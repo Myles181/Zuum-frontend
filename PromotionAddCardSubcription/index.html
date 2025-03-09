@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment App</title>
+    <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Promotion/Subscription Screen -->
+        <section id="promotion-section" class="active">
+            <div class="header">
+                <div class="back-button">←</div>
+                <div class="header-title">Promotion</div>
+                <div class="search-icon">🔍</div>
+                <div class="settings-icon">⚙️</div>
+            </div>
+            <div class="content">
+                <p class="instruction">Please select a subscription plan</p>
+                
+                <div class="subscription-plan" onclick="showSection('payment-section')">
+                    <div class="plan-name">
+                        Monthly Subscription Plan
+                        <span class="plan-price">$20</span>
+                    </div>
+                    <p class="plan-description">
+                        Get unlimited promotion for 30 day. Get unlimited access to our promotion tools for a month. Perfect for record labels and artists who wants to boost their online presence.
+                    </p>
+                    <button class="subscribe-button">Subscribe</button>
+                </div>
+                
+                <div class="subscription-plan" onclick="showSection('payment-section')">
+                    <div class="plan-name">
+                        Annual Subscription Plan
+                        <span class="plan-price">$100</span>
+                    </div>
+                    <p class="plan-description">
+                        Get unlimited promotion for a year. Get unlimited access to our promotion tools for a year. Perfect for record labels and artists who wants to boost their online presence.
+                    </p>
+                    <button class="subscribe-button">Subscribe</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment Method Screen -->
+        <section id="payment-section">
+            <div class="header">
+                <div class="back-button" onclick="showSection('promotion-section')">←</div>
+                <div class="header-title">Payment Method</div>
+                <div class="search-icon">🔍</div>
+                <div class="settings-icon">⚙️</div>
+            </div>
+            <div class="content">
+                <p class="instruction">Please select a payment method</p>
+                
+                <div class="payment-option selected" onclick="showSection('add-card-section')">
+                    <div class="payment-logo">
+                        <div class="mastercard-logo">
+                            <img src="./assets/logos_mastercard.png" alt="">
+                        </div>
+                    </div>
+                    <div class="payment-info">
+                        <div class="card-number">•••• •••• •••• 1234</div>
+                        <p class="card-expire">Expires on **/27</p>
+                    </div>
+                </div>
+                
+                <div class="payment-option" onclick="showSection('add-card-section')">
+                    <div class="payment-logo">
+                        <div class="visa-logo"><img src="./assets/Vector.png" alt=""></div>
+                    </div>
+                    <div class="payment-info">
+                        <div class="card-number">•••• •••• •••• 1234</div>
+                        <p class="card-expire">Expires on **/27</p>
+
+                    </div>
+                </div>
+                
+                <button type="button" class="action-button" onclick="showSection('add-card-section')">Add Payment Method</button>
+            </div>
+        </section>
+
+        <!-- Add Credit Card Screen -->
+        <section id="add-card-section">
+            <div class="header">
+                <div class="back-button" onclick="showSection('payment-section')">←</div>
+                <div class="header-title">Add Credit Card</div>
+                <div class="search-icon">🔍</div>
+                <div class="settings-icon">⚙️</div>
+            </div>
+            <div class="content">
+                <p class="instruction">Please provide the following details</p>
+                
+                <form>
+                    <div class="form-group">
+                        <input type="text" class="form-input" placeholder="Card Holder Name">
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="text" class="form-input" placeholder="Card Number">
+                    </div>
+                    
+                    <div class="form-group expiry-cvv-container">
+                        <div class="expiry-input">
+                            <input type="text" class="form-input" placeholder="Expires" value="11/12/24">
+                        </div>
+                        <div class="cvv-input">
+                            <input type="password" class="form-input" placeholder="CVV" value="****">
+                        </div>
+                    </div>
+                    
+                    <div class="save-option">
+                        <input type="checkbox" id="save-card">
+                        <label for="save-card">Save Card</label>
+                    </div>
+                    
+                    <button type="button" class="action-button" onclick="showSection('payment-section')">Add Card</button>
+                </form>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Function to show a specific section and hide others
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show the requested section
+            document.getElementById(sectionId).classList.add('active');
+        }
+        
+        // Initialize with the promotion section visible
+        document.addEventListener('DOMContentLoaded', function() {
+            showSection('promotion-section');
+        });
+    </script>
+</body>
+</html>
