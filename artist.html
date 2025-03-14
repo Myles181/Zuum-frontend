@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artist Page</title>
+    <style>
+        /* ========== NAVBAR STYLES ========== */
+        
+        img {
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+        
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: white;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .nav-left img,
+        .nav-right img {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+        
+        .toggle-container {
+            display: flex;
+            background: #2D8C72;
+            border-radius: 20px;
+        }
+        
+        .toggle-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .toggle-btn.active {
+            background: #2D8C72;
+            color: white;
+            padding-left: 50px;
+            padding-right: 50px;
+        }
+        /* Sidebar Styles */
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            /* Start off-screen */
+            width: 55%;
+            height: 100%;
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: left 0.3s ease-in-out;
+            /* Transition the left property */
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 1000;
+            /* Ensure sidebar is above other content */
+        }
+        
+        .sidebar.active {
+            left: 0;
+            /* Slide in */
+        }
+        
+        .sidebar img.logo {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            font-size: 18px;
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .menu-item img {
+            width: 24px;
+        }
+        
+        .menu-item:hover {
+            color: #008066;
+        }
+        
+        .logout-btn {
+            background-color: #008066;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 15px;
+            color: #888;
+        }
+        
+        .artist-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+            color: black;
+        }
+        
+        .artist-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .artist-item img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+        
+        .see-more {
+            font-size: 14px;
+            color: #008066;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        /* Overlay Styles */
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
+            /* Ensure overlay is below sidebar but above other content */
+        }
+        
+        .overlay.active {
+            display: block;
+        }
+        /* Profile Container Styles */
+        
+        .profile-container {
+            justify-content: center;
+            width: auto;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            font-family: Arial, sans-serif;
+            margin-left: 10em;
+            margin-right: 10em;
+        }
+        
+        .cover-image img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+        
+        .profile-details {
+            padding: 15px;
+            position: relative;
+            text-align: center;
+        }
+        
+        .profile-picture {
+            position: absolute;
+            top: -40px;
+            left: 7.5%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid white;
+        }
+        
+        .profile-picture img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .username {
+            margin-top: 50px;
+            margin-bottom: 10px;
+        }
+        
+        .username h2 {
+            font-size: 18px;
+            margin: 0;
+            color: #008066;
+        }
+        
+        .username p {
+            font-size: 14px;
+            color: gray;
+            margin: 5px 0 0;
+        }
+        
+        .stats-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: -20px;
+            padding: 0 15px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 85px;
+            text-align: center;
+        }
+        
+        .stats p {
+            font-size: 14px;
+            color: gray;
+        }
+        
+        .stats span {
+            font-size: 16px;
+            font-weight: bold;
+            color: #008066;
+        }
+        
+        .bio {
+            font-size: 14px;
+            color: #333;
+            text-align: left;
+            padding: 10px 15px;
+            margin: 15px 0;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+        }
+        
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            background: #ddd;
+            color: #008066;
+        }
+        
+        .following-btn {
+            background: #ddd;
+            color: #008066;
+        }
+        
+        @media screen and (max-width: 768px) {
+            .profile-container {
+                width: auto;
+            }
+        }
+        
+        @media screen and (max-width: 480px) {
+            .profile-container {
+                margin-left: 0;
+                margin-right: 0;
+                width: auto;
+            }
+        }
+        
+        .music-section {
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .music-list {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 90%;
+            max-width: 600px;
+        }
+        
+        .music-item {
+            display: flex;
+            justify-content: space-between;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .music-item .cover {
+            width: 30%;
+            border-radius: 5px;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #fff;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-item {
+            text-align: center;
+            flex: 1;
+            color: #333;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        
+        .nav-item img {
+            width: 24px;
+            height: 24px;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        html,
+        body {
+            overflow-x: hidden;
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- ========== NAVBAR ========== -->
+    <div class="navbar">
+        <div class="nav-left">
+            <img src="icons/menu-icon.png" alt="Menu" id="menu-btn">
+        </div>
+        <div class="toggle-container">
+            <div class="toggle-btn active" id="profile">Artist</div>
+        </div>
+        <div class="nav-right">
+            <a href="../search-zumm/search-zumm.html"><img src="icons/search-icon.png" alt="Search"><a href="../LabelSettings/index.html">
+            <img src="icons/settings-icon.png" alt="Settings"></a>
+        </div>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar" id="sidebar">
+        <img src="icons/Group 5.svg" alt="ZUUM Logo" class="logo">
+        <a href="/home.html" class="menu-item">
+            <img src="icons/Vector1.png" alt="Home"> Home
+        </a>
+        <a href="../PromotionAddCardSubcription/index.html" class="menu-item">
+            <img src="icons/arcticons_huawei-assistant.png" alt="Promotions"> Promotions
+        </a>
+        <button class="logout-btn">Log Out</button>
+
+        <div class="section-title">Followed Artists/ Producers</div>
+        <div class="artist-list">
+            <div class="artist-item">
+                <img src="icons/Mask group.png" alt="Olusteve"> Olusteve
+            </div>
+            <div class="artist-item">
+                <img src="icons/Mask group1.png" alt="Tennet"> Tennet
+            </div>
+            <div class="artist-item">
+                <img src="icons/Mask group2.png" alt="Alpha Rey"> Alpha Rey
+            </div>
+            <div class="see-more">See more</div>
+        </div>
+
+        <div class="section-title">Company</div>
+        <a href="#" class="menu-item">Instant Share</a>
+        <a href="../PromotionAddCardSubcription/index.html" class="menu-item">Music Promotion</a>
+
+        <div class="section-title">Products</div>
+        <a href="#" class="menu-item">Home</a>
+        <a href="#" class="menu-item">Zuum News</a>
+        <a href="#" class="menu-item">Contact Us</a>
+        <a href="#" class="menu-item">About Us</a>
+
+        <div class="section-title">Help</div>
+        <a href="#" class="menu-item">FAQ</a>
+        <a href="#" class="menu-item">Support Centre</a>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Profile Section -->
+    <div class="profile-container">
+        <div class="cover-image">
+            <img src="image/close-up-people-playing-music-stage 1.svg" alt="Cover Image">
+        </div>
+
+        <div class="profile-details">
+            <div class="profile-picture">
+                <img src="image/Mask group.svg" alt="Profile Picture">
+            </div>
+
+            <div class="stats-container">
+                <div class="username">
+                    <h2>Dave_sings</h2>
+                    <p>Artist</p>
+                </div>
+
+                <div class="stats">
+                    <div class="followers">
+                        <p>Followers</p>
+                        <span>42k</span>
+                    </div>
+                    <div class="following">
+                        <p>Following</p>
+                        <span>5.2k</span>
+                    </div>
+                </div>
+            </div>
+
+            <p class="bio">
+                I'm a singer-songwriter, weaving emotions into melodies that touch hearts and inspire minds.
+            </p>
+
+            <div class="buttons">
+                <button>Message</button>
+                <button class="following-btn">Following</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Music Section -->
+    <div class="music-section">
+        <div class="music-list">
+            <div class="music-item">
+                <img src="image/11429433 1.svg" alt="Cover" class="cover">
+                <img src="image/559 1.svg" alt="Cover" class="cover">
+                <img src="image/retro-music-concept-with-space-left 1.svg" alt="Cover" class="cover">
+            </div>
+            <div class="music-item">
+                <img src="image/11429433 1.svg" alt="Cover" class="cover">
+                <img src="image/559 1.svg" alt="Cover" class="cover">
+                <img src="image/retro-music-concept-with-space-left 1.svg" alt="Cover" class="cover">
+            </div>
+            <div class="music-item">
+                <img src="image/11429433 1.svg" alt="Cover" class="cover">
+                <img src="image/559 1.svg" alt="Cover" class="cover">
+                <img src="image/retro-music-concept-with-space-left 1.svg" alt="Cover" class="cover">
+            </div>
+            <div class="music-item">
+                <img src="image/11429433 1.svg" alt="Cover" class="cover">
+                <img src="image/559 1.svg" alt="Cover" class="cover">
+                <img src="image/retro-music-concept-with-space-left 1.svg" alt="Cover" class="cover">
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="../home page/index.html" class="nav-item">
+            <img src="icons/home.svg" alt="Home">
+            <span>Home</span>
+        </a>
+        <a href="#" class="nav-item">
+            <img src="icons/message.svg" alt="Message">
+            <span>Message</span>
+        </a>
+        <a href="#" class="nav-item">
+            <img src="icons/upload.svg" alt="Add">
+            <span>Upload</span>
+        </a>
+        <a href="/activity.html" class="nav-item">
+            <img src="icons/activities.svg" alt="Notifications">
+            <span>Activities</span>
+        </a>
+        <a href="#" class="nav-item">
+            <img src="icons/profile.svg" alt="Profile">
+            <span>Profile</span>
+        </a>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Fix toggle buttons
+            document.querySelectorAll(".toggle-btn").forEach(btn => {
+                btn.addEventListener("click", function() {
+                    document.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+                    this.classList.add("active");
+                });
+            });
+
+            // Fix sidebar toggle
+            const menuBtn = document.getElementById("menu-btn");
+            const sidebar = document.getElementById("sidebar");
+            const overlay = document.getElementById("overlay");
+
+            if (menuBtn && sidebar && overlay) {
+                menuBtn.addEventListener("click", () => {
+                    sidebar.classList.toggle("active");
+                    overlay.classList.toggle("active");
+                });
+
+                overlay.addEventListener("click", () => {
+                    sidebar.classList.remove("active");
+                    overlay.classList.remove("active");
+                });
+            } else {
+                console.error("Sidebar elements not found!");
+            }
+        });
+
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+
+</body>
+
+</html>

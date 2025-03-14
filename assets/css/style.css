@@ -1,0 +1,52 @@
+.loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    background-color: #2a2727;
+}
+
+.loading-animation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 5px;
+    background-color: #269072; /* blue */
+}
+
+.progress {
+    width: 100%;
+    height: 5px;
+    background-color: #fff; /* red */
+    animation: progress 5s linear forwards;
+}
+
+@keyframes progress {
+    0% {
+        width: 100%;
+    }
+    100% {
+        width: 0%;
+    }
+}
+
+.loading-image {
+    width: 50%;
+    height: auto;
+    margin-top: 50px;
+}
+
+.page-content {
+    display: none;
+}

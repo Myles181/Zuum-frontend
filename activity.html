@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        img {
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+        
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 15px;
+            background: white;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        .nav-left img,
+        .nav-right img {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+        
+        .toggle-container {
+            display: flex;
+            background: #2D8C72;
+            border-radius: 20px;
+        }
+        
+        .toggle-btn {
+            padding: 8px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        
+        .toggle-btn.active {
+            background: #2D8C72;
+            color: white;
+            padding-left: 50px;
+            padding-right: 50px;
+        }
+        /* Sidebar Styles */
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            /* Start off-screen */
+            width: 55%;
+            height: 100%;
+            background-color: white;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            transition: left 0.3s ease-in-out;
+            /* Transition the left property */
+            padding: 20px;
+            overflow-y: auto;
+            z-index: 1000;
+            /* Ensure sidebar is above other content */
+        }
+        
+        .sidebar.active {
+            left: 0;
+            /* Slide in */
+        }
+        
+        .sidebar img.logo {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+        
+        .menu-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            font-size: 18px;
+            color: black;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .menu-item img {
+            width: 24px;
+        }
+        
+        .menu-item:hover {
+            color: #008066;
+        }
+        
+        .logout-btn {
+            background-color: #008066;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+            border-radius: 5px;
+        }
+        
+        .section-title {
+            font-size: 14px;
+            font-weight: bold;
+            margin-top: 15px;
+            color: #888;
+        }
+        
+        .artist-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 10px;
+            color: black;
+        }
+        
+        .artist-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .artist-item img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+        }
+        
+        .see-more {
+            font-size: 14px;
+            color: #008066;
+            cursor: pointer;
+            margin-top: 5px;
+        }
+        /* Overlay Styles */
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            z-index: 999;
+            /* Ensure overlay is below sidebar but above other content */
+        }
+        
+        .overlay.active {
+            display: block;
+        }
+        
+        .activity-section {
+            padding: 10px;
+            background: #f8f8f8;
+        }
+        
+        .activities-container {
+            background: #fff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .activity-tabs {
+            display: flex;
+            gap: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ddd;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .activity-tabs:hover {
+            cursor: pointer;
+            color: #00936f;
+        }
+        
+        .activity-tabs span {
+            cursor: pointer;
+            color: #000;
+        }
+        /* .activity-tabs .active {}*/
+        
+        .activity-category h3 {
+            color: #6c6c6c;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+        
+        .activity-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .activity-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        .activity-info {
+            flex-grow: 1;
+            margin-left: 10px;
+        }
+        
+        .activity-info h4 {
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+        
+        .activity-info p {
+            font-size: 12px;
+            color: #555;
+        }
+        
+        .view-btn,
+        .follow-btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        
+        .view-btn {
+            background: #1f8c5a;
+            color: white;
+        }
+        
+        .follow-btn {
+            background: #1f8c5a;
+            color: white;
+        }
+        
+        .activity-thumbnail {
+            width: 35px;
+            height: 35px;
+            border-radius: 5px;
+            object-fit: cover;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: #fff;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-item {
+            text-align: center;
+            flex: 1;
+            color: #333;
+            text-decoration: none;
+            font-size: 12px;
+        }
+        
+        .nav-item img {
+            width: 24px;
+            height: 24px;
+            display: block;
+            margin: 0 auto;
+        }
+        
+        html,
+        body {
+            overflow-x: hidden;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        .activities-container {
+            max-width: 100%;
+            margin: auto;
+            overflow: hidden;
+        }
+    </style>
+
+</head>
+
+
+<body>
+
+    <!-- ========== NAVBAR ========== -->
+    <div class="navbar">
+        <div class="nav-left">
+            <img src="icons/menu-icon.png" alt="Menu" id="menu-btn">
+        </div>
+        <div class="toggle-container">
+            <div class="toggle-btn active" id="activity">Activities</div>
+        </div>
+        <div class="nav-right">
+            <img src="icons/search-icon.png" alt="Search"><a href="../LabelSettings/index.html">
+            <img src="icons/settings-icon.png" alt="Settings"></a>
+        </div>
+    </div>
+
+    <!-- Sidebar Navigation -->
+    <div class="sidebar" id="sidebar">
+        <img src="icons/Group 5.svg" alt="ZUUM Logo" class="logo">
+        <a href="/home.html" class="menu-item">
+            <img src="icons/Vector1.png" alt="Home"> Home
+        </a>
+        <a href="#" class="menu-item">
+            <img src="icons/arcticons_huawei-assistant.png" alt="Promotions"> Promotions
+        </a>
+        <button class="logout-btn">Log Out</button>
+
+        <div class="section-title">Followed Artists/ Producers</div>
+        <div class="artist-list">
+            <div class="artist-item">
+                <img src="icons/Mask group.png" alt="Olusteve"> Olusteve
+            </div>
+            <div class="artist-item">
+                <img src="icons/Mask group1.png" alt="Tennet"> Tennet
+            </div>
+            <div class="artist-item">
+                <img src="icons/Mask group2.png" alt="Alpha Rey"> Alpha Rey
+            </div>
+            <div class="see-more">See more</div>
+        </div>
+
+        <div class="section-title">Company</div>
+        <a href="#" class="menu-item">Instant Share</a>
+        <a href="#" class="menu-item">Music Promotion</a>
+
+        <div class="section-title">Products</div>
+        <a href="#" class="menu-item">Home</a>
+        <a href="#" class="menu-item">Zuum News</a>
+        <a href="#" class="menu-item">Contact Us</a>
+        <a href="#" class="menu-item">About Us</a>
+
+        <div class="section-title">Help</div>
+        <a href="#" class="menu-item">FAQ</a>
+        <a href="#" class="menu-item">Support Centre</a>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+
+    <div class="activity-section">
+        <div class="activities-container">
+            <div class="activity-tabs">
+                <span class="active">All Activity</span>
+                <span>Promotion</span>
+                <span>Like</span>
+                <span>Comment</span>
+                <span>Follower</span>
+            </div>
+            <div class="activity-category">
+                <h3>Today</h3>
+                <div class="activity-item">
+                    <img src="image/559 1.svg" alt="Music World Record Label" class="activity-avatar">
+                    <div class="activity-info">
+                        <h4>Music World Record Label</h4>
+                        <p>Wants to add you to a record label</p>
+                    </div>
+                    <button class="view-btn">View</button>
+                </div>
+                <div class="activity-item">
+                    <img src="image/sayo.svg" alt="Sayo" class="activity-avatar">
+                    <div class="activity-info">
+                        <h4>Sayo</h4>
+                        <p>Promoted your music</p>
+                    </div>
+                    <img src="image/11429433 1.svg" alt="Music Cover" class="activity-thumbnail">
+                </div>
+                <div class="activity-item">
+                    <img src="image/Mask group.svg" alt="Electron" class="activity-avatar">
+                    <div class="activity-info">
+                        <h4>Electron</h4>
+                        <p>Liked your post</p>
+                    </div>
+                    <img src="image/11429433 1.svg" alt="Music Cover" class="activity-thumbnail">
+                </div>
+                <div class="activity-item">
+                    <img src="image/Mask group3.svg" alt="Maaq" class="activity-avatar">
+                    <div class="activity-info">
+                        <h4>Maaq</h4>
+                        <p>Followed you</p>
+                    </div>
+                    <button class="follow-btn">Follow Back</button>
+                </div>
+            </div>
+
+            <div class="activity-category">
+                <h3>Yesterday</h3>
+                <div class="activity-item">
+                    <img src="image/Mask group.svg" alt="JayD" class="activity-avatar">
+                    <div class="activity-info">
+                        <h4>JayD</h4>
+                        <p>Liked your post</p>
+                    </div>
+                    <img src="image/11429433 1.svg" alt="Music Cover" class="activity-thumbnail">
+                </div>
+                <div class="activity-item">
+                    <img src="image/sayo.svg" alt="Sayo" class="activity-avatar">
+                    <div class="activity-info">
+                        <h4>Sayo</h4>
+                        <p>Promoted your music</p>
+                    </div>
+                    <img src="image/11429433 1.svg" alt="Music Cover" class="activity-thumbnail">
+                </div>
+                <div class="activity-item">
+                    <img src="image/Mask group.svg" alt="Sayo" class="activity-avatar">
+                    <div class="activity-info">
+                        <h4>Sayo</h4>
+                        <p>Liked your music</p>
+                    </div>
+                    <img src="image/11429433 1.svg" alt="Music Cover" class="activity-thumbnail">
+                </div>
+                <div class="activity-item">
+                    <img src="image/Mask group3.svg" alt="Maaq" class="activity-avatar">
+                    <div class="activity-info">
+                        <h4>Maaq</h4>
+                        <p>Followed you</p>
+                    </div>
+                    <button class="follow-btn">Follow Back</button>
+                </div>
+                <div class="activity-item">
+                    <img src="image/sayo.svg" alt="Sayo" class="activity-avatar">
+                    <div class="activity-info">
+                        <h4>Sayo</h4>
+                        <p>Promoted your music</p>
+                    </div>
+                    <img src="image/11429433 1.svg" alt="Music Cover" class="activity-thumbnail">
+                </div>
+                <div class="activity-item">
+                    <img src="image/559 1.svg" alt="Music World Record Label" class="activity-avatar">
+                    <div class="activity-info">
+                        <h4>Music World Record Label</h4>
+                        <p>Removed you from the Record Label</p>
+                    </div>
+                    <button class="view-btn">View</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="bottom-nav ">
+            <a href="../home page/index.html" class="nav-item ">
+                <img src="icons/home.svg " alt="Home ">
+                <span>Home</span>
+            </a>
+            <a href="#" class="nav-item ">
+                <img src="icons/message.svg " alt=" Message ">
+                <span>Message</span>
+            </a>
+            <a href="#" class="nav-item ">
+                <img src="icons/upload.svg " alt="Add ">
+                <span>Upload</span>
+            </a>
+            <a href="activity.html" class="nav-item ">
+                <img src="icons/activities.svg " alt="Notifications ">
+                <span>Activities</span>
+            </a>
+            <a href="../profile/index.html" class="nav-item ">
+                <img src="icons/profile.svg " alt="Profile ">
+                <span>Profile</span>
+            </a>
+        </div>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                // Fix toggle buttons
+                document.querySelectorAll(".toggle-btn").forEach(btn => {
+                    btn.addEventListener("click", function() {
+                        document.querySelectorAll(".toggle-btn").forEach(b => b.classList.remove("active"));
+                        this.classList.add("active");
+                    });
+                });
+
+                // Fix sidebar toggle
+                const menuBtn = document.getElementById("menu-btn");
+                const sidebar = document.getElementById("sidebar");
+                const overlay = document.getElementById("overlay");
+
+                if (menuBtn && sidebar && overlay) {
+                    menuBtn.addEventListener("click", () => {
+                        sidebar.classList.toggle("active");
+                        overlay.classList.toggle("active");
+                    });
+
+                    overlay.addEventListener("click", () => {
+                        sidebar.classList.remove("active");
+                        overlay.classList.remove("active");
+                    });
+                } else {
+                    console.error("Sidebar elements not found!");
+                }
+            });
+
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        </script>
+</body>
+
+</html>
