@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UploadVideo-Zumm</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        /*  */
+        body {
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 450px;
+            margin: 0 auto;
+            /* padding: 20px; */
+        }
+        .container-wrap {
+            background-color: #cfccc6;
+            border-radius: 1rem;
+            /* height: 95vh; */
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .menu-icon {
+            width: 24px;
+            cursor: pointer;
+        }
+        
+        .search-settings {
+            display: flex;
+            gap: 16px;
+        }
+        
+        .icon {
+            width: 24px;
+            cursor: pointer;
+        }
+        
+        .menu-icon, .search-icon, .settings-icon {
+            cursor: pointer;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .top-actions {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .top-actions button {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .upload-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 8px 20px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        .right-icons {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .caption-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            color: #fff;
+            padding: 10px 0;
+            font-size: 14px;
+            border-bottom: 1px solid #444;
+            margin-bottom: 20px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            /* min-height: 150px; */
+        }
+        
+        .caption-input::placeholder {
+            color: #aaa;
+        }
+        
+        .upload-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+
+        }
+        
+        .upload-area {
+            border: 1px dashed #444;
+            border-radius: 10px;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            min-height: 150px;
+            padding: 2rem;
+            width: 300px;
+        }
+        
+        .upload-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #444;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 10px;
+        }
+        
+        .upload-text {
+            color: #2ecc71;
+            font-size: 14px;
+        }
+        .option-wrapper {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .option-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #444;
+        }
+        
+        .option-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .option-right {
+            color: #aaa;
+        }
+        
+        .button-container {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 30px;
+        }
+        
+        .cancel-btn {
+            background: transparent;
+            border: green 1px solid;
+            color: #06f04c;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 10px 20px;
+        }
+        
+        .submit-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 25px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        
+        /* Video container styles */
+        .video-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: none;
+        }
+        
+        .video-container video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+        }
+        
+        .edit-button {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+        }
+        
+        /* Editor overlay */
+        .editor-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .editor-container {
+            width: 90%;
+            max-width: 800px;
+            background: #222;
+            border-radius: 10px;
+            padding: 20px;
+        }
+        
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .editor-title {
+            font-size: 18px;
+        }
+        
+        .editor-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        
+        .editor-video-container {
+            width: 100%;
+            aspect-ratio: 16/9;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+            background: #111;
+        }
+        
+        .editor-video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        .crop-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: 2px dashed white;
+            pointer-events: none;
+            display: none;
+        }
+        
+        .crop-handle {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            position: absolute;
+            pointer-events: auto;
+            cursor: move;
+        }
+        
+        .crop-handle-tl { top: -10px; left: -10px; }
+        .crop-handle-tr { top: -10px; right: -10px; }
+        .crop-handle-bl { bottom: -10px; left: -10px; }
+        .crop-handle-br { bottom: -10px; right: -10px; }
+        
+        .timeline-container {
+            width: 100%;
+            height: 60px;
+            background: #333;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .timeline {
+            width: 100%;
+            height: 30px;
+            background: #444;
+            margin-top: 15px;
+            position: relative;
+        }
+        
+        .timeline-slider {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            display: flex;
+            align-items: center;
+        }
+        
+        .timeline-handle {
+            width: 10px;
+            height: 40px;
+            background: white;
+            position: absolute;
+            top: -5px;
+            cursor: ew-resize;
+        }
+        
+        .timeline-handle-start { left: 0; }
+        .timeline-handle-end { right: 0; }
+        
+        .timeline-selected {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: rgba(46, 204, 113, 0.5);
+        }
+        
+        .editor-controls {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .editor-btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 15px;
+            cursor: pointer;
+        }
+        
+        .editor-btn.secondary {
+            background: #444;
+        }
+        
+        #file-input {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+            <div class="header">
+                <img src="./icons/menu-icon.png" alt="">
+                 
+                 <button class="upload-btn">Upload</button>
+                 
+                 <div class="search-settings">
+                   <img src="./icons/search-icon.png" alt="">
+                     
+                     <img src="./icons/settings-icon.png" alt="">
+                 </div>
+             </div>
+        <div class="container-wrap">    
+            <input type="text" class="caption-input" placeholder="Write a Caption...">
+            
+            <div class="upload-wrap">
+                <div class="upload-area" id="upload-area">
+                    <div class="upload-icon">+</div>
+                    <div class="upload-text">Choose a video</div>
+                    <input type="file" id="file-input" accept="video/*">
+                    
+                    <div class="video-container" id="video-container">
+                        <video id="preview-video" controls></video>
+                        <button class="edit-button" id="edit-button">✏️</button>
+                    </div>
+                </div>
+            </div>
+          
+    
+            <div class="option-wrapper">
+                <div class="option-row">
+                    <div class="option-left">
+                        <span><i class="fas fa-user-tag"></i></span>
+                        <span>Tag people</span>
+                    </div>
+                    <div class="option-right"><i class="fas fa-angle-right" style="color: #050400;"></i></div>
+                </div>
+                
+                <div class="option-row privacy">
+                    <div class="option-left">
+                        <span><i class="fas fa-globe"></i></span>
+                        <span>Everyone can view</span>
+                    </div>
+                    <div class="option-right"><i class="fas fa-angle-right" style="color: #050400;"></i></div>
+                </div>
+                
+                <div class="option-row">
+                    <div class="option-left">
+                        <span><i class="fas fa-map-marker-alt"></i></span>
+                        <span>Add location</span>
+                    </div>
+                    <div class="option-right"><i class="fas fa-angle-right" style="color: #050400;"></i></div>
+                </div>
+            </div>
+            
+            <div class="button-container">
+                <button class="cancel-btn">Cancel</button>
+                <button class="submit-btn" id="upload-btn">Upload</button>
+            </div>
+        </div>
+        </div>
+       
+    
+    <!-- Video Editor Overlay -->
+    <div class="editor-overlay" id="editor-overlay">
+        <div class="editor-container">
+            <div class="editor-header">
+                <div class="editor-title">Edit Video</div>
+                <button class="editor-close" id="editor-close">✕</button>
+            </div>
+            
+            <div class="editor-video-container">
+                <video id="editor-video" class="editor-video"></video>
+                <div class="crop-overlay" id="crop-overlay">
+                    <div class="crop-handle crop-handle-tl" id="handle-tl"></div>
+                    <div class="crop-handle crop-handle-tr" id="handle-tr"></div>
+                    <div class="crop-handle crop-handle-bl" id="handle-bl"></div>
+                    <div class="crop-handle crop-handle-br" id="handle-br"></div>
+                </div>
+            </div>
+            
+            <div class="timeline-container">
+                <div class="timeline">
+                    <div class="timeline-selected" id="timeline-selected"></div>
+                    <div class="timeline-slider">
+                        <div class="timeline-handle timeline-handle-start" id="handle-start"></div>
+                        <div class="timeline-handle timeline-handle-end" id="handle-end"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="editor-controls">
+                <button class="editor-btn" id="crop-btn">Crop Video</button>
+                <button class="editor-btn" id="trim-btn">Trim Length</button>
+                <button class="editor-btn secondary" id="cancel-edit-btn">Cancel</button>
+                <button class="editor-btn" id="apply-edit-btn">Apply Changes</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <script>
+        // DOM Elements
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-input');
+        const videoContainer = document.getElementById('video-container');
+        const previewVideo = document.getElementById('preview-video');
+        const editButton = document.getElementById('edit-button');
+        const editorOverlay = document.getElementById('editor-overlay');
+        const editorClose = document.getElementById('editor-close');
+        const editorVideo = document.getElementById('editor-video');
+        const cropOverlay = document.getElementById('crop-overlay');
+        const cropBtn = document.getElementById('crop-btn');
+        const trimBtn = document.getElementById('trim-btn');
+        const cancelEditBtn = document.getElementById('cancel-edit-btn');
+        const applyEditBtn = document.getElementById('apply-edit-btn');
+        const uploadBtn = document.getElementById('upload-btn');
+        const timelineSelected = document.getElementById('timeline-selected');
+        const handleStart = document.getElementById('handle-start');
+        const handleEnd = document.getElementById('handle-end');
+        
+        // Variables for trim functionality
+        let isInTrimMode = false;
+        let startTime = 0;
+        let endTime = 0;
+        
+        // Handle drag and drop
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            uploadArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        uploadArea.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            handleFiles(files);
+        }
+        
+        // Handle file selection via click
+        uploadArea.addEventListener('click', () => {
+            if (videoContainer.style.display !== 'block') {
+                fileInput.click();
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            handleFiles(e.target.files);
+        });
+        
+        function handleFiles(files) {
+            if (files.length > 0) {
+                const file = files[0];
+                if (file.type.startsWith('video/')) {
+                    displayVideo(file);
+                } else {
+                    alert('Please select a valid video file');
+                }
+            }
+        }
+        
+        function displayVideo(file) {
+            const url = URL.createObjectURL(file);
+            previewVideo.src = url;
+            videoContainer.style.display = 'block';
+            document.querySelector('.upload-icon').style.display = 'none';
+            document.querySelector('.upload-text').style.display = 'none';
+            
+            // Reset video size after load
+            previewVideo.onloadedmetadata = () => {
+                uploadArea.style.height = 'auto';
+                uploadArea.style.minHeight = previewVideo.offsetHeight + 'px';
+            };
+        }
+        
+        // Edit button click
+        editButton.addEventListener('click', openEditor);
+        
+        function openEditor() {
+            editorOverlay.style.display = 'flex';
+            editorVideo.src = previewVideo.src;
+            
+            // Don't set currentTime immediately, wait for metadata
+            editorVideo.addEventListener('loadedmetadata', function onMetadataLoaded() {
+                editorVideo.removeEventListener('loadedmetadata', onMetadataLoaded);
+                // Now it's safe to set currentTime
+                if (isFinite(previewVideo.currentTime)) {
+                    editorVideo.currentTime = previewVideo.currentTime;
+                }
+                // Initialize timeline after metadata is loaded
+                initializeTimeline();
+            });
+        }
+        
+        // Close editor
+        editorClose.addEventListener('click', closeEditor);
+        cancelEditBtn.addEventListener('click', closeEditor);
+        
+        function closeEditor() {
+            editorOverlay.style.display = 'none';
+            cropOverlay.style.display = 'none';
+        }
+        
+        // Video editing functions
+        
+        // 1. Crop functionality
+        let isCropMode = false;
+        
+        cropBtn.addEventListener('click', toggleCropMode);
+        
+        function toggleCropMode() {
+            isCropMode = !isCropMode;
+            
+            if (isCropMode) {
+                cropOverlay.style.display = 'block';
+                cropBtn.textContent = 'Cancel Crop';
+                initializeCropHandles();
+            } else {
+                cropOverlay.style.display = 'none';
+                cropBtn.textContent = 'Crop Video';
+            }
+        }
+        
+        function initializeCropHandles() {
+            const handles = document.querySelectorAll('.crop-handle');
+            
+            // Set initial crop area (80% of video size)
+            const videoWidth = editorVideo.offsetWidth;
+            const videoHeight = editorVideo.offsetHeight;
+            const margin = videoWidth * 0.1; // 10% margin on each side
+            
+            cropOverlay.style.top = margin + 'px';
+            cropOverlay.style.left = margin + 'px';
+            cropOverlay.style.width = (videoWidth - margin * 2) + 'px';
+            cropOverlay.style.height = (videoHeight - margin * 2) + 'px';
+            
+            // Add drag functionality to each handle
+            handles.forEach(handle => {
+                handle.addEventListener('mousedown', startDraggingHandle);
+            });
+        }
+        
+        function startDraggingHandle(e) {
+            e.preventDefault();
+            const handle = e.target;
+            const startX = e.clientX;
+            const startY = e.clientY;
+            
+            const initialRect = {
+                top: parseInt(cropOverlay.style.top) || 0,
+                left: parseInt(cropOverlay.style.left) || 0,
+                width: parseInt(cropOverlay.style.width) || editorVideo.offsetWidth,
+                height: parseInt(cropOverlay.style.height) || editorVideo.offsetHeight
+            };
+            
+            function moveHandle(moveEvent) {
+                const dx = moveEvent.clientX - startX;
+                const dy = moveEvent.clientY - startY;
+                
+                // Adjust crop overlay based on which handle is being dragged
+                if (handle.id === 'handle-tl') {
+                    cropOverlay.style.top = (initialRect.top + dy) + 'px';
+                    cropOverlay.style.left = (initialRect.left + dx) + 'px';
+                    cropOverlay.style.width = (initialRect.width - dx) + 'px';
+                    cropOverlay.style.height = (initialRect.height - dy) + 'px';
+                } else if (handle.id === 'handle-tr') {
+                    cropOverlay.style.top = (initialRect.top + dy) + 'px';
+                    cropOverlay.style.width = (initialRect.width + dx) + 'px';
+                    cropOverlay.style.height = (initialRect.height - dy) + 'px';
+                } else if (handle.id === 'handle-bl') {
+                    cropOverlay.style.left = (initialRect.left + dx) + 'px';
+                    cropOverlay.style.width = (initialRect.width - dx) + 'px';
+                    cropOverlay.style.height = (initialRect.height + dy) + 'px';
+                } else if (handle.id === 'handle-br') {
+                    cropOverlay.style.width = (initialRect.width + dx) + 'px';
+                    cropOverlay.style.height = (initialRect.height + dy) + 'px';
+                }
+            }
+            
+            function stopDragging() {
+                document.removeEventListener('mousemove', moveHandle);
+                document.removeEventListener('mouseup', stopDragging);
+            }
+            
+            document.addEventListener('mousemove', moveHandle);
+            document.addEventListener('mouseup', stopDragging);
+        }
+        
+        // 2. Trim functionality
+        trimBtn.addEventListener('click', toggleTrimMode);
+        
+        function toggleTrimMode() {
+            isInTrimMode = !isInTrimMode;
+            
+            if (isInTrimMode) {
+                trimBtn.textContent = 'Cancel Trim';
+                initializeTimeline();
+            } else {
+                trimBtn.textContent = 'Trim Length';
+            }
+        }
+        
+        // Fixed version of initializeTimeline
+        function initializeTimeline() {
+            // Make sure video metadata is loaded before accessing duration
+            if (isNaN(editorVideo.duration) || !isFinite(editorVideo.duration)) {
+                // If duration is not available yet, wait for the loadedmetadata event
+                editorVideo.addEventListener('loadedmetadata', function onMetadataLoaded() {
+                    // Remove this listener to avoid multiple calls
+                    editorVideo.removeEventListener('loadedmetadata', onMetadataLoaded);
+                    // Now initialize with valid duration
+                    initializeTimelineWithDuration(editorVideo.duration);
+                });
+            } else {
+                // Duration is already available, proceed
+                initializeTimelineWithDuration(editorVideo.duration);
+            }
+        }
+        
+        function initializeTimelineWithDuration(videoDuration) {
+            if (!isFinite(videoDuration) || videoDuration <= 0) {
+                console.error("Invalid video duration:", videoDuration);
+                videoDuration = 1; // Fallback to prevent errors
+            }
+            
+            startTime = 0;
+            endTime = videoDuration;
+            
+            // Set initial position
+            updateTimelineUI();
+            
+            // Add drag functionality to timeline handles
+            handleStart.addEventListener('mousedown', startDraggingStartHandle);
+            handleEnd.addEventListener('mousedown', startDraggingEndHandle);
+        }
+        
+        function startDraggingStartHandle(e) {
+            e.preventDefault();
+            const timeline = document.querySelector('.timeline');
+            const timelineWidth = timeline.offsetWidth;
+            const startX = e.clientX;
+            const initialStartTime = startTime;
+            
+            function moveHandle(moveEvent) {
+                const dx = moveEvent.clientX - startX;
+                const timeChange = (dx / timelineWidth) * editorVideo.duration;
+                startTime = Math.max(0, Math.min(endTime - 1, initialStartTime + timeChange));
+                
+                updateTimelineUI();
+                if (isFinite(startTime)) {
+                    editorVideo.currentTime = startTime;
+                }
+            }
+            
+            function stopDragging() {
+                document.removeEventListener('mousemove', moveHandle);
+                document.removeEventListener('mouseup', stopDragging);
+            }
+            
+            document.addEventListener('mousemove', moveHandle);
+            document.addEventListener('mouseup', stopDragging);
+        }
+        
+        function startDraggingEndHandle(e) {
+            e.preventDefault();
+            const timeline = document.querySelector('.timeline');
+            const timelineWidth = timeline.offsetWidth;
+            const startX = e.clientX;
+            const initialEndTime = endTime;
+            
+            function moveHandle(moveEvent) {
+                const dx = moveEvent.clientX - startX;
+                const timeChange = (dx / timelineWidth) * editorVideo.duration;
+                endTime = Math.max(startTime + 1, Math.min(editorVideo.duration, initialEndTime + timeChange));
+                
+                updateTimelineUI();
+            }
+            
+            function stopDragging() {
+                document.removeEventListener('mousemove', moveHandle);
+                document.removeEventListener('mouseup', stopDragging);
+            }
+            
+            document.addEventListener('mousemove', moveHandle);
+            document.addEventListener('mouseup', stopDragging);
+        }
+        
+        // Fixed version of updateTimelineUI
+        function updateTimelineUI() {
+            const timeline = document.querySelector('.timeline');
+            const timelineWidth = timeline.offsetWidth;
+            const videoDuration = editorVideo.duration;
+            
+            // Safety check for valid duration
+            if (!isFinite(videoDuration) || videoDuration <= 0) {
+                console.warn("Cannot update timeline: invalid video duration");
+                return;
+            }
+            
+            const startPos = (startTime / videoDuration) * timelineWidth;
+            const endPos = (endTime / videoDuration) * timelineWidth;
+            
+            handleStart.style.left = startPos + 'px';
+            handleEnd.style.left = endPos + 'px';
+            
+            timelineSelected.style.left = startPos + 'px';
+            timelineSelected.style.width = (endPos - startPos) + 'px';
+        }
+        
+        // Fixed version of applyChanges
+        function applyChanges() {
+            // In a real implementation, this would create a new video with the edits applied
+            
+            // Update preview video with trim times - with safety check
+            if (isInTrimMode && isFinite(startTime) && startTime >= 0) {
+                // Ensure the video metadata is loaded
+                if (previewVideo.readyState >= 2) { // HAVE_CURRENT_DATA or higher
+                    previewVideo.currentTime = startTime;
+                } else {
+                    previewVideo.addEventListener('loadeddata', function onLoadedData() {
+                        previewVideo.removeEventListener('loadeddata', onLoadedData);
+                        previewVideo.currentTime = startTime;
+                    });
+                }
+            }
+            
+            // This is a simplified version - in a real app, you would process the video
+            alert('Changes applied! In a real app, the video would be cropped and trimmed according to your selections.');
+            
+            closeEditor();
+        }
+        
+        // Upload button click - simulate upload process
+        uploadBtn.addEventListener('click', () => {
+            if (previewVideo.src) {
+                alert('Your beat is being uploaded! This would connect to a real backend in a production environment.');
+            } else {
+                alert('Please select a video first');
+            }
+        });
+    </script>
+</body>
+</html>
