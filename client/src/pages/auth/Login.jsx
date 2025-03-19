@@ -1,49 +1,83 @@
-import React, { useState, useEffect } from 'react';
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import React, { useState, useEffect } from "react";
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { Link, useNavigate } from "react-router-dom"; // Import useNavigate
 import a from "../../assets/public/Group 14.png";
 import b from "../../assets/public/logo.png";
 import c from "../../assets/public/google.png";
 import d from "../../assets/public/facebooklogo.png";
-import Footers from '../../components/getStarted/Footer';
-import { Link } from 'react-router-dom';
+import Footers from "../../components/getStarted/Footer";
+import {useLogin} from "../../../Hooks/auth/useLogin"; // Import the useLogin hook
 
 const Login = () => {
-  const [passwordVisible, setPasswordVisible] = useState(false);
+  const [email, setEmail] = useState(""); // State for email input
+  const [password, setPassword] = useState(""); // State for password input
+  const [passwordVisible, setPasswordVisible] = useState(false); // State for password visibility
+  const navigate = useNavigate(); // Initialize useNavigate
+
+  const { loading, error, token, login } = useLogin(); // Use the useLogin hook
 
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Prepare credentials for login
+    const credentials = {
+      email,
+      password,
+    };
+
+    // Call the login function from the hook
+    await login(credentials);
+  };
+
+  // Redirect to the dashboard or home page if login is successful
+  useEffect(() => {
+    if (token) {
+      navigate("/dashboard"); // Replace "/dashboard" with your desired route after login
+    }
+  }, [token, navigate]);
+
   useEffect(() => {
     const handleScroll = () => {
-      const elements = document.querySelectorAll('.fade-in');
+      const elements = document.querySelectorAll(".fade-in");
       elements.forEach((element) => {
         const elementTop = element.getBoundingClientRect().top;
         const windowHeight = window.innerHeight;
         if (elementTop < windowHeight - 100) {
-          element.classList.add('show');
+          element.classList.add("show");
         }
       });
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
     handleScroll();
 
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, []);
 
   return (
-    <div className="bg-cover bg-center bg-no-repeat bg-fixed min-h-screen" style={{ backgroundImage: `linear-gradient(rgba(18, 121, 155, 0.89), rgba(18, 101, 180, 0.89)), url(${a})` }}>
+    <div
+      className="bg-cover bg-center bg-no-repeat bg-fixed min-h-screen"
+      style={{ backgroundImage: `linear-gradient(rgba(18, 121, 155, 0.89), rgba(18, 101, 180, 0.89)), url(${a})` }}
+    >
       <div className="absolute inset-0 bg-black opacity-50"></div>
       <div className="relative z-10 flex items-center justify-center min-h-screen">
-        <div className="max-w-lg w-full rounded-lg p-6 shadow-lg ">
+        <div className="max-w-lg w-full rounded-lg p-6 shadow-lg">
           <div className="flex items-center justify-center mb-6">
             <img src={b} alt="Logo" className="w-24 h-auto" />
           </div>
           <h2 className="text-2xl font-bold text-center text-white mb-6">Login</h2>
-          <form>
+
+          {/* Error Message */}
+          {error && <p className="text-red-500 text-center mb-4">{error}</p>}
+
+          <form onSubmit={handleSubmit}>
+            {/* Email Input */}
             <div className="relative mb-4">
               <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -51,15 +85,21 @@ const Login = () => {
                 placeholder="Email"
                 className="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none bg-white focus:border-blue-500"
                 required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+
+            {/* Password Input */}
             <div className="relative mb-4">
               <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
-                type={passwordVisible ? 'text' : 'password'}
+                type={passwordVisible ? "text" : "password"}
                 placeholder="Password"
                 className="w-full pl-10 pr-10 py-2 border rounded-lg focus:outline-none bg-white focus:border-blue-500"
                 required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
               <button
                 type="button"
@@ -69,19 +109,35 @@ const Login = () => {
                 {passwordVisible ? <FaEyeSlash /> : <FaEye />}
               </button>
             </div>
+
+            {/* Remember Me and Forgot Password */}
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center">
                 <input type="checkbox" id="rememberMe" className="h-5 w-5 text-blue-600" />
-                <label htmlFor="rememberMe" className="ml-2 text-gray-300">Remember me</label>
+                <label htmlFor="rememberMe" className="ml-2 text-gray-300">
+                  Remember me
+                </label>
               </div>
-              <Link to="/forgot" className="text-blue-500 hover:underline">Forgot Password?</Link>
-           
+              <Link to="/forgot" className="text-blue-500 hover:underline">
+                Forgot Password?
+              </Link>
             </div>
-            <button className="w-full bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition duration-300">Log in</button>
-          
+
+            {/* Login Button */}
+            <button
+              type="submit"
+              className="w-full bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+              disabled={loading} // Disable button while loading
+            >
+              {loading ? "Logging in..." : "Log in"}
+            </button>
+
+            {/* Separator */}
             <p className="separator text-center my-4">
               <span className="relative px-4 text-white">or continue with</span>
             </p>
+
+            {/* Social Login Buttons */}
             <div className="social-login flex justify-center gap-4">
               <button className="social-button flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
                 <img src={c} alt="Google" className="social-icons w-6 h-6 mr-2" /> Google
@@ -90,17 +146,18 @@ const Login = () => {
                 <img src={d} alt="Facebook" className="social-icons w-6 h-6 mr-2" /> Facebook
               </button>
             </div>
+
+            {/* Signup Link */}
             <p className="text-white text-center mt-4">
-              Don't have an account?
-              <Link to="/signup" className="text-blue-500 hover:underline"> Sign up</Link>
-              
+              Don't have an account?{" "}
+              <Link to="/signup" className="text-blue-500 hover:underline">
+                Sign up
+              </Link>
             </p>
           </form>
         </div>
       </div>
-     
-       
-     <Footers />
+      <Footers />
     </div>
   );
 };

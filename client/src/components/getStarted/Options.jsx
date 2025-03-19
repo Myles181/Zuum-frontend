@@ -1,6 +1,3 @@
-
-
-
 import React from "react";
 import { Link } from "react-router-dom";
 
@@ -19,8 +16,12 @@ const Options = () => {
             key={index}
             className="w-4/5 max-w-md bg-white p-8 rounded-lg shadow-lg text-center text-black font-bold text-lg cursor-pointer hover:bg-gray-100 fade-in"
           >
-            <Link to="/signup" className="text-black no-underline">
-            {option}
+            {/* Pass the selected role as a URL parameter */}
+            <Link
+              to={`/signup?identity=${option.toLowerCase().replace(/\s+/g, "-")}`} // Convert to lowercase and replace spaces with hyphens
+              className="text-black no-underline"
+            >
+              {option}
             </Link>
           </div>
         ))}

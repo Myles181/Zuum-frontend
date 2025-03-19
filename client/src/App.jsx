@@ -16,6 +16,7 @@ import UploadPage from './pages/upload/Upload';
 import UploadBeat from './pages/upload/UploadBeatSale';
 import MusicUploadInterface from './pages/upload/UploadMusic';
 import UploadVideo from './pages/upload/UploadVideo';
+import ResetPassword from './pages/auth/ResetPassword';
 
 const App = () => {
   return (
@@ -26,6 +27,7 @@ const App = () => {
       <Route path="/signup" element={<Signup />} />
       <Route path="/login" element={<Login />} />
       <Route path="/forgot" element={<ForgotPassword />} />
+      <Route path="/reset" element={<ResetPassword />} />
       <Route path="/verify" element={<VerifyOTP />} />
       <Route path="/home" element={<Homepage />} />
       <Route path="/search" element={<Search />} />
