@@ -17,7 +17,7 @@ const useSignup = () => {
 
     try {
       // Assign default identity if not provided
-      const { username, email, password, identity = "artist" } = userData;
+      const { username, email, password, identity } = userData;
 
       // Make a POST request to the API
       const response = await axios.post(
