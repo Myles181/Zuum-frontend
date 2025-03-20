@@ -1,5 +1,11 @@
 import { useState } from "react";
 import axios from "axios";
+// import { useSearchParams } from "react-router-dom";
+
+// Get the Api url
+const API_URL = import.meta.env.VITE_API_URL;
+
+console.log(API_URL);
 
 // Custom hook for user login
 const useLogin = () => {
@@ -16,7 +22,8 @@ const useLogin = () => {
     try {
       // Make a POST request to the API
       const response = await axios.post(
-        "https://zuum-backend-qs8x.onrender.com/api/auth/login", // Replace with your actual login endpoint
+        // "https://zuum-backend-qs8x.onrender.com/api/auth/login", // Replace with your actual login endpoint
+        `${API_URL}/auth/login`,
         credentials
       );
 
@@ -67,13 +74,14 @@ const useForgotPassword = () => {
     try {
       // Make a POST request to the API
       const response = await axios.post(
-        "https://zuum-backend-qs8x.onrender.com/api/auth/forgot-password", // Replace with your actual forgot password endpoint
+        `${API_URL}/auth/forgot-password`, // Replace with your actual forgot password endpoint
         { email }
       );
 
       // Check the response status
       if (response.status === 200) {
-        setSuccess(true); // Reset link sent successfully
+        localStorage.setItem('password-reset-email', email)
+        setSuccess(true);
       }
     } catch (err) {
       // Handle errors based on status code
@@ -98,4 +106,48 @@ const useForgotPassword = () => {
   return { loading, error, success, forgotPassword };
 };
 
-export { useLogin, useForgotPassword };
+// Custom hook for forgot password
+const useResetPassword = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
+  const ResetPassword = async (token, newPassword) => {
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+
+    try {
+      const email = localStorage.getItem("password-reset-email");
+      if (!email) {
+        setError("Email not found. Redirecting to Forgot Password page...");
+      }
+
+      const response = await axios.post(`${API_URL}/auth/reset-password`, {
+        email,
+        token,
+        newPassword,
+      });
+
+      if (response.status === 200) {
+        setSuccess(true);
+        setTimeout(() => {
+          window.location.href = "/login"; // Redirect manually
+        }, 2000);
+        return;
+      }
+    } catch (err) {
+      console.log(err)
+      setError(
+        err.response?.data?.error.msg || err.response?.data?.error || "An unexpected error occurred."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { loading, error, success, ResetPassword }; // Ensure consistent return
+};
+
+
+export { useLogin, useForgotPassword, useResetPassword };

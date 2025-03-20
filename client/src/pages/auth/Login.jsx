@@ -36,7 +36,7 @@ const Login = () => {
   // Redirect to the dashboard or home page if login is successful
   useEffect(() => {
     if (token) {
-      navigate("/dashboard"); // Replace "/dashboard" with your desired route after login
+      navigate("/home"); // Replace "/dashboard" with your desired route after login
     }
   }, [token, navigate]);
 
