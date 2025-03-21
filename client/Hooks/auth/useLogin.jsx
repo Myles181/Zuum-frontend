@@ -31,6 +31,10 @@ const useLogin = () => {
       if (response.status === 200) {
         const { token } = response.data; // Extract the JWT token from the response
         setToken(token); // Store the token
+
+        
+        // Save the token to localStorage
+        localStorage.setItem("authToken", token);
       }
     } catch (err) {
       // Handle errors based on status code
