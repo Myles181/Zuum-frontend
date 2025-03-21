@@ -9,7 +9,7 @@ const BottomNav = () => {
     location.pathname === path ? "text-green-800" : "text-gray-700";
 
   return (
-    <div className="bottom-nav fixed bottom-0 left-0 w-full bg-white flex justify-around p-4 shadow-t z-50">
+    <div className="bottom-nav fixed bottom-0 left-0 w-full bg-white flex justify-around p-1 shadow-t z-50">
       {/* Home */}
       <Link to='/home' className={`nav-item flex flex-col items-center text-sm ${getLinkClass('/home')}`}>
         <FiHome className="w-6 h-6" />

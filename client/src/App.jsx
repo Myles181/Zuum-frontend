@@ -17,6 +17,7 @@ import UploadBeat from './pages/upload/UploadBeatSale';
 import MusicUploadInterface from './pages/upload/UploadMusic';
 import UploadVideo from './pages/upload/UploadVideo';
 import ResetPassword from './pages/auth/ResetPassword';
+import EditProfile from './components/profile/EditProfile';
 
 const App = () => {
   return (
@@ -33,6 +34,7 @@ const App = () => {
       <Route path="/search" element={<Search />} />
       <Route path="/settings" element={<Settings />} />
       <Route path="/profile" element={<ArtistPage />} />
+      <Route path="/editprofile" element={<EditProfile />} />
       <Route path="/activity" element={<ActivityPage />} />
       <Route path="/messages" element={<Chat />} />
       <Route path="/add" element={<UploadPage />} />

@@ -1,28 +1,48 @@
-
-
 import React from "react";
 import c from "../../assets/icons/ORSJOS0 1.png";
 import d from "../../assets/icons/Mask group1.svg";
+import { Link } from "react-router-dom";
 
-const ProfileSection = () => {
+const ProfileSection = ({ profile }) => {
+  // Fallback data in case profile is null or undefined
+  const fallbackProfile = {
+    cover_image: c, // Default cover image
+    image: d, // Default profile image
+    username: "Dave_sings", // Default username
+    identity: "Artist", // Default identity
+    bio: "I'm a singer-songwriter, weaving emotions into melodies that touch hearts and inspire minds.", // Default bio
+  };
+
+  // Merge profile data with fallback data
+  const mergedProfile = { ...fallbackProfile, ...profile };
+
   return (
-    <div className="profile-container flex flex-col mt-15 mb-20 items-center  w-full max-w-lg mx-auto overflow-hidden">
-      <div className="profile-container relative">
-           {/* Background Image */}
-           <div className="profile-background h-40 overflow-hidden rounded-t-lg relative">
-             <img src={c} alt="Profile Background" className="w-full h-full object-cover" />
-           </div>
-       
-           {/* Profile Image (Absolute Positioning) */}
-           <div className="profile-header absolute bottom-0 left-4 translate-y-1/2">
-             <img src={d} alt="Profile Picture" className="w-24 h-24 rounded-full border-4 border-white shadow-lg" />
-           </div>
-         </div>
+    <div className="profile-container relative">
+    {/* Background Image */}
+    <div className="profile-background h-60 overflow-hidden rounded-t-lg relative">
+  <img
+    src={mergedProfile.cover_image ? mergedProfile.cover_image : c}
+    alt="Profile Background"
+    className="w-full h-full object-cover" // Corrected: object-cover for proper scaling
+  />
+</div>
+
+{/* Profile Image (Floating Over Background) */}
+<div className="profile-header absolute top-48 left-4">
+  <img
+    src={mergedProfile.image ? mergedProfile.image : d}
+    alt="Profile Picture"
+    className="w-24 h-24 rounded-full border-4 border-white shadow-lg"
+  />
+</div>
+
+
+
 
       <div className="stats-container flex flex-col items-center mt-16 w-full px-5 text-center">
         <div className="username">
-          <h2 className="text-2xl text-[#008066]">Dave_sings</h2>
-          <p className="text-gray-500">Artist</p>
+          <h2 className="text-2xl text-[#008066]">{mergedProfile.username}</h2>
+          <p className="text-gray-500">{mergedProfile.identity}</p>
         </div>
 
         <div className="stats flex justify-around w-full max-w-md mt-4 gap-5 text-gray-500 flex-wrap">
@@ -38,12 +58,18 @@ const ProfileSection = () => {
       </div>
 
       <p className="bio text-gray-700 text-center px-5 mt-5">
-        I'm a singer-songwriter, weaving emotions into melodies that touch hearts and inspire minds.
+        {mergedProfile.bio}
       </p>
 
       <div className="buttons flex justify-center mt-5 w-full gap-3">
-        <button className="bg-gray-200 text-[#008066] px-6 py-2 rounded-lg">Message</button>
-        <button className="bg-gray-200 text-[#008066] px-6 py-2 rounded-lg">Following</button>
+        <Link to='/editprofile'>
+        <button className="bg-gray-200 text-[#008066] px-6 py-2 rounded-lg">
+          Edit Profile
+        </button>
+        </Link>
+        <button className="bg-gray-200 text-[#008066] px-6 py-2 rounded-lg">
+          Share Profile
+        </button>
       </div>
     </div>
   );

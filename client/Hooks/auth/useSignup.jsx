@@ -1,6 +1,8 @@
 import { useState } from "react";
 import axios from "axios";
 
+const API_URL = import.meta.env.VITE_API_URL;
+
 // Custom hook for user signup
 const useSignup = () => {
   const [loading, setLoading] = useState(false); // Tracks loading state
@@ -19,7 +21,7 @@ const useSignup = () => {
 
       // Make a POST request to the API
       const response = await axios.post(
-        "https://zuum-backend-qs8x.onrender.com/api/auth/signup", // Replace with your actual signup endpoint
+        `${API_URL}/auth/signup`, // Replace with your actual signup endpoint
         { username, email, password, identity }
       );
 
@@ -67,7 +69,7 @@ const useVerifyEmail = () => {
     try {
       // Make a POST request to the API
       const response = await axios.post(
-        "https://zuum-backend-qs8x.onrender.com/api/auth/verify-email", // Replace with your actual email verification endpoint
+        `${API_URL}/auth/verify-email`, // Replace with your actual email verification endpoint
         { email, otp }
       );
 
@@ -113,7 +115,7 @@ const useResendOtp = () => {
     try {
       // Make a POST request to the API
       const response = await axios.post(
-        "https://zuum-backend-qs8x.onrender.com/api/auth/resend-otp", // Replace with your actual resend OTP endpoint
+        `${API_URL}/auth/resend-otp`, // Replace with your actual resend OTP endpoint
         { email }
       );
 
