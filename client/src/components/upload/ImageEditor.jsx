@@ -19,10 +19,7 @@ const ImageEditor = ({ coverPreview, handleMouseDown, handleMouseMove, handleMou
           <input type="color" id="colorPicker" value={color} onChange={handleColorChange} className="editor-tool w-10 h-6 rounded-full" />
           <button className={`editor-tool px-4 py-2 rounded-full ${editorTool === 'rotate' ? 'bg-green-800 text-white' : 'bg-gray-200 text-gray-700'} hover:bg-green-600 hover:text-white transition-colors duration-200`} onClick={handleRotate}>Rotate</button>
         </div>
-        <div className="editor-buttons flex justify-between mt-6">
-          <button className="editor-btn cancel-btn bg-gray-200 text-gray-700 px-6 py-3 rounded-full font-medium hover:bg-gray-300 transition-colors duration-200" onClick={handleCancelEdit}>Cancel</button>
-          <button className="editor-btn save-btn bg-green-800 text-white px-6 py-3 rounded-full font-medium hover:bg-green-800 transition-colors duration-200" onClick={handleSaveEdit}>Save</button>
-        </div>
+      
       </div>
     </div>
   );

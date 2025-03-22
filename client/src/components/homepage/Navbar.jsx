@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import a from "../../assets/icons/menu-icon.png";
 import b from "../../assets/icons/search-icon.png";
 import c from "../../assets/icons/settings-icon.png";
-import {Link} from 'react-router-dom';
-
+import { Link } from 'react-router-dom';
 
 const Navbar = ({ toggleSidebar }) => {
   const [activeTab, setActiveTab] = useState('new');
@@ -13,7 +12,7 @@ const Navbar = ({ toggleSidebar }) => {
   };
 
   return (
-    <nav className="navbar flex items-center justify-between p-4 bg-white border-b border-gray-300">
+    <nav className="navbar fixed top-0 left-0 right-0 flex items-center justify-between p-1 bg-white border-b border-gray-300 z-50">
       <div className="nav-left">
         <img
           src={a}
@@ -24,16 +23,16 @@ const Navbar = ({ toggleSidebar }) => {
       </div>
       <div className="toggle-container bg-gray-200 rounded-full p-1 flex">
         <div
-          className={`toggle-btn px-4 py-2 rounded-full ${
-            activeTab === 'new' ? 'bg-green-700 text-white' : ''
+          className={`toggle-btn px-2 py-1 rounded-full ${
+            activeTab === 'new' ? 'bg-[#2D8C72] text-white' : ''
           }`}
           onClick={() => handleTabClick('new')}
         >
           New
         </div>
         <div
-          className={`toggle-btn px-4 py-2 rounded-full ${
-            activeTab === 'recent' ? 'bg-green-800 text-white' : ''
+          className={`toggle-btn px-2 py-1 rounded-full ${
+            activeTab === 'recent' ? 'bg-[#2D8C72] text-white' : ''
           }`}
           onClick={() => handleTabClick('recent')}
         >
