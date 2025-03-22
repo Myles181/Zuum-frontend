@@ -28,6 +28,7 @@ const useSignup = () => {
       // Check the response status
       if (response.status === 201) {
         setSuccess(true); // Registration successful
+        return true; // Explicitly return true on success
       }
     } catch (err) {
       // Handle errors based on status code
@@ -49,10 +50,14 @@ const useSignup = () => {
     } finally {
       setLoading(false); // Stop loading regardless of success or failure
     }
+
+    return false; // Explicitly return false on failure
   };
 
   return { loading, error, success, signup };
 };
+
+export default useSignup;
 
 // Custom hook for email verification
 const useVerifyEmail = () => {
