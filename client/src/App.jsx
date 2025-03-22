@@ -18,6 +18,8 @@ import MusicUploadInterface from './pages/upload/UploadMusic';
 import UploadVideo from './pages/upload/UploadVideo';
 import ResetPassword from './pages/auth/ResetPassword';
 import EditProfile from './components/profile/EditProfile';
+import MusicDetailsPage from './pages/MusicDetails';
+import VideoDetails from './pages/VideoDetails';
 
 const App = () => {
   return (
@@ -37,10 +39,12 @@ const App = () => {
       <Route path="/editprofile" element={<EditProfile />} />
       <Route path="/activity" element={<ActivityPage />} />
       <Route path="/messages" element={<Chat />} />
+      <Route path="/music/:postId" element={<MusicDetailsPage />} />
       <Route path="/add" element={<UploadPage />} />
       <Route path="/addpaybeat" element={<UploadBeat />} />
       <Route path="/addbeat" element={<MusicUploadInterface />} />
       <Route path="/addvideo" element={<UploadVideo />} />
+      <Route path="/video/:postId" element={<VideoDetails/>} />
       </Routes>
       </Router>
   )

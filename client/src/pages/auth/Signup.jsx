@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaUser, FaEnvelope, FaPhone, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
-import { Link, useSearchParams } from "react-router-dom"; // Import useSearchParams
+import { Link, Navigate, useSearchParams } from "react-router-dom"; // Import useSearchParams
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import a from "../../assets/public/Group 14.png";
 import b from "../../assets/public/logo.png";
@@ -27,6 +27,7 @@ function Signup() {
 
   const { loading, error, success, signup } = useSignup();
   const { loading: googleLoading, error: googleError, authenticateWithGoogle } = useGoogleAuth(); // Use the useGoogleAuth hook
+  
 
   useEffect(() => {
     // Set the role in formData when the component mounts
