@@ -2,7 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import Post from './Post';
 import { useGetAudioPosts } from '../../../Hooks/audioPosts/useCreateAudio'; // Hook for music posts
 import { useGetVideoPosts } from '../../../Hooks/videoPosts/useCreateVideo'; // Hook for video posts
-import Spinner from '../spinner';
+import Spinner from '../Spinner';
+
 
 const Feed = () => {
   const [page, setPage] = useState(1); // Pagination state
