@@ -1,14 +1,14 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import c from "../../assets/image/11429433 1.svg";
-import useAudioPosts from "../../../Hooks/audioPosts/useCreateAudio";
+import { useGetUserAudioPosts } from '../../../Hooks/audioPosts/useCreateAudio';
 
 
 const MusicSection = () => {
+  const { data, loading, error } = useGetUserAudioPosts(); // Fetch the authenticated user's audio posts
   const navigate = useNavigate(); // Initialize useNavigate
 
-  // Use the custom hook to fetch audio posts
-  const { loading, error, posts, pagination } = useAudioPosts();
+  console.log(data); // Debugging API response
 
   // Function to handle music item click
   const handleMusicClick = (postId) => {
@@ -22,8 +22,8 @@ const MusicSection = () => {
         {loading && <p className="text-center col-span-full">Loading your music posts...</p>}
         {error && <p className="text-red-500 col-span-full">{error}</p>}
 
-        {posts && posts.length > 0 ? (
-          posts.map((post) => (
+        {data && data.length > 0 ? (
+          data.map((post) => (
             <div
               key={post.id}
               className="music-item bg-white rounded-lg shadow-lg p-1 flex flex-col justify-center items-center text-center transition transform hover:scale-105 cursor-pointer"

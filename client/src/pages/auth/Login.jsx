@@ -138,13 +138,11 @@ const Login = () => {
             </p>
 
             {/* Social Login Buttons */}
-            <div className="social-login flex justify-center gap-4">
-              <button className="social-button flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
+            <div className="social-login flex justify-center ">
+              <button className="social-button w-full mx-15 flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
                 <img src={c} alt="Google" className="social-icons w-6 h-6 mr-2" /> Google
               </button>
-              <button className="social-button flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
-                <img src={d} alt="Facebook" className="social-icons w-6 h-6 mr-2" /> Facebook
-              </button>
+             
             </div>
 
             {/* Signup Link */}
