@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 const Options = () => {
   return (
-    <main className="p-5 min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-[#87CEFA] to-[#2E8B57]">
+    <main className="p-5  flex flex-col items-center justify-center bg-gradient-to-b from-[#87CEFA] to-[#2E8B57]">
       <p className="text-white text-sm text-center mb-8 fade-in">
         Choose your role and begin your journey—artist, producer, or record
         label owner

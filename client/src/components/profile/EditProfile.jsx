@@ -105,7 +105,7 @@ const EditProfile = () => {
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
-      <div className="profile-container flex flex-col items-center mt-4 mb-15">
+      <div className="profile-container flex flex-col items-center  mt-4 mb-15">
         <section>
           <div className="profile-info bg-white mt-5 p-5 rounded-lg shadow-md relative">
             <div className="profile-container relative">

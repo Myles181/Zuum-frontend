@@ -36,7 +36,7 @@ const ArtistPage = () => {
       <Navbar toggleSidebar={toggleSidebar} name={"Profile"} />
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-
+      <div className="profile-container flex flex-col items-center  mt-4 mb-15">
       {error ? (
         <p className="text-red-500 text-center mt-4">{error}</p>
       ) : (
@@ -45,7 +45,7 @@ const ArtistPage = () => {
          
         </>
       )}
-
+        </div>
       <BottomNav />
     </div>
   );

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { FaUser, FaEnvelope, FaPhone, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
+import { FcGoogle } from 'react-icons/fc';
 import { Link, Navigate, useSearchParams } from "react-router-dom"; // Import useSearchParams
 import { useNavigate } from "react-router-dom"; // Import useNavigate
 import a from "../../assets/public/Group 14.png";
@@ -239,7 +240,7 @@ function Signup() {
                 onClick={handleGoogleAuth} // Add onClick handler for Google authentication
                 disabled={googleLoading} // Disable button while loading
               >
-                <img src={c} alt="Google" className="w-6 h-6 mr-2" /> Google
+                 <FcGoogle className="w-6 h-6 mr-2" /> Google
               </button>
               
             </div>

@@ -6,20 +6,22 @@ import b from "../../assets/public/logo.png";
 import c from "../../assets/public/google.png";
 import d from "../../assets/public/facebooklogo.png";
 import Footers from "../../components/getStarted/Footer";
-import {useLogin} from "../../../Hooks/auth/useLogin"; // Import the useLogin hook
+import { FcGoogle } from "react-icons/fc";
+import { useAuth } from "../../contexts/AuthContexts";
 
 const Login = () => {
   const [email, setEmail] = useState(""); // State for email input
   const [password, setPassword] = useState(""); // State for password input
+  const { token, loading, error, login } = useAuth(); // Destructure token from useAuth
   const [passwordVisible, setPasswordVisible] = useState(false); // State for password visibility
   const navigate = useNavigate(); // Initialize useNavigate
 
-  const { loading, error, token, login } = useLogin(); // Use the useLogin hook
-
+  // Toggle password visibility
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
   };
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -33,10 +35,10 @@ const Login = () => {
     await login(credentials);
   };
 
-  // Redirect to the dashboard or home page if login is successful
+  // Redirect to the home page if login is successful
   useEffect(() => {
     if (token) {
-      navigate("/home"); // Replace "/dashboard" with your desired route after login
+      navigate("/home"); // Redirect to the home page
     }
   }, [token, navigate]);
 
@@ -140,7 +142,7 @@ const Login = () => {
             {/* Social Login Buttons */}
             <div className="social-login flex justify-center ">
               <button className="social-button w-full mx-15 flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
-                <img src={c} alt="Google" className="social-icons w-6 h-6 mr-2" /> Google
+              <FcGoogle className="w-6 h-6 mr-2" /> Google
               </button>
              
             </div>

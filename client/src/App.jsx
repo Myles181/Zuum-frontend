@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import GetStarted from './pages/GetStarted';
 import LandingPage from './pages/LandingPage';
@@ -20,34 +20,41 @@ import ResetPassword from './pages/auth/ResetPassword';
 import EditProfile from './components/profile/EditProfile';
 import MusicDetailsPage from './pages/MusicDetails';
 import VideoDetails from './pages/VideoDetails';
+import ProtectedRoute from './contexts/ProtectedRoutes';
+
 
 const App = () => {
   return (
     <Router>
       <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/start" element={<GetStarted />} />
-      <Route path="/signup" element={<Signup />} />
-      <Route path="/login" element={<Login />} />
-      <Route path="/forgot" element={<ForgotPassword />} />
-      <Route path="/reset" element={<ResetPassword />} />
-      <Route path="/verify" element={<VerifyOTP />} />
-      <Route path="/home" element={<Homepage />} />
-      <Route path="/search" element={<Search />} />
-      <Route path="/settings" element={<Settings />} />
-      <Route path="/profile" element={<ArtistPage />} />
-      <Route path="/editprofile" element={<EditProfile />} />
-      <Route path="/activity" element={<ActivityPage />} />
-      <Route path="/messages" element={<Chat />} />
-      <Route path="/music/:postId" element={<MusicDetailsPage />} />
-      <Route path="/add" element={<UploadPage />} />
-      <Route path="/addpaybeat" element={<UploadBeat />} />
-      <Route path="/addbeat" element={<MusicUploadInterface />} />
-      <Route path="/addvideo" element={<UploadVideo />} />
-      <Route path="/video/:postId" element={<VideoDetails/>} />
-      </Routes>
-      </Router>
-  )
-}
+        {/* Public Routes */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/start" element={<GetStarted />} />
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/forgot" element={<ForgotPassword />} />
+        <Route path="/reset" element={<ResetPassword />} />
+        <Route path="/verify" element={<VerifyOTP />} />
 
-export default App
+        {/* Protected Routes */}
+        <Route element={<ProtectedRoute />}>
+          <Route path="/home" element={<Homepage />} />
+          <Route path="/search" element={<Search />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/profile" element={<ArtistPage />} />
+          <Route path="/editprofile" element={<EditProfile />} />
+          <Route path="/activity" element={<ActivityPage />} />
+          <Route path="/messages" element={<Chat />} />
+          <Route path="/music/:postId" element={<MusicDetailsPage />} />
+          <Route path="/add" element={<UploadPage />} />
+          <Route path="/addpaybeat" element={<UploadBeat />} />
+          <Route path="/addbeat" element={<MusicUploadInterface />} />
+          <Route path="/addvideo" element={<UploadVideo />} />
+          <Route path="/video/:postId" element={<VideoDetails />} />
+        </Route>
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;
