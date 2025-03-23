@@ -1,7 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { useGetVideoPosts } from "../../../Hooks/videoPosts/useCreateVideo"; // Hook for video posts
+// import { useGetVideoPosts } from "../../../Hooks/videoPosts/useCreateVideo"; // Hook for video posts
 import Spinner from "../Spinner";
 import a from "../../assets/icons/Mask group1.svg";
 import b from "../../assets/icons/dots-icon.svg";
@@ -22,11 +22,11 @@ const Post = ({ postId, postType }) => {
   } = useAudioPosts(1, 10, postId);
 
   // Fetch video post using the video hook
-  const {
-    data: videoPost,
-    loading: videoLoading,
-    error: videoError,
-  } = useGetVideoPosts(postId);
+  // const {
+  //   data: videoPost,
+  //   loading: videoLoading,
+  //   error: videoError,
+  // } = useGetVideoPosts(postId);
 
   // Determine which post to display based on postType
   const post = postType === "music" ? audioPosts[0] : videoPost;
@@ -34,7 +34,13 @@ const Post = ({ postId, postType }) => {
   const error = postType === "music" ? audioError : videoError;
 
   const handlePostClick = () => {
-    navigate(`/${postType}/${postId}`);
+    // Check if the post data is available
+    if (post) {
+      navigate(`/${postType}/${postId}`);
+    } else {
+      console.error("Post data is not available.");
+      // Optionally, show a user-friendly message or prevent navigation
+    }
   };
 
   if (loading) {
@@ -61,7 +67,7 @@ const Post = ({ postId, postType }) => {
       <div className="user-info flex items-center gap-3 justify-between mb-3">
         <div className="flex items-center gap-3">
           <img
-            src={post.profile_picture || a}
+            src={post.profile_picture || post.image || a}
             alt="Profile"
             className="profile-pic w-10 h-10 rounded-full"
           />
@@ -81,11 +87,19 @@ const Post = ({ postId, postType }) => {
             className="w-full rounded-lg"
           />
         ) : (
-          <video src={post.video_upload} className="w-full rounded-lg" controls />
+          <>
+            {/* Display video instead of thumbnail */}
+            <video
+              src={post.video_upload}
+              className="w-full rounded-lg"
+              controls // Add controls to allow play/pause
+              poster={c} // Optional: Add a poster (thumbnail) for the video
+            />
+            <div className="play-overlay absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+              <img src={d} alt="Play" className="w-10 h-10" />
+            </div>
+          </>
         )}
-        <div className="play-overlay absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          <img src={d} alt="Play" className="w-10 h-10" />
-        </div>
       </div>
 
       <div className="post-caption mb-3">
