@@ -5,7 +5,6 @@ import { useNavigate } from "react-router-dom"; // Import useNavigate
 import a from "../../assets/public/Group 14.png";
 import b from "../../assets/public/logo.png";
 import c from "../../assets/public/google.png";
-import d from "../../assets/public/facebooklogo.png";
 import { useSignup } from "../../../Hooks/auth/useSignup"; // Import useGoogleAuth useGoogleAuth
 import useGoogleAuth from "../../../Hooks/auth/useGoogleAuth";
 
@@ -57,29 +56,27 @@ function Signup() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
     if (formData.password !== formData.confirmPassword) {
       alert("Passwords do not match!");
       return;
     }
-
+  
     const userData = {
       username: formData.username,
       email: formData.email,
       phoneNumber: formData.phoneNumber,
       password: formData.password,
-      identity: formData.identity, // Include the role in the signup data
+      identity: formData.identity,
     };
-
-    // Call the signup function from the hook
+  
     const success = await signup(userData);
-
-    // Redirect to the Verify page if signup is successful
+    console.log("Signup success:", success);
     if (success) {
-      navigate("/verify"); // Use navigate to redirect
+      navigate("/verify");
     }
   };
-
+  
   // Handle Google authentication
   const handleGoogleAuth = () => {
     authenticateWithGoogle(); // Call the Google authentication function
@@ -220,16 +217,7 @@ function Signup() {
             {error && <div className="mb-4 text-red-500 text-center">{error}</div>}
 
             {/* Success Message */}
-            {success && (
-              <div className="mb-4 text-green-500 text-center">
-                Registration successful! You can now{" "}
-                <Link to="/login" className="text-blue-500 hover:underline">
-                  login
-                </Link>
-                .
-              </div>
-            )}
-
+           
             {/* Signup Button */}
             <button
               type="submit"
@@ -245,17 +233,15 @@ function Signup() {
             </p>
 
             {/* Social Login Buttons */}
-            <div className="flex justify-center gap-4">
+            <div className="flex justify-center ">
               <button
-                className="flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300"
+                className="flex items-center w-full mx-15  justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300"
                 onClick={handleGoogleAuth} // Add onClick handler for Google authentication
                 disabled={googleLoading} // Disable button while loading
               >
                 <img src={c} alt="Google" className="w-6 h-6 mr-2" /> Google
               </button>
-              <button className="flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
-                <img src={d} alt="Facebook" className="w-6 h-6 mr-2" /> Facebook
-              </button>
+              
             </div>
 
             {/* Login Link */}
