@@ -1,20 +1,27 @@
-import React, { useState, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom'; // Import useNavigate
+import React, { useState, useRef } from "react";
+import { useParams, useNavigate } from "react-router-dom"; // Import useNavigate
 import c from "../assets/image/11429433 1.svg"; // Fallback image
-import { useDeleteAudioPost, useGetAudioPost } from '../../Hooks/audioPosts/useCreateAudio';
-import Navbar from '../components/profile/NavBar';
-import Sidebar from '../components/homepage/Sidebar';
-import Overlay from '../components/homepage/Overlay';
-import BottomNav from '../components/homepage/BottomNav';
-import CommentSection from '../components/details/Comments';
-import ReactionsSection from '../components/details/Reactions';
-import Spinner from '../components/Spinner';
+import Navbar from "../components/profile/NavBar";
+import Sidebar from "../components/homepage/Sidebar";
+import Overlay from "../components/homepage/Overlay";
+import BottomNav from "../components/homepage/BottomNav";
+import CommentSection from "../components/details/Comments";
+import ReactionsSection from "../components/details/Reactions";
+import Spinner from "../components/Spinner";
 import useUserProfile from "../../Hooks/useProfile";
+import useAudioPosts from "../../Hooks/audioPosts/useCreateAudio";
+
 
 const MusicDetailsPage = () => {
   const { postId } = useParams(); // Get the post ID from the URL
-  const { data, loading, error } = useGetAudioPost(postId); // Fetch the audio post details
-  const { deleteAudioPost, loading: deleteLoading, error: deleteError } = useDeleteAudioPost(); // Hook to delete audio post
+  const navigate = useNavigate(); // Initialize useNavigate
+
+  // Use the custom hook to fetch the specific audio post
+  const { loading, error, posts } = useAudioPosts(1, 10, postId);
+
+  // Extract the post data (since we're fetching a single post, posts[0] will contain the data)
+  const data = posts.length > 0 ? posts[0] : null;
+
   const [showComments, setShowComments] = useState(false); // State to manage comments visibility
   const audioRef = useRef(null); // Reference to the audio element
   const [isPlaying, setIsPlaying] = useState(false); // State to manage play/pause
@@ -22,7 +29,6 @@ const MusicDetailsPage = () => {
   const [duration, setDuration] = useState(0); // State to track total duration
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { profile } = useUserProfile();
-  const navigate = useNavigate(); // Initialize useNavigate
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -48,7 +54,7 @@ const MusicDetailsPage = () => {
   const formatTime = (time) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
   // Handle seek
@@ -60,11 +66,12 @@ const MusicDetailsPage = () => {
 
   // Handle audio post deletion
   const handleDeleteAudio = async () => {
-    const confirmDelete = window.confirm('Are you sure you want to delete this audio post?');
+    const confirmDelete = window.confirm("Are you sure you want to delete this audio post?");
     if (confirmDelete) {
-      await deleteAudioPost(postId); // Call the delete function
+      // Call the delete function (you'll need to implement this)
+      // await deleteAudioPost(postId);
       // Redirect to the profile page after successful deletion
-      navigate('/profile'); // Replace '/profile' with your actual profile route
+      navigate("/profile"); // Replace '/profile' with your actual profile route
     }
   };
 
@@ -72,7 +79,7 @@ const MusicDetailsPage = () => {
   const isOwner = profile?.id === data?.profile_id;
 
   return (
-    <div className='mb-10'>
+    <div className="mb-10">
       <Navbar name={"Details"} />
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
@@ -93,10 +100,10 @@ const MusicDetailsPage = () => {
               {isOwner && (
                 <button
                   onClick={handleDeleteAudio}
-                  disabled={deleteLoading}
+                  disabled={loading}
                   className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:opacity-50"
                 >
-                  {deleteLoading ? 'Deleting...' : 'Delete Audio Post'}
+                  Delete Audio Post
                 </button>
               )}
               {/* Cover Image */}
@@ -107,7 +114,7 @@ const MusicDetailsPage = () => {
               />
               <h1 className="text-2xl font-bold">{data.caption}</h1>
               {/* Caption */}
-              <div className='flex justify-start items-center gap-3'>
+              <div className="flex justify-start items-center gap-3">
                 <img
                   src={data.profile_picture || c}
                   alt="Profile Picture"

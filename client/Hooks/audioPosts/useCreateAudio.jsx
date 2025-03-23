@@ -61,63 +61,113 @@ export const useCreateAudioPost = () => {
 };
 
 // Hook for fetching audio posts with pagination
-export const useGetAudioPosts = (page = 1, limit = 10) => {
-  const [loading, setLoading] = useState(false); // Tracks if the request is in progress
-  const [error, setError] = useState(null); // Stores any error that occurs
-  const [data, setData] = useState(null); // Stores the fetched data
 
-  const fetchAudioPosts = async () => {
-    setLoading(true); // Start loading
-    setError(null); // Reset error state
 
-    try {
-      const token = localStorage.getItem('authToken'); // Retrieve the authentication token
 
-      // Make the GET request to the API endpoint
-      const response = await axios.get(`${API_URL}/audio`, {
-        params: { page, limit }, // Include pagination parameters
-        headers: {
-          Authorization: `Bearer ${token}`, // Include the auth token
-        },
-      });
+const useAudioPosts = (page = 1, limit = 10, postId = null) => {
+  const [loading, setLoading] = useState(true); // Tracks loading state
+  const [error, setError] = useState(null); // Tracks error messages
+  const [posts, setPosts] = useState([]); // Stores the fetched audio posts
+  const [pagination, setPagination] = useState({
+    total: 0,
+    totalPages: 0,
+    currentPage: page,
+    hasNext: false,
+    hasPrev: false,
+  }); // Stores pagination details
 
-      // Handle successful response (status code 200)
-      if (response.status === 200) {
-        setData(response.data); // Store the fetched data
-      } else {
-        // Handle unexpected status codes
-        setError('An unexpected error occurred');
-      }
-    } catch (err) {
-      // Handle errors
-      if (err.response) {
-        // The request was made and the server responded with a status code
-        if (err.response.status === 500) {
-          setError('Server error: Please try again later');
-        } else {
-          setError('An unexpected error occurred');
-        }
-      } else if (err.request) {
-        // The request was made but no response was received
-        setError('Network error: No response from server');
-      } else {
-        // Something happened in setting up the request
-        setError('Failed to fetch audio posts: ' + err.message);
-      }
-    } finally {
-      setLoading(false); // Stop loading
-    }
-  };
-
-  // Fetch audio posts when the component mounts or when `page` or `limit` changes
+  // Fetch audio posts when `page`, `limit`, or `postId` changes
   useEffect(() => {
-    fetchAudioPosts();
-  }, [page, limit]);
+    const fetchAudioPosts = async () => {
+      setLoading(true);
+      setError(null);
 
-  // Return the data, loading, and error states
-  return { data, loading, error };
+      try {
+        const token = localStorage.getItem("authToken"); // Retrieve the authentication token
+
+        if (!token) {
+          throw new Error("Authentication token not found. Please log in.");
+        }
+
+        let response;
+
+        if (postId) {
+          // Fetch a specific post by ID
+          response = await axios.get(`${API_URL}/audio/${postId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`, // Include the auth token
+            },
+          });
+        } else {
+          // Fetch all posts with pagination
+          response = await axios.get(`${API_URL}/audio/`, {
+            params: { page, limit },
+            headers: {
+              Authorization: `Bearer ${token}`, // Include the auth token
+            },
+          });
+        }
+
+        // Check if the response is successful
+        if (response.status === 200) {
+          if (postId) {
+            // If fetching a single post, set it as the only post in the array
+            setPosts([response.data.post]);
+            setPagination({
+              total: 1,
+              totalPages: 1,
+              currentPage: 1,
+              hasNext: false,
+              hasPrev: false,
+            });
+          } else {
+            // If fetching all posts, update the posts and pagination state
+            const { posts, pagination } = response.data;
+            setPosts(posts);
+            setPagination({
+              total: pagination.total,
+              totalPages: pagination.totalPages,
+              currentPage: pagination.currentPage,
+              hasNext: pagination.hasNext,
+              hasPrev: pagination.hasPrev,
+            });
+          }
+        }
+      } catch (err) {
+        // Handle errors
+        if (err.response) {
+          // The request was made and the server responded with a status code
+          if (err.response.status === 401) {
+            setError("Unauthorized: Please log in to access this resource.");
+          } else if (err.response.status === 404) {
+            setError("Post not found.");
+          } else {
+            setError(err.response.data?.message || "An error occurred while fetching audio posts.");
+          }
+        } else if (err.request) {
+          // The request was made but no response was received
+          setError("Network error: No response from server.");
+        } else {
+          // Something happened in setting up the request
+          setError(err.message || "An unexpected error occurred.");
+        }
+      } finally {
+        setLoading(false); // Stop loading
+      }
+    };
+
+    fetchAudioPosts();
+  }, [page, limit, postId]); // Re-run effect when `page`, `limit`, or `postId` changes
+
+  return {
+    loading,
+    error,
+    posts,
+    pagination,
+  };
 };
 
+export default useAudioPosts;
 
 
 export const useGetAudioPost = (postId) => {
