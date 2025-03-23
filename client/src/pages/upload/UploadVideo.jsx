@@ -7,14 +7,13 @@ import VideoUpload from '../../components/upload/VideoUpload';
 import Options from '../../components/upload/Options';
 import { useCreateVideoPost } from '../../../Hooks/videoPosts/useCreateVideo';
 
-
 const UploadVideo = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [videoFile, setVideoFile] = useState(null);
   const [videoPreview, setVideoPreview] = useState(null);
   const [caption, setCaption] = useState('');
   const [location, setLocation] = useState('');
-  const [isPublic, setIsPublic] = useState(false);
+  const [isPublic, setIsPublic] = useState(true); // Set to true by default
   const [taggedPeople, setTaggedPeople] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [isCropMode, setIsCropMode] = useState(false);
@@ -23,6 +22,7 @@ const UploadVideo = () => {
 
   const videoRef = useRef(null); // Create the videoRef
 
+  // Use the hook
   const { createVideoPost, loading, error, success } = useCreateVideoPost();
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
@@ -71,14 +71,35 @@ const UploadVideo = () => {
       return;
     }
 
+    // Create a FormData object
     const formData = new FormData();
     formData.append('caption', caption);
     formData.append('location', location);
-    formData.append('public', isPublic);
+    formData.append('public', isPublic); // Ensure `public` is set correctly
+
+    // Append tagged people as an array
     taggedPeople.forEach((person) => formData.append('tagged_people[]', person));
+
+    // Append the video file
     formData.append('video_upload', videoFile);
 
+    // Log FormData for debugging
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
+
+    // Call the hook to create the video post
     await createVideoPost(formData);
+
+    // Reset form on success
+    if (success) {
+      setVideoFile(null);
+      setVideoPreview(null);
+      setCaption('');
+      setLocation('');
+      setIsPublic(true); // Reset to true
+      setTaggedPeople([]);
+    }
   };
 
   return (
@@ -117,7 +138,7 @@ const UploadVideo = () => {
                 setVideoPreview(null);
                 setCaption('');
                 setLocation('');
-                setIsPublic(false);
+                setIsPublic(true); // Reset to true
                 setTaggedPeople([]);
               }}
             >
@@ -130,9 +151,10 @@ const UploadVideo = () => {
             >
               {loading ? 'Uploading...' : 'Upload'}
             </button>
-             {error && <p className="text-red-500 text-center mt-4">{error}</p>}
-            {success && <p className="text-green-500 text-center mt-4">Video post created successfully!</p>}
           </div>
+          {/* Display error or success messages */}
+          {error && <p className="text-red-500 text-center mt-4">{error}</p>}
+          {success && <p className="text-green-500 text-center mt-4">Video post created successfully!</p>}
         </div>
       </div>
 
@@ -148,8 +170,6 @@ const UploadVideo = () => {
           cropRect={cropRect}
         />
       )}
-
-     
 
       <BottomNav activeTab="upload" />
     </div>

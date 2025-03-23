@@ -10,7 +10,7 @@ import ReactionsSection from "../components/details/Reactions";
 import Spinner from "../components/Spinner";
 import useUserProfile from "../../Hooks/useProfile";
 import useAudioPosts from "../../Hooks/audioPosts/useCreateAudio";
-
+import { FaTrash } from "react-icons/fa"; // Import trash icon
 
 const MusicDetailsPage = () => {
   const { postId } = useParams(); // Get the post ID from the URL
@@ -78,13 +78,20 @@ const MusicDetailsPage = () => {
   // Check if the authenticated user is the owner of the post
   const isOwner = profile?.id === data?.profile_id;
 
+  // Handle profile image click
+  const handleProfileClick = () => {
+    if (data?.profile_id) {
+      navigate(`/profile/${data.profile_id}`); // Redirect to the author's profile
+    }
+  };
+
   return (
-    <div className="mb-10">
+    <div className="mb-10 mt-20">
       <Navbar name={"Details"} />
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <div className="music-details-page flex justify-center mt-10">
-        <div className="music-details bg-white rounded-lg shadow-md p-6 max-w-2xl w-full">
+        <div className="music-details bg-white rounded-lg shadow-md p-6 max-w-2xl w-full relative">
           {/* Display loading state */}
           {loading && (
             <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50">
@@ -101,9 +108,9 @@ const MusicDetailsPage = () => {
                 <button
                   onClick={handleDeleteAudio}
                   disabled={loading}
-                  className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:opacity-50"
+                  className="absolute top-4 right-4 text-red-500 hover:text-red-600 transition-colors"
                 >
-                  Delete Audio Post
+                  <FaTrash className="w-6 h-6" /> {/* Use trash icon */}
                 </button>
               )}
               {/* Cover Image */}
@@ -118,7 +125,8 @@ const MusicDetailsPage = () => {
                 <img
                   src={data.profile_picture || c}
                   alt="Profile Picture"
-                  className="w-10 h-10 rounded-full border-4 border-white shadow-lg"
+                  className="w-10 h-10 rounded-full border-4 border-white shadow-lg cursor-pointer"
+                  onClick={handleProfileClick} // Redirect to profile on click
                 />
                 <h3 className="ml-2">{data.username}</h3>
               </div>

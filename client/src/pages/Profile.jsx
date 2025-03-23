@@ -42,7 +42,7 @@ const ArtistPage = () => {
       ) : (
         <>
           <ProfileSection profile={profile || {}} />
-          <MusicSection />
+         
         </>
       )}
 
