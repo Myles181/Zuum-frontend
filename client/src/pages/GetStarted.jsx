@@ -59,7 +59,7 @@ const PageContent = () => {
   }, []);
 
   return (
-    <div className="page-content">
+    <div>
   <Header />
   <Options />
   <Footers />

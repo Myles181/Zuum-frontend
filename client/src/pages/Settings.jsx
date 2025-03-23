@@ -3,9 +3,11 @@ import Navbar from '../components/profile/NavBar'
 import Sidebar from '../components/homepage/Sidebar'
 import Overlay from '../components/homepage/Overlay'
 import BottomNav from '../components/homepage/BottomNav'
+import { useAuth } from '../contexts/AuthContexts'
 
 const Settings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { token, logout } = useAuth(); // Access auth context
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -51,7 +53,8 @@ const Settings = () => {
       </ul>
     
       {/* Log Out Button */}
-      <button className="bg-[#008066] text-white rounded-2xl px-6 py-3 block mx-auto mt-5 hover:bg-[#006652] transition-colors">
+      <button className="bg-[#008066] text-white rounded-2xl px-6 py-3 block mx-auto mt-5 hover:bg-[#006652] transition-colors"
+      onClick={logout} >
         Log Out
       </button>
     </section>
