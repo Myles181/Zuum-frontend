@@ -1,22 +1,36 @@
-import React, { useState, useEffect, useRef } from 'react';
-import Post from './Post';
-import { useGetAudioPosts } from '../../../Hooks/audioPosts/useCreateAudio'; // Hook for music posts
-import { useGetVideoPosts } from '../../../Hooks/videoPosts/useCreateVideo'; // Hook for video posts
-import Spinner from '../Spinner';
+import React, { useState, useEffect, useRef } from "react";
+import Post from "./Post";
 
+import { useGetVideoPosts } from "../../../Hooks/videoPosts/useCreateVideo"; // Hook for video posts
+import Spinner from "../Spinner";
+import useAudioPosts from "../../../Hooks/audioPosts/useCreateAudio";
 
 const Feed = () => {
   const [page, setPage] = useState(1); // Pagination state
   const limit = 10; // Number of posts per page
-  const { data: audioPostsData, loading: audioLoading, error: audioError } = useGetAudioPosts(page, limit); // Fetch music posts
-  const { data: videoPostsData, loading: videoLoading, error: videoError } = useGetVideoPosts(page, limit); // Fetch video posts
+
+  // Fetch audio posts using the custom hook
+  const {
+    loading: audioLoading,
+    error: audioError,
+    posts: audioPosts,
+    pagination: audioPagination,
+  } = useAudioPosts(page, limit);
+
+  // Fetch video posts using the video hook
+  const {
+    data: videoPostsData,
+    loading: videoLoading,
+    error: videoError,
+  } = useGetVideoPosts(page, limit);
+
   const [posts, setPosts] = useState([]); // Store all loaded posts (both music and video)
   const observerRef = useRef(null);
 
   // Combine music and video posts
   useEffect(() => {
-    if (audioPostsData?.posts || videoPostsData?.posts) {
-      const newAudioPosts = audioPostsData?.posts || [];
+    if (audioPosts?.length > 0 || videoPostsData?.posts?.length > 0) {
+      const newAudioPosts = audioPosts || [];
       const newVideoPosts = videoPostsData?.posts || [];
       const combinedPosts = [...newAudioPosts, ...newVideoPosts];
 
@@ -28,7 +42,7 @@ const Feed = () => {
         return [...prevPosts, ...uniquePosts];
       });
     }
-  }, [audioPostsData, videoPostsData]);
+  }, [audioPosts, videoPostsData]);
 
   // Infinite scroll logic
   useEffect(() => {
@@ -60,7 +74,7 @@ const Feed = () => {
 
   // Show error state
   if (audioError || videoError) {
-    return <p style={{ color: 'red' }}>{audioError || videoError}</p>;
+    return <p style={{ color: "red" }}>{audioError || videoError}</p>;
   }
 
   return (
