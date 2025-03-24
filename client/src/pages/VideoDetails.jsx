@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useParams } from 'react-router-dom'; // To get the post ID from the URL
+import { useNavigate, useParams } from 'react-router-dom'; // To get the post ID from the URL
 import c from "../assets/image/11429433 1.svg"; // Fallback image
 
 import Navbar from '../components/profile/NavBar';
@@ -22,6 +22,7 @@ const VideoDetails = () => {
   const [currentTime, setCurrentTime] = useState(0); // State to track current playback time
   const [duration, setDuration] = useState(0); // State to track total duration
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate(); // Initialize useNavigate
 
   console.log(data);
 
