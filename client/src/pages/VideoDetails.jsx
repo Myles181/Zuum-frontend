@@ -6,10 +6,12 @@ import Navbar from '../components/profile/NavBar';
 import Sidebar from '../components/homepage/Sidebar';
 import Overlay from '../components/homepage/Overlay';
 import BottomNav from '../components/homepage/BottomNav';
-import CommentSection from '../components/details/Comments';
-import ReactionsSection from '../components/details/Reactions';
+
+// import ReactionsSection from '../components/details/Reactions';
 import Spinner from '../components/Spinner';
 import { useGetVideoPost } from '../../Hooks/videoPosts/useCreateVideo';
+import CommentSection from '../components/details/VideoComments';
+import ReactionsSection from '../components/details/VideoReactions';
 
 const VideoDetails = () => {
   const { postId } = useParams(); // Get the post ID from the URL
@@ -56,6 +58,15 @@ const VideoDetails = () => {
     videoRef.current.currentTime = seekTime;
     setCurrentTime(seekTime);
   };
+
+
+
+  const handleUserClick = (userId) => {
+    if (userId) {
+      navigate(`/profile/${userId}`); // Redirect to the user's profile
+    }
+  };
+
 
   return (
     <div className='mb-10'>
@@ -131,14 +142,20 @@ const VideoDetails = () => {
               {/* Caption */}
               <h1 className="text-2xl font-bold">{data.caption}</h1>
               {/* User Info */}
-              <div className='flex justify-start items-center gap-3'>
-                <img
-                  src={data.profile_picture || c}
-                  alt="Profile Picture"
-                  className="w-10 h-10 rounded-full border-4 border-white shadow-lg"
-                />
-                <h3 className="ml-2">{data.username}</h3>
-              </div>
+             <div className="flex justify-start items-center gap-3">
+                            <img
+                              src={data.profile_picture || c}
+                              alt="Profile Picture"
+                              className="w-10 h-10 rounded-full border-4 border-white shadow-lg cursor-pointer"
+                              onClick={() => handleUserClick(data.profile_id)} // Redirect to profile on click
+                            />
+                            <h3
+                              className="ml-2 cursor-pointer hover:underline"
+                              onClick={() => handleUserClick(data.profile_id)} // Redirect to profile on click
+                            >
+                              {data.username}
+                            </h3>
+                          </div>
               {/* Type */}
               <p className="text-sm text-gray-500">{data.type}</p>
               {/* Custom Video Player Controls */}
@@ -192,9 +209,9 @@ const VideoDetails = () => {
                 </div>
               </div>
               {/* Comments Section */}
-              {/* <CommentSection comments={data.comments} postId={postId} />
+              <CommentSection comments={data.comments} postId={postId} /> 
               {/* Reactions Section */}
-              {/* <ReactionsSection reactions={data.reactions} />  */}
+               <ReactionsSection reactions={data.reactions} />  
               {/* Shares Section */}
               <div className="shares mt-6 bg-gray-50 p-4 rounded-lg">
                 <h2 className="text-lg font-medium mb-2">Shares</h2>

@@ -6,7 +6,7 @@ import b from "../../assets/icons/dots-icon.svg";
 import d from "../../assets/icons/Vector2.png";
 import e from "../../assets/icons/stream-icon.svg";
 import { FaHeart, FaComment } from "react-icons/fa";
-import useVideoPosts from "../../../Hooks/videoPosts/useCreateVideo";
+import {useVideoPosts} from "../../../Hooks/videoPosts/useCreateVideo";
 
 const VideoFeed = () => {
   const [page, setPage] = useState(1);

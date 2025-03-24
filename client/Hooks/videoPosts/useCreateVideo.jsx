@@ -194,7 +194,9 @@ export const useCreateVideoPost = () => {
 
 
 
-const useVideoPosts = (page = 1, limit = 10, videoId = null) => {
+
+
+export const useVideoPosts = (page = 1, limit = 10, videoId = null, userId = null) => {
   const [loading, setLoading] = useState(true); // Tracks loading state
   const [error, setError] = useState(null); // Tracks error messages
   const [posts, setPosts] = useState([]); // Stores the fetched video posts
@@ -206,6 +208,7 @@ const useVideoPosts = (page = 1, limit = 10, videoId = null) => {
     hasPrev: false,
   }); // Stores pagination details
 
+  // Fetch video posts when `page`, `limit`, `videoId`, or `userId` changes
   useEffect(() => {
     const fetchVideoPosts = async () => {
       setLoading(true);
@@ -223,6 +226,14 @@ const useVideoPosts = (page = 1, limit = 10, videoId = null) => {
         if (videoId) {
           // Fetch a specific video post by ID
           response = await axios.get(`${API_URL}/video/${videoId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`, // Include the auth token
+            },
+          });
+        } else if (userId) {
+          // Fetch video posts for a specific user
+          response = await axios.get(`${API_URL}/video/user/${userId}`, {
+            params: { page, limit },
             headers: {
               Authorization: `Bearer ${token}`, // Include the auth token
             },
@@ -250,7 +261,7 @@ const useVideoPosts = (page = 1, limit = 10, videoId = null) => {
               hasPrev: false,
             });
           } else {
-            // If fetching all posts, update the posts and pagination state
+            // If fetching posts, update the posts and pagination state
             const { posts, pagination } = response.data;
             setPosts(posts);
             setPagination({
@@ -288,7 +299,7 @@ const useVideoPosts = (page = 1, limit = 10, videoId = null) => {
     };
 
     fetchVideoPosts();
-  }, [page, limit, videoId]); // Re-run effect when `page`, `limit`, or `videoId` changes
+  }, [page, limit, videoId, userId]); // Re-run effect when `page`, `limit`, `videoId`, or `userId` changes
 
   return {
     loading,
@@ -298,7 +309,6 @@ const useVideoPosts = (page = 1, limit = 10, videoId = null) => {
   };
 };
 
-export default useVideoPosts;
 
 
 export const useGetVideoPost = (postId) => {

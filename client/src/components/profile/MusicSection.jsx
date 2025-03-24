@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
+import React from "react";
+import { useNavigate } from "react-router-dom"; // Import useNavigate
 import c from "../../assets/image/11429433 1.svg";
-import { useGetUserAudioPosts } from '../../../Hooks/audioPosts/useCreateAudio';
+import useAudioPosts from "../../../Hooks/audioPosts/useCreateAudio"; // Import the useAudioPosts hook
 
-
-const MusicSection = () => {
-  const { data, loading, error } = useGetUserAudioPosts(); // Fetch the authenticated user's audio posts
+const MusicSection = ({ userId }) => {
+  const { posts, loading, error } = useAudioPosts(1, 10, null, userId); // Fetch audio posts for the specified user
   const navigate = useNavigate(); // Initialize useNavigate
 
-  console.log(data); // Debugging API response
+  console.log(userId); // Debugging userId
+  console.log(posts); // Debugging API response
+
+  // Filter posts where profile__id matches userId
+  const filteredPosts = posts.filter((post) => post.profile_id === userId);
 
   // Function to handle music item click
   const handleMusicClick = (postId) => {
@@ -19,11 +22,11 @@ const MusicSection = () => {
     <div className="music-section p-1 flex flex-col items-center mb-20 mt-10">
       {/* Music Grid */}
       <div className="music-list grid grid-cols-3 gap-1 w-full max-w-6xl px-1">
-        {loading && <p className="text-center col-span-full">Loading your music posts...</p>}
-        {error && <p className="text-red-500 col-span-full">{error}</p>}
+        {loading && <p className="text-center col-span-full">Loading music posts...</p>}
+        {/* {error && <p className="text-red-500 col-span-full">{error}</p>} */}
 
-        {data && data.length > 0 ? (
-          data.map((post) => (
+        {filteredPosts && filteredPosts.length > 0 ? (
+          filteredPosts.map((post) => (
             <div
               key={post.id}
               className="music-item bg-white rounded-lg shadow-lg p-1 flex flex-col justify-center items-center text-center transition transform hover:scale-105 cursor-pointer"
@@ -40,7 +43,7 @@ const MusicSection = () => {
             </div>
           ))
         ) : (
-          !loading && <p className="text-gray-600 col-span-full text-center">You have no audio posts yet.</p>
+          !loading && <p className="text-gray-600 col-span-full text-center">No audio posts found.</p>
         )}
       </div>
     </div>
