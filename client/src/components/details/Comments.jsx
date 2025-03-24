@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useCreateComment } from '../../../Hooks/audioPosts/usePostInteractions';
+import useUserProfile from "../../../Hooks/useProfile";
 
-
-const CommentSection = ({ comments, postId }) => {
+const CommentSection = ({ comments: initialComments, postId }) => {
   const [showComments, setShowComments] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [comments, setComments] = useState(initialComments || []); // Store comments locally
+  const { profile } = useUserProfile();
 
-  // Use the useCreateComment hook
   const { createComment, loading, error, success } = useCreateComment();
 
-  // Reset the input field when the comment is successfully posted
   useEffect(() => {
     if (success) {
       setNewComment('');
@@ -20,13 +20,23 @@ const CommentSection = ({ comments, postId }) => {
     e.preventDefault();
     if (newComment.trim()) {
       try {
-        // Call the createComment function from the hook
-        await createComment(postId, newComment);
+        const commentData = {
+          id: Date.now(), // Temporary ID (replace with actual ID from API if needed)
+          username: 'You', // Assuming the current user is adding the comment
+          profile_picture: profile.image, // Replace with actual user profile picture
+          comment: newComment,
+        };
+
+        setComments([commentData, ...comments]); // Update the comments state immediately
+        await createComment(postId, newComment); // Send the comment to the backend
       } catch (err) {
         console.error('Error posting comment:', err);
       }
     }
   };
+
+  console.log(comments);
+  
 
   return (
     <div className="comments mt-4 bg-white p-4 rounded-lg shadow-md border border-gray-200 relative">
@@ -43,7 +53,7 @@ const CommentSection = ({ comments, postId }) => {
         <>
           {/* Comments List */}
           <div className="mb-20">
-            {comments && comments.length > 0 ? (
+            {comments.length > 0 ? (
               <ul className="space-y-4">
                 {comments.map((comment) => (
                   <li key={comment.id} className="bg-gray-100 p-4 rounded-lg border hover:shadow-md transition">
@@ -55,7 +65,7 @@ const CommentSection = ({ comments, postId }) => {
                       />
                       <div>
                         <p className="text-gray-900 font-semibold">{comment.username}</p>
-                        <p className="text-sm text-gray-500">2 hours ago</p>
+                        <p className="text-sm text-gray-500">Just now</p>
                       </div>
                     </div>
                     <p className="mt-2 text-gray-700">{comment.comment}</p>

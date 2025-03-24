@@ -15,7 +15,7 @@ const useProfile = () => {
   const [updateError, setUpdateError] = useState(null); // Stores any error that occurs during the update
   const [updateSuccess, setUpdateSuccess] = useState(false); // Indicates if the update was successful
 
-  // Fetch profile data
+  // Fetch profile data  
   useEffect(() => {
     const fetchProfile = async () => {
       try {
@@ -139,3 +139,149 @@ const useProfile = () => {
 };
 
 export default useProfile;
+
+
+
+export const useUserProfile = (userId) => {
+  const [profile, setProfile] = useState(null); // Stores the user profile data
+  const [loading, setLoading] = useState(true); // Tracks if the request is in progress
+  const [error, setError] = useState(null); // Stores any error that occurs
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      setLoading(true); // Start loading
+      setError(null); // Reset error state
+
+      try {
+        const token = localStorage.getItem('authToken'); // Retrieve the authentication token
+
+        // Make the GET request to the API endpoint
+        const response = await axios.get(`${API_URL}/user/profile/${userId}`, {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include the auth token
+          },
+        });
+
+        // Handle successful response (status code 200)
+        if (response.status === 200) {
+          setProfile(response.data); // Update the profile state
+        } else {
+          // Handle unexpected status codes
+          setError('An unexpected error occurred');
+        }
+      } catch (err) {
+        // Handle errors
+        if (err.response) {
+          // The request was made and the server responded with a status code
+          if (err.response.status === 401) {
+            setError('Unauthorized - Invalid or missing token');
+          } else if (err.response.status === 404) {
+            setError('Profile not found');
+          } else if (err.response.status === 500) {
+            setError('Server error: Please try again later');
+          } else {
+            setError('An unexpected error occurred');
+          }
+        } else if (err.request) {
+          // The request was made but no response was received
+          setError('Network error: No response from server');
+        } else {
+          // Something happened in setting up the request
+          setError('Failed to fetch profile: ' + err.message);
+        }
+      } finally {
+        setLoading(false); // Stop loading
+      }
+    };
+
+    if (userId) {
+      fetchProfile(); // Fetch profile only if userId is provided
+    } else {
+      setLoading(false); // No userId, so no need to fetch
+    }
+  }, [userId]); // Re-run the effect when userId changes
+
+  // Return the profile and state variables
+  return { profile, loading, error };
+};
+
+
+
+
+export const useFollowUser = () => {
+  const [loading, setLoading] = useState(false); // Tracks loading state
+  const [error, setError] = useState(null); // Tracks error messages
+  const [message, setMessage] = useState(null); // Tracks success messages
+
+  // Function to follow or unfollow a user
+  const followUser = async (profileId, follow) => {
+    setLoading(true);
+    setError(null);
+    setMessage(null);
+
+    try {
+      const token = localStorage.getItem("authToken"); // Retrieve the authentication token
+
+      if (!token) {
+        throw new Error("Authentication token not found. Please log in.");
+      }
+
+      // Make the POST request to the API endpoint
+      const response = await axios.post(
+        `${API_URL}/user/follow`,
+        { profileId, follow },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include the auth token
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      // Handle successful response (status code 200)
+      if (response.status === 200) {
+        setMessage(response.data.message); // Set success message
+      } else {
+        // Handle unexpected status codes
+        setError("An unexpected error occurred.");
+      }
+    } catch (err) {
+      // Handle errors
+      if (err.response) {
+        // The request was made and the server responded with a status code
+        switch (err.response.status) {
+          case 401:
+            setError("No changes made (already followed/unfollowed).");
+            break;
+          case 404:
+            setError("Profile ID does not exist.");
+            break;
+          case 406:
+            setError("You cannot follow yourself.");
+            break;
+          case 500:
+            setError("Internal server error.");
+            break;
+          default:
+            setError(err.response.data?.message || "An error occurred.");
+        }
+      } else if (err.request) {
+        // The request was made but no response was received
+        setError("Network error: No response from server.");
+      } else {
+        // Something happened in setting up the request
+        setError(err.message || "An unexpected error occurred.");
+      }
+    } finally {
+      setLoading(false); // Stop loading
+    }
+  };
+
+  return {
+    loading,
+    error,
+    message,
+    followUser, // Function to follow/unfollow a user
+  };
+};
+

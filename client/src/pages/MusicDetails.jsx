@@ -78,10 +78,12 @@ const MusicDetailsPage = () => {
   // Check if the authenticated user is the owner of the post
   const isOwner = profile?.id === data?.profile_id;
 
-  // Handle profile image click
-  const handleProfileClick = () => {
-    if (data?.profile_id) {
-      navigate(`/profile/${data.profile_id}`); // Redirect to the author's profile
+  // Handle profile image or name click
+  
+
+  const handleUserClick = (userId) => {
+    if (userId) {
+      navigate(`/profile/${userId}`); // Redirect to the user's profile
     }
   };
 
@@ -126,9 +128,14 @@ const MusicDetailsPage = () => {
                   src={data.profile_picture || c}
                   alt="Profile Picture"
                   className="w-10 h-10 rounded-full border-4 border-white shadow-lg cursor-pointer"
-                  onClick={handleProfileClick} // Redirect to profile on click
+                  onClick={() => handleUserClick(data.profile_id)} // Redirect to profile on click
                 />
-                <h3 className="ml-2">{data.username}</h3>
+                <h3
+                  className="ml-2 cursor-pointer hover:underline"
+                  onClick={() => handleUserClick(data.profile_id)} // Redirect to profile on click
+                >
+                  {data.username}
+                </h3>
               </div>
               {/* Type */}
               <p className="text-sm text-gray-500">{data.type}</p>

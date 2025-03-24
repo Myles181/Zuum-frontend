@@ -1,13 +1,19 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"; // Import useNavigate
-
 import Spinner from "../Spinner"; // Adjust the import path
-import { useUserVideoPosts } from "../../../Hooks/videoPosts/useCreateVideo";
+import {useVideoPosts} from "../../../Hooks/videoPosts/useCreateVideo"; // Import the useVideoPosts hook
 
-const VideoSection = () => {
-  const { loading, error, posts } = useUserVideoPosts(); // Fetch the authenticated user's video posts
+const VideoSection = ({ userId }) => {
+  const { posts, loading, error } = useVideoPosts(1, 10, null); // Fetch video posts for the specified user
   const navigate = useNavigate(); // Initialize useNavigate
   const [thumbnails, setThumbnails] = useState({}); // State to store video thumbnails
+
+  console.log(userId); // Debugging userId
+  console.log(posts); // Debugging API response
+  
+
+  // Filter posts where profile__id matches userId
+  const filteredPosts = posts.filter((post) => post.profile_id === userId);
 
   // Function to handle video item click
   const handleVideoClick = (postId) => {
@@ -42,14 +48,14 @@ const VideoSection = () => {
 
   // Generate thumbnails for all video posts
   useEffect(() => {
-    if (posts.length > 0) {
-      posts.forEach((post) => {
+    if (filteredPosts.length > 0) {
+      filteredPosts.forEach((post) => {
         if (post.video_upload && !thumbnails[post.id]) {
           generateThumbnail(post.video_upload, post.id);
         }
       });
     }
-  }, [posts]);
+  }, [filteredPosts]);
 
   return (
     <div className="video-section p-1 flex flex-col items-center mb-20 mt-10">
@@ -62,8 +68,8 @@ const VideoSection = () => {
         )}
         {error && <p className="text-red-500 col-span-full text-center">{error}</p>}
 
-        {posts.length > 0 ? (
-          posts.map((post) => (
+        {filteredPosts.length > 0 ? (
+          filteredPosts.map((post) => (
             <div
               key={post.id}
               className="video-item bg-white rounded-lg shadow-lg p-1 flex flex-col justify-center items-center text-center transition transform hover:scale-105 cursor-pointer"
@@ -89,7 +95,7 @@ const VideoSection = () => {
         ) : (
           !loading && (
             <p className="text-gray-600 col-span-full text-center">
-              You have no video posts yet.
+              No video posts found.
             </p>
           )
         )}

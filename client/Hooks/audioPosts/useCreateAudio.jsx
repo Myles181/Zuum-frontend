@@ -64,7 +64,8 @@ export const useCreateAudioPost = () => {
 
 
 
-const useAudioPosts = (page = 1, limit = 10, postId = null) => {
+
+const useAudioPosts = (page = 1, limit = 10, postId = null, userId = null) => {
   const [loading, setLoading] = useState(true); // Tracks loading state
   const [error, setError] = useState(null); // Tracks error messages
   const [posts, setPosts] = useState([]); // Stores the fetched audio posts
@@ -76,7 +77,7 @@ const useAudioPosts = (page = 1, limit = 10, postId = null) => {
     hasPrev: false,
   }); // Stores pagination details
 
-  // Fetch audio posts when `page`, `limit`, or `postId` changes
+  // Fetch audio posts when `page`, `limit`, `postId`, or `userId` changes
   useEffect(() => {
     const fetchAudioPosts = async () => {
       setLoading(true);
@@ -94,6 +95,14 @@ const useAudioPosts = (page = 1, limit = 10, postId = null) => {
         if (postId) {
           // Fetch a specific post by ID
           response = await axios.get(`${API_URL}/audio/${postId}`, {
+            headers: {
+              Authorization: `Bearer ${token}`, // Include the auth token
+            },
+          });
+        } else if (userId) {
+          // Fetch posts for a specific user
+          response = await axios.get(`${API_URL}/audio/user/${userId}`, {
+            params: { page, limit },
             headers: {
               Authorization: `Bearer ${token}`, // Include the auth token
             },
@@ -121,7 +130,7 @@ const useAudioPosts = (page = 1, limit = 10, postId = null) => {
               hasPrev: false,
             });
           } else {
-            // If fetching all posts, update the posts and pagination state
+            // If fetching posts, update the posts and pagination state
             const { posts, pagination } = response.data;
             setPosts(posts);
             setPagination({
@@ -157,7 +166,7 @@ const useAudioPosts = (page = 1, limit = 10, postId = null) => {
     };
 
     fetchAudioPosts();
-  }, [page, limit, postId]); // Re-run effect when `page`, `limit`, or `postId` changes
+  }, [page, limit, postId, userId]); // Re-run effect when `page`, `limit`, `postId`, or `userId` changes
 
   return {
     loading,
@@ -168,6 +177,7 @@ const useAudioPosts = (page = 1, limit = 10, postId = null) => {
 };
 
 export default useAudioPosts;
+
 
 
 export const useGetAudioPost = (postId) => {

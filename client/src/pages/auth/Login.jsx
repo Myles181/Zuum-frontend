@@ -154,6 +154,12 @@ const Login = () => {
                 Sign up
               </Link>
             </p>
+            <p className="text-white text-center mt-4">
+              Verify your account{" "}
+              <Link to="/verify" className="text-blue-500 hover:underline">
+                Verify
+              </Link>
+            </p>
           </form>
         </div>
       </div>

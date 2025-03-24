@@ -5,7 +5,6 @@ import { Link } from "react-router-dom";
 import MusicSection from "./MusicSection";
 import VideoSection from "./VideoSection";
 
-
 const ProfileSection = ({ profile }) => {
   // Fallback data in case profile is null or undefined
   const fallbackProfile = {
@@ -15,6 +14,8 @@ const ProfileSection = ({ profile }) => {
     identity: "Artist", // Default identity
     bio: "I'm a singer-songwriter, weaving emotions into melodies that touch hearts and inspire minds.", // Default bio
   };
+
+  console.log(profile);
 
   // Merge profile data with fallback data
   const mergedProfile = { ...fallbackProfile, ...profile };
@@ -47,22 +48,26 @@ const ProfileSection = ({ profile }) => {
           <h2 className="text-2xl text-[#008066]">{mergedProfile.username}</h2>
           <p className="text-gray-500">{mergedProfile.identity}</p>
         </div>
-
-        <div className="stats flex justify-around w-full max-w-md mt-4 gap-5 text-gray-500 flex-wrap">
-          <div className="followers text-center">
-            <p>Followers</p>
-            <span className="text-[#008066] font-bold">42k</span>
-          </div>
-          <div className="following text-center">
-            <p>Following</p>
-            <span className="text-[#008066] font-bold">5.2k</span>
-          </div>
-        </div>
       </div>
 
       <p className="bio text-gray-700 text-center px-5 mt-5">
         {mergedProfile.bio}
       </p>
+
+      <div className="stats flex justify-around w-full max-w-md mt-4 gap-5 text-gray-500 flex-wrap">
+  <div className="followers text-center">
+    <p>Followers</p>
+    <span className="text-[#008066] font-bold">
+      {mergedProfile.followers_list?.length || 0}
+    </span>
+  </div>
+  <div className="following text-center">
+    <p>Following</p>
+    <span className="text-[#008066] font-bold">
+      {mergedProfile.following_list?.length || 0}
+    </span>
+  </div>
+</div>
 
       <div className="buttons flex justify-center mt-5 w-full gap-3">
         <Link to="/editprofile">
@@ -77,23 +82,23 @@ const ProfileSection = ({ profile }) => {
 
       {/* Tab Section */}
       <div className="tab-section mt-8 w-full">
-        <div className="tab-buttons flex justify-center gap-4">
+        <div className="tab-buttons flex justify-center gap-8 border-b-2 border-gray-200">
           <button
             onClick={() => setActiveTab("audio")}
-            className={`px-4 py-2 rounded-lg ${
+            className={`pb-2 text-lg font-medium relative ${
               activeTab === "audio"
-                ? "bg-[#008066] text-white"
-                : "bg-gray-200 text-[#008066]"
+                ? "text-[#008066] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[3px] after:bg-[#008066] after:rounded-full"
+                : "text-gray-600 hover:text-[#008066] transition"
             }`}
           >
             Audio
           </button>
           <button
             onClick={() => setActiveTab("video")}
-            className={`px-4 py-2 rounded-lg ${
+            className={`pb-2 text-lg font-medium relative ${
               activeTab === "video"
-                ? "bg-[#008066] text-white"
-                : "bg-gray-200 text-[#008066]"
+                ? "text-[#008066] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[3px] after:bg-[#008066] after:rounded-full"
+                : "text-gray-600 hover:text-[#008066] transition"
             }`}
           >
             Video
@@ -102,7 +107,11 @@ const ProfileSection = ({ profile }) => {
 
         {/* Tab Content */}
         <div className="tab-content mt-4">
-          {activeTab === "audio" ? <MusicSection /> : <VideoSection />}
+          {activeTab === "audio" ? (
+            <MusicSection userId={profile?.id} /> // Pass the userId to MusicSection
+          ) : (
+            <VideoSection userId={profile?.id} />
+          )}
         </div>
       </div>
     </div>

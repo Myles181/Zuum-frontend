@@ -21,6 +21,7 @@ import EditProfile from './components/profile/EditProfile';
 import MusicDetailsPage from './pages/MusicDetails';
 import VideoDetails from './pages/VideoDetails';
 import ProtectedRoute from './contexts/ProtectedRoutes';
+import UserProfilePage from './pages/UserProfilePge';
 
 
 const App = () => {
@@ -42,6 +43,7 @@ const App = () => {
           <Route path="/search" element={<Search />} />
           <Route path="/settings" element={<Settings />} />
           <Route path="/profile" element={<ArtistPage />} />
+          <Route path="/profile/:userId" element={<UserProfilePage />} />
           <Route path="/editprofile" element={<EditProfile />} />
           <Route path="/activity" element={<ActivityPage />} />
           <Route path="/messages" element={<Chat />} />
