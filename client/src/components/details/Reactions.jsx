@@ -1,15 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useReactToPost } from '../../../Hooks/audioPosts/usePostInteractions';
+import { useUserProfile } from '../../../Hooks/useProfile';
 
-const ReactionsSection = ({ reactions }) => {
+
+
+const ReactionsSection = ({ reactions, postId }) => {
   const [userReaction, setUserReaction] = useState(null); // Track the user's reaction
   const [showReactions, setShowReactions] = useState(false); // Track if reactions are visible
+  const { profile } = useUserProfile();
+
+  // Import the useReactToPost hook
+  const { reactToPost, loading, error, success } = useReactToPost();
+
+  console.log(postId);
+
+  console.log(profile);
+  
+  
+
+  // Effect to update userReaction based on existing reactions
+  useEffect(() => {
+    const userReact = reactions.find(reaction => reaction.user_id === profile?.id); 
+    if (userReact) {
+      setUserReaction(userReact.like ? 'like' : 'unlike');
+    }
+  }, [reactions]);
 
   // Function to handle like/unlike toggle
-  const handleReactionToggle = (type) => {
+  const handleReactionToggle = async (type) => {
     if (userReaction === type) {
       setUserReaction(null); // Remove reaction if already selected
+      await reactToPost(postId, false, true); // Unlike the post
     } else {
       setUserReaction(type); // Set new reaction
+      await reactToPost(postId, type === 'like', type === 'unlike'); // Like or unlike the post
     }
   };
 
@@ -181,6 +205,11 @@ const ReactionsSection = ({ reactions }) => {
           )}
         </>
       )}
+
+      {/* Loading/Error Messages */}
+      {loading && <p>Loading...</p>}
+      {error && <p className="text-red-500">{error}</p>}
+      {success && <p className="text-green-500">Reaction saved successfully!</p>}
     </div>
   );
 };

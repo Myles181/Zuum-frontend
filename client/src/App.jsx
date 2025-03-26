@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import GetStarted from './pages/GetStarted';
 import LandingPage from './pages/LandingPage';
@@ -22,9 +22,27 @@ import MusicDetailsPage from './pages/MusicDetails';
 import VideoDetails from './pages/VideoDetails';
 import ProtectedRoute from './contexts/ProtectedRoutes';
 import UserProfilePage from './pages/UserProfilePge';
+import ChatListPage from './components/messages/ChatList';
+import MessagePage from './components/messages/Chat';
+import useProfile from '../Hooks/useProfile';
+import { initializeSocket } from './socket';
+
+
+
 
 
 const App = () => {
+
+    const { profile: authProfile, loading: authLoading } = useProfile();
+   const userId = authProfile?.id;
+
+  useEffect(() => {
+    if (userId) {
+      initializeSocket(userId);
+    }
+  }, [userId]);
+
+  
   return (
     <Router>
       <Routes>
@@ -47,6 +65,8 @@ const App = () => {
           <Route path="/editprofile" element={<EditProfile />} />
           <Route path="/activity" element={<ActivityPage />} />
           <Route path="/messages" element={<Chat />} />
+          <Route path="/message" element={<ChatListPage />} />
+          <Route path="/chat/:roomId" element={<MessagePage />} />
           <Route path="/music/:postId" element={<MusicDetailsPage />} />
           <Route path="/add" element={<UploadPage />} />
           <Route path="/addpaybeat" element={<UploadBeat />} />
