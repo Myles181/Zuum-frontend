@@ -9,6 +9,7 @@ import Navbar from "../components/profile/NavBar";
 import Spinner from "../components/Spinner";
 import ProfileSection from "../components/profile/ViewProfile";
 import { useUserProfile } from "../../Hooks/useProfile";
+import UserProfileSection from "../components/profile/ViewProfile";
 
 const UserProfilePage = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -43,7 +44,7 @@ const UserProfilePage = () => {
           <p className="text-red-500 text-center mt-4">{error}</p>
         ) : (
           <>
-            <ProfileSection profiles={profile || {}}  />
+            <UserProfileSection profiles={profile || {}}  />
           </>
         )}
       </div>

@@ -80,11 +80,11 @@ export const useCreateComment = () => {
       try {
         const token = localStorage.getItem('authToken'); // Retrieve the authentication token
   
-        // Ensure like and unlike are boolean values
+      
         const payload = {
-          post_id: String(postId), // Ensure post_id is a string
-          like: Boolean(like),     // Ensure like is a boolean
-          unlike: Boolean(unlike), // Ensure unlike is a boolean
+          post_id: String(postId), 
+          like: Boolean(like),     
+          unlike: Boolean(unlike) 
         };
   
         console.log('Payload:', payload); // Debugging: Log the payload

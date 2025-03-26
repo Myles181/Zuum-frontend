@@ -4,7 +4,7 @@ import { FiMenu, FiSearch, FiSettings } from "react-icons/fi";
 
 const Navbar = ({ toggleSidebar, activeTab, handleTabClick }) => {
   return (
-    <nav className="navbar fixed top-0 left-0 right-0 flex items-center justify-between p-1 bg-white border-b border-gray-300 z-50">
+    <div className="navbar bg-white shadow-md flex items-center justify-between px-4 py-3 fixed top-0 left-0 w-full z-50">
       <div className="nav-left">
         <FiMenu
           className="w-6 h-6 cursor-pointer"
@@ -37,7 +37,7 @@ const Navbar = ({ toggleSidebar, activeTab, handleTabClick }) => {
           <FiSettings className="w-6 h-6" />
         </Link>
       </div>
-    </nav>
+   </div>
   );
 };
 

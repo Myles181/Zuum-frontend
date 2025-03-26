@@ -17,7 +17,7 @@ const BottomNav = () => {
       </Link>
 
       {/* Messages */}
-      <Link to='/messages' className={`nav-item flex flex-col items-center text-sm ${getLinkClass('/messages')}`}>
+      <Link to='/message' className={`nav-item flex flex-col items-center text-sm ${getLinkClass('/message')}`}>
         <FiMessageCircle className="w-6 h-6" />
         <span>Message</span>
       </Link>
@@ -43,4 +43,4 @@ const BottomNav = () => {
   );
 };
 
-export default BottomNav;
+export default BottomNav; 
