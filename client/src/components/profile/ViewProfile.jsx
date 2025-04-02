@@ -7,15 +7,15 @@ import VideoSection from "./VideoSection";
 import useProfile, { useFollowUser } from "../../../Hooks/useProfile";
 import { useGetRoomId } from "../../../Hooks/messages/useMessages";
 
-
 const UserProfileSection = ({ profiles, isOtherUser = true }) => {
   const { profile: authProfile, loading: authLoading } = useProfile();
   const { message, followUser } = useFollowUser();
-  const { getRoomId, loading: roomLoading, error: roomError } = useGetRoomId(); // Destructure the hook
+  const { getRoomId, loading: roomLoading, error: roomError } = useGetRoomId();
   const [isFollowing, setIsFollowing] = useState(false);
   const [activeTab, setActiveTab] = useState("audio");
   const [followersCount, setFollowersCount] = useState(0);
   const [isOwnProfile, setIsOwnProfile] = useState(false);
+  const [followLoading, setFollowLoading] = useState(false); // Added missing state
   const navigate = useNavigate();
 
   const fallbackProfile = {
@@ -33,22 +33,35 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
   useEffect(() => {
     if (!authLoading && authProfile && mergedProfile) {
       setIsOwnProfile(authProfile.id === mergedProfile.id);
-      
-      const isUserFollowing = mergedProfile.followers_list?.some((follower) =>
-        typeof follower === "object" ? follower.id === authProfile.id : follower === authProfile.id
-      );
-      setIsFollowing(isUserFollowing);
       setFollowersCount(mergedProfile.followers_list?.length || 0);
     }
   }, [authProfile, mergedProfile, authLoading]);
 
+  useEffect(() => {
+    if (authProfile && mergedProfile) {
+      const isUserFollowing = mergedProfile.followers_list?.some((follower) =>
+        typeof follower === "object" ? follower.id === authProfile.id : follower === authProfile.id
+      );
+      setIsFollowing(isUserFollowing);
+    }
+  }, [authProfile, mergedProfile]);
+
   const handleFollow = async () => {
+    const newFollowingStatus = !isFollowing;
+    // Optimistically update UI
+    setIsFollowing(newFollowingStatus);
+    setFollowersCount((prev) => (newFollowingStatus ? prev + 1 : prev - 1));
+    setFollowLoading(true);
+
     try {
-      await followUser(mergedProfile.id, !isFollowing);
-      setIsFollowing((prev) => !prev);
-      setFollowersCount((prev) => (isFollowing ? prev - 1 : prev + 1));
+      await followUser(mergedProfile.id, newFollowingStatus);
     } catch (error) {
       console.error("Error following/unfollowing user:", error);
+      // Revert if error occurs
+      setIsFollowing((prev) => !prev);
+      setFollowersCount((prev) => (newFollowingStatus ? prev - 1 : prev + 1));
+    } finally {
+      setFollowLoading(false);
     }
   };
 
@@ -66,23 +79,18 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
       if (roomId) {
         navigate(`/chat/${roomId}`, {
           state: {
-            userId: authProfile.id,           // Current user's ID
-            otherUserId: mergedProfile.id,    // Other user's ID
-            roomId: roomId,                   // The chat room ID
-            otherProfilePicture: mergedProfile.image || d,  // Other user's profile picture
-            otherUsername: mergedProfile.username          // Other user's username (optional)
+            userId: authProfile.id,
+            otherUserId: mergedProfile.id,
+            roomId: roomId,
+            otherProfilePicture: mergedProfile.image || d,
+            otherUsername: mergedProfile.username
           }
         });
       }
     } catch (error) {
       console.error("Error getting room ID:", error);
-      // You might want to show an error message to the user here
     }
   };
-
-  if (authLoading) {
-    return <p className="text-center text-gray-500">Loading profile...</p>;
-  }
 
   return (
     <div className="profile-container relative">
@@ -115,17 +123,16 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
       <div className="buttons flex justify-center mt-5 w-full gap-3">
         <button 
           onClick={handleFollow} 
-          className="bg-gray-200 text-[#008066] px-6 py-2 rounded-lg"
+          disabled={followLoading}
+          className={`bg-gray-200 text-[#008066] px-6 py-2 rounded-lg ${followLoading ? "opacity-50 cursor-not-allowed" : ""}`}
         >
-          {isFollowing ? "Unfollow" : "Follow"}
+          {followLoading ? (isFollowing ? "Unfollowing..." : "Following...") : isFollowing ? "Unfollow" : "Follow"}
         </button>
         {isFollowing && (
           <button
             onClick={handleMessageClick}
             disabled={roomLoading}
-            className={`bg-gray-200 text-[#008066] px-6 py-2 rounded-lg ${
-              roomLoading ? "opacity-50 cursor-not-allowed" : ""
-            }`}
+            className={`bg-gray-200 text-[#008066] px-6 py-2 rounded-lg ${roomLoading ? "opacity-50 cursor-not-allowed" : ""}`}
           >
             {roomLoading ? "Loading..." : "Message"}
           </button>

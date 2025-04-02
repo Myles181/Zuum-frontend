@@ -1,30 +1,36 @@
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../Spinner";
 import a from "../../assets/icons/Mask group1.svg";
 import b from "../../assets/icons/dots-icon.svg";
 import c from "../../assets/image/11429433 1.svg";
-import { FaHeart, FaComment, FaShareAlt } from "react-icons/fa";
+import { FaComment, FaShareAlt, FaHeart } from "react-icons/fa"; // Import FaHeart for the heart icon
 import { MdCampaign } from "react-icons/md";
 import useAudioPosts from "../../../Hooks/audioPosts/useCreateAudio";
 
 const AudioFeed = () => {
   const [page, setPage] = useState(1);
-  const [allPosts, setAllPosts] = useState([]); // Stores all fetched posts
+  const [allPosts, setAllPosts] = useState([]); // Each post includes an "isLiked" flag
   const limit = 10;
   const navigate = useNavigate();
   const observer = useRef(null);
 
-  console.log("Fetching audio posts for page:", page);
-
+  // Get posts and pagination data
   const { loading, error, posts, pagination } = useAudioPosts(page, limit);
 
   useEffect(() => {
     if (posts.length > 0) {
       setAllPosts((prevPosts) => {
-        // Prevent duplicates by checking post IDs
+        // Prevent duplicates by checking post IDs.
         const newPosts = posts.filter((p) => !prevPosts.some((prev) => prev.id === p.id));
-        return [...prevPosts, ...newPosts];
+        // Initialize isLiked flag for new posts.
+        return [
+          ...prevPosts,
+          ...newPosts.map((post) => ({
+            ...post,
+            isLiked: post.isLiked || false,
+          })),
+        ];
       });
     }
   }, [posts]);
@@ -36,7 +42,6 @@ const AudioFeed = () => {
       observer.current = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting && pagination.hasNext) {
-            console.log("Loading more posts...");
             setPage((prevPage) => prevPage + 1);
           }
         },
@@ -47,8 +52,14 @@ const AudioFeed = () => {
     [loading, pagination.hasNext]
   );
 
+  // Navigate to the post detail page
   const handlePostClick = (postId) => {
-    console.log("Navigating to post:", postId);
+    navigate(`/music/${postId}`);
+  };
+
+  // Handler for clicking the comment button.
+  const handleComment = (e, postId) => {
+    e.stopPropagation();
     navigate(`/music/${postId}`);
   };
 
@@ -101,26 +112,32 @@ const AudioFeed = () => {
                 </div>
 
                 <div className="p-2">
-  <p className="text-lg font-semibold text-gray-900">
-    {post.caption || "Untitled Track"}
-  </p>
-
-</div>
-
+                  <p className="text-lg font-semibold text-gray-900">
+                    {post.caption || "Untitled Track"}
+                  </p>
+                </div>
 
                 <div className="flex items-center space-x-3 p-2 border-t border-gray-100">
-                  <span className="flex items-center space-x-2 px-2 py-1 bg-gray-100 rounded-md">
-                    <FaHeart className="text-gray-500" />
-                    <span className="text-sm text-gray-600">{post.likes || 0}</span>
-                  </span>
-                  <span className="flex items-center space-x-2 px-2 py-1 bg-gray-100 rounded-md">
+                  {/* Heart Icon for Likes */}
+                  <div className="flex items-center space-x-2 px-2 py-1 bg-gray-100 rounded-md">
+  <FaHeart className="text-gray-500" />
+  <span className="text-sm text-gray-600 ">{post.likes || 0}</span>
+</div>
+
+                  {/* Comment Button */}
+                  <button
+                    onClick={(e) => handleComment(e, post.id)}
+                    className="flex items-center space-x-2 px-2 py-1 bg-gray-100 rounded-md hover:bg-gray-200"
+                  >
                     <FaComment className="text-gray-500" />
                     <span className="text-sm text-gray-600">{post.comments || 0}</span>
-                  </span>
+                  </button>
+                  {/* Promote Button */}
                   <span className="flex items-center space-x-2 px-2 py-1 bg-gray-100 rounded-md">
                     <MdCampaign className="text-gray-500" />
                     <span className="text-sm text-gray-600">Promote</span>
                   </span>
+                  {/* Share Button */}
                   <span className="flex items-center space-x-2 px-2 py-1 bg-gray-100 rounded-md">
                     <FaShareAlt className="text-gray-500" />
                     <span className="text-sm text-gray-600">Share</span>

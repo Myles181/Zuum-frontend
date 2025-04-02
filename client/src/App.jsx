@@ -26,6 +26,8 @@ import ChatListPage from './components/messages/ChatList';
 import MessagePage from './components/messages/Chat';
 import useProfile from '../Hooks/useProfile';
 import { initializeSocket } from './socket';
+import FollowersPage from './components/homepage/FollowingList ';
+import FollowersListPage from './components/homepage/FollowingList ';
 
 
 
@@ -73,6 +75,7 @@ const App = () => {
           <Route path="/addbeat" element={<MusicUploadInterface />} />
           <Route path="/addvideo" element={<UploadVideo />} />
           <Route path="/video/:postId" element={<VideoDetails />} />
+          <Route path="/all" element={<FollowersListPage />} />
         </Route>
       </Routes>
     </Router>
