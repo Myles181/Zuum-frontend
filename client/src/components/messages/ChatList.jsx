@@ -6,29 +6,39 @@ import Overlay from "../homepage/Overlay";
 import Navbar from "../profile/NavBar";
 import Sidebar from "../homepage/Sidebar";
 import Spinner from "../Spinner";
+import useProfile from "../../../Hooks/useProfile";
+
 
 const ChatListPage = () => {
-  
-  // Changed from useChatRooms to useGetRooms
-  const { rooms, loading, error, refreshRooms } = useGetRooms();
-   const navigate = useNavigate();
+  const { rooms, loading: roomsLoading, error, refreshRooms } = useGetRooms();
+  const { profile, loading: profileLoading } = useProfile();
+  const navigate = useNavigate();
 
-   const [sidebarOpen, setSidebarOpen] = useState(false);
-     
-   
-     const toggleSidebar = () => {
-       setSidebarOpen(!sidebarOpen);
-     };
-  // Add useEffect to load rooms on component mount
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  // Debugging logs
+  console.log("Rooms Loading:", roomsLoading, "Rooms Data:", rooms);
+
   useEffect(() => {
     refreshRooms();
-  }, [refreshRooms]);
+  }, []);
 
-  if (loading) {
+  // If profile is stuck in loading state for too long, force a rerender
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (profileLoading) {
+        console.warn("Profile loading timeout - possible issue with useUserProfile");
+      }
+    }, 5000); // Warn if loading takes longer than 5 seconds
+
+    return () => clearTimeout(timeout);
+  }, [profileLoading]);
+
+  if (roomsLoading || profileLoading) {
     return (
       <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50">
-          <Spinner /> {/* Show the spinner while loading */}
-        </div>
+        <Spinner />
+      </div>
     );
   }
 
@@ -40,40 +50,41 @@ const ChatListPage = () => {
     );
   }
 
+  
+
+  const userId = profile?.id ?? "Unknown"; // Fallback to avoid null
+
   return (
-    <div className="max-w-2xl mx-auto bg-white rounded-lg shadow">
-      <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-        <Navbar name="Messages" toggleSidebar={toggleSidebar} />
-        <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
+    <div className="max-w-2xl mx-auto mt-15 bg-white rounded-lg shadow">
+      <Overlay isOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      <Navbar name="Messages" toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      <Sidebar isOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
       <div className="divide-y divide-gray-200">
         {rooms.length > 0 ? (
-          rooms.map(room => (
-            <div 
-              key={room.room_id} 
+          rooms.map((room) => (
+            <div
+              key={room.room_id}
               className="p-4 hover:bg-gray-50 cursor-pointer flex items-center"
-              onClick={() => navigate(`/chat/${room.room_id}`, { state: room })}
+              onClick={() =>
+                navigate(`/chat/${room.room_id}`, {
+                  state: { roomId: room.room_id, otherUserId: room.recipient_id, userId, otherUsername: room.recipient_profile_username , otherProfilePicture: room.recipient_profile_image
+                  },
+                })
+              }
             >
-              {/* Update these fields based on your actual API response structure */}
-              <img 
-                src={room.other_user?.image || '/default-avatar.png'} 
+              <img
+                src={room.recipient_profile_image || "https://res.cloudinary.com/dlanhtzbw/image/upload/v1675343188/Telegram%20Clone/no-profile_aknbeq.jpg"}
                 alt={room.other_user?.name}
                 className="w-12 h-12 rounded-full object-cover mr-3"
               />
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-center">
                   <h3 className="font-medium text-gray-900 truncate">
-                    {room.other_user?.name || 'Unknown User'}
+                    {room.recipient_profile_username || "Unknown User"}
                   </h3>
-                  <span className="text-xs text-gray-500 whitespace-nowrap ml-2">
-                    {new Date(room.last_message_at).toLocaleTimeString([], { 
-                      hour: '2-digit', 
-                      minute: '2-digit' 
-                    })}
-                  </span>
+                 
                 </div>
-                <p className="text-sm text-gray-500 truncate mt-1">
-                  {room.last_message || 'No messages yet'}
-                </p>
+               
               </div>
             </div>
           ))
@@ -88,4 +99,4 @@ const ChatListPage = () => {
   );
 };
 
-export default ChatListPage
+export default ChatListPage;

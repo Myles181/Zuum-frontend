@@ -15,6 +15,8 @@ import CommentSection from "../components/details/Comments";
 import Spinner from "../components/Spinner";
 import useUserProfile from "../../Hooks/useProfile";
 import useAudioPosts from "../../Hooks/audioPosts/useCreateAudio";
+import ReactionButton from "../components/details/Reactions";
+// Import the reactions component
 
 
 const MusicDetailsPage = () => {
@@ -80,9 +82,6 @@ const MusicDetailsPage = () => {
     }
     setIsMuted(!isMuted);
   };
-
-  ;
-  
 
   const handleUserClick = (userId) => {
     if (userId) {
@@ -163,7 +162,7 @@ const MusicDetailsPage = () => {
             </div>
 
             {/* Modern Player Controls */}
-            <div className=" rounded-2xl shadow-lg p-6 mb-8 border border-white/10 backdrop-blur-sm bg-white/80">
+            <div className="rounded-2xl shadow-lg p-6 mb-8 border border-white/10 backdrop-blur-sm bg-white/80">
               {/* Progress Bar */}
               <div className="mb-6">
                 <div className="flex justify-between text-sm text-gray-500 mb-2">
@@ -219,11 +218,9 @@ const MusicDetailsPage = () => {
                     onClick={() => setIsLiked(!isLiked)}
                     className="text-gray-600 hover:text-red-500 transition-colors"
                   >
-                    {isLiked ? (
-                      <FaHeart className="text-red-500 text-xl" />
-                    ) : (
-                      <FaRegHeart className="text-xl" />
-                    )}
+                     {data.reactions && (
+              <ReactionButton reactions={data.reactions} postId={postId} />
+            )}
                   </motion.button>
                   
                   <motion.button 
@@ -259,7 +256,7 @@ const MusicDetailsPage = () => {
             </div>
 
             {/* Streaming Platforms - Modern Card */}
-            <div className=" rounded-2xl shadow-lg p-6 mb-8 border border-white/10 backdrop-blur-sm bg-white/80">
+            <div className="rounded-2xl shadow-lg p-6 mb-8 border border-white/10 backdrop-blur-sm bg-white/80">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Streaming Platforms</h3>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {data.spotify && (
@@ -306,6 +303,9 @@ const MusicDetailsPage = () => {
                 <p className="text-gray-700 leading-relaxed">{data.description}</p>
               </div>
             )}
+
+            {/* Reactions Section */}
+           
 
             {/* Comments Section */}
             <CommentSection comments={data.comments} postId={postId} />

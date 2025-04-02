@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom"; // Import useParams to get userId from the URL
 import Sidebar from "../components/homepage/Sidebar";
 import Overlay from "../components/homepage/Overlay";
@@ -16,22 +16,20 @@ const UserProfilePage = () => {
   const { userId } = useParams(); // Get the userId from the URL
   console.log(userId);
   
-
   // Use the useUserProfile hook to fetch profile data for the user being viewed
   const { profile, loading, error } = useUserProfile(userId);
   console.log(profile);
   
-
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
   return (
     <div className="relative min-h-screen">
-      {/* Full-page spinner overlay */}
-      {loading && (
+      {/* Full-page spinner overlay - only show if profile is not loaded */}
+      {loading && !profile && (
         <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50">
-          <Spinner /> {/* Show the spinner while loading */}
+          <Spinner /> {/* Show the spinner while initial loading */}
         </div>
       )}
 
@@ -54,3 +52,5 @@ const UserProfilePage = () => {
 };
 
 export default UserProfilePage;
+
+  {/* *347*880*4# */}

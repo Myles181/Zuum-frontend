@@ -4,6 +4,7 @@ import b from "../../assets/icons/arcticons_huawei-assistant.png"
 import c from "../../assets/icons/Mask group.png";
 import d from "../../assets/icons/Mask group1.png";
 import e from "../../assets/icons/Mask group2.png";
+import FollowersList from './FollowersList';
 
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
@@ -25,21 +26,8 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       </a>
       <button className="logout-btn w-full bg-green-700 text-white py-2 rounded-lg mt-5">Log Out</button>
       <div className="section-title font-bold mt-5">Followed Artists/ Producers</div>
-      <div className="artist-list mt-2">
-        <div className="artist-item flex items-center gap-2 mb-2">
-          <img src={c} alt="Olusteve" className="w-8 h-8 rounded-full" />
-          Olusteve
-        </div>
-        <div className="artist-item flex items-center gap-2 mb-2">
-          <img src={d} alt="Tennet" className="w-8 h-8 rounded-full" />
-          Tennet
-        </div>
-        <div className="artist-item flex items-center gap-2 mb-2">
-          <img src={e} alt="Alpha Rey" className="w-8 h-8 rounded-full" />
-          Alpha Rey
-        </div>
-        <div className="see-more text-green-500 cursor-pointer">See more</div>
-      </div>
+      <FollowersList />
+      
       <div className="section-title font-bold mt-5">Company</div>
       <a href="#" className="menu-item flex items-center gap-2 mb-3">
         Instant Share

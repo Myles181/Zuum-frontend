@@ -72,65 +72,39 @@ export const useGetRoomId = () => {
 
 
 // useMessages.jsx
-export const useGetRooms = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [rooms, setRooms] = useState([]);
 
-  const getRooms = async () => {
+export const useGetRooms = () => {
+  const [rooms, setRooms] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchRooms = useCallback(async () => {
     setLoading(true);
     setError(null);
-    setRooms([]);
-
     try {
-      const token = localStorage.getItem('authToken');
-      const response = await axios.post(
-        `${API_URL}/user/get-rooms`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      const token = localStorage.getItem("authToken");
+      const response = await axios.get(`${API_URL}/user/get-rooms`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.status === 200) {
-        console.log('Rooms fetched:', response.data);
         setRooms(response.data);
-        return response.data;
+       
+        
       } else {
-        setError('An unexpected error occurred');
-        console.error('Unexpected response status:', response.status);
+        setError("Failed to fetch rooms.");
       }
     } catch (err) {
-      if (err.response) {
-        switch (err.response.status) {
-          case 500:
-            setError(err.response.data?.error || 'Internal server error');
-            break;
-          default:
-            setError(`Server error: ${err.response.status}`);
-        }
-      } else if (err.request) {
-        setError('Network error: No response from server');
-      } else {
-        setError('Failed to fetch rooms: ' + err.message);
-      }
-      console.error('Error in getRooms:', err);
+      setError(err.response?.data?.error || "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
-  };
-
-  // Optional: Add automatic refresh capability
-  const refreshRooms = useCallback(() => {
-    getRooms();
   }, []);
 
-  return { getRooms, rooms, loading, error, refreshRooms };
+  return { rooms, loading, error, refreshRooms: fetchRooms };
 };
-  
 
 // ---------------------
 // Join Chat Hook
@@ -224,47 +198,49 @@ export const useSendMessage = () => {
 // Fetch Messages Hook
 // ---------------------
 export const useFetchMessages = (roomId) => {
-    const socket = getSocket();
-    const [fetchedMessages, setFetchedMessages] = useState([]);
-  
-    useEffect(() => {
-      if (!socket || !roomId) return;
-  
-      const handleRecentMessages = (messages) => {
-        console.log('Backend returned messages:', messages);
-        setFetchedMessages(messages);
-      };
-  
-      const handleNewMessage = (message) => {
-        if (message.room_id === roomId) {
-          setFetchedMessages((prev) => [...prev, message]);
-        }
-      };
-  
-      // Listen for messages from the server
-      socket.on('recentMessages', handleRecentMessages);
-      socket.on('receiveMessage', handleNewMessage);
-  
-      // Immediately request messages for the room
+  const socket = getSocket();
+  const [fetchedMessages, setFetchedMessages] = useState([]);
+  const [loading, setLoading] = useState(true); // New loading state
+
+  useEffect(() => {
+    if (!socket || !roomId) return;
+
+    const handleRecentMessages = (messages) => {
+      console.log('Backend returned messages:', messages);
+      setFetchedMessages(messages);
+      setLoading(false); // Set loading to false once messages are received
+    };
+
+    const handleNewMessage = (message) => {
+      if (message.room_id === roomId) {
+        setFetchedMessages((prev) => [...prev, message]);
+      }
+    };
+
+    // Listen for messages from the server
+    socket.on('recentMessages', handleRecentMessages);
+    socket.on('receiveMessage', handleNewMessage);
+
+    // Immediately request messages for the room
+    socket.emit('fetchMessages', roomId);
+
+    // Set up an interval to fetch messages every 5 seconds
+    const interval = setInterval(() => {
       socket.emit('fetchMessages', roomId);
-  
-      // Set up an interval to fetch messages every 2 seconds
-      const interval = setInterval(() => {
-        socket.emit('fetchMessages', roomId);
-        console.log(`Emitted fetchMessages for room: ${roomId}`);
-      }, 2000);
-  
-      // Cleanup on unmount
-      return () => {
-        socket.off('recentMessages', handleRecentMessages);
-        socket.off('receiveMessage', handleNewMessage);
-        clearInterval(interval);
-      };
-    }, [socket, roomId]);
-  
-    return fetchedMessages;
-  };
-  
+      console.log(`Emitted fetchMessages for room: ${roomId}`);
+    }, 5000);
+
+    // Cleanup on unmount
+    return () => {
+      socket.off('recentMessages', handleRecentMessages);
+      socket.off('receiveMessage', handleNewMessage);
+      clearInterval(interval);
+    };
+  }, [socket, roomId]);
+
+  return { fetchedMessages, loading };
+};
+
 
 // ---------------------
 // Receive Messages Hook

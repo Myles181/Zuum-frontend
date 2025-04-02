@@ -1,55 +1,62 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate
-import useNotifications from '../../../Hooks/notification/useNotification'; // Import the hook
+import { useNavigate } from 'react-router-dom';
+import useNotifications from '../../../Hooks/notification/useNotification';
 import Spinner from '../Spinner';
 
-const NotificationSection = () => {
-  const { notifications, loading, error, markNotificationAsRead } = useNotifications(); // Add markNotificationAsRead from the hook
-  const navigate = useNavigate(); // Initialize useNavigate
+// Black placeholder image using inline SVG
+const placeholderImage =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='48' height='48'%3E%3Crect width='48' height='48' fill='black'/%3E%3C/svg%3E";
 
-  console.log(notifications);
+const NotificationSection = () => {
+  const { notifications, loading, error, markNotificationAsRead } = useNotifications();
+  const navigate = useNavigate();
 
   if (loading) {
-    return <div className="w-full h-full"><Spinner /></div>;
+    return (
+      <div className="flex justify-center items-center h-full">
+        <Spinner />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center p-5 text-red-500">Error: {error}</div>;
+    return (
+      <div className="text-center p-3 text-red-500">
+        Error: {error}
+      </div>
+    );
   }
 
   if (notifications.length === 0) {
-    return <div className="text-center p-5 h-full">No notifications found.</div>;
+    return (
+      <div className="text-center p-3 h-full">
+        No notifications found.
+      </div>
+    );
   }
 
-  // Function to handle notification click
+  // Handlers for marking notifications as read and navigation
   const handleNotificationClick = async (notification) => {
-    if (notification.type === 'POST_AUDIO' && !notification.read) {
+    if (!notification.read) {
       try {
-        // Mark the notification as read
         await markNotificationAsRead(notification.id);
       } catch (err) {
         console.error("Failed to mark notification as read:", err);
       }
     }
-
-    // Navigate to the post
     if (notification.post_id) {
       navigate(`/music/${notification.post_id}`);
     }
   };
 
-  // Function to handle reply button click
   const handleAudioReplyClick = async (notification) => {
     if (!notification.read) {
       try {
-        // Mark the notification as read
         await markNotificationAsRead(notification.id);
       } catch (err) {
         console.error("Failed to mark notification as read:", err);
       }
     }
-
-    // Navigate to the post
     if (notification.post_id) {
       navigate(`/music/${notification.post_id}`);
     }
@@ -58,50 +65,38 @@ const NotificationSection = () => {
   const handleVideoReplyClick = async (notification) => {
     if (!notification.read) {
       try {
-        // Mark the notification as read
         await markNotificationAsRead(notification.id);
       } catch (err) {
         console.error("Failed to mark notification as read:", err);
       }
     }
-
-    // Navigate to the post
     if (notification.post_id) {
       navigate(`/video/${notification.post_id}`);
     }
   };
 
-
   const handleFollowClick = async (notification) => {
     if (!notification.read) {
       try {
-        // Mark the notification as read
         await markNotificationAsRead(notification.id);
       } catch (err) {
         console.error("Failed to mark notification as read:", err);
       }
     }
-
-    // Navigate to the post
-    if (notification.
-      action_user_id) {
-      
-          navigate(`/profile/${notification.
-            action_user_id}`); // Redirect to the user's profile
-       
-      
+    if (notification.action_user_id) {
+      navigate(`/profile/${notification.action_user_id}`);
     }
   };
 
-  // Function to render the appropriate button based on notification type
+  // Render action button based solely on green styling.
   const renderActionButton = (notification) => {
     switch (notification.type) {
       case 'POST_VIDEO':
         return (
           <button
-            className="comment-btn bg-[#1f8c5a] text-white px-3 py-1 rounded"
+            className="bg-[#2D8C72] text-white px-3 py-1 rounded shadow hover:bg-green-700 transition-all text-sm"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent the parent onClick from firing
+              e.stopPropagation();
               handleVideoReplyClick(notification);
             }}
           >
@@ -111,21 +106,21 @@ const NotificationSection = () => {
       case 'FOLLOW':
         return (
           <button
-            className="comment-btn bg-[#1f8c5a] text-white px-3 py-1 rounded"
+            className="bg-[#2D8C72] text-white px-3 py-1 rounded shadow hover:bg-green-700 transition-all text-sm"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent the parent onClick from firing
+              e.stopPropagation();
               handleFollowClick(notification);
             }}
           >
             Follow
           </button>
-        )
+        );
       case 'POST_AUDIO':
         return (
           <button
-            className="comment-btn bg-[#1f8c5a] text-white px-3 py-1 rounded"
+            className="bg-[#2D8C72] text-white px-3 py-1 rounded shadow hover:bg-green-700 transition-all text-sm"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent the parent onClick from firing
+              e.stopPropagation();
               handleAudioReplyClick(notification);
             }}
           >
@@ -138,31 +133,39 @@ const NotificationSection = () => {
   };
 
   return (
-    <div className="notification-section p-3 bg-gray-100 h-full">
-      <div className="notifications-container bg-white p-4 rounded-lg shadow-md h-full">
-        <h2 className="text-xl font-bold mb-4">Notifications</h2>
-        {notifications.map((notification) => (
-          <div
-            key={notification.id}
-            className={`notification-item bg-white p-3 rounded-lg shadow-md flex justify-between items-center mb-3 cursor-pointer ${
-              !notification.read ? "bg-gray-50" : ""
-            }`}
-            onClick={() => handleNotificationClick(notification)} // Handle click
-          >
-            <div className="notification-content flex items-center">
-              <img
-                src={notification.action_user_image || "default-avatar.png"} // Use a fallback avatar if none is provided
-                alt={notification.name}
-                className="w-10 h-10 rounded-full object-cover mr-3"
-              />
+    <div className="p-4 bg-gray-50 min-h-screen">
+      <div className="max-w-xl mx-auto bg-white rounded-lg shadow overflow-hidden">
+        <div className="px-4 py-3 border-b border-gray-200">
+          <h2 className="text-xl font-bold text-gray-800">Notifications</h2>
+        </div>
+        <div className="divide-y divide-gray-100">
+          {notifications.map((notification) => (
+            <div
+              key={notification.id}
+              className={`flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer transition-colors ${
+                !notification.read ? "bg-green-50" : ""
+              }`}
+              onClick={() => handleNotificationClick(notification)}
+            >
+              <div className="flex items-center space-x-3">
+                <img
+                  src={notification.action_user_image || placeholderImage}
+                  alt={notification.name}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+                <div>
+                  <h4 className="text-base font-semibold text-gray-800">
+                    {notification.name}
+                  </h4>
+                  <p className="text-xs text-gray-600">{notification.message}</p>
+                </div>
+              </div>
               <div>
-                <h4 className="text-sm font-bold">{notification.name}</h4>
-                <p className="text-xs text-gray-500">{notification.message}</p>
+                {renderActionButton(notification)}
               </div>
             </div>
-            {renderActionButton(notification)}
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
     </div>
   );
