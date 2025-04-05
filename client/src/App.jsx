@@ -28,6 +28,8 @@ import useProfile from '../Hooks/useProfile';
 import { initializeSocket } from './socket';
 import FollowersPage from './components/homepage/FollowingList ';
 import FollowersListPage from './components/homepage/FollowingList ';
+import SubscriptionPage from './components/subscription/Account';
+import SubscriptionDetails from './components/subscription/SubDetails';
 
 
 
@@ -76,6 +78,8 @@ const App = () => {
           <Route path="/addvideo" element={<UploadVideo />} />
           <Route path="/video/:postId" element={<VideoDetails />} />
           <Route path="/all" element={<FollowersListPage />} />
+          <Route path="/subscribe" element={<SubscriptionPage />} />
+          <Route path="/details" element={<SubscriptionDetails />} />
         </Route>
       </Routes>
     </Router>
