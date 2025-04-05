@@ -7,9 +7,14 @@ import BottomNav from '../components/homepage/BottomNav';
 import AudioFeed from '../components/homepage/AudioFeed';
 import VideoFeed from '../components/homepage/VideoFeed';
 
+import { FiX, FiCheckCircle } from 'react-icons/fi';
+import { FaCheckCircle } from 'react-icons/fa';
+import SubscriptionPopup from '../components/subscription/Popup';
+
 function Homepage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('audio'); // Default to 'audio'
+  const [activeTab, setActiveTab] = useState('audio');
+  const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(true); // Control popup visibility
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -33,6 +38,11 @@ function Homepage() {
       {activeTab === 'audio' ? <AudioFeed /> : <VideoFeed />}
 
       <BottomNav />
+      
+      {/* Subscription Popup - only shown when showSubscriptionPopup is true */}
+      {showSubscriptionPopup && (
+        <SubscriptionPopup onClose={() => setShowSubscriptionPopup(false)} />
+      )}
     </div>
   );
 }
