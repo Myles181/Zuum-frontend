@@ -1,6 +1,7 @@
-import { FaPlay, FaPause, FaStepBackward, FaStepForward, FaVolumeUp, FaVolumeMute } from "react-icons/fa";
+import { FaPlay, FaPause, FaStepBackward, FaStepForward, FaVolumeUp, FaVolumeMute, FaShare } from "react-icons/fa";
 import { motion } from "framer-motion";
 import ReactionButton from "../../details/Reactions";
+import { useState } from "react";
 
 const AudioPlayerControls = ({
   isPlaying,
@@ -17,10 +18,13 @@ const AudioPlayerControls = ({
   postId,
   reactions,
   userId,
+  setIsShareModalOpen
 }) => {
 
     console.log(userId);
     
+   
+
   return (
     <div className="rounded-2xl p-6 mb-8 ">
       {/* Progress Bar */}
@@ -40,9 +44,7 @@ const AudioPlayerControls = ({
       
       {/* Main Controls */}
       <div className="flex items-center justify-around mb-4">
-        <button className="text-gray-500 hover:text-gray-900 transition-colors p-2">
-          <FaStepBackward className="text-xl" />
-        </button>
+       
         
         <motion.button
           onClick={togglePlayPause}
@@ -56,10 +58,10 @@ const AudioPlayerControls = ({
           )}
         </motion.button>
         
-        <button className="text-gray-500 hover:text-gray-900 transition-colors p-2">
-          <FaStepForward className="text-xl" />
-        </button>
+       
       </div>
+
+      <div className="flex items-center justify-between mb-4">
       
 
                    <ReactionButton
@@ -67,6 +69,18 @@ const AudioPlayerControls = ({
   reactions={reactions}
   profileId={userId}
 />
+
+
+<button 
+  onClick={() => setIsShareModalOpen(true)}
+  className="text-gray-600 hover:text-gray-900 transition-colors p-2"
+>
+  <FaShare className="text-xl" />
+</button>
+
+
+
+</div>
       
       {/* Volume Controls */}
     

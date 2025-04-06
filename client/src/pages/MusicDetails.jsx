@@ -15,6 +15,7 @@ import ReactionButton from "../components/details/Reactions";
 import AudioPlayerControls from "../components/homepage/details/AudioControls";
 import TrackHeader from "../components/homepage/details/TrackHeader";
 import StreamingPlatforms from "../components/homepage/details/StreamingPlatforms";
+import ShareModal from "../components/details/Share";
 
 const MusicDetailsPage = () => {
   const { postId } = useParams();
@@ -97,6 +98,8 @@ const MusicDetailsPage = () => {
     }
   };
 
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+
   return (
     <div className="bg-gradient-to-b from-gray-50 to-gray-100 min-h-screen">
       <Navbar name={"Details"} />
@@ -142,6 +145,7 @@ const MusicDetailsPage = () => {
               postId={postId}
               reactions={data.reactions}
               userId={profile?.id}
+              setIsShareModalOpen={setIsShareModalOpen}
             />
 
             {/* Reactions Section */} 
@@ -178,6 +182,13 @@ const MusicDetailsPage = () => {
         onLoadedData={() => setDuration(audioRef.current?.duration || 0)}
         className="hidden"
       />
+
+<ShareModal
+      isOpen={isShareModalOpen}
+      onClose={() => setIsShareModalOpen(false)}
+      url={`${window.location.origin}/posts/${postId}`}
+      title={data?.caption || "Check out this track"}
+    />
     </div>
   );
 };
