@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import c from "../../assets/icons/ORSJOS0 1.png";
 import d from "../../assets/icons/Mask group1.svg";
@@ -11,12 +11,17 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
   const { profile: authProfile, loading: authLoading } = useProfile();
   const { message, followUser } = useFollowUser();
   const { getRoomId, loading: roomLoading, error: roomError } = useGetRoomId();
-  const [isFollowing, setIsFollowing] = useState(false);
-  const [activeTab, setActiveTab] = useState("audio");
-  const [followersCount, setFollowersCount] = useState(0);
-  const [isOwnProfile, setIsOwnProfile] = useState(false);
-  const [followLoading, setFollowLoading] = useState(false); // Added missing state
   const navigate = useNavigate();
+
+  // local UI state
+  const [isFollowing, setIsFollowing]       = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [isOwnProfile, setIsOwnProfile]     = useState(false);
+  const [followLoading, setFollowLoading]   = useState(false);
+  const [activeTab, setActiveTab]           = useState("audio");
+
+  // ensure we only seed followersCount once
+  const didInitFollowers = useRef(false);
 
   const fallbackProfile = {
     cover_image: c,
@@ -27,131 +32,155 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
     followers_list: [],
     following_list: []
   };
-
   const mergedProfile = { ...fallbackProfile, ...profiles?.data };
 
+  // On first load, set isOwnProfile and initial followers count
   useEffect(() => {
-    if (!authLoading && authProfile && mergedProfile) {
+    if (!authLoading && authProfile && mergedProfile && !didInitFollowers.current) {
       setIsOwnProfile(authProfile.id === mergedProfile.id);
       setFollowersCount(mergedProfile.followers_list?.length || 0);
-    }
-  }, [authProfile, mergedProfile, authLoading]);
-
-  useEffect(() => {
-    if (authProfile && mergedProfile) {
-      const isUserFollowing = mergedProfile.followers_list?.some((follower) =>
-        typeof follower === "object" ? follower.id === authProfile.id : follower === authProfile.id
+      // set whether current user is following
+      const followed = mergedProfile.followers_list?.some(f =>
+        typeof f === "object" ? f.id === authProfile.id : f === authProfile.id
       );
-      setIsFollowing(isUserFollowing);
+      setIsFollowing(followed);
+      didInitFollowers.current = true;
     }
-  }, [authProfile, mergedProfile]);
+  }, [authLoading, authProfile, mergedProfile]);
+
+  // Redirect to own profile if they navigate here themselves
+  useEffect(() => {
+    if (isOwnProfile) navigate("/profile");
+  }, [isOwnProfile, navigate]);
 
   const handleFollow = async () => {
-    const newFollowingStatus = !isFollowing;
-    // Optimistically update UI
-    setIsFollowing(newFollowingStatus);
-    setFollowersCount((prev) => (newFollowingStatus ? prev + 1 : prev - 1));
+    if (!authProfile) return;
+
+    const willFollow = !isFollowing;
+
+    // 1) Optimistic UI update
+    setIsFollowing(willFollow);
+    setFollowersCount(count => willFollow ? count + 1 : count - 1);
     setFollowLoading(true);
 
+    // 2) Fire & forget the server call, revert on error
     try {
-      await followUser(mergedProfile.id, newFollowingStatus);
-    } catch (error) {
-      console.error("Error following/unfollowing user:", error);
-      // Revert if error occurs
-      setIsFollowing((prev) => !prev);
-      setFollowersCount((prev) => (newFollowingStatus ? prev - 1 : prev + 1));
+      await followUser(mergedProfile.id, willFollow);
+    } catch (err) {
+      console.error(err);
+      // rollback
+      setIsFollowing(followed => !followed);
+      setFollowersCount(count => willFollow ? count - 1 : count + 1);
     } finally {
       setFollowLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (isOwnProfile) {
-      navigate("/profile");
-    }
-  }, [isOwnProfile, navigate]);
-
   const handleMessageClick = async () => {
-    if (!authProfile || !mergedProfile) return;
-    
+    if (!authProfile) return;
     try {
       const roomId = await getRoomId(authProfile.id, mergedProfile.id);
-      if (roomId) {
-        navigate(`/chat/${roomId}`, {
-          state: {
-            userId: authProfile.id,
-            otherUserId: mergedProfile.id,
-            roomId: roomId,
-            otherProfilePicture: mergedProfile.image || d,
-            otherUsername: mergedProfile.username
-          }
-        });
-      }
-    } catch (error) {
-      console.error("Error getting room ID:", error);
+      navigate(`/chat/${roomId}`, {
+        state: {
+          userId: authProfile.id,
+          otherUserId: mergedProfile.id,
+          roomId,
+          otherProfilePicture: mergedProfile.image,
+          otherUsername: mergedProfile.username
+        }
+      });
+    } catch (err) {
+      console.error(err);
     }
   };
 
   return (
     <div className="profile-container relative">
-      <div className="profile-background h-60 overflow-hidden rounded-t-lg relative">
-        <img src={mergedProfile.cover_image || c} alt="Profile Background" className="w-full h-full object-cover" />
+      {/* Cover & Avatar */}
+      <div className="profile-background h-60 overflow-hidden rounded-t-lg">
+        <img
+          src={mergedProfile.cover_image}
+          alt="Profile Background"
+          className="w-full h-full object-cover"
+        />
       </div>
-
       <div className="profile-header absolute top-48 left-4">
-        <img src={mergedProfile.image || d} alt="Profile" className="w-24 h-24 rounded-full border-4 border-white shadow-lg" />
+        <img
+          src={mergedProfile.image}
+          alt="Profile"
+          className="w-24 h-24 rounded-full border-4 border-white shadow-lg"
+        />
       </div>
 
-      <div className="stats-container flex flex-col items-center mt-16 w-full px-5 text-center">
+      {/* Stats */}
+      <div className="stats-container flex flex-col items-center mt-16 px-5 text-center">
         <h2 className="text-2xl text-[#008066]">{mergedProfile.username}</h2>
         <p className="text-gray-500">{mergedProfile.identity}</p>
-
-        <div className="stats flex justify-around w-full max-w-md mt-4 gap-5 text-gray-500 flex-wrap">
-          <div className="followers text-center">
+        <div className="stats flex justify-around w-full max-w-md mt-4 gap-5 text-gray-500">
+          <div>
             <p>Followers</p>
             <span className="text-[#008066] font-bold">{followersCount}</span>
           </div>
-          <div className="following text-center">
+          <div>
             <p>Following</p>
-            <span className="text-[#008066] font-bold">{mergedProfile.following_list?.length || 0}</span>
+            <span className="text-[#008066] font-bold">
+              {mergedProfile.following_list?.length || 0}
+            </span>
           </div>
         </div>
       </div>
 
-      <p className="bio text-gray-700 text-center px-5 mt-5">{mergedProfile.bio}</p>
+      {/* Bio */}
+      <p className="bio text-gray-700 text-center px-5 mt-5">
+        {mergedProfile.bio}
+      </p>
 
-      <div className="buttons flex justify-center mt-5 w-full gap-3">
-        <button 
-          onClick={handleFollow} 
-          disabled={followLoading}
-          className={`bg-gray-200 text-[#008066] px-6 py-2 rounded-lg ${followLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-        >
-          {followLoading ? (isFollowing ? "Unfollowing..." : "Following...") : isFollowing ? "Unfollow" : "Follow"}
-        </button>
-        {isFollowing && (
-          <button
-            onClick={handleMessageClick}
-            disabled={roomLoading}
-            className={`bg-gray-200 text-[#008066] px-6 py-2 rounded-lg ${roomLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-          >
-            {roomLoading ? "Loading..." : "Message"}
-          </button>
-        )}
-      </div>
+      {/* Follow / Message buttons */}
+      <div className="buttons flex justify-center mt-5 gap-3">
+  <button
+    onClick={handleFollow}
+    disabled={followLoading}
+    className={`px-6 py-2 rounded-lg ${
+      followLoading
+        ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+        : isFollowing
+          ? "bg-white text-[#008066] border border-[#008066]"
+          : "bg-[#008066] text-white"
+    }`}
+  >
+    {followLoading
+      ? (isFollowing ? "Following..." : "Unfollowing...")
+      : (isFollowing ? "Unfollow" : "Follow")
+    }
+  </button>
+
+  {isFollowing && (
+    <button
+      onClick={handleMessageClick}
+      disabled={roomLoading}
+      className={`px-6 py-2 rounded-lg bg-gray-200 text-[#008066] ${
+        roomLoading ? "opacity-50 cursor-not-allowed" : ""
+      }`}
+    >
+      {roomLoading ? "Loading..." : "Message"}
+    </button>
+  )}
+</div>
 
       {message && <p className="text-green-500 text-center mt-3">{message}</p>}
       {roomError && <p className="text-red-500 text-center mt-3">{roomError}</p>}
 
-      <div className="tab-section mt-8 w-full">
+      {/* Tabs */}
+      <div className="tab-section mt-8">
         <div className="tab-buttons flex justify-center gap-8 border-b-2 border-gray-200">
-          {["audio", "video"].map((tab) => (
+          {["audio", "video"].map(tab => (
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`pb-2 text-lg font-medium relative ${
+              className={`pb-2 text-lg font-medium ${
                 activeTab === tab
-                  ? "text-[#008066] after:absolute after:bottom-0 after:left-0 after:w-full after:h-[3px] after:bg-[#008066] after:rounded-full"
-                  : "text-gray-600 hover:text-[#008066] transition"
+                  ? "text-[#008066] border-b-4 border-[#008066]"
+                  : "text-gray-600 hover:text-[#008066]"
               }`}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -159,7 +188,10 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
           ))}
         </div>
         <div className="tab-content mt-4">
-          {activeTab === "audio" ? <MusicSection userId={mergedProfile?.id} /> : <VideoSection userId={mergedProfile?.id} />}
+          {activeTab === "audio"
+            ? <MusicSection userId={mergedProfile.id} />
+            : <VideoSection userId={mergedProfile.id} />
+          }
         </div>
       </div>
     </div>

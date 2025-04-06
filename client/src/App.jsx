@@ -30,6 +30,9 @@ import FollowersPage from './components/homepage/FollowingList ';
 import FollowersListPage from './components/homepage/FollowingList ';
 import SubscriptionPage from './components/subscription/Account';
 import SubscriptionDetails from './components/subscription/SubDetails';
+import LockedMusicPlayer from './components/homepage/sale/Locked';
+import PurchaseFeed from './components/homepage/sale/Purchase';
+
 
 
 
@@ -80,6 +83,8 @@ const App = () => {
           <Route path="/all" element={<FollowersListPage />} />
           <Route path="/subscribe" element={<SubscriptionPage />} />
           <Route path="/details" element={<SubscriptionDetails />} />
+          <Route path="/lock" element={<LockedMusicPlayer />} />
+          <Route path="/purchased" element={<PurchaseFeed />} />
         </Route>
       </Routes>
     </Router>
