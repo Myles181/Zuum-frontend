@@ -48,15 +48,15 @@ const ReactionButton = ({ postId, reactions = [], profileId }) => {
     <button
       onClick={handleClick}
       disabled={loading}
-      className="bg-gray-100 flex justify-center items-center gap-2 px-4 py-2 rounded-full shadow-md hover:bg-red-300 transition-all duration-200"
+      className=" flex flex-col justify-center items-center gap-1 rounded-full shadow-md hover:bg-red-300 transition-all duration-200"
       aria-label={isLiked ? 'Unlike' : 'Like'}
     >
       {isLiked ? (
-        <FaHeart className="text-green-700" />
+        <FaHeart className="text-green-700 text-xl" />
       ) : (
-        <FaRegHeart className="text-gray-500" />
+        <FaRegHeart className="text-gray-100 text-xl" />
       )}
-      <span className="text-sm text-gray-700">{likeCount}</span>
+      <span className="text-sm text-white">{likeCount}</span>
     </button>
   );
 };
