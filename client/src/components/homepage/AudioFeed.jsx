@@ -1,161 +1,189 @@
 import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../Spinner";
-import a from "../../assets/icons/Mask group1.svg";
-import b from "../../assets/icons/dots-icon.svg";
-import c from "../../assets/image/11429433 1.svg";
-import { FaComment, FaShareAlt, FaHeart } from "react-icons/fa"; // Import FaHeart for the heart icon
-import { MdCampaign } from "react-icons/md";
 import useAudioPosts from "../../../Hooks/audioPosts/useCreateAudio";
+import AudioPost from "./audio feed/AudioPost";
+
 
 const AudioFeed = () => {
   const [page, setPage] = useState(1);
-  const [allPosts, setAllPosts] = useState([]); // Each post includes an "isLiked" flag
+  const [allPosts, setAllPosts] = useState([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [showTapIcon, setShowTapIcon] = useState(false);
+  const [tapIconType, setTapIconType] = useState("play");
   const limit = 10;
-  const navigate = useNavigate();
-  const observer = useRef(null);
-
-  // Get posts and pagination data
+  const containerRef = useRef(null);
+  const loadObserver = useRef(null);
+  const iconTimeout = useRef(null);
+  const scrollObserver = useRef(null);
+  const audioRefs = useRef([]); // Added back audioRefs
   const { loading, error, posts, pagination } = useAudioPosts(page, limit);
+  
+  
 
+  // Merge newly fetched posts
   useEffect(() => {
-    if (posts.length > 0) {
-      setAllPosts((prevPosts) => {
-        // Prevent duplicates by checking post IDs.
-        const newPosts = posts.filter((p) => !prevPosts.some((prev) => prev.id === p.id));
-        // Initialize isLiked flag for new posts.
-        return [
-          ...prevPosts,
-          ...newPosts.map((post) => ({
-            ...post,
-            isLiked: post.isLiked || false,
-          })),
-        ];
-      });
-    }
+    if (!posts.length) return;
+    setAllPosts((prev) => {
+      const filtered = posts.filter((p) => !prev.some((q) => q.id === p.id));
+      return [
+        ...prev,
+        ...filtered.map((post) => ({ ...post, isLiked: post.isLiked || false })),
+      ];
+    });
   }, [posts]);
 
+  // Infinite scroll
   const lastPostRef = useCallback(
     (node) => {
       if (loading) return;
-      if (observer.current) observer.current.disconnect();
-      observer.current = new IntersectionObserver(
+      if (loadObserver.current) loadObserver.current.disconnect();
+      loadObserver.current = new IntersectionObserver(
         (entries) => {
           if (entries[0].isIntersecting && pagination.hasNext) {
-            setPage((prevPage) => prevPage + 1);
+            setPage((p) => p + 1);
           }
         },
-        { threshold: 1 }
+        { threshold: 0.5 }
       );
-      if (node) observer.current.observe(node);
+      if (node) loadObserver.current.observe(node);
     },
     [loading, pagination.hasNext]
   );
 
-  // Navigate to the post detail page
-  const handlePostClick = (postId) => {
-    navigate(`/music/${postId}`);
-  };
+  // Track current visible slide
+  useEffect(() => {
+    if (!containerRef.current || allPosts.length === 0) return;
+    const options = {
+      root: containerRef.current,
+      rootMargin: "0px",
+      threshold: 0.6,
+    };
+    scrollObserver.current = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          setCurrentIndex(Number(entry.target.dataset.index));
+        }
+      });
+    }, options);
+    const slides = containerRef.current.querySelectorAll(".snap-slide");
+    slides.forEach((slide) => scrollObserver.current.observe(slide));
+    return () => {
+      if (scrollObserver.current) {
+        scrollObserver.current.disconnect();
+      }
+    };
+  }, [allPosts]);
 
-  // Handler for clicking the comment button.
-  const handleComment = (e, postId) => {
-    e.stopPropagation();
-    navigate(`/music/${postId}`);
-  };
+  // Auto-play the active audio
+  useEffect(() => {
+    audioRefs.current.forEach((audioEl, idx) => {
+      if (!audioEl) return;
+      if (idx === currentIndex) {
+        audioEl.play().catch(() => {});
+      } else {
+        audioEl.pause();
+        audioEl.currentTime = 0;
+      }
+    });
+  }, [currentIndex, allPosts]);
+
+  // Cleanup
+  useEffect(() => {
+    return () => {
+      clearTimeout(iconTimeout.current);
+      if (scrollObserver.current) scrollObserver.current.disconnect();
+    };
+  }, []);
+
+  const handleTap = useCallback((idx) => {
+    const audio = audioRefs.current[idx];
+    if (!audio) return;
+    if (audio.paused) {
+      audio.play().catch(() => {});
+      setTapIconType("pause");
+    } else {
+      audio.pause();
+      setTapIconType("play");
+    }
+    setShowTapIcon(true);
+    clearTimeout(iconTimeout.current);
+    iconTimeout.current = setTimeout(() => setShowTapIcon(false), 800);
+  }, []);
+
+  const handleLike = useCallback((postId) => {
+    setAllPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? {
+              ...p,
+              isLiked: !p.isLiked,
+              likes: p.isLiked ? p.likes - 1 : p.likes + 1,
+            }
+          : p
+      )
+    );
+  }, []);
+
+  const handleTimeUpdate = useCallback((idx, e) => {
+    if (idx === currentIndex) {
+      setCurrentTime(e.target.currentTime);
+    }
+  }, [currentIndex]);
+
+  const handleLoadedMetadata = useCallback((idx, e) => {
+    if (idx === currentIndex) {
+      setDuration(e.target.duration);
+    }
+  }, [currentIndex]);
+
+  const setAudioRef = useCallback((idx, el) => {
+    audioRefs.current[idx] = el;
+  }, []);
 
   if (error) {
-    console.error("Error fetching data:", error);
     return <p className="text-red-500 text-center">{error}</p>;
   }
 
   return (
-    <div className="mt-15 mb-15">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-        {allPosts.length > 0 ? (
-          allPosts.map((post, index) => (
-            <div
-              key={post.id}
-              ref={index === allPosts.length - 1 ? lastPostRef : null}
-              className="relative shadow-md overflow-hidden cursor-pointer transition-transform hover:scale-102 h-full"
-              onClick={() => handlePostClick(post.id)}
-            >
-              <div
-                className="absolute inset-0 w-full h-full bg-cover bg-center filter blur-2xl opacity-40 z-0"
-                style={{ backgroundImage: `url(${post.cover_photo})` }}
-              />
-              <div className="absolute inset-0 bg-black/30 z-0" />
-
-              <div className="relative z-10 bg-white/80 backdrop-blur-md h-full flex flex-col">
-                <div className="flex items-center justify-between p-2 border-b border-gray-100">
-                  <div className="flex items-center space-x-3">
-                    <img
-                      src={post.profile_picture || post.image || a}
-                      alt="Profile"
-                      className="w-12 h-12 rounded-full object-cover border-2 border-gray-200"
-                    />
-                    <div>
-                      <h4 className="font-semibold text-gray-800">
-                        {post.username || "Olusteve"}
-                      </h4>
-                      <p className="text-sm text-gray-500">{post.artist || "Artist"}</p>
-                    </div>
-                  </div>
-                  <img src={b} className="w-6 h-6 cursor-pointer" alt="Options" />
-                </div>
-
-                <div className="relative">
-                  <img
-                    src={post.cover_photo || c}
-                    alt="Music Cover"
-                    className="w-full h-48 object-cover"
-                  />
-                </div>
-
-                <div className="p-2">
-                  <p className="text-lg font-semibold text-gray-900">
-                    {post.caption || "Untitled Track"}
-                  </p>
-                </div>
-
-                <div className="flex items-center space-x-3 p-2 border-t border-gray-100">
-                  {/* Heart Icon for Likes */}
-                  <div className="flex items-center space-x-2 px-2 py-1 bg-gray-100 rounded-md">
-  <FaHeart className="text-gray-500" />
-  <span className="text-sm text-gray-600 ">{post.likes || 0}</span>
-</div>
-
-                  {/* Comment Button */}
-                  <button
-                    onClick={(e) => handleComment(e, post.id)}
-                    className="flex items-center space-x-2 px-2 py-1 bg-gray-100 rounded-md hover:bg-gray-200"
-                  >
-                    <FaComment className="text-gray-500" />
-                    <span className="text-sm text-gray-600">{post.comments || 0}</span>
-                  </button>
-                  {/* Promote Button */}
-                  <span className="flex items-center space-x-2 px-2 py-1 bg-gray-100 rounded-md">
-                    <MdCampaign className="text-gray-500" />
-                    <span className="text-sm text-gray-600">Promote</span>
-                  </span>
-                  {/* Share Button */}
-                  <span className="flex items-center space-x-2 px-2 py-1 bg-gray-100 rounded-md">
-                    <FaShareAlt className="text-gray-500" />
-                    <span className="text-sm text-gray-600">Share</span>
-                  </span>
-                </div>
-              </div>
-            </div>
-          ))
-        ) : (
-          <p className="text-center text-gray-500">No posts available</p>
-        )}
-      </div>
-
-      {loading && (
-        <div className="flex justify-center items-center my-4">
-          <Spinner />
+    <div
+      ref={containerRef}
+      className="h-screen w-full overflow-y-scroll snap-y snap-mandatory bg-black"
+      style={{ overscrollBehavior: "none" }}
+    >
+      {allPosts.length > 0 ? (
+        allPosts.map((post, idx) => (
+          <AudioPost
+            key={post.id}
+            post={post}
+            isActive={idx === currentIndex}
+            onTap={() => handleTap(idx)}
+            onLike={() => handleLike(post.id)}
+            currentTime={currentTime}
+            duration={duration}
+            showTapIcon={showTapIcon && idx === currentIndex}
+            tapIconType={tapIconType}
+            data-index={idx}
+            ref={idx === allPosts.length - 1 ? lastPostRef : null}
+            setAudioRef={(el) => setAudioRef(idx, el)}
+            onTimeUpdate={(e) => handleTimeUpdate(idx, e)}
+            onLoadedMetadata={(e) => handleLoadedMetadata(idx, e)}
+          />
+        ))
+      ) : (
+        <div className="h-screen w-full flex items-center justify-center">
+          <p className="text-white">No posts available</p>
         </div>
       )}
+      {loading && (
+  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
+    <Spinner />
+  </div>
+)}
+
+      
     </div>
   );
 };

@@ -5,7 +5,6 @@ import { FiMenu, FiChevronLeft, FiSearch, FiSettings } from 'react-icons/fi';
 const Navbar = ({ toggleSidebar, name, profilePicture, goBack, isMessagePage }) => {
   // Truncate name if it's too long
   const displayName = name.length > 8 ? name.substring(0, 10) + "..." : name;
-  console.log("Navbar received profile picture:", profilePicture);
 
   return (
     <div className="navbar bg-white shadow-md flex items-center justify-between px-4 py-3 fixed top-0 left-0 w-full z-50">

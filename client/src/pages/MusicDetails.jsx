@@ -186,7 +186,7 @@ const MusicDetailsPage = () => {
 <ShareModal
       isOpen={isShareModalOpen}
       onClose={() => setIsShareModalOpen(false)}
-      url={`${window.location.origin}/posts/${postId}`}
+      url={`${window.location.origin}/music/${postId}`}
       title={data?.caption || "Check out this track"}
     />
     </div>
