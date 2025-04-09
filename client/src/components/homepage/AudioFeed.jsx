@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../Spinner";
 import useAudioPosts from "../../../Hooks/audioPosts/useCreateAudio";
-import AudioPost from "./audio feed/AudioPost";
+import AudioPost from "./feed/AudioPost";
 
 
 const AudioFeed = () => {

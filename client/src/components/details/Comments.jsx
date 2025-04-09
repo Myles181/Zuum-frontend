@@ -132,12 +132,10 @@ const CommentModal = ({ comments: initialComments = [], postId }) => {
                   {comments.map((comment) => (
                     <div key={comment.id} className="flex gap-3">
                       <img
-                        src={comment.profile_picture}
+                        src={comment.profile_picture || 'https://res.cloudinary.com/dlanhtzbw/image/upload/v1675343188/Telegram%20Clone/no-profile_aknbeq.jpg'}
                         alt="Profile"
                         className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-                        onError={(e) => {
-                          e.target.src = 'https://via.placeholder.com/40';
-                        }}
+                       
                       />
                       <div className="flex-1 min-w-0">
                         <div className="bg-gray-100 rounded-2xl p-3">
@@ -156,14 +154,17 @@ const CommentModal = ({ comments: initialComments = [], postId }) => {
               </div>
               
               {/* Fixed comment input at bottom */}
-              <div className="p-3 mb-15 border-t border-gray-200 bg-white">
+
+              <div className="p-3 border-t mb-10 border-gray-200 bg-white">
+             
+
                 <form onSubmit={handleSubmitComment} className="flex items-center gap-2">
                   <img
-                    src={profile?.image}
+                    src={profile?.image || 'https://res.cloudinary.com/dlanhtzbw/image/upload/v1675343188/Telegram%20Clone/no-profile_aknbeq.jpg'}
                     alt="Your profile"
                     className="w-10 h-10 rounded-full object-cover flex-shrink-0"
                     onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/40';
+                      e.target.src = 'https://res.cloudinary.com/dlanhtzbw/image/upload/v1675343188/Telegram%20Clone/no-profile_aknbeq.jpg';
                     }}
                   />
                   <div className="flex-1 relative">

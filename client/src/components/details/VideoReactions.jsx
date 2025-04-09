@@ -12,7 +12,7 @@ import { FaHeart, FaRegHeart } from 'react-icons/fa';
  */
 const ReactionButton = ({ postId, reactions = [], profileId }) => {
 
-  console.log(profileId);
+  console.log(profileId, reactions);
   
   // Derive initial state from reactions array
   const initialLikeCount = reactions.filter(r => r.like).length;
@@ -20,40 +20,37 @@ const ReactionButton = ({ postId, reactions = [], profileId }) => {
     r => r.post_reacter_id === profileId && r.like
   );
 
+
+  console.log(reactions, initialLiked, initialLikeCount);
+
   const [isLiked, setIsLiked] = useState(initialLiked);
   const [likeCount, setLikeCount] = useState(initialLikeCount);
   const { reactToVideo, loading, error } = useVideoReaction();
 
-  // Sync if reactions or profileId change
-  useEffect(() => {
-    setIsLiked(initialLiked);
-    setLikeCount(initialLikeCount);
-  }, [initialLiked, initialLikeCount]);
+  console.log(error);
+  
 
+  // Sync if reactions or profileId change
+ useEffect(() => {
+     setIsLiked(initialLiked);
+     setLikeCount(initialLikeCount);
+   }, [initialLiked, initialLikeCount]);
+
+  
   const handleClick = async (e) => {
     e.stopPropagation();
-
-    // Prepare new state
-    const nextLiked = !isLiked;
-    const nextCount = likeCount + (nextLiked ? 1 : -1);
-
     // Optimistic UI update
-    setIsLiked(nextLiked);
-    setLikeCount(nextCount);
-
-    try {
-      await reactToVideo({
-        post_id: postId,
-        like: nextLiked,
-        unlike: !nextLiked
-      });
-    } catch (errMsg) {
-      // Revert on error
-      setIsLiked(isLiked);
-      setLikeCount(likeCount);
-      console.error('Reaction failed:', errMsg);
+    if (isLiked) {
+      setIsLiked(false);
+      setLikeCount(count => count - 1);
+      await reactToVideo(postId, false, true);
+    } else {
+      setIsLiked(true);
+      setLikeCount(count => count + 1);
+      await reactToVideo(postId, true, false);
     }
   };
+
 
   return (
     <button
