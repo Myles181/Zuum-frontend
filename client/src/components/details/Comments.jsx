@@ -144,17 +144,7 @@ const CommentModal = ({ comments: initialComments = [], postId }) => {
                         </div>
                         <div className="flex items-center mt-1 ml-2 gap-4 text-xs text-gray-500">
                           <span>{formatDate(comment.created_at)}</span>
-                          <button 
-                            className="flex items-center gap-1"
-                            onClick={() => handleLikeComment(comment.id)}
-                          >
-                            {comment.isLiked ? (
-                              <FaHeart className="text-red-500" />
-                            ) : (
-                              <FaRegHeart />
-                            )}
-                            {comment.likes > 0 && <span>{comment.likes}</span>}
-                          </button>
+                          
                         </div>
                       </div>
                     </div>
@@ -164,7 +154,10 @@ const CommentModal = ({ comments: initialComments = [], postId }) => {
               </div>
               
               {/* Fixed comment input at bottom */}
+
               <div className="p-3 border-t mb-10 border-gray-200 bg-white">
+             
+
                 <form onSubmit={handleSubmitComment} className="flex items-center gap-2">
                   <img
                     src={profile?.image || 'https://res.cloudinary.com/dlanhtzbw/image/upload/v1675343188/Telegram%20Clone/no-profile_aknbeq.jpg'}
