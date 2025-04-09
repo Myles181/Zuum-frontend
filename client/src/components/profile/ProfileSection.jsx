@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import classNames from "classnames";
 import c from "../../assets/icons/ORSJOS0 1.png";
 import d from "../../assets/icons/Mask group1.svg";
+import { FiActivity, FiBarChart, FiGrid, FiHome } from "react-icons/fi"; // Import dashboard icon
 import MusicSection from "./MusicSection";
 import VideoSection from "./VideoSection";
 
@@ -25,14 +26,22 @@ const ProfileSection = ({ profile }) => {
   const [activeTab, setActiveTab] = useState("audio");
 
   return (
-    <div className="profile-container relative">
-      {/* Background Image */}
-      <div className="profile-background h-60 overflow-hidden rounded-t-lg relative">
+    <div className="profile-container relative ">
+      {/* Background Image with Dashboard Icon */}
+      <div className="profile-background h-60 overflow-hidden rounded-t-lg relatve">
         <img
           src={mergedProfile.cover_image || c}
           alt="Profile Background"
           className="w-full h-full object-cover"
         />
+        {/* Dashboard Icon */}
+        <Link 
+          to="/dashboard" 
+          className="absolute top-4 right-4 bg-white/90 p-2 mt-10 rounded-full shadow-lg hover:bg-white transition-all"
+          title="Go to Dashboard"
+        >
+          <FiBarChart className="w-5 h-5 text-[#008066]" />
+        </Link>
       </div>
 
       {/* Profile Image */}
@@ -55,7 +64,7 @@ const ProfileSection = ({ profile }) => {
       </p>
 
       {/* Followers & Following */}
-      <div className="stats flex justify-around w-full max-w-md mt-4 gap-5 text-gray-500 flex-wrap">
+      <div className="stats flex justify-around w-full  max-w-md mt-4 gap-5 text-gray-500 ">
         {["Followers", "Following"].map((item, index) => (
           <div key={index} className="text-center">
             <p>{item}</p>

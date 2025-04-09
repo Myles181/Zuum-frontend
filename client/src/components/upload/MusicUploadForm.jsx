@@ -2,12 +2,12 @@ import React, { useState, useRef, useEffect } from 'react';
 import { FaMusic, FaUpload } from 'react-icons/fa';
 import { FiCheckCircle, FiAlertCircle } from 'react-icons/fi';
 import { useCreateAudioPost } from '../../../Hooks/audioPosts/useCreateAudio';
-import FileUploadSection from '../../components/upload/FileUploadSection';
-import PlatformLinksSection from '../../components/upload/PlatformLinksSection';
-import Navbar from '../../components/profile/NavBar';
-import Sidebar from '../../components/homepage/Sidebar';
-import Overlay from '../../components/homepage/Overlay';
-import BottomNav from '../../components/homepage/BottomNav';
+import FileUploadSection from './FileUploadSection';
+import PlatformLinksSection from './PlatformLinksSection';
+import BottomNav from '../homepage/BottomNav';
+import Navbar from '../profile/NavBar';
+import Sidebar from '../homepage/Sidebar';
+import Overlay from '../homepage/Overlay';
 
 const MusicUploadForm = () => {
   const [formData, setFormData] = useState({
@@ -26,7 +26,6 @@ const MusicUploadForm = () => {
   const [previewImage, setPreviewImage] = useState(null);
   const fileInputRef = useRef(null);
   const audioInputRef = useRef(null);
-  const [sidebarOpen, setSidebarOpen] = useState(false);
   
   const { createAudioPost, loading, error, success } = useCreateAudioPost();
 
@@ -173,7 +172,7 @@ const MusicUploadForm = () => {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
-    <div className="min-h-screen bg-gray-50 mb-13 ">
+    <div className="min-h-screen bg-gray-50 ">
           <Navbar name={"Upload Beats"} toggleSidebar={toggleSidebar} />
           <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
           <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
@@ -200,7 +199,7 @@ const MusicUploadForm = () => {
         
         {/* Show success message */}
         {success && (
-          <div className="p-4 bg-emerald-50 border-l-4 border-[#2D8C72] flex items-center gap-3">
+          <div className="p-4 bg-emerald-50 border-l-4 border-emerald-500 flex items-center gap-3">
             <FiCheckCircle className="text-emerald-500 text-lg" />
             <p className="text-emerald-700">Your audio has been uploaded successfully!</p>
           </div>
