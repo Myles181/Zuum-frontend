@@ -139,7 +139,7 @@ const AudioPost = React.forwardRef(({
         </div>
         {isLocked && (
             <div 
-              className="bg-black/70 backdrop-blur-sm p-2 mx-3 mb-15 rounded-xl w-[80%]  border border-gray-600"
+              className="bg-black/50 backdrop-blur-sm p-2 mx-3 mb-15 rounded-xl w-[80%]  border border-gray-600"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="flex items-center space-x-3">

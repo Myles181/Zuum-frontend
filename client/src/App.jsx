@@ -32,6 +32,7 @@ import SubscriptionPage from './components/subscription/Account';
 import SubscriptionDetails from './components/subscription/SubDetails';
 import LockedMusicPlayer from './components/homepage/sale/Locked';
 import PurchaseFeed from './components/homepage/sale/Purchase';
+import MusicDashboard from './pages/Dashboard';
 
 
 
@@ -85,6 +86,7 @@ const App = () => {
           <Route path="/details" element={<SubscriptionDetails />} />
           <Route path="/lock" element={<LockedMusicPlayer />} />
           <Route path="/purchased" element={<PurchaseFeed />} />
+          <Route path="/dashboard" element={<MusicDashboard />} />
         </Route>
       </Routes>
     </Router>

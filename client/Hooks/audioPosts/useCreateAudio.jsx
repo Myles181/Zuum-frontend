@@ -7,7 +7,7 @@ const API_URL = import.meta.env.VITE_API_URL; // Ensure this is correctly set in
 export const useCreateAudioPost = () => {
   const [loading, setLoading] = useState(false); // Tracks if the request is in progress
   const [error, setError] = useState(null); // Stores any error that occurs
-  const [success, setSuccess] = useState(false); // Indicates if the request was successful
+  const [success, setSuccess] = useState(false); // Indicates if the request was successful 
 
   const createAudioPost = async (formData) => {
     setLoading(true); // Start loading

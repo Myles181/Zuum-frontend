@@ -4,6 +4,7 @@ import Sidebar from '../components/homepage/Sidebar'
 import Overlay from '../components/homepage/Overlay'
 import BottomNav from '../components/homepage/BottomNav'
 import { useAuth } from '../contexts/AuthContexts'
+import { Link } from 'react-router-dom'
 
 const Settings = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -22,6 +23,9 @@ const Settings = () => {
     
       <ul className="mt-8">
         {/* Change Password */}
+        <Link to='/dashboard' className="py-3 border-b border-gray-200 flex justify-between items-center">
+        <span className="text-gray-700">Dashboard</span>
+        </Link>
       
         {/* Deactivate Account */}
         <li className="py-3 border-b border-gray-200 flex justify-between items-center">
