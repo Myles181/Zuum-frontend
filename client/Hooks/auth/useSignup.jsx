@@ -17,12 +17,12 @@ const useSignup = () => {
 
     try {
       // Assign default identity if not provided
-      const { username, email, password, identity } = userData;
+      const { firstname, lastname, middlename, phonenumber, username, email, password, identity } = userData;
 
       // Make a POST request to the API
       const response = await axios.post(
         `${API_URL}/auth/signup`, // Replace with your actual signup endpoint
-        { username, email, password, identity }
+        { firstname, lastname, middlename, phonenumber, username, email, password, identity }
       );
 
       // Check the response status

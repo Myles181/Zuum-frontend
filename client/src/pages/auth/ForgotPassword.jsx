@@ -63,7 +63,7 @@ const ForgotPassword = () => {
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+              className="w-full bg-[#2D8C72] text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition duration-300"
               disabled={loading} // Disable button while loading
             >
               {loading ? "Sending..." : "Send Reset Link"}
@@ -72,11 +72,11 @@ const ForgotPassword = () => {
             {/* Back to Login and Reset Password Links */}
             <p className="text-white text-center mt-4">
               <span>Reset your password </span>
-              <Link to="/reset" className="text-blue-500 hover:underline">
+              <Link to="/reset" className="text-[#2D8C72] hover:underline">
                 Reset
               </Link>
               <span> or </span>
-              <Link to="/login" className="text-blue-500 hover:underline">
+              <Link to="/login" className="text-[#2D8C72] hover:underline">
                 Log in
               </Link>
             </p>

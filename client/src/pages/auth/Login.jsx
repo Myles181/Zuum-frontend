@@ -115,12 +115,12 @@ const Login = () => {
             {/* Remember Me and Forgot Password */}
             <div className="flex justify-between items-center mb-4">
               <div className="flex items-center">
-                <input type="checkbox" id="rememberMe" className="h-5 w-5 text-blue-600" />
+                <input type="checkbox" id="rememberMe" className="h-5 w-5 text-[#2D8C72]" />
                 <label htmlFor="rememberMe" className="ml-2 text-gray-300">
                   Remember me
                 </label>
               </div>
-              <Link to="/forgot" className="text-blue-500 hover:underline">
+              <Link to="/forgot" className="text-[#2D8C72] hover:underline">
                 Forgot Password?
               </Link>
             </div>
@@ -128,7 +128,7 @@ const Login = () => {
             {/* Login Button */}
             <button
               type="submit"
-              className="w-full bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+              className="w-full bg-[#2D8C72] text-white font-bold py-2 rounded-lg  transition duration-300"
               disabled={loading} // Disable button while loading
             >
               {loading ? "Logging in..." : "Log in"}
@@ -141,7 +141,7 @@ const Login = () => {
 
             {/* Social Login Buttons */}
             <div className="social-login flex justify-center ">
-              <button className="social-button w-full mx-15 flex items-center justify-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-300">
+              <button className="social-button w-full mx-15 flex items-center justify-center bg-[#2D8C72] text-white py-2 px-4 rounded-lg  transition duration-300">
               <FcGoogle className="w-6 h-6 mr-2" /> Google
               </button>
              
@@ -150,13 +150,13 @@ const Login = () => {
             {/* Signup Link */}
             <p className="text-white text-center mt-4">
               Don't have an account?{" "}
-              <Link to="/signup" className="text-blue-500 hover:underline">
+              <Link to="/signup" className="text-[#2D8C72] hover:underline">
                 Sign up
               </Link>
             </p>
             <p className="text-white text-center mt-4">
               Verify your account{" "}
-              <Link to="/verify" className="text-blue-500 hover:underline">
+              <Link to="/verify" className="text-[#2D8C72] hover:underline">
                 Verify
               </Link>
             </p>

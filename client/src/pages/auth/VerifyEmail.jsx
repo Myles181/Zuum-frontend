@@ -100,7 +100,7 @@ const VerifyOTP = () => {
             {/* Verify Button */}
             <button
               type="submit"
-              className="login-button resend-otp w-full bg-blue-500 text-white font-bold py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+              className="login-button resend-otp w-full bg-[#2D8C72] text-white font-bold py-2 rounded-lg  transition duration-300"
               disabled={verifyLoading || resendLoading} // Disable button while loading
             >
               {verifyLoading ? "Verifying..." : "Verify OTP"}
@@ -111,7 +111,7 @@ const VerifyOTP = () => {
               Didn't receive email?{" "}
               <span
                 onClick={handleResendOtp}
-                className="text-blue-500 hover:underline cursor-pointer"
+                className="text-[#2D8C72] hover:underline cursor-pointer"
               >
                 Resend OTP
               </span>

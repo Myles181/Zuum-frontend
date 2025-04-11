@@ -1,206 +1,435 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
+import useProfile from "../../../Hooks/useProfile";
+import { FaCamera } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 
-import c from "../../assets/icons/ORSJOS0 1.png"; // Default background image
-import d from "../../assets/icons/Mask group1.svg"; // Default profile image
-import Navbar from './NavBar';
-import Sidebar from '../homepage/Sidebar';
-import Overlay from '../homepage/Overlay';
-import BottomNav from '../homepage/BottomNav';
-import useProfile from '../../../Hooks/useProfile';
-import Spinner from '../Spinner';
-
-const EditProfile = () => {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [profileImage, setProfileImage] = useState(d); // State for profile image
-  const [backgroundImage, setBackgroundImage] = useState(c); // State for background image
-
-  // Use the useProfile hook
+const EditProfilePage = () => {
   const {
     profile,
-    loading, // Loading state for fetching profile data
+    loading,
     fetchError,
     updateProfile,
-    updateLoading, // Loading state for updating profile
+    updateLoading,
     updateError,
     updateSuccess,
   } = useProfile();
 
-  // Update profile and background images when profile data is fetched
+  // Form state
+  const [formData, setFormData] = useState({
+    firstname: "",
+    middlename: "",
+    lastname: "",
+    username: "",
+    email: "",
+    phonenumber: "",
+    bio: "",
+    identity: "",
+    image: null,
+    cover_image: null,
+  });
+
+  // Previews
+  const [previewImage, setPreviewImage] = useState(null);
+  const [previewCoverImage, setPreviewCoverImage] = useState(null);
+
   useEffect(() => {
     if (profile) {
-      if (profile.image) {
-        setProfileImage(profile.image); // Set profile image from profile data
-      }
-      if (profile.cover_image) {
-        setBackgroundImage(profile.cover_image); // Set background image from profile data
-      }
+      setFormData({
+        firstname: profile.firstname || "",
+        middlename: profile.middlename || "",
+        lastname: profile.lastname || "",
+        username: profile.username || "",
+        email: profile.email || "",
+        phonenumber: profile.phonenumber || "",
+        bio: profile.bio || "",
+        identity: profile.identity || "",
+        image: null,
+        cover_image: null,
+      });
+      if (profile.image) setPreviewImage(profile.image);
+      if (profile.cover_image) setPreviewCoverImage(profile.cover_image);
     }
-  }, [profile]); // Run this effect when profile data changes
+  }, [profile]);
+  const navigate = useNavigate();
 
-  const toggleSidebar = () => {
-    setSidebarOpen(!sidebarOpen);
+  const getInitial = () => {
+    if (formData.firstname) return formData.firstname.charAt(0).toUpperCase();
+    if (formData.username) return formData.username.charAt(0).toUpperCase();
+    return "?";
   };
 
-  // Handle profile image change
-  const handleProfileImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setProfileImage(e.target.result); // Set the new profile image
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((p) => ({ ...p, [name]: value }));
   };
 
-  // Handle background image change
-  const handleBackgroundImageChange = (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setBackgroundImage(e.target.result); // Set the new background image
-      };
-      reader.readAsDataURL(file);
-    }
+  const handleFileChange = (e) => {
+    const { name, files } = e.target;
+    const file = files[0];
+    if (!file) return;
+    setFormData((p) => ({ ...p, [name]: file }));
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (name === "image") setPreviewImage(reader.result);
+      else setPreviewCoverImage(reader.result);
+    };
+    reader.readAsDataURL(file);
   };
 
-  // Handle form submission
-  const handleSave = async () => {
-    const formData = new FormData();
-
-    // Append text fields
-    formData.append('username', document.getElementById('username').value);
-    formData.append('email', document.getElementById('email').value);
-    formData.append('phone_number', document.getElementById('phone').value);
-    formData.append('bio', document.getElementById('bio').value);
-
-    // Append image files
-    const profileImageFile = document.querySelector('input[name="profileImage"]').files[0];
-    const coverImageFile = document.querySelector('input[name="coverImage"]').files[0];
-
-    if (profileImageFile) {
-      formData.append('image', profileImageFile);
-    }
-    if (coverImageFile) {
-      formData.append('cover_image', coverImageFile);
-    }
-
-    // Call the updateProfile function from the useProfile hook
-    await updateProfile(formData);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const data = new FormData();
+    Object.entries(formData).forEach(([k, v]) => {
+      if (v !== null && v !== "") data.append(k, v);
+    });
+    await updateProfile(data);
   };
 
-  // Display loading spinner while fetching profile data
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <Spinner />
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500" />
+      </div>
+    );
+  }
+
+  if (updateSuccess){
+    navigate("/profile");
+  }
+
+  if (fetchError) {
+    return (
+      <div className="max-w-md mx-auto mt-10 p-6 bg-red-50 rounded-lg shadow-md">
+        <h2 className="text-xl font-bold text-red-600 mb-2">Error</h2>
+        <p className="text-gray-700">{fetchError}</p>
       </div>
     );
   }
 
   return (
-    <div>
-      <Navbar toggleSidebar={toggleSidebar} name={updateLoading ? 'Saving...' : 'Edit Profile'} />
-      <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-      <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
-
-      <div className="profile-container flex flex-col items-center  mt-4 mb-15">
-        <section>
-          <div className="profile-info bg-white mt-5 p-5 rounded-lg shadow-md relative">
-            <div className="profile-container relative">
-              {/* Background Image */}
-              <div className="profile-background h-40 overflow-hidden rounded-t-lg relative">
-                <img
-                  src={backgroundImage} // Use the selected background image or fallback to the profile's background image
-                  alt="Profile Background"
-                  className="w-full h-full object-cover"
-                />
-                <input
-                  type="file"
-                  name="coverImage"
-                  accept="image/*"
-                  onChange={handleBackgroundImageChange}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
+    <div className="bg-gray-100 min-h-screen ">
+      <div className="max-w-5xl mx-auto">
+        {/* Cover + Profile */}
+        <div className="relative">
+          <div className="h-60 bg-white overflow-hidden">
+            {previewCoverImage ? (
+              <img
+                src={previewCoverImage}
+                alt="Cover"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="w-full h-full" />
+            )}
+          </div>
+          <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
+            <div className="relative">
+              <div className="w-40 h-40 rounded-full border-4 border-white overflow-hidden bg-white">
+                {previewImage ? (
+                  <img
+                    src={previewImage}
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full bg-gray-200">
+                    <span className="text-gray-400 text-6xl font-medium">
+                      {getInitial()}
+                    </span>
+                  </div>
+                )}
               </div>
-
-              {/* Profile Image (Absolute Positioning) */}
-              <div className="profile-header absolute bottom-0 left-4 translate-y-1/2">
-                <img
-                  src={profileImage} // Use the selected profile image or fallback to the profile's image
-                  alt="Profile Picture"
-                  className="w-24 h-24 rounded-full border-4 border-white shadow-lg"
-                />
-                <input
-                  type="file"
-                  name="profileImage"
-                  accept="image/*"
-                  onChange={handleProfileImageChange}
-                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                />
-              </div>
+              <label
+                htmlFor="image"
+                className="absolute bottom-2 right-2 bg-gray-100 text-gray-700 p-2 rounded-full cursor-pointer shadow-md hover:bg-gray-200 transition"
+              >
+                <FaCamera />
+              </label>
+              <input
+                type="file"
+                id="image"
+                name="image"
+                accept="image/*"
+                onChange={handleFileChange}
+                className="hidden"
+              />
             </div>
+          </div>
+          <label
+            htmlFor="cover_image"
+            className="absolute bottom-4 right-4 bg-white px-4 py-2 rounded-md shadow cursor-pointer hover:bg-gray-50 transition flex items-center gap-2"
+          >
+            <FaCamera />
+          </label>
+          <input
+            type="file"
+            id="cover_image"
+            name="cover_image"
+            accept="image/*"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+        </div>
 
-            <div className="profile-details mt-20">
-              <div className="form-group mb-5">
-                <label htmlFor="username" className="block text-sm text-gray-500">Username</label>
+        {/* Form */}
+        <div className="mt-24 bg-white rounded-lg shadow-md p-6">
+          {updateSuccess && (
+            <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
+              <p className="text-green-700 font-medium">
+                Profile updated successfully!
+              </p>
+            </div>
+          )}
+          {updateError && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
+              <p className="text-red-700 font-medium">{updateError}</p>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit}>
+            {/* Basic Info */}
+            <div className="border-b border-gray-200 pb-4 mb-6">
+              <h2 className="text-xl font-semibold text-gray-800">
+                Basic Info
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* First Name */}
+              <div>
+                <label
+                  htmlFor="firstname"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  First Name
+                </label>
+                <input
+                  type="text"
+                  id="firstname"
+                  name="firstname"
+                  value={formData.firstname}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+
+              {/* Middle Name */}
+              <div>
+                <label
+                  htmlFor="middlename"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Middle Name
+                </label>
+                <input
+                  type="text"
+                  id="middlename"
+                  name="middlename"
+                  value={formData.middlename}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+
+              {/* Last Name */}
+              <div>
+                <label
+                  htmlFor="lastname"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Last Name
+                </label>
+                <input
+                  type="text"
+                  id="lastname"
+                  name="lastname"
+                  value={formData.lastname}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                />
+              </div>
+
+              {/* Username (read‑only) */}
+              <div>
+                <label
+                  htmlFor="username"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Username
+                </label>
                 <input
                   type="text"
                   id="username"
-                  defaultValue={profile?.username || "Olusteve"}
-                  className="w-full px-3 py-2 border-b border-gray-300 focus:outline-none focus:border-green-500 text-gray-800"
-                />
-              </div>
-              <div className="form-group mb-5">
-                <label htmlFor="bio" className="block text-sm text-gray-500">Bio</label>
-                <textarea
-                  id="bio"
-                  defaultValue={profile?.bio || "I'm a singer-songwriter, weaving emotions into melodies that touches.."}
-                  className="w-full px-3 py-2 border-b border-gray-300 focus:outline-none focus:border-green-500 text-gray-800 resize-y h-32"
-                ></textarea>
-              </div>
-              <div className="form-group mb-5">
-                <label htmlFor="email" className="block text-sm text-gray-500">Email</label>
-                <input
-                  type="email"
-                  id="email"
-                  defaultValue={profile?.email || "olusteve@gmail.com"}
-                  className="w-full px-3 py-2 border-b border-gray-300 focus:outline-none focus:border-green-500 text-gray-800 bg-gray-100 cursor-not-allowed"
-                  readOnly // Prevents editing
-                />
-              </div>
-              <div className="form-group mb-5">
-                <label htmlFor="phone" className="block text-sm text-gray-500">Phone Number</label>
-                <input
-                  type="tel"
-                  id="phone"
-                  defaultValue={profile?.phone_number || "+2345678901"}
-                  className="w-full px-3 py-2 border-b border-gray-300 focus:outline-none focus:border-green-500 text-gray-800"
+                  name="username"
+                  value={formData.username}
+                  disabled
+                  className="w-full pl-3 px-4 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
                 />
               </div>
             </div>
-          </div>
 
-          <div className="buttons flex justify-center mt-5 mb-10">
-            <button 
-              className="save bg-[#008066] text-white rounded-3xl px-4 py-2"
-              onClick={handleSave}
-              disabled={updateLoading}
-            >
-              {updateLoading ? 'Saving...' : 'Save'}
-            </button>
-          </div>
+            {/* Contact Info */}
+            <div className="border-b border-gray-200 pb-4 mb-6 mt-8">
+              <h2 className="text-xl font-semibold text-gray-800">
+                Contact Information
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Email (read‑only) */}
+              <div>
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={formData.email}
+                  disabled
+                  className="w-full pl-3 px-4 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
+                />
+              </div>
 
-          {/* Display success or error messages */}
-          {updateSuccess && <div className="text-green-500 text-center mt-2">Profile updated successfully!</div>}
-          {updateError && <div className="text-red-500 text-center mt-2">{updateError}</div>}
-        </section>
+              {/* Phone Number */}
+              <div>
+                <label
+                  htmlFor="phonenumber"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Phone Number
+                </label>
+                <input
+                  type="tel"
+                  id="phonenumber"
+                  name="phonenumber"
+                  value={formData.phonenumber || ""}
+                  onChange={handleChange}
+                  className="w-full pl-3 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder="Add your phone number"
+                />
+              </div>
+            </div>
 
-        <BottomNav />
+            {/* About You */}
+            <div className="border-b border-gray-200 pb-4 mb-6 mt-8">
+              <h2 className="text-xl font-semibold text-gray-800">
+                About You
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 gap-6">
+              {/* Identity (read‑only) */}
+              <div>
+                <label
+                  htmlFor="identity"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Identity
+                </label>
+                <select
+                  id="identity"
+                  name="identity"
+                  value={formData.identity}
+                  disabled
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
+                >
+                  <option value="">Select identity</option>
+                  <option value="artist">Artist</option>
+                  <option value="collector">Collector</option>
+                  <option value="both">Both</option>
+                </select>
+              </div>
+
+              {/* Bio */}
+              <div>
+                <label
+                  htmlFor="bio"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
+                  Bio
+                </label>
+                <textarea
+                  id="bio"
+                  name="bio"
+                  rows="4"
+                  value={formData.bio || ""}
+                  onChange={handleChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  placeholder="Tell us a bit about yourself..."
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Write a short introduction about yourself. What makes you
+                  unique?
+                </p>
+              </div>
+            </div>
+
+            {/* Account Info */}
+            <div className="mt-8 p-4 bg-gray-50 rounded-md">
+              <h3 className="font-medium text-gray-700 flex items-center">
+                Account Information
+              </h3>
+              <div className="mt-2 text-sm text-gray-500">
+                <p>
+                  Account created:{" "}
+                  {new Date(profile?.created_at).toLocaleDateString("en-US", {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                  })}
+                </p>
+                <p>Account ID: {profile?.id}</p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="mt-8 flex justify-end space-x-3">
+              <button
+                type="button"
+                className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={updateLoading}
+                className="px-6 py-2 border border-transparent rounded-md shadow-sm text-white bg-[#2D8C72] hover:bg-[#25725D] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 flex items-center"
+              >
+                {updateLoading ? (
+                  <>
+                    <svg
+                      className="animate-spin -ml-1 mr-2 h-4 w-4 text-white"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                    >
+                      <circle
+                        className="opacity-25"
+                        cx="12"
+                        cy="12"
+                        r="10"
+                        stroke="currentColor"
+                        strokeWidth="4"
+                      />
+                      <path
+                        className="opacity-75"
+                        fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                      />
+                    </svg>
+                    Saving...
+                  </>
+                ) : (
+                  "Save Changes"
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
       </div>
     </div>
   );
 };
 
-export default EditProfile;
+export default EditProfilePage;
