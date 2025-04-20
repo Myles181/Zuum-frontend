@@ -1,70 +1,91 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL; // Ensure this is correctly set in your environment
+const API_URL = import.meta.env.VITE_API_URL;
 
-
+/**
+ * Custom hook to create a comment on an audio post.
+ * Handles casting, detailed error reporting, and stores response data.
+ */
 export const useCreateComment = () => {
-    const [loading, setLoading] = useState(false); // Track if the request is in progress
-    const [error, setError] = useState(null); // Store any error that occurs
-    const [success, setSuccess] = useState(false); // Indicates if the request was successful
-  
-    const createComment = async (postId, comment) => {
-      setLoading(true); // Start loading
-      setError(null); // Reset error state
-      setSuccess(false); // Reset success state
-  
-      try {
-        const token = localStorage.getItem('authToken'); // Retrieve the authentication token
-  
-        // Make the POST request to the API endpoint
-        const response = await axios.post(
-          `${API_URL}/audio/comment/create`,
-          { post_id: postId, comment }, // Request body
-          {
-            headers: {
-              Authorization: `Bearer ${token}`, // Include the auth token
-              'Content-Type': 'application/json', // Set content type
-            },
-          }
-        );
-  
-        // Handle successful response (status code 201)
-        if (response.status === 201) {
-          setSuccess(true); // Mark the request as successful
-          return response.data; // Return the response data (optional)
-        } else {
-          // Handle unexpected status codes
-          setError('An unexpected error occurred');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [commentData, setCommentData] = useState(null);
+
+  const createComment = async (postId, trimmedComment) => {
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+    setCommentData(null);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      // Cast postId to string per API schema requirements
+      const payload = {
+        post_id: String(postId),
+        comment: trimmedComment,
+      };
+
+      // Debugging log to confirm payload & endpoint
+      console.debug('Posting comment:', payload, 'to', `${API_URL}/audio/comment/create`);
+
+      const response = await axios.post(
+        `${API_URL}/audio/comment/create`,
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         }
-      } catch (err) {
-        // Handle errors
-        if (err.response) {
-          // The request was made and the server responded with a status code
-          if (err.response.status === 400) {
-            setError('Validation error: Please check your input');
-          } else if (err.response.status === 404) {
-            setError('Post not found');
-          } else if (err.response.status === 500) {
-            setError('Server error: Please try again later');
-          } else {
-            setError('An unexpected error occurred');
-          }
-        } else if (err.request) {
-          // The request was made but no response was received
-          setError('Network error: No response from server');
-        } else {
-          // Something happened in setting up the request
-          setError('Failed to create comment: ' + err.message);
-        }
-      } finally {
-        setLoading(false); // Stop loading
+      );
+
+      if (response.status === 201) {
+        setSuccess(true);
+        setCommentData(response.data);
+        return response.data;
+      } else {
+        // Unexpected status code
+        const msg = `Unexpected status code: ${response.status}`;
+        console.warn(msg, response.data);
+        setError(msg);
       }
-    };
-  
-    // Return the create function and state variables
-    return { createComment, loading, error, success };
+    } catch (err) {
+      // Detailed error parsing
+      if (err.response && err.response.data) {
+        console.error('Server validation errors:', err.response.data);
+        // If API returns structured errors, join them
+        const data = err.response.data;
+        if (data.errors) {
+          const messages = Object.values(data.errors).flat().join(' | ');
+          setError(messages);
+        } else if (data.message) {
+          setError(data.message);
+        } else {
+          setError(JSON.stringify(data));
+        }
+      } else if (err.request) {
+        console.error('No response received:', err.request);
+        setError('Network error: No response from server');
+      } else {
+        console.error('Error setting up request:', err.message);
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
+
+  return {
+    createComment,
+    isLoading: loading,
+    error,
+    isSuccess: success,
+    commentData,
+  };
+};
+
   
 
   export const useReactToPost = () => {

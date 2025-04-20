@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   FaTwitter,
@@ -10,25 +10,38 @@ import {
   FaTimes
 } from "react-icons/fa";
 
-const ShareModal = ({ isOpen, onClose, url, title }) => {
+const ShareModal = ({ isOpen, onClose, url, title, postId }) => {
   const [copySuccess, setCopySuccess] = useState(false);
+  const [shareableLink, setShareableLink] = useState(url);
   const text = encodeURIComponent("Check out this track");
+
+  // Generate a proper shareable link
+  useEffect(() => {
+    if (postId) {
+      // Generate a proper shareable link with the post ID
+      const baseUrl = window.location.origin;
+      const shareUrl = `${baseUrl}/shared-audio/${postId}`;
+      setShareableLink(shareUrl);
+    } else {
+      setShareableLink(url);
+    }
+  }, [postId, url]);
 
   const socialPlatforms = [
     { 
       name: "Twitter", 
       icon: <FaTwitter className="text-[#1DA1F2]" size={20} />, 
-      url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}` 
+      url: `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(shareableLink)}` 
     },
     { 
       name: "Facebook", 
       icon: <FaFacebook className="text-[#1877F2]" size={20} />, 
-      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}` 
+      url: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareableLink)}` 
     },
     { 
       name: "WhatsApp", 
       icon: <FaWhatsapp className="text-[#25D366]" size={20} />, 
-      url: `https://wa.me/?text=${text}%20${encodeURIComponent(url)}` 
+      url: `https://wa.me/?text=${text}%20${encodeURIComponent(shareableLink)}` 
     },
     { 
       name: "Instagram", 
@@ -37,7 +50,7 @@ const ShareModal = ({ isOpen, onClose, url, title }) => {
     { 
       name: "Telegram", 
       icon: <FaTelegram className="text-[#0088CC]" size={20} />, 
-      url: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}` 
+      url: `https://t.me/share/url?url=${encodeURIComponent(shareableLink)}&text=${encodeURIComponent(title)}` 
     },
   ];
 
@@ -52,7 +65,7 @@ const ShareModal = ({ isOpen, onClose, url, title }) => {
   };
 
   const copyToClipboard = () => {
-    navigator.clipboard.writeText(url).then(() => {
+    navigator.clipboard.writeText(shareableLink).then(() => {
       setCopySuccess(true);
       setTimeout(() => setCopySuccess(false), 2000);
     });
@@ -125,13 +138,13 @@ const ShareModal = ({ isOpen, onClose, url, title }) => {
                 <div className="flex items-center">
                   <input
                     type="text"
-                    value={url}
+                    value={shareableLink}
                     readOnly
                     className="flex-1 bg-white border border-gray-200 rounded-l-lg px-4 py-2 text-sm text-gray-700 truncate focus:outline-none"
                   />
                   <button
                     onClick={copyToClipboard}
-                    className="bg-[#2D8C72]  text-white px-4 py-2 rounded-r-lg text-sm font-medium hover:bg-gray-700 transition-colors"
+                    className="bg-[#2D8C72] text-white px-4 py-2 rounded-r-lg text-sm font-medium hover:bg-gray-700 transition-colors"
                   >
                     {copySuccess ? 'Copied!' : 'Copy'}
                   </button>

@@ -10,10 +10,12 @@ import VideoFeed from '../components/homepage/VideoFeed';
 import { FiX, FiCheckCircle } from 'react-icons/fi';
 import { FaCheckCircle } from 'react-icons/fa';
 import SubscriptionPopup from '../components/subscription/Popup';
+import useProfile from '../../Hooks/useProfile';
 
 function Homepage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('audio');
+  const { profile: authProfile, loading: authLoading } = useProfile();
   const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(true); // Control popup visibility
 
   const toggleSidebar = () => {
@@ -35,13 +37,13 @@ function Homepage() {
       <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       {/* Conditionally render AudioFeed or VideoFeed based on activeTab */}
-      {activeTab === 'audio' ? <AudioFeed /> : <VideoFeed />}
+      {activeTab === 'audio' ? <AudioFeed   /> : <VideoFeed />}
 
       <BottomNav />
       
       {/* Subscription Popup - only shown when showSubscriptionPopup is true */}
       {showSubscriptionPopup && (
-        <SubscriptionPopup onClose={() => setShowSubscriptionPopup(false)} />
+        <SubscriptionPopup onClose={() => setShowSubscriptionPopup(false)} authProfile={authProfile}  />
       )}
     </div>
   );

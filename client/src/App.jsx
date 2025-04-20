@@ -33,6 +33,10 @@ import SubscriptionDetails from './components/subscription/SubDetails';
 import LockedMusicPlayer from './components/homepage/sale/Locked';
 import PurchaseFeed from './components/homepage/sale/Purchase';
 import MusicDashboard from './pages/Dashboard';
+import BeatDetails from './components/homepage/details/BeatDetails';
+import PurchasedBeats from './components/homepage/details/PurchasedBeats';
+import PromotionPage from './pages/Promotion';
+import SharedAudioPage from './components/homepage/SharePage';
 
 
 
@@ -76,17 +80,23 @@ const App = () => {
           <Route path="/message" element={<ChatListPage />} />
           <Route path="/chat/:roomId" element={<MessagePage />} />
           <Route path="/music/:postId" element={<MusicDetailsPage />} />
-          <Route path="/add" element={<UploadPage />} />
+          <Route path="/add" element={<UploadPage profile={authProfile} />} />
           <Route path="/addpaybeat" element={<UploadBeat />} />
           <Route path="/addbeat" element={<MusicUploadInterface />} />
           <Route path="/addvideo" element={<UploadVideo />} />
           <Route path="/video/:postId" element={<VideoDetails />} />
           <Route path="/all" element={<FollowersListPage />} />
-          <Route path="/subscribe" element={<SubscriptionPage />} />
+          <Route path="/subscribe" element={<SubscriptionPage profile={authProfile} />} />
           <Route path="/details" element={<SubscriptionDetails />} />
           <Route path="/lock" element={<LockedMusicPlayer />} />
           <Route path="/purchased" element={<PurchaseFeed />} />
           <Route path="/dashboard" element={<MusicDashboard />} />
+          <Route path="/beats/:id" element={<BeatDetails />} />
+          <Route path="/purchasedbeats" element={<PurchasedBeats />} />
+          <Route path="/promotion" element={<PromotionPage />} />
+          <Route path="/shared-audio/:shareId" element={<SharedAudioPage />} />
+          
+          
         </Route>
       </Routes>
     </Router>

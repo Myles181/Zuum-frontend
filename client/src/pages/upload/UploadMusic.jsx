@@ -8,6 +8,7 @@ import Navbar from '../../components/profile/NavBar';
 import Sidebar from '../../components/homepage/Sidebar';
 import Overlay from '../../components/homepage/Overlay';
 import BottomNav from '../../components/homepage/BottomNav';
+import { useNavigate } from 'react-router-dom';
 
 const MusicUploadForm = () => {
   const [formData, setFormData] = useState({
@@ -22,6 +23,8 @@ const MusicUploadForm = () => {
     audio_upload: null
   });
 
+  
+  const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
   const fileInputRef = useRef(null);
@@ -142,6 +145,7 @@ const MusicUploadForm = () => {
             audio_upload: null
           });
           setPreviewImage(null);
+          navigate('/home');
         }
       } catch (err) {
         console.error('Error during submission:', err);

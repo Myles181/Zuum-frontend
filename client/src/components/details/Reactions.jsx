@@ -10,36 +10,35 @@ import { useReactToPost } from '../../../Hooks/audioPosts/usePostInteractions';
  * - reactions: array of reaction objects [{ like, unlike, post_reacter_id, ... }]
  * - profileId: current user's profile ID
  */
-const ReactionButton = ({ postId, reactions = [], profileId }) => {
-  // Derive initial state from reactions array
-  const initialLikeCount = reactions.filter(r => r.like).length;
-  const initialLiked = reactions.some(
-    r => r.post_reacter_id === profileId && r.like
-  );
-
-  console.log(reactions, initialLiked, initialLikeCount);
-  
-
-  const [isLiked, setIsLiked] = useState(initialLiked);
-  const [likeCount, setLikeCount] = useState(initialLikeCount);
+const ReactionButton = ({ postId, reactions, profileId }) => {
   const { reactToPost, loading } = useReactToPost();
 
-  // Sync if reactions or profileId change
+  const safeReactions = Array.isArray(reactions) ? reactions : [];
+
+  const initialLikeCount = safeReactions.filter(r => r.like).length;
+  const initialLiked =
+    profileId &&
+    safeReactions.some(r => r.post_reacter_id === profileId && r.like);
+
+  const [isLiked, setIsLiked] = useState(initialLiked || false);
+  const [likeCount, setLikeCount] = useState(initialLikeCount);
+
   useEffect(() => {
-    setIsLiked(initialLiked);
     setLikeCount(initialLikeCount);
-  }, [initialLiked, initialLikeCount]);
+    setIsLiked(initialLiked || false);
+  }, [initialLikeCount, initialLiked]);
 
   const handleClick = async (e) => {
     e.stopPropagation();
-    // Optimistic UI update
+    if (!profileId) return;
+
     if (isLiked) {
       setIsLiked(false);
-      setLikeCount(count => count - 1);
+      setLikeCount(prev => prev - 1);
       await reactToPost(postId, false, true);
     } else {
       setIsLiked(true);
-      setLikeCount(count => count + 1);
+      setLikeCount(prev => prev + 1);
       await reactToPost(postId, true, false);
     }
   };
@@ -47,14 +46,18 @@ const ReactionButton = ({ postId, reactions = [], profileId }) => {
   return (
     <button
       onClick={handleClick}
-      disabled={loading}
-      className=" flex flex-col justify-center items-center gap-1 rounded-full shadow-md hover:bg-red-300 transition-all duration-200"
+      disabled={loading || !profileId}
+      className="flex flex-col justify-center items-center gap-1 rounded-full shadow-md hover:bg-red-300 transition-all duration-200"
       aria-label={isLiked ? 'Unlike' : 'Like'}
     >
-      {isLiked ? (
-        <FaHeart className="text-green-700 text-xl" />
+      {profileId ? (
+        isLiked ? (
+          <FaHeart className="text-green-700 text-xl" />
+        ) : (
+          <FaRegHeart className="text-gray-100 text-xl" />
+        )
       ) : (
-        <FaRegHeart className="text-gray-100 text-xl" />
+        <FaRegHeart className="text-gray-400 text-xl" />
       )}
       <span className="text-sm text-white">{likeCount}</span>
     </button>

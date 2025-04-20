@@ -1,67 +1,99 @@
-import { useState } from "react";
-import axios from "axios";
+import { useCallback, useState } from 'react';
+import axios from 'axios';
 
-// Get the API URL from environment variables
 const API_URL = import.meta.env.VITE_API_URL;
 
-const useBankTransferPayment = () => {
-  const [loading, setLoading] = useState(false); // Tracks loading state
-  const [error, setError] = useState(null); // Tracks error messages
-  const [paymentDetails, setPaymentDetails] = useState(null); // Stores payment details on success
+const useDepositAccount = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [paymentDetails, setPaymentDetails] = useState(null);
 
-  // Retrieve the token from localStorage
-  const token = localStorage.getItem("authToken");
+  const getDepositAccount = useCallback(async () => {
+    console.debug('[useDepositAccount] Initializing request...');
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+    setPaymentDetails(null);
 
-  // Function to create a bank transfer payment
-  const createBankTransferPayment = async () => {
-    setLoading(true); // Start loading
-    setError(null); // Reset any previous errors
-    setPaymentDetails(null); // Reset payment data
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      console.error('[useDepositAccount] No auth token found');
+      setError('Authentication token missing');
+      setLoading(false);
+      return;
+    }
+
+    const url = `${API_URL}/payment/deposit-account`;
+    console.debug(`[useDepositAccount] Making request to: ${url}`);
 
     try {
-      // Make a GET request to initiate a bank transfer payment with Authorization header
-      const response = await axios.get(`${API_URL}/payment/create`, {
+      const response = await axios.get(url, {
         headers: {
-          Authorization: `Bearer ${token}`, // Pass the token in the request headers
-          Accept: "application/json", // Specify we want JSON response
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json',
         },
       });
 
-      // Check if the payment was initiated successfully
-      if (response.status === 200) {
-        setPaymentDetails(response.data); // Store the payment details returned from the API
+      console.debug('[useDepositAccount] Full response:', response);
+      
+      // Check if data exists and has the expected structure
+      if (!response.data) {
+        throw new Error('No data in response');
       }
-    } catch (err) {
-      console.error("API Error:", err.response || err);
-      // Handle errors based on the response status code
-      if (err.response) {
-        const { status, data } = err.response;
-        if (status === 401) {
-          setError(data.error || "Unauthorized. Please login to continue.");
-        } else if (status === 404) {
-          setError(data.error || "Payment plan not found");
-        } else if (status === 500) {
-          setError(data.error || "Server error. Please try again later.");
-        } else {
-          setError(data.error || "An unexpected error occurred.");
-        }
-      } else {
-        setError("Network error. Please check your internet connection.");
-      }
-    } finally {
-      setLoading(false); // Stop loading regardless of success or failure
-    }
-  };
 
-  return { 
-    loading, 
-    error, 
-    paymentDetails, 
-    createBankTransferPayment 
+      // Handle different possible response structures
+      const details = response.data.paymentDetails || 
+                     response.data.data || 
+                     response.data;
+      
+      if (!details) {
+        throw new Error('Payment details not found in response');
+      }
+
+      console.debug('[useDepositAccount] Extracted payment details:', details);
+      setPaymentDetails(details);
+      setSuccess(true);
+      
+    } catch (err) {
+      console.error('[useDepositAccount] Error:', err);
+      
+      let errorMessage = 'Failed to fetch payment details';
+      
+      if (err.response) {
+        console.error('[useDepositAccount] Response error:', {
+          status: err.response.status,
+          data: err.response.data,
+        });
+        
+        errorMessage = err.response.data?.message || 
+                      err.response.data?.error || 
+                      `Server responded with ${err.response.status}`;
+      } else if (err.request) {
+        console.error('[useDepositAccount] No response received');
+        errorMessage = 'No response from server';
+      } else {
+        console.error('[useDepositAccount] Request error:', err.message);
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+      console.debug('[useDepositAccount] Request completed');
+    }
+  }, []);
+
+  return {
+    getDepositAccount,
+    paymentDetails,
+    loading,
+    error,
+    success,
   };
 };
 
-export default useBankTransferPayment;
+export default useDepositAccount;
 
 
 
@@ -130,3 +162,92 @@ export const useFlutterwaveWebhook = () => {
     handleWebhook,
   };
 };
+
+
+
+
+
+export const useDepositAccountPayment = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [paymentDetails, setPaymentDetails] = useState(null);
+
+  // Retrieve the token from localStorage
+  const token = localStorage.getItem("authToken");
+
+  // Function to initiate a deposit account payment
+  const initiateDepositPayment = async () => {
+    setLoading(true);
+    setError(null);
+    setPaymentDetails(null);
+
+    try {
+      // Make a GET request to initiate a deposit payment with Authorization header
+      const response = await axios.get(`${API_URL}/payment/deposit-account`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+
+      // Check if the payment was initiated successfully
+      if (response.status === 200) {
+        setPaymentDetails(response.data.paymentDetails);
+        return response.data;
+      }
+    } catch (err) {
+      console.error("Payment API Error:", err.response || err);
+      
+      // Handle errors based on the response status code
+      if (err.response) {
+        const { status, data } = err.response;
+        if (status === 401) {
+          setError("Unauthorized. Please login to continue.");
+        } else if (status === 404) {
+          setError("Payment plan not found.");
+        } else if (status === 500) {
+          setError(data.error || "Failed to initiate payment. Please try again later.");
+        } else {
+          setError(data.error || "An unexpected error occurred.");
+        }
+      } else {
+        setError("Network error. Please check your internet connection.");
+      }
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Function to check the payment reference status
+  const checkPaymentStatus = async (reference) => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.get(`${API_URL}/payment/status/${reference}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      });
+
+      return response.data;
+    } catch (err) {
+      console.error("Payment Status Check Error:", err.response || err);
+      setError("Failed to check payment status.");
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    loading,
+    error,
+    paymentDetails,
+    initiateDepositPayment,
+    checkPaymentStatus
+  };
+};
+

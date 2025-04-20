@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { FiX, FiCheck, FiZap } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
-import useProfile from '../../../Hooks/useProfile';
 
-const SubscriptionPopup = ({ onClose }) => {
+
+const SubscriptionPopup = ({ onClose, authProfile }) => {
   const [submitted, setSubmitted] = useState(false);
-  const { profile: authProfile, loading: authLoading } = useProfile();
+  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -56,8 +56,8 @@ const SubscriptionPopup = ({ onClose }) => {
   }
 
   return (
-    <div className="fixed inset-0 bg-white/80 backdrop-blur-lg flex items-center justify-center z-50 p-2">
-      <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-xl border border-gray-100">
+    <div className="fixed inset-0 bg-white/80 backdrop-blur-lg flex items-center justify-center z-50 ">
+      <div className="bg-white  p-8 max-w-md w-full  border border-gray-100">
         <div className="flex justify-between items-start mb-6">
           <div>
             <div className="flex items-center mb-2">
