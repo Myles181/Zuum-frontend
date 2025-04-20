@@ -25,6 +25,7 @@ import { Share, Share2 } from "lucide-react";
 
 const AudioPost = React.forwardRef(({ 
   post, 
+  profile,
   isActive, 
   onTap, 
   currentTime,
@@ -38,7 +39,7 @@ const AudioPost = React.forwardRef(({
   ...props
 }, ref) => {
   const navigate = useNavigate();
-  const { profile } = useProfile();
+ 
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const { loading, error, posts } = useAudioPosts(1, 10, post.id);
   const data = posts.length > 0 ? posts[0] : null;

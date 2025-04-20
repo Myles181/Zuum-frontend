@@ -38,6 +38,11 @@ const Login = () => {
   // Redirect to the home page if login is successful
   useEffect(() => {
     if (token) {
+    
+      sessionStorage.setItem('fromLogin', 'true');
+  
+  // Force a full page reload to reset the entire app state
+  
       navigate("/home"); // Redirect to the home page
     }
   }, [token, navigate]);

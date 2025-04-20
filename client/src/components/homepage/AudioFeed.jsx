@@ -6,7 +6,7 @@ import useAudioPosts from "../../../Hooks/audioPosts/useCreateAudio";
 import AudioPost from "./feed/AudioPost";
 import { useFetchBeats } from "../../../Hooks/beats/useBeats";
 
-const AudioFeed = () => {
+const AudioFeed = ({profile}) => {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [beatsPage, setBeatsPage] = useState(1);
@@ -177,6 +177,7 @@ const AudioFeed = () => {
     >
       {combinedContent.map((content, idx) => (
         <AudioPost
+          profile={profile}
           key={`${content.type}-${content.id}`}
           post={content}
           isActive={idx === currentIndex}

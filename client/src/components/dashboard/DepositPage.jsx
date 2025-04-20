@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowDownToLine, Copy, CheckCircle } from 'lucide-react';
-import useDepositAccount from '../../../Hooks/subscription/useCreateAccount';
+import useDepositAccount, { usePaymentAccount } from '../../../Hooks/subscription/useCreateAccount';
 
 // Card wrapper for consistent styling
 const Card = ({ children, className = '' }) => (
@@ -11,6 +11,24 @@ export const DepositPage = () => {
   const [copied, setCopied] = useState(false);
   const [copiedField, setCopiedField] = useState('');
   const { getDepositAccount, paymentDetails, loading, error } = useDepositAccount();
+  const { 
+    paymentDetails : testDetails, 
+    loading: testLoading, 
+    error: testError, 
+    fetchPaymentDetails,
+    resetError 
+  } = usePaymentAccount();
+
+  useEffect(() => {
+    fetchPaymentDetails();
+  }, []);
+
+  console.log(testDetails);
+  console.log(testError);
+  console.log(testLoading);
+  
+  
+  
 
   // Fetch bank details once on mount
   useEffect(() => {
