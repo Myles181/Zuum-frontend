@@ -100,75 +100,6 @@ export default useDepositAccount;
 
 
 
-
-export const useFlutterwaveWebhook = () => {
-  const [loading, setLoading] = useState(false); // Tracks loading state
-  const [error, setError] = useState(null); // Tracks error messages
-  const [webhookResponse, setWebhookResponse] = useState(null); // Stores webhook response data
-
-  // Retrieve the token from localStorage
-  const token = localStorage.getItem("authToken");
-
-  // Function to handle Flutterwave webhook events
-  const handleWebhook = async (eventData) => {
-    setLoading(true); // Start loading
-    setError(null); // Reset any previous errors
-    setWebhookResponse(null); // Reset response data
-
-    try {
-      // Make a POST request to handle the webhook with Authorization header
-      const response = await axios.post(
-        `${API_URL}/payment/webhooks/flutterwave`,
-        eventData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          }
-        }
-      );
-
-      // Check if the webhook was processed successfully
-      if (response.status === 200) {
-        setWebhookResponse(response.data); // Store the webhook response
-      }
-    } catch (err) {
-      console.error("Webhook Error:", err.response || err);
-      // Handle errors based on the response status code
-      if (err.response) {
-        const { status, data } = err.response;
-        if (status === 401) {
-          setError(data.error || "Unauthorized. Please login to continue.");
-        } else if (status === 400) {
-          setError(data.error || "Invalid webhook data.");
-        } else if (status === 500) {
-          setError(data.error || "Server error. Please try again later.");
-        } else {
-          setError(data.error || "Failed to process webhook.");
-        }
-      } else {
-        setError("Network error. Please check your internet connection.");
-      }
-      throw err; // Re-throw the error for component-level handling
-    } finally {
-      setLoading(false); // Stop loading regardless of success or failure
-    }
-  };
-
-  return {
-    loading,
-    error,
-    webhookResponse,
-    handleWebhook,
-  };
-};
-
-
-
-
-
-
-
 export const useSubscriptionPayment = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -259,6 +190,80 @@ export const useSubscriptionPayment = () => {
     initiateSubscriptionPayment,
     redirectToPayment,
     retryPayment
+  };
+};
+
+
+
+
+
+
+
+export const usePaymentAccount = () => {
+  const [paymentDetails, setPaymentDetails] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const fetchPaymentDetails = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+
+      const response = await axios.get(`${API_URL}/payment/create`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/json'
+        }
+      });
+
+      console.log('API Response:', response.data); // Debug log
+
+      if (response.status === 200 && response.data?.paymentDetails) {
+        setPaymentDetails(response.data.paymentDetails);
+      } else {
+        throw new Error(response.data?.message || 'Invalid response structure');
+      }
+    } catch (err) {
+      let errorMessage = 'Failed to fetch payment details';
+      
+      if (err.response) {
+        // Handle specific error statuses
+        switch (err.response.status) {
+          case 404:
+            errorMessage = 'No payment details found for this user';
+            break;
+          default:
+            errorMessage = err.response.data?.message || 
+                         `Server error (${err.response.status})`;
+        }
+      } else if (err.request) {
+        errorMessage = 'No response from server';
+      } else {
+        errorMessage = err.message;
+      }
+
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const resetError = () => {
+    setError(null);
+  };
+
+  return {
+    paymentDetails,
+    loading,
+    error,
+    fetchPaymentDetails,
+    resetError
   };
 };
 

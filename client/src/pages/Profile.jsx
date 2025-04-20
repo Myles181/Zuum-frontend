@@ -8,29 +8,23 @@ import Navbar from "../components/profile/NavBar";
 import useUserProfile from "../../Hooks/useProfile"; // Import the custom hook
 import Spinner from "../components/Spinner";
 
-const ArtistPage = () => {
+const ArtistPage = ({profile, error}) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  // Use the useUserProfile hook to fetch profile data
-  const { profile, loading, error } = useUserProfile();
+ 
 
-  // Debugging: Log profile data
-  console.log("Profile Data:", profile);
-  console.log("Loading:", loading);
-  console.log("Error:", error);
+
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
+  console.log(profile);
+  
+
   return (
     <div className="relative min-h-screen">
-      {/* Full-page spinner overlay */}
-      {loading && (
-        <div className="fixed inset-0 z-50 flex justify-center items-center bg-black bg-opacity-50">
-          <Spinner /> {/* Show the spinner while loading */}
-        </div>
-      )}
+    
 
       {/* Page content */}
       <Navbar toggleSidebar={toggleSidebar} name={"Profile"} />
@@ -41,7 +35,7 @@ const ArtistPage = () => {
         <p className="text-red-500 text-center mt-4">{error}</p>
       ) : (
         <>
-          <ProfileSection profile={profile || {}} />
+          <ProfileSection profile={profile} />
          
         </>
       )}

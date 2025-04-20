@@ -3,10 +3,8 @@ import useProfile from "../../../Hooks/useProfile";
 import { FaCamera } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 
-const EditProfilePage = () => {
+const EditProfilePage = ({profile}) => {
   const {
-    profile,
-    loading,
     fetchError,
     updateProfile,
     updateLoading,
@@ -85,13 +83,7 @@ const EditProfilePage = () => {
     await updateProfile(data);
   };
 
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500" />
-      </div>
-    );
-  }
+  
 
   if (updateSuccess){
     navigate("/profile");

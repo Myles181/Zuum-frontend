@@ -1,69 +1,102 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FiX, FiCheck, FiZap } from 'react-icons/fi';
 import { Link } from 'react-router-dom';
+import { usePaymentAccount } from '../../../Hooks/subscription/useCreateAccount';
 
+const SubscriptionPopup = ({ onClose, details }) => {
+  // const { 
+  //   paymentDetails: details, 
+  //   loading: testLoading, 
+  //   error: testError, 
+  //   fetchPaymentDetails,
+  //   resetError 
+  // } = usePaymentAccount();
 
-const SubscriptionPopup = ({ onClose, authProfile }) => {
-  const [submitted, setSubmitted] = useState(false);
-  
+  // useEffect(() => {
+  //   fetchPaymentDetails();
+  // }, []);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log('Subscribing to premium');
-    setSubmitted(true);
-  };
+  // // Skeleton loading component
+  // const SkeletonLoader = () => (
+  //   <div className="animate-pulse">
+  //     <div className="flex justify-between items-start mb-6">
+  //       <div>
+  //         <div className="flex items-center mb-2">
+  //           <div className="h-5 w-5 bg-gray-200 rounded-full mr-2"></div>
+  //           <div className="h-4 w-24 bg-gray-200 rounded"></div>
+  //         </div>
+  //         <div className="h-8 w-48 bg-gray-200 rounded"></div>
+  //       </div>
+  //       <div className="h-6 w-6 bg-gray-200 rounded-full"></div>
+  //     </div>
 
-  // Determine price based on identity
-  const getPriceData = () => {
-    if (!authProfile) return { amount: '₦--,---', description: '/month' }; // Default
-    
-    switch(authProfile.identity) {
-      case 'artist':
-        return { amount: '₦15,000', description: '/month' };
-      case 'producer':
-        return { amount: '₦20,000', description: '/month' };
-      case 'label owner':
-        return { amount: '₦30,000', description: '/month' };
-      default:
-        return { amount: '₦--,---', description: '/month' };
-    }
-  };
+  //     <div className="mb-8">
+  //       <div className="bg-gray-50 p-6 rounded-xl mb-6 border border-gray-200">
+  //         <div className="flex items-end mb-2">
+  //           <div className="h-10 w-32 bg-gray-200 rounded"></div>
+  //           <div className="h-6 w-16 bg-gray-200 rounded ml-1"></div>
+  //         </div>
+  //         <div className="h-4 w-40 bg-gray-200 rounded"></div>
+  //         <div className="h-4 w-24 bg-gray-200 rounded mt-1"></div>
+  //       </div>
 
-  const priceData = getPriceData();
+  //       <ul className="space-y-3">
+  //         {[...Array(4)].map((_, i) => (
+  //           <li key={i} className="flex items-start">
+  //             <div className="h-5 w-5 bg-gray-200 rounded-full mt-0.5 mr-3"></div>
+  //             <div className="h-4 w-48 bg-gray-200 rounded"></div>
+  //           </li>
+  //         ))}
+  //       </ul>
+  //     </div>
 
-  if (submitted) {
-    return (
-      <div className="fixed inset-0 bg-white/80 backdrop-blur-lg flex items-center justify-center z-50 p-4">
-        <div className="bg-white rounded-2xl p-8 max-w-md w-full shadow-xl border border-gray-100">
-          <div className="text-center">
-            <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-[#2D8C72] mb-4">
-              <FiCheck className="h-8 w-8 text-white" />
-            </div>
-            <h3 className="text-2xl font-bold text-gray-900 mb-2">Welcome to Zuum Premium!</h3>
-            <p className="text-gray-600 mb-6">
-              You now have access to all exclusive {authProfile?.identity} features.
-            </p>
-            <button
-              onClick={onClose}
-              className="w-full bg-[#2D8C72] text-white py-3 px-4 rounded-xl font-medium hover:bg-[#24735a] transition-colors shadow-md"
-            >
-              Start Exploring
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  //     <div className="h-12 w-full bg-gray-200 rounded-xl"></div>
+  //     <div className="h-3 w-40 bg-gray-200 rounded mx-auto mt-4"></div>
+  //   </div>
+  // );
+
+  // if (testLoading) {
+  //   return (
+  //     <div className="fixed inset-0 bg-white/80 backdrop-blur-lg flex items-center justify-center z-50">
+  //       <div className="bg-white p-8 max-w-md w-full border border-gray-100">
+  //         <SkeletonLoader />
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+  // if (testError) {
+  //   return (
+  //     <div className="fixed inset-0 bg-white/80 backdrop-blur-lg flex items-center justify-center z-50">
+  //       <div className="bg-white p-8 max-w-md w-full border border-gray-100">
+  //         <div className="text-red-500 mb-4 flex items-center">
+  //           <FiX className="h-5 w-5 mr-2" />
+  //           <span>Error loading subscription details</span>
+  //         </div>
+  //         <p className="text-gray-600 mb-6">{testError}</p>
+  //         <button
+  //           onClick={() => {
+  //             resetError();
+  //             fetchPaymentDetails();
+  //           }}
+  //           className="w-full bg-[#2D8C72] text-white py-2 px-4 rounded-lg"
+  //         >
+  //           Retry
+  //         </button>
+  //       </div>
+  //     </div>
+  //   );
+  // }
 
   return (
-    <div className="fixed inset-0 bg-white/80 backdrop-blur-lg flex items-center justify-center z-50 ">
-      <div className="bg-white  p-8 max-w-md w-full  border border-gray-100">
+    <div className="fixed inset-0 bg-white/80 backdrop-blur-lg flex items-center justify-center z-50">
+      <div className="bg-white p-8 max-w-md w-full border border-gray-100">
         <div className="flex justify-between items-start mb-6">
           <div>
             <div className="flex items-center mb-2">
               <FiZap className="h-5 w-5 text-[#2D8C72] mr-2" />
               <span className="text-sm font-semibold text-[#2D8C72] uppercase tracking-wide">
-                {authProfile?.identity ? `${authProfile.identity} Premium` : 'Premium'}
+                {details?.description || 'Premium Subscription'}
               </span>
             </div>
             <h2 className="text-3xl font-bold text-gray-900">Upgrade Your Experience</h2>
@@ -79,21 +112,25 @@ const SubscriptionPopup = ({ onClose, authProfile }) => {
         <div className="mb-8">
           <div className="bg-gray-50 p-6 rounded-xl mb-6 border border-gray-200">
             <div className="flex items-end mb-2">
-              <span className="text-4xl font-bold text-gray-900">{priceData.amount}</span>
-              <span className="text-lg text-gray-500 ml-1">{priceData.description}</span>
+              <span className="text-4xl font-bold text-gray-900">
+                ₦{details?.amount ? parseFloat(details.amount).toLocaleString() : '--,--'}
+              </span>
+              <span className="text-lg text-gray-500 ml-1">
+                {details?.frequency === 'annual' ? '/year' : '/month'}
+              </span>
             </div>
-            <p className="text-gray-600">Billed monthly, cancel anytime</p>
-            {authProfile?.identity && (
-              <p className="text-sm text-[#2D8C72] mt-1">
-                Special {authProfile.identity} pricing
-              </p>
-            )}
+            <p className="text-gray-600">
+              {details?.frequency === 'annual' ? 'Billed annually' : 'Billed monthly'}, cancel anytime
+            </p>
+            <p className="text-sm text-[#2D8C72] mt-1">
+              Special {details?.name || 'member'} pricing
+            </p>
           </div>
 
           <ul className="space-y-3 text-gray-700">
             <li className="flex items-start">
               <FiCheck className="h-5 w-5 text-[#2D8C72] mt-0.5 mr-3 flex-shrink-0" />
-              <span>Exclusive {authProfile?.identity ? `${authProfile.identity} ` : ''}content</span>
+              <span>Exclusive {details?.name ? `${details.name} ` : ''}content</span>
             </li>
             <li className="flex items-start">
               <FiCheck className="h-5 w-5 text-[#2D8C72] mt-0.5 mr-3 flex-shrink-0" />
@@ -106,10 +143,10 @@ const SubscriptionPopup = ({ onClose, authProfile }) => {
             <li className="flex items-start">
               <FiCheck className="h-5 w-5 text-[#2D8C72] mt-0.5 mr-3 flex-shrink-0" />
               <span>
-                {authProfile?.identity === 'artist' && 'Early access to collaborations'}
-                {authProfile?.identity === 'producer' && 'Beat submission priority'}
-                {authProfile?.identity === 'label owner' && 'Artist analytics dashboard'}
-                {!authProfile?.identity && 'Early access to new features'}
+                {details?.name === 'artist' && 'Early access to collaborations'}
+                {details?.name === 'producer' && 'Beat submission priority'}
+                {details?.name === 'label owner' && 'Artist analytics dashboard'}
+                {!details?.name && 'Early access to new features'}
               </span>
             </li>
           </ul>
@@ -120,7 +157,7 @@ const SubscriptionPopup = ({ onClose, authProfile }) => {
             type="submit"
             className="w-full bg-[#2D8C72] text-white py-4 px-6 rounded-xl font-bold hover:bg-[#24735a] transition-colors shadow-lg"
           >
-            Get {authProfile?.identity ? `${authProfile.identity} ` : ''}Premium
+            Get {details?.name ? `${details.name} ` : ''}Premium
           </button>
         </Link>
 

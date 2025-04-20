@@ -95,7 +95,7 @@ const ProfileSection = ({ profile }) => {
           {["Followers", "Following"].map((item, index) => (
             <div key={index} className="text-center">
               <span className="text-lg font-bold text-[#008066]">
-                {index === 0 ? mergedProfile.followers || 0 : mergedProfile.following || 0}
+                {index === 0 ? mergedProfile.followers_list.length || 0 : mergedProfile.following_list.length || 0}
               </span>
               <p className="text-gray-600 text-sm">{item}</p>
             </div>
@@ -174,32 +174,53 @@ const ProfileSection = ({ profile }) => {
 
       {/* Tab Section */}
       <div className="tab-section pt-4 w-full bg-white rounded-b-lg">
-        <div className="tab-buttons flex justify-center gap-8 border-b border-gray-200">
-          {["audio", "video"].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={classNames(
-                "pb-4 px-6 text-lg font-medium relative transition-all",
-                activeTab === tab
-                  ? "text-[#008066] font-semibold after:absolute after:bottom-0 after:left-0 after:w-full after:h-[3px] after:bg-[#008066] after:rounded-t-lg"
-                  : "text-gray-500 hover:text-[#008066]"
-              )}
-            >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab Content */}
-        <div className="tab-content p-6">
-          {activeTab === "audio" ? (
-            <MusicSection userId={mergedProfile.id} />
-          ) : (
-            <VideoSection userId={mergedProfile.id} />
+  <div className="tab-buttons flex justify-center gap-8 border-b border-gray-200">
+    {profile.identity === 'producer' ? (
+      // Show these tabs for producers
+      ["beats", "audio", "video"].map((tab) => (
+        <button
+          key={tab}
+          onClick={() => setActiveTab(tab)}
+          className={classNames(
+            "pb-4 px-6 text-lg font-medium relative transition-all",
+            activeTab === tab
+              ? "text-[#008066] font-semibold after:absolute after:bottom-0 after:left-0 after:w-full after:h-[3px] after:bg-[#008066] after:rounded-t-lg"
+              : "text-gray-500 hover:text-[#008066]"
           )}
-        </div>
-      </div>
+        >
+          {tab.charAt(0).toUpperCase() + tab.slice(1)}
+        </button>
+      ))
+    ) : (
+      // Show these tabs for non-producers
+      ["audio", "video"].map((tab) => (
+        <button
+          key={tab}
+          onClick={() => setActiveTab(tab)}
+          className={classNames(
+            "pb-4 px-6 text-lg font-medium relative transition-all",
+            activeTab === tab
+              ? "text-[#008066] font-semibold after:absolute after:bottom-0 after:left-0 after:w-full after:h-[3px] after:bg-[#008066] after:rounded-t-lg"
+              : "text-gray-500 hover:text-[#008066]"
+          )}
+        >
+          {tab.charAt(0).toUpperCase() + tab.slice(1)}
+        </button>
+      ))
+    )}
+  </div>
+
+  {/* Tab Content */}
+  <div className="tab-content p-6">
+    {activeTab === "beats" ? (
+      <BeatsSection userId={mergedProfile.id} />
+    ) : activeTab === "audio" ? (
+      <MusicSection userId={mergedProfile.id} />
+    ) : (
+      <VideoSection userId={mergedProfile.id} />
+    )}
+  </div>
+</div>
     </div>
   );
 };
