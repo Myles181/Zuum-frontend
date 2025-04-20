@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { CheckCircle, AlertCircle, Copy, RefreshCw, ArrowRight, Clock } from 'lucide-react';
-import useSubscriptionPayment from '../../../Hooks/subscription/useCreateAccount';
+import {useSubscriptionPayment} from '../../../Hooks/subscription/useCreateAccount';
 
 const SubscriptionPage = ({ onSuccess, onError, profile }) => {
   const [isFadingIn, setIsFadingIn] = useState(false);
