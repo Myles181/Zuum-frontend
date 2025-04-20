@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FaUpload } from 'react-icons/fa';
 import { FiX, FiVideo, FiMapPin, FiUser, FiEye, FiEyeOff } from 'react-icons/fi';
 import Navbar from '../../components/profile/NavBar';

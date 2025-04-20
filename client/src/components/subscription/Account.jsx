@@ -86,26 +86,7 @@ const SubscriptionPage = ({ onSuccess, onError, profile }) => {
   }, [paymentDetails]);
 
   // Update countdown timer
-  useEffect(() => {
-    if (!expiryTime) return;
-
-    const timer = setInterval(() => {
-      const now = new Date();
-      const diff = expiryTime - now;
-
-      if (diff <= 0) {
-        clearInterval(timer);
-        setCountdownTime('Expired');
-        return;
-      }
-
-      const minutes = Math.floor(diff / 60000);
-      const seconds = Math.floor((diff % 60000) / 1000);
-      setCountdownTime(`${minutes}m ${seconds}s`);
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [expiryTime]);
+  
 
   const copyToClipboard = (text, fieldName) => {
     navigator.clipboard.writeText(text);
@@ -153,12 +134,7 @@ const SubscriptionPage = ({ onSuccess, onError, profile }) => {
             <p className="text-sm opacity-90">Unlock exclusive features</p>
           </div>
           
-          {countdownTime && (
-            <div className="flex items-center text-white bg-[#1a6953] py-1 px-3 rounded-full text-xs">
-              <Clock size={14} className="mr-1" />
-              <span>{countdownTime}</span>
-            </div>
-          )}
+         
         </div>
       </div>
 

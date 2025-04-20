@@ -8,6 +8,9 @@ const UploadPage = ({ profile }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
+  console.log(profile?.identity);
+  
+
   return (
     <div>
       <Navbar name="Upload" toggleSidebar={toggleSidebar} />
