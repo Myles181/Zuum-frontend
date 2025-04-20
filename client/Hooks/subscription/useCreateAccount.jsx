@@ -167,87 +167,98 @@ export const useFlutterwaveWebhook = () => {
 
 
 
-export const useDepositAccountPayment = () => {
+
+
+export const useSubscriptionPayment = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [paymentDetails, setPaymentDetails] = useState(null);
 
-  // Retrieve the token from localStorage
-  const token = localStorage.getItem("authToken");
-
-  // Function to initiate a deposit account payment
-  const initiateDepositPayment = async () => {
+  /**
+   * Initiates a subscription payment
+   * @returns {Promise<{status: boolean, message: string, paymentLink: string}|undefined>}
+   */
+  const initiateSubscriptionPayment = async () => {
     setLoading(true);
     setError(null);
     setPaymentDetails(null);
 
     try {
-      // Make a GET request to initiate a deposit payment with Authorization header
-      const response = await axios.get(`${API_URL}/payment/deposit-account`, {
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication token not found');
+      }
+
+      const response = await axios.get(`${API_URL}/payment/subscription`, {
         headers: {
           Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
+          Accept: 'application/json'
+        }
       });
 
-      // Check if the payment was initiated successfully
-      if (response.status === 200) {
-        setPaymentDetails(response.data.paymentDetails);
+      if (response.status === 200 && response.data?.status) {
+        setPaymentDetails(response.data);
         return response.data;
+      } else {
+        throw new Error(response.data?.message || 'Invalid response from server');
       }
     } catch (err) {
-      console.error("Payment API Error:", err.response || err);
+      let errorMessage = 'Failed to initiate subscription payment';
       
-      // Handle errors based on the response status code
       if (err.response) {
-        const { status, data } = err.response;
-        if (status === 401) {
-          setError("Unauthorized. Please login to continue.");
-        } else if (status === 404) {
-          setError("Payment plan not found.");
-        } else if (status === 500) {
-          setError(data.error || "Failed to initiate payment. Please try again later.");
-        } else {
-          setError(data.error || "An unexpected error occurred.");
+        // Handle specific error statuses
+        switch (err.response.status) {
+          case 401:
+            errorMessage = 'Unauthorized - Please login again';
+            break;
+          case 404:
+            errorMessage = 'Payment plan not found';
+            break;
+          case 409:
+            errorMessage = 'You already have an active subscription';
+            break;
+          default:
+            errorMessage = err.response.data?.error || 
+                         err.response.data?.message || 
+                         `Server error (${err.response.status})`;
         }
+      } else if (err.request) {
+        errorMessage = 'No response from server';
       } else {
-        setError("Network error. Please check your internet connection.");
+        errorMessage = err.message;
       }
-      return null;
+
+      setError(errorMessage);
+      throw new Error(errorMessage);
     } finally {
       setLoading(false);
     }
   };
 
-  // Function to check the payment reference status
-  const checkPaymentStatus = async (reference) => {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await axios.get(`${API_URL}/payment/status/${reference}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          Accept: "application/json",
-        },
-      });
-
-      return response.data;
-    } catch (err) {
-      console.error("Payment Status Check Error:", err.response || err);
-      setError("Failed to check payment status.");
-      return null;
-    } finally {
-      setLoading(false);
+  /**
+   * Redirects user to payment page if payment link exists
+   */
+  const redirectToPayment = () => {
+    if (!paymentDetails?.paymentLink) {
+      throw new Error('No payment link available');
     }
+    window.location.href = paymentDetails.paymentLink;
+  };
+
+  /**
+   * Retries payment initiation
+   */
+  const retryPayment = async () => {
+    return await initiateSubscriptionPayment();
   };
 
   return {
     loading,
     error,
     paymentDetails,
-    initiateDepositPayment,
-    checkPaymentStatus
+    initiateSubscriptionPayment,
+    redirectToPayment,
+    retryPayment
   };
 };
 
