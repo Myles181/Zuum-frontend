@@ -133,6 +133,7 @@ const MusicUploadForm = () => {
         
         if (success) {
           console.log('Upload successful, resetting form');
+        
           setFormData({
             caption: '',
             type: 'music',
@@ -145,7 +146,7 @@ const MusicUploadForm = () => {
             audio_upload: null
           });
           setPreviewImage(null);
-          navigate('/home');
+       
         }
       } catch (err) {
         console.error('Error during submission:', err);
@@ -164,6 +165,13 @@ const MusicUploadForm = () => {
       console.log('Form validation failed, not submitting');
     }
   };
+
+  useEffect(() => {
+    if (success) {
+      navigate('/home');
+    }
+  }, [success, navigate]);
+
 
   const triggerFileInput = (type) => {
     console.log(`Triggering file input for: ${type}`);

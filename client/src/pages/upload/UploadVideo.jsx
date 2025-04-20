@@ -93,9 +93,16 @@ const VideoUpload = () => {
         video_upload: null
       });
       setPreview(null);
-      navigate('/home');
+     
     }
   };
+
+  useEffect(() => {
+      if (success) {
+        navigate('/home');
+      }
+    }, [success, navigate]);
+  
 
   const triggerVideoInput = () => videoInputRef.current.click();
   const toggleSidebar = () => setSidebarOpen(o => !o);

@@ -104,10 +104,12 @@ import { useNavigate } from 'react-router-dom';
     };
 
 
-    if(success){
-      navigate('/home');
-    }
-      
+  useEffect(() => {
+      if (success) {
+        navigate('/home');
+      }
+    }, [success, navigate]);
+  
     
     // The teal color (#008066) will be used throughout instead of the gradient
     const tealColor = '#008066';
