@@ -6,23 +6,27 @@ import d from "../../assets/icons/Mask group1.svg";
 import { FiBarChart, FiMail, FiPhone, FiCalendar, FiCreditCard, FiEdit, FiShare2 } from "react-icons/fi";
 import MusicSection from "./MusicSection";
 import VideoSection from "./VideoSection";
+import { Headphones } from "lucide-react";
 
 const ProfileSection = ({ profile }) => {
   // Fallback data in case profile is null or undefined
-  const fallbackProfile = useMemo(() => ({
-    cover_image: c,
-    image: d,
-    username: "Dave_sings",
-    identity: "Artist",
-    bio: "I'm a singer-songwriter, weaving emotions into melodies that touch hearts and inspire minds.",
-    followers_list: [],
-    following_list: [],
-    firstname: "",
-    lastname: "",
-    email: "",
-    phonenumber: "",
-    subscription_status: null,
-  }), []);
+  const fallbackProfile = useMemo(
+    () => ({
+      cover_image: c,
+      image: d,
+      username: "Dave_sings",
+      identity: "Artist",
+      bio: "I'm a singer-songwriter, weaving emotions into melodies that touch hearts and inspire minds.",
+      followers_list: [],
+      following_list: [],
+      firstname: "",
+      lastname: "",
+      email: "",
+      phonenumber: "",
+      subscription_status: null,
+    }),
+    []
+  );
 
   // Merge profile data with fallback data
   const mergedProfile = useMemo(() => ({ ...fallbackProfile, ...profile }), [profile, fallbackProfile]);
@@ -34,15 +38,15 @@ const ProfileSection = ({ profile }) => {
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   return (
-    <div className="profile-container relative bg-gray-50 ">
+    <div className="profile-container relative bg-gray-50">
       {/* Background Image with Dashboard Icon */}
       <div className="profile-background h-64 overflow-hidden rounded-t-lg relative">
         <img
@@ -50,21 +54,19 @@ const ProfileSection = ({ profile }) => {
           alt="Profile Background"
           className="w-full h-full object-cover"
         />
-        {/* Dashboard Icon */}
-        <Link 
-          to="/dashboard" 
+        <Link
+          to="/dashboard"
           className="absolute top-4 right-4 bg-white/90 p-2 rounded-full shadow-lg hover:bg-white transition-all"
           title="Go to Dashboard"
         >
           <FiBarChart className="w-5 h-5 text-[#008066]" />
         </Link>
-        
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
       </div>
 
       {/* Profile Image */}
-      <div className="profile-header absolute top-48 ml-6  transform -translate-x-1">
+      <div className="profile-header absolute top-48 ml-6 transform -translate-x-1">
         <div className="relative">
           <img
             src={mergedProfile.image || d}
@@ -88,31 +90,43 @@ const ProfileSection = ({ profile }) => {
         </p>
       </div>
 
-      <div className="stats flex-1 p-4 ">
-          <div className="flex justify-around gap-4">
-            {["Followers", "Following"].map((item, index) => (
-              <div key={index} className="text-center">
-                <span className="text-lg font-bold text-[#008066]">
-                  {index === 0 ? mergedProfile.followers || 0 : mergedProfile.following || 0}
-                </span>
-                <p className="text-gray-600 text-sm">{item}</p>
-              </div>
-            ))}
-          </div>
+      <div className="stats flex-1 p-4">
+        <div className="flex justify-around gap-4">
+          {["Followers", "Following"].map((item, index) => (
+            <div key={index} className="text-center">
+              <span className="text-lg font-bold text-[#008066]">
+                {index === 0 ? mergedProfile.followers || 0 : mergedProfile.following || 0}
+              </span>
+              <p className="text-gray-600 text-sm">{item}</p>
+            </div>
+          ))}
         </div>
+      </div>
 
+      {/* Profile Action Buttons */}
+      <div className="buttons flex justify-center mb-6 w-full gap-4 px-8">
+        <Link to="/editprofile" className="flex-1">
+          <button className="w-full bg-white border border-[#008066] text-[#008066] px-6 py-2 rounded-lg hover:bg-gray-50 transition shadow-sm font-medium flex items-center justify-center">
+            <FiEdit className="mr-2" /> Edit
+          </button>
+        </Link>
+       
+        <button className="flex-1 bg-[#008066] text-white px-6 py-2 rounded-lg hover:bg-[#006e58] transition shadow-sm font-medium flex items-center justify-center">
+          <FiShare2 className="mr-2" /> Share
+        </button>
+        <Link to="/dashboard" className="flex-1">
+          <button className="w-full bg-white border border-[#008066] text-[#008066] px-3 py-3 rounded-lg hover:bg-gray-50 transition shadow-sm font-medium flex items-center justify-center">
+            <FiBarChart className="mr-2" /> 
+          </button>
+        </Link>
+      </div>
+          <Link to="/purchasedbeats" className="flex-1">
+      <div className="flex justify-center items-center mb-6 w-full px-5 text-[#008066] text-center gap-1">
+        <Headphones />
+      <h2 className="text-xl font-stretch-50% text-center ">My Beats</h2>
 
-        <div className="buttons flex justify-center mb-6 w-full gap-4 px-8">
-  <Link to="/editprofile" className="flex-1">
-    <button className="w-full bg-white border border-[#008066] text-[#008066] px-6 py-2 rounded-lg hover:bg-gray-50 transition shadow-sm font-medium flex items-center justify-center">
-      <FiEdit className="mr-2" /> Edit
-    </button>
-  </Link>
-  <button className="flex-1 bg-[#008066] text-white px-6 py-2 rounded-lg hover:bg-[#006e58] transition shadow-sm font-medium flex items-center justify-center">
-    <FiShare2 className="mr-2" /> Share
-  </button>
-</div>
-
+      </div>
+      </Link>
 
       {/* Bio */}
       <div className="bio-container mt-4 px-8">
@@ -126,9 +140,6 @@ const ProfileSection = ({ profile }) => {
 
       {/* Stats and Contact in Flex Row */}
       <div className="flex flex-col md:flex-row justify-between px-8 mt-6 gap-4">
-        {/* Followers & Following */}
-        
-
         {/* Contact Information */}
         <div className="contact-info flex-1 bg-white p-4 rounded-lg shadow-sm">
           <h3 className="text-sm font-medium text-gray-500 mb-2">Contact Info</h3>
@@ -161,8 +172,6 @@ const ProfileSection = ({ profile }) => {
         </div>
       </div>
 
-      {/* Profile Actions */}
-      
       {/* Tab Section */}
       <div className="tab-section pt-4 w-full bg-white rounded-b-lg">
         <div className="tab-buttons flex justify-center gap-8 border-b border-gray-200">

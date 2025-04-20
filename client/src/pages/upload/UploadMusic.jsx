@@ -8,6 +8,7 @@ import Navbar from '../../components/profile/NavBar';
 import Sidebar from '../../components/homepage/Sidebar';
 import Overlay from '../../components/homepage/Overlay';
 import BottomNav from '../../components/homepage/BottomNav';
+import { useNavigate } from 'react-router-dom';
 
 const MusicUploadForm = () => {
   const [formData, setFormData] = useState({
@@ -22,6 +23,8 @@ const MusicUploadForm = () => {
     audio_upload: null
   });
 
+  
+  const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
   const fileInputRef = useRef(null);
@@ -130,6 +133,7 @@ const MusicUploadForm = () => {
         
         if (success) {
           console.log('Upload successful, resetting form');
+        
           setFormData({
             caption: '',
             type: 'music',
@@ -142,6 +146,7 @@ const MusicUploadForm = () => {
             audio_upload: null
           });
           setPreviewImage(null);
+       
         }
       } catch (err) {
         console.error('Error during submission:', err);
@@ -160,6 +165,13 @@ const MusicUploadForm = () => {
       console.log('Form validation failed, not submitting');
     }
   };
+
+  useEffect(() => {
+    if (success) {
+      navigate('/home');
+    }
+  }, [success, navigate]);
+
 
   const triggerFileInput = (type) => {
     console.log(`Triggering file input for: ${type}`);

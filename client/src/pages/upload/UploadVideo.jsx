@@ -6,6 +6,7 @@ import Sidebar from '../../components/homepage/Sidebar';
 import Overlay from '../../components/homepage/Overlay';
 import BottomNav from '../../components/homepage/BottomNav';
 import { useCreateVideoPost } from '../../../Hooks/videoPosts/useCreateVideo';
+import { useNavigate } from 'react-router-dom';
 
 
 const VideoUpload = () => {
@@ -20,6 +21,7 @@ const VideoUpload = () => {
   const [newTag, setNewTag] = useState('');
   const videoInputRef = useRef(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const navigate = useNavigate();
 
   // hook
   const { createVideoPost, loading, error: apiError, success } = useCreateVideoPost();
@@ -91,8 +93,16 @@ const VideoUpload = () => {
         video_upload: null
       });
       setPreview(null);
+     
     }
   };
+
+  useEffect(() => {
+      if (success) {
+        navigate('/home');
+      }
+    }, [success, navigate]);
+  
 
   const triggerVideoInput = () => videoInputRef.current.click();
   const toggleSidebar = () => setSidebarOpen(o => !o);
