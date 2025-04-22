@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import classNames from "classnames";
 import c from "../../assets/icons/ORSJOS0 1.png";
 import d from "../../assets/icons/Mask group1.svg";
@@ -9,6 +9,8 @@ import VideoSection from "./VideoSection";
 import { Headphones } from "lucide-react";
 
 const ProfileSection = ({ profile }) => {
+  const navigate = useNavigate();
+
   // Fallback data in case profile is null or undefined
   const fallbackProfile = useMemo(
     () => ({
@@ -24,15 +26,32 @@ const ProfileSection = ({ profile }) => {
       email: "",
       phonenumber: "",
       subscription_status: null,
+      created_at: null
     }),
     []
   );
 
   // Merge profile data with fallback data
-  const mergedProfile = useMemo(() => ({ ...fallbackProfile, ...profile }), [profile, fallbackProfile]);
+  const mergedProfile = useMemo(
+    () => ({ ...fallbackProfile, ...profile }),
+    [profile, fallbackProfile]
+  );
 
-  // State to manage active tab
+  // Tab state
   const [activeTab, setActiveTab] = useState("audio");
+  const tabs = mergedProfile.identity.toLowerCase() === "producer"
+    ? ["beats", "audio", "video"]
+    : ["audio", "video"];
+
+  // Handle tab clicks
+  const handleTabClick = (tab) => {
+    if (tab === "beats") {
+      // Pass mergedProfile.id via route param to purchased beats page
+      navigate(`/userbeats/${mergedProfile.id}`);
+    } else {
+      setActiveTab(tab);
+    }
+  };
 
   // Format date function
   const formatDate = (dateString) => {
@@ -174,53 +193,33 @@ const ProfileSection = ({ profile }) => {
 
       {/* Tab Section */}
       <div className="tab-section pt-4 w-full bg-white rounded-b-lg">
-  <div className="tab-buttons flex justify-center gap-8 border-b border-gray-200">
-    {profile.identity === 'producer' ? (
-      // Show these tabs for producers
-      ["beats", "audio", "video"].map((tab) => (
-        <button
-          key={tab}
-          onClick={() => setActiveTab(tab)}
-          className={classNames(
-            "pb-4 px-6 text-lg font-medium relative transition-all",
-            activeTab === tab
-              ? "text-[#008066] font-semibold after:absolute after:bottom-0 after:left-0 after:w-full after:h-[3px] after:bg-[#008066] after:rounded-t-lg"
-              : "text-gray-500 hover:text-[#008066]"
-          )}
-        >
-          {tab.charAt(0).toUpperCase() + tab.slice(1)}
-        </button>
-      ))
-    ) : (
-      // Show these tabs for non-producers
-      ["audio", "video"].map((tab) => (
-        <button
-          key={tab}
-          onClick={() => setActiveTab(tab)}
-          className={classNames(
-            "pb-4 px-6 text-lg font-medium relative transition-all",
-            activeTab === tab
-              ? "text-[#008066] font-semibold after:absolute after:bottom-0 after:left-0 after:w-full after:h-[3px] after:bg-[#008066] after:rounded-t-lg"
-              : "text-gray-500 hover:text-[#008066]"
-          )}
-        >
-          {tab.charAt(0).toUpperCase() + tab.slice(1)}
-        </button>
-      ))
-    )}
-  </div>
+        <div className="tab-buttons flex justify-center gap-8 border-b border-gray-200">
+          {tabs.map((tab) => (
+            <button
+              key={tab}
+              onClick={() => handleTabClick(tab)}
+              className={classNames(
+                "pb-4 px-6 text-lg font-medium relative transition-all",
+                activeTab === tab
+                  ? "text-[#008066] font-semibold after:absolute after:bottom-0 after:left-0 after:w-full after:h-[3px] after:bg-[#008066] after:rounded-t-lg"
+                  : "text-gray-500 hover:text-[#008066]"
+              )}
+            >
+              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
+        </div>
 
-  {/* Tab Content */}
-  <div className="tab-content p-6">
-    {activeTab === "beats" ? (
-      <BeatsSection userId={mergedProfile.id} />
-    ) : activeTab === "audio" ? (
-      <MusicSection userId={mergedProfile.id} />
-    ) : (
-      <VideoSection userId={mergedProfile.id} />
-    )}
-  </div>
-</div>
+        <div className="tab-content p-6">
+          {activeTab === "audio" && (
+            <MusicSection userId={mergedProfile.id} />
+          )}
+
+          {activeTab === "video" && (
+            <VideoSection userId={mergedProfile.id} />
+          )}
+        </div>
+      </div>
     </div>
   );
 };

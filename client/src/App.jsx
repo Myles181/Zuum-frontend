@@ -148,7 +148,7 @@ const App = () => {
           <Route path="/subscribe" element={<SubscriptionPage profile={authProfile} />} />
           <Route path="/details" element={<SubscriptionDetails />} />
           <Route path="/lock" element={<LockedMusicPlayer />} />
-          <Route path="/purchased" element={<PurchaseFeed />} />
+          <Route path="/userbeats/:userId" element={<PurchaseFeed />} />
           <Route path="/dashboard" element={<MusicDashboard />} />
           <Route path="/beats/:id" element={<BeatDetails />} />
           <Route path="/purchasedbeats" element={<PurchasedBeats />} />

@@ -39,6 +39,9 @@ const AudioFeed = ({profile}) => {
     pagination: beatsPagination,
   } = useFetchBeats({ initialPage: beatsPage, initialLimit: beatsLimit });
 
+  console.log(beats);
+  
+
   const combinedContent = useMemo(() => {
     return [...allPosts, ...allBeats].sort(
       (a, b) => new Date(b.created_at) - new Date(a.created_at)

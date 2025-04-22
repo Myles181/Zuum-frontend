@@ -16,7 +16,7 @@ import Navbar from '../../../components/profile/NavBar';
 import Sidebar from '../../../components/homepage/Sidebar';
 import Overlay from '../../../components/homepage/Overlay';
 import BottomNav from '../../../components/homepage/BottomNav';
-import { useGetBeatPost } from '../../../../Hooks/beats/useBeats';
+import { useGetBeatPost, usePurchaseBeat } from '../../../../Hooks/beats/useBeats';
 import BeatReactionButton from '../../details/BeatReaction';
 import useProfile from '../../../../Hooks/useProfile';
 import BeatCommentModal from '../../details/BeatComment';
@@ -33,6 +33,7 @@ const BeatDetails = React.memo(() => {
   const audioRef = useRef(null);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
+  const { purchaseBeat, isLoading: isPurchasing, error: purchaseError } = usePurchaseBeat();
   const { profile } = useProfile();
 
   useEffect(() => {
@@ -44,6 +45,43 @@ const BeatDetails = React.memo(() => {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   console.log(beat);
+
+
+  const handlePurchase = async () => {
+    try {
+      const result = await purchaseBeat(beat.post.id, beat.post.amount);
+
+      console.log(result);
+      
+      // Handle successful purchase
+      alert(`Purchase successful! ${result.message}`);
+      // You might want to refresh the beat data
+      fetchBeatPost();
+    } catch (err) {
+      // Error is already handled by the hook
+      console.error('Purchase error:', err.message);
+    }
+  };
+
+  // Add this near your other state checks
+  if (purchaseError) {
+    return (
+      <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+        <div className="bg-white p-6 rounded-lg max-w-md mx-4">
+          <h3 className="text-lg font-bold text-red-600 mb-2">Purchase Error</h3>
+          <p className="mb-4">{purchaseError.message}</p>
+          <div className="flex justify-end space-x-2">
+            <button 
+              onClick={() => setError(null)}
+              className="px-4 py-2 bg-gray-200 rounded-lg"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
   
 
   const toggleAudioPlay = () => {
@@ -73,7 +111,6 @@ const BeatDetails = React.memo(() => {
   const toggleLike = () => setIsLiked(prev => !prev);
   const handleShare = () => alert('Share functionality');
   const handleComment = () => alert('Comment functionality');
-  const handlePurchase = () => alert('Purchase functionality');
   const handleGoBack = () => navigate(-1);
 
   const handleNavigateToProfile = () => {
@@ -251,13 +288,23 @@ const BeatDetails = React.memo(() => {
 
             {/* Action Buttons */}
             <div className="flex flex-col sm:flex-row gap-4">
-              <button
-                onClick={handlePurchase}
-                className="flex-1 flex items-center justify-center py-3 px-6 rounded-lg bg-[#2D8C72] text-white font-medium hover:bg-teal-600 transition transform hover:-translate-y-0.5"
-              >
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                Buy License - ₦{beat.post.amount}
-              </button>
+            <button
+    onClick={handlePurchase}
+    disabled={isPurchasing}
+    className={`flex-1 flex items-center justify-center py-3 px-6 rounded-lg bg-[#2D8C72] text-white font-medium hover:bg-teal-600 transition transform hover:-translate-y-0.5 ${isPurchasing ? 'opacity-75' : ''}`}
+  >
+    {isPurchasing ? (
+      <>
+        <Loader className="mr-2 h-5 w-5 animate-spin" />
+        Processing...
+      </>
+    ) : (
+      <>
+        <ShoppingCart className="mr-2 h-5 w-5" />
+        Buy License - ₦{beat.post.amount}
+      </>
+    )}
+  </button>
             </div>
           </div>
 

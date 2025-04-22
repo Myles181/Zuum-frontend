@@ -429,3 +429,116 @@ export const useCommentOnBeatPost = () => {
 
   return { commentOnBeatPost, loading, error, success };
 };
+
+
+
+
+
+
+
+
+
+export const usePurchaseBeat = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [data, setData] = useState(null);
+
+  const purchaseBeat = async (postId, amount) => {
+    setIsLoading(true);
+    setError(null);
+    setData(null);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('Authentication required');
+
+      const response = await axios.post(
+        `${API_URL}/beat/purchase`,
+        { postId, amount },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      setData(response.data);
+      return response.data;
+    } catch (err) {
+      let errorMsg = 'Failed to purchase beat';
+      
+      if (err.response) {
+        switch (err.response.status) {
+          case 400:
+            errorMsg = err.response.data?.error || 'Validation error or insufficient balance';
+            break;
+          case 404:
+            errorMsg = err.response.data?.error || 'Beat not found or sold out';
+            break;
+          case 500:
+            errorMsg = err.response.data?.error || 'Server error';
+            break;
+          default:
+            errorMsg = err.response.data?.error || `Error: ${err.response.status}`;
+        }
+      }
+      
+      setError(new Error(errorMsg));
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return { purchaseBeat, isLoading, error, data };
+};
+
+
+
+
+
+
+
+
+export const usePurchasedBeats = () => {
+  const [purchasedBeats, setPurchasedBeats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchPurchasedBeats = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const token = localStorage.getItem('authToken');
+      if (!token) {
+        throw new Error('Authentication token missing');
+      }
+
+      const response = await axios.get(`${API_URL}/beat/purchase`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      setPurchasedBeats(response.data);
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || 'Failed to fetch purchased beats');
+      console.error('Error fetching purchased beats:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPurchasedBeats();
+  }, []);
+
+  const refetch = () => {
+    fetchPurchasedBeats();
+  };
+
+  return { purchasedBeats, loading, error, refetch };
+};
