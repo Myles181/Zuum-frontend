@@ -7,6 +7,7 @@ import Overlay from '../../components/homepage/Overlay';
 import BottomNav from '../../components/homepage/BottomNav';
 import { useCreateVideoPost } from '../../../Hooks/videoPosts/useCreateVideo';
 import { useNavigate } from 'react-router-dom';
+import { useAlerts } from '../../contexts/AlertConntexts';
 
 
 const VideoUpload = () => {
@@ -22,6 +23,9 @@ const VideoUpload = () => {
   const videoInputRef = useRef(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const navigate = useNavigate();
+  
+  // Get alert functions from context
+  const { showSuccess, showError, showInfo, showWarning } = useAlerts();
 
   // hook
   const { createVideoPost, loading, error: apiError, success } = useCreateVideoPost();
@@ -33,12 +37,27 @@ const VideoUpload = () => {
 
   const handleTogglePublic = () => {
     setFormDataState(prev => ({ ...prev, public: !prev.public }));
+    showInfo(`Video will be ${!formDataState.public ? 'public' : 'private'}`);
   };
 
   const handleVideoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      // Check file size (example: 50MB limit)
+      if (file.size > 50 * 1024 * 1024) {
+        showError('Video file size exceeds 50MB limit');
+        return;
+      }
+      
+      // Check file type
+      const validTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo'];
+      if (!validTypes.includes(file.type)) {
+        showError('Please upload a valid video file (MP4, MOV, or AVI)');
+        return;
+      }
+      
       setFormDataState(prev => ({ ...prev, video_upload: file }));
+      showSuccess('Video file selected');
     }
   };
 
@@ -50,6 +69,7 @@ const VideoUpload = () => {
         tagged_people: [...prev.tagged_people, tag]
       }));
       setNewTag('');
+      showInfo(`${tag} added to tags`);
     }
   };
 
@@ -58,12 +78,19 @@ const VideoUpload = () => {
       ...prev,
       tagged_people: prev.tagged_people.filter(t => t !== tagToRemove)
     }));
+    showWarning(`${tagToRemove} removed from tags`);
   };
 
   const validateForm = () => {
     const errs = {};
-    if (!formDataState.caption) errs.caption = 'Caption is required';
-    if (!formDataState.video_upload) errs.video_upload = 'Video file is required';
+    if (!formDataState.caption) {
+      errs.caption = 'Caption is required';
+      showError('Please add a caption for your video');
+    }
+    if (!formDataState.video_upload) {
+      errs.video_upload = 'Video file is required';
+      showError('Please select a video file to upload');
+    }
     setErrors(errs);
     return Object.keys(errs).length === 0;
   };
@@ -72,37 +99,38 @@ const VideoUpload = () => {
     e.preventDefault();
     if (!validateForm()) return;
 
-    // build multipart form data
-    const fd = new FormData();
-    fd.append('caption', formDataState.caption);
-    fd.append('location', formDataState.location);
-    fd.append('public', formDataState.public);
-    // send tagged_people as JSON string or send multiple fields depending on backend
-    fd.append('tagged_people', JSON.stringify(formDataState.tagged_people));
-    fd.append('video_upload', formDataState.video_upload);
+    try {
+      // build multipart form data
+      const fd = new FormData();
+      fd.append('caption', formDataState.caption);
+      fd.append('location', formDataState.location);
+      fd.append('public', formDataState.public);
+      fd.append('tagged_people', JSON.stringify(formDataState.tagged_people));
+      fd.append('video_upload', formDataState.video_upload);
 
-    await createVideoPost(fd);
+      await createVideoPost(fd);
 
-    // optionally, reset form on success
-    if (success) {
-      setFormDataState({
-        caption: '',
-        location: '',
-        public: true,
-        tagged_people: [],
-        video_upload: null
-      });
-      setPreview(null);
-     
+      if (success) {
+        showSuccess('Video uploaded successfully!');
+        setFormDataState({
+          caption: '',
+          location: '',
+          public: true,
+          tagged_people: [],
+          video_upload: null
+        });
+        navigate('/home');
+      }
+    } catch (error) {
+      showError('Failed to upload video. Please try again.');
     }
   };
 
   useEffect(() => {
-      if (success) {
-        navigate('/home');
-      }
-    }, [success, navigate]);
-  
+    if (apiError) {
+      showError(apiError);
+    }
+  }, [apiError, showError]);
 
   const triggerVideoInput = () => videoInputRef.current.click();
   const toggleSidebar = () => setSidebarOpen(o => !o);
@@ -249,11 +277,6 @@ const VideoUpload = () => {
             </div>
             {errors.video_upload && <p className="text-rose-500 text-sm">{errors.video_upload}</p>}
           </div>
-
-          {/* API Error */}
-          {apiError && <p className="text-rose-500 text-center">{apiError}</p>}
-          {/* Success Message */}
-          {success && <p className="text-green-600 text-center">Video uploaded successfully!</p>}
 
           {/* Submit */}
           <button

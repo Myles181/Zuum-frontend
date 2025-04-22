@@ -52,7 +52,7 @@ const UploadPage = ({ profile }) => {
               </div>
 
               {/* Upload beat for sale - only for producers */}
-              {profile?.identity === 'producer' && (
+              {profile?.identity === 'producer' || 'dev' && (
                 <div className="upload-option flex flex-col items-center bg-white border border-gray-200 rounded-lg p-8 text-center cursor-pointer hover:-translate-y-1 hover:shadow-md transition-transform duration-300">
                   <svg className="option-icon w-12 h-12 mb-4 text-green-800" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M12 2V6" stroke="#2a9d8f" strokeWidth="2" strokeLinecap="round"/>
