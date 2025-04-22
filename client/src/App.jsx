@@ -36,6 +36,8 @@ import PurchasedBeats from './components/homepage/details/PurchasedBeats';
 import PromotionPage from './pages/Promotion';
 import SharedAudioPage from './components/homepage/SharePage';
 import { usePreloadEssentialData } from '../Hooks/UsePreLoader';
+import { AlertProvider } from './contexts/AlertConntexts';
+
 
 // Auth state management
 export const AuthContext = React.createContext();
@@ -160,29 +162,30 @@ const App = () => {
   };
   
   return (
-    <AuthContext.Provider value={{ 
-      profile: authProfile, 
-      loading: authLoading, 
-      
-    }}>
-      <Router>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/start" element={<GetStarted />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login  />} />
-          <Route path="/forgot" element={<ForgotPassword />} />
-          <Route path="/reset" element={<ResetPassword />} />
-          <Route path="/verify" element={<VerifyOTP />} />
+    <AlertProvider>
+      <AuthContext.Provider value={{ 
+        profile: authProfile, 
+        loading: authLoading, 
+      }}>
+        <Router>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/start" element={<GetStarted />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login  />} />
+            <Route path="/forgot" element={<ForgotPassword />} />
+            <Route path="/reset" element={<ResetPassword />} />
+            <Route path="/verify" element={<VerifyOTP />} />
 
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/*" element={<ProtectedRoutesWithLoader />} />
-          </Route>
-        </Routes>
-      </Router>
-    </AuthContext.Provider>
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/*" element={<ProtectedRoutesWithLoader />} />
+            </Route>
+          </Routes>
+        </Router>
+      </AuthContext.Provider>
+    </AlertProvider>
   );
 };
 
