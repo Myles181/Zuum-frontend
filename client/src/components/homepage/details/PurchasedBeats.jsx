@@ -14,6 +14,8 @@ import Navbar from '../../profile/NavBar';
 import Sidebar from '../Sidebar';
 import Overlay from '../Overlay';
 import BottomNav from '../BottomNav';
+import { usePurchasedBeats } from '../../../../Hooks/beats/useBeats';
+
 
 const PurchasedBeats = () => {
   // Color variables
@@ -21,51 +23,33 @@ const PurchasedBeats = () => {
   const tealLight = 'rgba(0, 128, 102, 0.1)';
   const tealDark = '#006652';
 
-  // Mock data - replace with API call
-  const [beats, setBeats] = useState([
-    {
-      id: 1,
-      title: "Midnight Dreams",
-      artist: "ProducerX",
-      coverArt: "https://source.unsplash.com/random/300x300/?music,night",
-      price: 29.99,
-      purchasedDate: "2023-05-15",
-      duration: "3:45",
-      genre: "Hip Hop",
-      downloadsRemaining: 3,
-      audioUrl: "#",
-      isPlaying: false,
-      isFavorite: false
-    },
-    {
-      id: 2,
-      title: "Summer Vibes",
-      artist: "BeatMaster",
-      coverArt: "https://source.unsplash.com/random/300x300/?summer,beach",
-      price: 24.99,
-      purchasedDate: "2023-06-22",
-      duration: "4:12",
-      genre: "Pop",
-      downloadsRemaining: 5,
-      audioUrl: "#",
-      isPlaying: false,
-      isFavorite: true
-    },
-    {
-      id: 3,
-      title: "Urban Flow",
-      artist: "TrapKing",
-      coverArt: "https://source.unsplash.com/random/300x300/?city,night",
-      price: 34.99,
-      purchasedDate: "2023-07-10",
-      duration: "2:58",
-      genre: "Trap",
-      downloadsRemaining: 2,
-      audioUrl: "#",
-      isPlaying: false,
-      isFavorite: false
+  // Use the purchased beats hook
+  const { purchasedBeats, loading, error, refetch } = usePurchasedBeats();
+  const [beats, setBeats] = useState([]);
+
+  console.log(purchasedBeats);
+  
+
+  // Transform API data to match your component's structure
+  useEffect(() => {
+    if (purchasedBeats.length > 0) {
+      const transformedBeats = purchasedBeats.map(beat => ({
+        id: beat.id,
+        title: beat.caption || 'Untitled Beat',
+        artist: beat.username || 'Unknown Artist',
+        coverArt: beat.cover_photo || 'https://source.unsplash.com/random/300x300/?music',
+        price: beat.amount || 0,
+        purchasedDate: beat.purchase_date || new Date().toISOString(),
+        duration: '3:45', // You might want to calculate this from audio duration
+        genre: beat.genre || 'Unknown Genre',
+        downloadsRemaining: beat.downloads_remaining || 0,
+        audioUrl: beat.audio_upload || '#',
+        isPlaying: false,
+        isFavorite: false
+      }));
+      setBeats(transformedBeats);
     }
-  ]);
+  }, [purchasedBeats]);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentAudio, setCurrentAudio] = useState(null);
@@ -134,9 +118,43 @@ const PurchasedBeats = () => {
     };
   }, [currentAudio]);
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 my-13 flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#008066]"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 p-4 my-13 flex flex-col justify-center items-center">
+        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4 max-w-md">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-red-700">{error}</p>
+            </div>
+          </div>
+        </div>
+        <button 
+          onClick={refetch}
+          className="mt-4 px-6 py-2 rounded-lg hover:bg-opacity-90 transition-colors"
+          style={{ backgroundColor: teal, color: 'white' }}
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 p-4 my-13">
-        <Navbar name="Your Beats" toggleSidebar={toggleSidebar} />
+      <Navbar name="Your Beats" toggleSidebar={toggleSidebar} />
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <div className="max-w-7xl mx-auto">
@@ -147,11 +165,9 @@ const PurchasedBeats = () => {
             <h1 className="text-3xl font-bold text-gray-900 ml-3">Your Library</h1>
           </div>
           <p className="text-gray-500">
-            {beats.length} purchased beats • Last added {beats[0]?.purchasedDate}
+            {beats.length} purchased beats {beats.length > 0 && `• Last added ${new Date(beats[0].purchasedDate).toLocaleDateString('en-US')}`}
           </p>
         </div>
-
-        
 
         {/* Beats Grid */}
         {filteredBeats.length > 0 ? (
@@ -190,7 +206,6 @@ const PurchasedBeats = () => {
                         <span>{beat.duration}</span>
                       </div>
                     </div>
-                    
                   </div>
 
                   {/* Purchase Info */}

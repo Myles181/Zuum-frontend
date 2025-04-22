@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import c from "../../assets/icons/ORSJOS0 1.png";
 import d from "../../assets/icons/Mask group1.svg";
+import classNames from "classnames";
 import MusicSection from "./MusicSection";
 import VideoSection from "./VideoSection";
 import useProfile, { useFollowUser } from "../../../Hooks/useProfile";
@@ -75,6 +76,22 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
       setFollowLoading(false);
     }
   };
+
+   
+    const tabs = mergedProfile.identity.toLowerCase() === "producer" || "dev"
+      ? ["beats", "audio", "video"]
+      : ["audio", "video"];
+  
+    // Handle tab clicks
+    const handleTabClick = (tab) => {
+      if (tab === "beats") {
+        // Pass mergedProfile.id via route param to purchased beats page
+        navigate(`/userbeats/${mergedProfile.id}`);
+      } else {
+        setActiveTab(tab);
+      }
+    };
+  
 
   const handleMessageClick = async () => {
     if (!authProfile) return;
@@ -171,27 +188,32 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
       {roomError && <p className="text-red-500 text-center mt-3">{roomError}</p>}
 
       {/* Tabs */}
-      <div className="tab-section mt-8">
-        <div className="tab-buttons flex justify-center gap-8 border-b-2 border-gray-200">
-          {["audio", "video"].map(tab => (
+      <div className="tab-section pt-4 w-full bg-white rounded-b-lg">
+        <div className="tab-buttons flex justify-center gap-8 border-b border-gray-200">
+          {tabs.map((tab) => (
             <button
               key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`pb-2 text-lg font-medium ${
+              onClick={() => handleTabClick(tab)}
+              className={classNames(
+                "pb-4 px-6 text-lg font-medium relative transition-all",
                 activeTab === tab
-                  ? "text-[#008066] border-b-4 border-[#008066]"
-                  : "text-gray-600 hover:text-[#008066]"
-              }`}
+                  ? "text-[#008066] font-semibold after:absolute after:bottom-0 after:left-0 after:w-full after:h-[3px] after:bg-[#008066] after:rounded-t-lg"
+                  : "text-gray-500 hover:text-[#008066]"
+              )}
             >
               {tab.charAt(0).toUpperCase() + tab.slice(1)}
             </button>
           ))}
         </div>
-        <div className="tab-content mt-4">
-          {activeTab === "audio"
-            ? <MusicSection userId={mergedProfile.id} />
-            : <VideoSection userId={mergedProfile.id} />
-          }
+
+        <div className="tab-content p-6">
+          {activeTab === "audio" && (
+            <MusicSection userId={mergedProfile.id} />
+          )}
+
+          {activeTab === "video" && (
+            <VideoSection userId={mergedProfile.id} />
+          )}
         </div>
       </div>
     </div>

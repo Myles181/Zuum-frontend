@@ -267,3 +267,128 @@ export const usePaymentAccount = () => {
   };
 };
 
+
+
+
+
+
+
+export const useWithdrawal = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [withdrawalData, setWithdrawalData] = useState(null);
+
+  const initiateWithdrawal = useCallback(async (withdrawalRequest) => {
+    console.debug('[useWithdrawal] Initializing request...');
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+    setWithdrawalData(null);
+
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      console.error('[useWithdrawal] No auth token found');
+      setError('Authentication token missing');
+      setLoading(false);
+      return;
+    }
+
+    // Validate required fields
+    if (!withdrawalRequest.amount) {
+      setError('Amount is required');
+      setLoading(false);
+      return;
+    }
+
+    // If saving account details, validate account info
+    if (withdrawalRequest.save === true) {
+      if (!withdrawalRequest.accountNumber || !withdrawalRequest.bankCode) {
+        setError('Account number and bank code are required when saving');
+        setLoading(false);
+        return;
+      }
+    }
+
+    const url = `${API_URL}/payment/withdrawal`;
+    console.debug(`[useWithdrawal] Making request to: ${url}`);
+
+    try {
+      const response = await axios.post(url, withdrawalRequest, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
+        },
+      });
+
+      console.debug('[useWithdrawal] Full response:', response);
+      
+      if (!response.data) {
+        throw new Error('No data in response');
+      }
+
+      const result = response.data.data || response.data;
+      
+      if (!result) {
+        throw new Error('Withdrawal data not found in response');
+      }
+
+      console.debug('[useWithdrawal] Withdrawal successful:', result);
+      setWithdrawalData(result);
+      setSuccess(true);
+      
+    } catch (err) {
+      console.error('[useWithdrawal] Error:', err);
+      
+      let errorMessage = 'Failed to initiate withdrawal';
+      
+      if (err.response) {
+        console.error('[useWithdrawal] Response error:', {
+          status: err.response.status,
+          data: err.response.data,
+        });
+        
+        // Handle different error response formats
+        if (err.response.status === 400) {
+          errorMessage = err.response.data?.error || 'Invalid request data';
+        } else if (err.response.status === 401) {
+          errorMessage = 'Authentication failed - please login again';
+        } else if (err.response.status === 406) {
+          errorMessage = err.response.data?.message || 'Insufficient funds';
+        } else if (err.response.status === 500) {
+          errorMessage = err.response.data?.error || 'Server error';
+        } else {
+          errorMessage = err.response.data?.message || 
+                        err.response.data?.error || 
+                        `Server responded with ${err.response.status}`;
+        }
+      } else if (err.request) {
+        console.error('[useWithdrawal] No response received');
+        errorMessage = 'No response from server';
+      } else {
+        console.error('[useWithdrawal] Request error:', err.message);
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+      console.debug('[useWithdrawal] Request completed');
+    }
+  }, []);
+
+  return {
+    initiateWithdrawal,
+    withdrawalData,
+    loading,
+    error,
+    success,
+    reset: () => {
+      setError(null);
+      setSuccess(false);
+      setWithdrawalData(null);
+    }
+  };
+};
+
