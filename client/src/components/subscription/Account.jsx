@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { CheckCircle, AlertCircle, Copy, RefreshCw, ArrowRight, Clock } from 'lucide-react';
 import {useSubscriptionPayment} from '../../../Hooks/subscription/useCreateAccount';
 
-const SubscriptionPage = ({ onSuccess, onError, profile }) => {
+const SubscriptionPage = ({ onSuccess, onError, profile, details }) => {
   const [isFadingIn, setIsFadingIn] = useState(false);
   const [copiedField, setCopiedField] = useState(null);
   const [countdownTime, setCountdownTime] = useState('');
@@ -133,33 +133,40 @@ const SubscriptionPage = ({ onSuccess, onError, profile }) => {
             <h2 className="text-xl font-bold">Zuum {getUserTypeTitle()}</h2>
             <p className="text-sm opacity-90">Unlock exclusive features</p>
           </div>
-          
-         
         </div>
       </div>
 
-      {/* Progress Indicator */}
-      <div className="px-6 pt-4">
+      {/* Progress Indicator - FIXED ALIGNMENT */}
+      <div className="px-6 pt-6 pb-2">
         <div className="flex items-center justify-between">
-          <div className="flex flex-col items-center">
+          {/* Step 1 */}
+          <div className="flex flex-col items-center z-10">
             <div className="w-8 h-8 rounded-full bg-[#2D8C72] text-white flex items-center justify-center">
-              1
+              <CheckCircle size={16} />
             </div>
-            <span className="text-xs mt-1 text-[#2D8C72] font-medium">Details</span>
+            <span className="text-xs mt-1 text-[#2D8C72] font-medium text-center">Details</span>
           </div>
-          <div className="flex-1 h-1 mx-2 bg-[#2D8C72]"></div>
-          <div className="flex flex-col items-center">
+          
+          {/* Line 1-2 */}
+          <div className="flex-1 h-1 bg-[#2D8C72] mx-2"></div>
+          
+          {/* Step 2 */}
+          <div className="flex flex-col items-center z-10">
             <div className="w-8 h-8 rounded-full bg-[#2D8C72] text-white flex items-center justify-center">
               2
             </div>
-            <span className="text-xs mt-1 text-[#2D8C72] font-medium">Confirm</span>
+            <span className="text-xs mt-1 text-[#2D8C72] font-medium text-center">Confirm</span>
           </div>
-          <div className="flex-1 h-1 mx-2 bg-gray-200"></div>
-          <div className="flex flex-col items-center">
+          
+          {/* Line 2-3 */}
+          <div className="flex-1 h-1 bg-gray-200 mx-2"></div>
+          
+          {/* Step 3 */}
+          <div className="flex flex-col items-center z-10">
             <div className="w-8 h-8 rounded-full bg-gray-200 text-gray-500 flex items-center justify-center">
               3
             </div>
-            <span className="text-xs mt-1 text-gray-500">Complete</span>
+            <span className="text-xs mt-1 text-gray-500 text-center">Complete</span>
           </div>
         </div>
       </div>
@@ -213,8 +220,8 @@ const SubscriptionPage = ({ onSuccess, onError, profile }) => {
           <div className="flex justify-between items-center pt-3 border-t border-gray-200">
             <span className="text-sm font-medium text-gray-700">Total:</span>
             <span className="font-bold text-[#2D8C72]">
-              {priceData.amount}
-              <span className="text-sm font-normal text-gray-500 ml-1">{priceData.description}</span>
+              {details.amount}
+              <span className="text-sm font-normal text-gray-500 ml-1">/Year</span>
             </span>
           </div>
         </div>

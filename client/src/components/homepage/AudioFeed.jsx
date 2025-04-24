@@ -1,4 +1,3 @@
-// AudioFeed.jsx
 import React, { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import Spinner from "../Spinner";
@@ -6,7 +5,7 @@ import useAudioPosts from "../../../Hooks/audioPosts/useCreateAudio";
 import AudioPost from "./feed/AudioPost";
 import { useFetchBeats } from "../../../Hooks/beats/useBeats";
 
-const AudioFeed = ({profile}) => {
+const AudioFeed = ({ profile }) => {
   const navigate = useNavigate();
   const [page, setPage] = useState(1);
   const [beatsPage, setBeatsPage] = useState(1);
@@ -39,14 +38,12 @@ const AudioFeed = ({profile}) => {
     pagination: beatsPagination,
   } = useFetchBeats({ initialPage: beatsPage, initialLimit: beatsLimit });
 
-  console.log(beats);
-  
-
-  const combinedContent = useMemo(() => {
-    return [...allPosts, ...allBeats].sort(
+  const combinedContent = useMemo(
+    () => [...allPosts, ...allBeats].sort(
       (a, b) => new Date(b.created_at) - new Date(a.created_at)
-    );
-  }, [allPosts, allBeats]);
+    ),
+    [allPosts, allBeats]
+  );
 
   useEffect(() => {
     if (posts.length) {
@@ -54,11 +51,7 @@ const AudioFeed = ({profile}) => {
         ...prev,
         ...posts
           .filter((p) => !prev.some((q) => q.id === p.id))
-          .map((post) => ({
-            ...post,
-            isLiked: post.isLiked || false,
-            type: "audio",
-          })),
+          .map((post) => ({ ...post, isLiked: post.isLiked || false, type: "audio" })),
       ]);
     }
   }, [posts]);
@@ -113,10 +106,7 @@ const AudioFeed = ({profile}) => {
           }
         });
       },
-      {
-        root: containerRef.current,
-        threshold: 0.6,
-      }
+      { root: containerRef.current, threshold: 0.6 }
     );
 
     const slides = containerRef.current.querySelectorAll(".snap-slide");
@@ -199,8 +189,9 @@ const AudioFeed = ({profile}) => {
         />
       ))}
 
+      {/* Inline Loader Under Feed */}
       {(postsLoading || beatsLoading) && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
+        <div className="flex justify-center py-6">
           <Spinner />
         </div>
       )}

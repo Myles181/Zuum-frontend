@@ -147,7 +147,7 @@ const App = () => {
           <Route path="/addvideo" element={<UploadVideo />} />
           <Route path="/video/:postId" element={<VideoDetails />} />
           <Route path="/all" element={<FollowersListPage />} />
-          <Route path="/subscribe" element={<SubscriptionPage profile={authProfile} />} />
+          <Route path="/subscribe" element={<SubscriptionPage profile={authProfile}  details={paymentDetails} />} />
           <Route path="/details" element={<SubscriptionDetails />} />
           <Route path="/lock" element={<LockedMusicPlayer />} />
           <Route path="/userbeats/:userId" element={<PurchaseFeed />} />
