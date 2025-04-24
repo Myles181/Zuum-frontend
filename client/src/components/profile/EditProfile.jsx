@@ -2,6 +2,8 @@ import { useState, useEffect } from "react";
 import useProfile from "../../../Hooks/useProfile";
 import { FaCamera } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
+import { useAlerts } from "../../contexts/AlertConntexts";
+
 
 const EditProfilePage = ({profile}) => {
   const {
@@ -11,6 +13,9 @@ const EditProfilePage = ({profile}) => {
     updateError,
     updateSuccess,
   } = useProfile();
+
+  // Get alert functions from context
+  const { showSuccess, showError, showInfo, showWarning } = useAlerts();
 
   // Form state
   const [formData, setFormData] = useState({
@@ -48,6 +53,7 @@ const EditProfilePage = ({profile}) => {
       if (profile.cover_image) setPreviewCoverImage(profile.cover_image);
     }
   }, [profile]);
+
   const navigate = useNavigate();
 
   const getInitial = () => {
@@ -65,29 +71,64 @@ const EditProfilePage = ({profile}) => {
     const { name, files } = e.target;
     const file = files[0];
     if (!file) return;
+
+    // Validate file type and size
+    if (!file.type.match('image.*')) {
+      showError('Please select a valid image file (JPEG, PNG)');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      showError('Image must be less than 5MB');
+      return;
+    }
+
     setFormData((p) => ({ ...p, [name]: file }));
     const reader = new FileReader();
     reader.onload = () => {
-      if (name === "image") setPreviewImage(reader.result);
-      else setPreviewCoverImage(reader.result);
+      if (name === "image") {
+        setPreviewImage(reader.result);
+        showInfo('Profile picture selected');
+      } else {
+        setPreviewCoverImage(reader.result);
+        showInfo('Cover image selected');
+      }
     };
     reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const data = new FormData();
-    Object.entries(formData).forEach(([k, v]) => {
-      if (v !== null && v !== "") data.append(k, v);
-    });
-    await updateProfile(data);
+    try {
+      const data = new FormData();
+      Object.entries(formData).forEach(([k, v]) => {
+        if (v !== null && v !== "") data.append(k, v);
+      });
+      await updateProfile(data);
+    } catch (err) {
+      showError('Failed to update profile. Please try again.');
+      console.error('Profile update error:', err);
+    }
   };
 
-  
+  useEffect(() => {
+    if (updateSuccess) {
+      showSuccess('Profile updated successfully!');
+      // Navigate after a short delay to allow the success message to be seen
+      setTimeout(() => navigate("/profile"), 1500);
+    }
+  }, [updateSuccess, navigate, showSuccess]);
 
-  if (updateSuccess){
-    navigate("/profile");
-  }
+  useEffect(() => {
+    if (updateError) {
+      showError(updateError);
+    }
+  }, [updateError, showError]);
+
+  useEffect(() => {
+    if (fetchError) {
+      showError(fetchError);
+    }
+  }, [fetchError, showError]);
 
   if (fetchError) {
     return (
@@ -165,19 +206,6 @@ const EditProfilePage = ({profile}) => {
 
         {/* Form */}
         <div className="mt-24 bg-white rounded-lg shadow-md p-6">
-          {updateSuccess && (
-            <div className="bg-green-50 border-l-4 border-green-500 p-4 mb-6">
-              <p className="text-green-700 font-medium">
-                Profile updated successfully!
-              </p>
-            </div>
-          )}
-          {updateError && (
-            <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6">
-              <p className="text-red-700 font-medium">{updateError}</p>
-            </div>
-          )}
-
           <form onSubmit={handleSubmit}>
             {/* Basic Info */}
             <div className="border-b border-gray-200 pb-4 mb-6">
@@ -379,6 +407,7 @@ const EditProfilePage = ({profile}) => {
             <div className="mt-8 flex justify-end space-x-3">
               <button
                 type="button"
+                onClick={() => navigate(-1)}
                 className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
               >
                 Cancel
