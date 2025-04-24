@@ -108,7 +108,7 @@ const App = () => {
   const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
 
   useEffect(() => {
-    if (authProfile && !authProfile.subscription) {
+    if (authProfile && !authProfile.subscription_status) {
       setShowSubscriptionPopup(true);
     }
   }, [authProfile]);
