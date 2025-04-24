@@ -354,10 +354,8 @@ const EditProfilePage = ({profile}) => {
                   disabled
                   className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
                 >
-                  <option value="">Select identity</option>
-                  <option value="artist">Artist</option>
-                  <option value="collector">Collector</option>
-                  <option value="both">Both</option>
+                  <option value="">{formData.identity}</option>
+                  
                 </select>
               </div>
 

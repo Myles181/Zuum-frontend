@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import GetStarted from './pages/GetStarted';
 import LandingPage from './pages/LandingPage';
 import Signup from './pages/auth/Signup';
@@ -28,6 +28,7 @@ import { initializeSocket } from './socket';
 import FollowersListPage from './components/homepage/FollowingList ';
 import SubscriptionPage from './components/subscription/Account';
 import SubscriptionDetails from './components/subscription/SubDetails';
+
 import LockedMusicPlayer from './components/homepage/sale/Locked';
 import PurchaseFeed from './components/homepage/sale/Purchase';
 import MusicDashboard from './pages/Dashboard';
@@ -37,12 +38,10 @@ import PromotionPage from './pages/Promotion';
 import SharedAudioPage from './components/homepage/SharePage';
 import { usePreloadEssentialData } from '../Hooks/UsePreLoader';
 import { AlertProvider } from './contexts/AlertConntexts';
+import SubscriptionPopup from './components/subscription/Popup';
 
-
-// Auth state management
 export const AuthContext = React.createContext();
 
-// Custom Loader Component
 const CustomLoader = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-white">
     <div className="text-center">
@@ -52,7 +51,6 @@ const CustomLoader = () => (
   </div>
 );
 
-// Custom Error Component
 const AuthErrorDisplay = ({ errorMessage }) => (
   <div className="fixed inset-0 flex items-center justify-center bg-white p-4">
     <div className="text-center max-w-md">
@@ -74,7 +72,6 @@ const AuthErrorDisplay = ({ errorMessage }) => (
   </div>
 );
 
-// Payment Error Toast
 const PaymentErrorToast = () => (
   <div className="bg-amber-50 border-l-4 border-amber-500 p-4 fixed top-4 right-4 z-50 max-w-md shadow-lg">
     <div className="flex">
@@ -108,8 +105,14 @@ const App = () => {
     errors,
     authLoading,
   } = usePreloadEssentialData();
+  const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
 
-  // Initialize socket when auth is ready
+  useEffect(() => {
+    if (authProfile && !authProfile.subscription_status) {
+      setShowSubscriptionPopup(true);
+    }
+  }, [authProfile]);
+
   useEffect(() => {
     if (authProfile?.id) {
       initializeSocket(authProfile.id);
@@ -117,18 +120,20 @@ const App = () => {
   }, [authProfile?.id]);
 
   const ProtectedRoutesWithLoader = () => {
-    if (isLoading) {
-      return <CustomLoader />;
+    if (isLoading) return <CustomLoader />;
+    if (errors?.auth) return <AuthErrorDisplay errorMessage={errors.auth.message} />;
+    if (showSubscriptionPopup) {
+      return (
+        <SubscriptionPopup
+          details={paymentDetails}
+          onClose={() => setShowSubscriptionPopup(false)}
+        />
+      );
     }
-    
-    if (errors?.auth) {
-      return <AuthErrorDisplay errorMessage={errors.auth.message} />;
-    }
-    
+
     return (
       <>
         {errors?.payment && <PaymentErrorToast />}
-        
         <Routes>
           <Route path="/home" element={<Homepage details={paymentDetails} profile={authProfile}/>} />
           <Route path="/search" element={<Search />} />
@@ -160,7 +165,7 @@ const App = () => {
       </>
     );
   };
-  
+
   return (
     <AlertProvider>
       <AuthContext.Provider value={{ 
