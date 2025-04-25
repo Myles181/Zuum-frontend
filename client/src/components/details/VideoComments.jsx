@@ -1,155 +1,198 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useCreateVideoComment } from '../../../Hooks/videoPosts/useVideoPostInteractions';
-import useUserProfile from "../../../Hooks/useProfile";
-import { formatDistanceToNow } from 'date-fns';
+import { FaComment, FaTimes, FaPaperPlane } from 'react-icons/fa';
+import { motion, AnimatePresence } from 'framer-motion';
+import useProfile from '../../../Hooks/useProfile';
 
-const CommentSection = ({ comments: initialComments, postId }) => {
-  const [showComments, setShowComments] = useState(true); // Show by default
+const VideoCommentModal = ({ comments: initialComments, postId }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [comments, setComments] = useState(Array.isArray(initialComments) ? initialComments : []);
   const [newComment, setNewComment] = useState('');
-  const [comments, setComments] = useState(initialComments || []);
-  const { profile } = useUserProfile();
+  const [optimisticId, setOptimisticId] = useState(null);
+  const commentsEndRef = useRef(null);
 
-  const { createVideoComment, loading, error, success, reset } = useCreateVideoComment();
+  const { createVideoComment, loading, error, success } = useCreateVideoComment();
+  const { profile } = useProfile();
 
+  // Sync when initialComments prop changes
   useEffect(() => {
-    if (success) {
-      setNewComment('');
-      reset();
+    if (Array.isArray(initialComments)) setComments(initialComments);
+  }, [initialComments]);
+
+  // On successful API comment, replace optimistic comment
+  useEffect(() => {
+    if (success && optimisticId) {
+      // Assuming createVideoComment returns new comment data via success state
+      // If the hook returns data, you'd capture it in the hook and use it here
+      setComments(prev => prev.map(c => {
+        if (c.id === optimisticId) {
+          // Replace temp comment with actual (no structural change if no data)
+          return { ...c, id: `srv-${optimisticId}`, isPending: false };
+        }
+        return c;
+      }));
+      setOptimisticId(null);
+      scrollToBottom();
     }
-  }, [success, reset]);
+  }, [success, optimisticId]);
 
-  const handleSubmitComment = async (e) => {
+  const scrollToBottom = () => {
+    setTimeout(() => commentsEndRef.current?.scrollIntoView({ behavior: 'smooth' }), 100);
+  };
+
+  const handleSubmit = async e => {
     e.preventDefault();
-    if (newComment.trim()) {
-      try {
-        const tempComment = {
-          id: Date.now(),
-          username: profile?.username || 'You',
-          profile_picture: profile?.image || '/default-avatar.png',
-          comment: newComment,
-          created_at: new Date().toISOString(),
-          likes: 0,
-          replies: []
-        };
+    const text = newComment.trim();
+    if (!text) return;
 
-        setComments([tempComment, ...comments]);
-        
-        await createVideoComment({
-          post_id: postId,
-          comment: newComment
-        });
+    const tempId = Date.now();
+    const temp = {
+      id: tempId,
+      username: profile?.username || 'You',
+      profile_picture: profile?.image || '/default-avatar.png',
+      comment: text,
+      created_at: new Date().toISOString(),
+      likes: 0,
+      isPending: true,
+    };
 
-      } catch (err) {
-        setComments(comments.filter(c => c.id !== tempComment.id));
-      }
+    // Optimistic add
+    setComments(prev => [...prev, temp]);
+    setOptimisticId(tempId);
+    setNewComment('');
+    scrollToBottom();
+
+    try {
+      await createVideoComment({ post_id: postId, comment: text });
+    } catch {
+      // Remove optimistic on failure
+      setComments(prev => prev.filter(c => c.id !== tempId));
+      setOptimisticId(null);
     }
   };
 
+  const formatDate = iso => {
+    const d = new Date(iso);
+    const now = new Date();
+    const diff = (now - d) / 1000;
+    if (diff < 60) return 'Just now';
+    if (diff < 3600) return `${Math.floor(diff/60)}m`;
+    if (diff < 86400) return `${Math.floor(diff/3600)}h`;
+    return `${Math.floor(diff/86400)}d`;
+  };
+
   return (
-    <div className="comments mt-4 bg-white rounded-lg">
-      <div className="p-4 border-b">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold text-gray-800">
-            Comments {comments.length > 0 && `(${comments.length})`}
-          </h2>
-          <button
-            onClick={() => setShowComments(!showComments)}
-            className="text-gray-500 hover:text-gray-700 text-sm font-medium"
-          >
-            {showComments ? 'Hide comments' : 'Show comments'}
-          </button>
-        </div>
-      </div>
-      
-      {showComments && (
-        <div className="divide-y divide-gray-100">
-          {/* Comment Input - Fixed at top */}
-          <div className="p-4">
-            <div className="flex items-start space-x-3">
-              <img
-                src={profile?.image || '/default-avatar.png'}
-                alt="Your profile"
-                className="w-8 h-8 rounded-full object-cover"
-              />
-              <form onSubmit={handleSubmitComment} className="flex-1">
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Write a comment..."
-                    className="w-full p-2 pr-12 border-b border-gray-200 focus:border-gray-300 focus:outline-none text-sm"
-                    disabled={loading}
+    <>
+      <button
+        onClick={e => { e.stopPropagation(); setIsOpen(true); }}
+        className="flex flex-col items-center text-white"
+        aria-label="View comments"
+      >
+        <FaComment className="text-xl" />
+        <span className="text-sm">{comments.length}</span>
+      </button>
+
+      <AnimatePresence>
+        {isOpen && (
+          <div className="fixed inset-0 z-50">
+            <motion.div
+              className="absolute inset-0 bg-black/50"
+              onClick={() => setIsOpen(false)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            />
+
+            <motion.div
+              className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl flex flex-col"
+              style={{ height: '70vh' }}
+              onClick={e => e.stopPropagation()}
+              initial={{ y: '100%' }}
+              animate={{ y: 0 }}
+              exit={{ y: '100%' }}
+              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+            >
+              {/* Header */}
+              <div className="px-4 py-3 border-b flex justify-between items-center">
+                <h3 className="font-bold text-lg">{comments.length} Comments</h3>
+                <button onClick={() => setIsOpen(false)} aria-label="Close">
+                  <FaTimes className="text-xl text-gray-600" />
+                </button>
+              </div>
+
+              {/* Comments List */}
+              <div className="flex-1 overflow-y-auto px-4 py-2">
+                {comments.length ? (
+                  comments.map(c => (
+                    <motion.div
+                      key={c.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2 }}
+                      className="flex gap-3 mb-3"
+                    >
+                      <img
+                        src={c.profile_picture}
+                        alt={c.username}
+                        className="w-10 h-10 rounded-full object-cover"
+                        onError={e => e.target.src = '/default-avatar.png'}
+                      />
+                      <div className="flex-1">
+                        <div className="bg-gray-100 rounded-2xl p-3">
+                          <p className="font-semibold text-sm">{c.username}</p>
+                          <p className="mt-1 text-gray-800 break-words">{c.comment}</p>
+                        </div>
+                        <div className="mt-1 ml-2 text-xs text-gray-500">
+                          {formatDate(c.created_at)}{c.isPending && ' • Sending...'}
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))
+                ) : (
+                  <div className="text-center py-10 text-gray-500">No comments yet.</div>
+                )}
+                <div ref={commentsEndRef} />
+              </div>
+
+              {/* Input */}
+              <div className="p-3 border-t bg-white">
+                <form onSubmit={handleSubmit} className="flex items-center gap-2">
+                  <img
+                    src={profile?.image || '/default-avatar.png'}
+                    alt="Your profile"
+                    className="w-10 h-10 rounded-full object-cover"
+                    onError={e => e.target.src = '/default-avatar.png'}
                   />
-                  {newComment.trim() && (
+                  <div className="flex-1 relative">
+                    <input
+                      type="text"
+                      value={newComment}
+                      onChange={e => setNewComment(e.target.value)}
+                      placeholder="Add a comment..."
+                      className="w-full py-2 px-4 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-[#2D8C72]"
+                      disabled={loading}
+                    />
                     <button
                       type="submit"
-                      disabled={loading}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 text-blue-500 font-semibold text-sm hover:text-blue-700"
+                      disabled={!newComment.trim() || loading}
+                      className={`absolute right-3 top-1/2 transform -translate-y-1/2 ${newComment.trim() ? 'text-[#2D8C72]' : 'text-gray-400'}`}
                     >
-                      Post
+                      <FaPaperPlane />
                     </button>
-                  )}
-                </div>
-                {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
-              </form>
-            </div>
-          </div>
-
-          {/* Comments List */}
-          <div className="max-h-[500px] overflow-y-auto">
-            {comments.length > 0 ? (
-              <ul className="divide-y divide-gray-100">
-                {comments.map((comment) => (
-                  <li key={comment.id} className="p-4 hover:bg-gray-50 transition-colors">
-                    <div className="flex space-x-3">
-                      <img
-                        src={comment.profile_picture}
-                        alt="Profile"
-                        className="w-8 h-8 rounded-full object-cover flex-shrink-0"
-                      />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-1">
-                          <p className="text-sm font-semibold text-gray-900">
-                            {comment.username}
-                          </p>
-                          <span className="text-xs text-gray-500">
-                            {formatDistanceToNow(new Date(comment.created_at), { addSuffix: true })}
-                          </span>
-                        </div>
-                        <p className="text-sm text-gray-800 mt-1 whitespace-pre-wrap">
-                          {comment.comment}
-                        </p>
-                        
-                        {/* Comment Actions */}
-                        <div className="flex items-center mt-2 space-x-4 text-xs text-gray-500">
-                          <button className="hover:text-gray-700 hover:underline">
-                            Like
-                          </button>
-                          <button className="hover:text-gray-700 hover:underline">
-                            Reply
-                          </button>
-                          {comment.likes > 0 && (
-                            <span>{comment.likes} likes</span>
-                          )}
-                        </div>
-                        
-                        {/* Reply form would go here */}
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="p-6 text-center">
-                <p className="text-gray-500 text-sm">No comments yet. Be the first to comment!</p>
+                  </div>
+                </form>
+                {error && (
+                  <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-red-500 text-sm mt-2 text-center">
+                    {error}
+                  </motion.div>
+                )}
               </div>
-            )}
+            </motion.div>
           </div>
-        </div>
-      )}
-    </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 
-export default CommentSection;
+export default VideoCommentModal;

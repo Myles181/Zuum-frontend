@@ -3,10 +3,11 @@ import { FaHeart, FaComment, FaShareAlt, FaShare } from "react-icons/fa";
 import { MdCampaign } from "react-icons/md";
 import a from "../../../assets/icons/Mask group1.svg";
 import b from "../../../assets/icons/dots-icon.svg";
-import ReactionButton from "../../details/Reactions";
+
 import CommentModal from "../../details/Comments";
 import ShareModal from "../../details/Share";
 import { useNavigate } from "react-router-dom";
+import ReactionButton from "../../details/VideoReactions";
 
 const VideoSideActions = ({ post, data, profileId }) => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -39,7 +40,10 @@ const VideoSideActions = ({ post, data, profileId }) => {
           profileId={profileId}
         />
         
-        <CommentModal comments={data?.comments} postId={data?.id} />
+        <CommentModal 
+              comments={data?.comments || []} 
+              postId={post?.id} 
+            />
         
         <button 
           onClick={(e) => {
