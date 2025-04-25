@@ -91,75 +91,73 @@ export const useCreateVideoComment = () => {
 
 
 
+
+
+
 export const useVideoReaction = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [reaction, setReaction] = useState(null);
-  const [count, setCount] = useState(0);
+  const [success, setSuccess] = useState(false);
 
-  const reactToVideo = async ({ post_id, like, unlike }) => {
+  const reactToVideo = async (postId, like, unlike) => {
     setLoading(true);
     setError(null);
+    setSuccess(false);
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem("authToken");
       if (!token) {
-        throw new Error('Authentication required');
+        throw new Error("Authentication required");
       }
+
+      const payload = {
+        post_id: String(postId),
+        like: Boolean(like),
+        unlike: Boolean(unlike),
+      };
+      console.log("Video react payload:", payload);
 
       const response = await axios.post(
         `${API_URL}/video/react`,
-        { post_id, like, unlike },
+        payload,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
         }
       );
 
       if (response.status === 200 || response.status === 201) {
-        setReaction(like ? 'liked' : unlike ? 'unliked' : null);
-        // If your API returns the updated like count, you can set it here:
-        // setCount(response.data.likes_count);
+        setSuccess(true);
         return response.data;
+      } else {
+        setError("An unexpected error occurred");
       }
-      throw new Error('Unexpected response');
-      
     } catch (err) {
-      let errorMessage = 'Failed to update reaction';
-      
       if (err.response) {
         switch (err.response.status) {
           case 400:
-            errorMessage = 'Invalid reaction data';
+            setError("Validation error: Please check your input");
             break;
           case 404:
-            errorMessage = 'Video post not found';
+            setError("Video post not found");
             break;
           case 500:
-            errorMessage = 'Server error. Please try again';
+            setError("Server error: Please try again later");
             break;
           default:
-            errorMessage = err.response.data?.message || err.message;
+            setError(err.response.data?.message || "An unexpected error occurred");
         }
+      } else if (err.request) {
+        setError("Network error: No response from server");
       } else {
-        errorMessage = err.message;
+        setError("Failed to react to video: " + err.message);
       }
-
-      setError(errorMessage);
-      throw errorMessage;
     } finally {
       setLoading(false);
     }
   };
 
-  return { 
-    reactToVideo, 
-    loading, 
-    error, 
-    reaction,
-    count,
-    resetError: () => setError(null)
-  };
+  return { reactToVideo, loading, error, success };
 };

@@ -37,7 +37,7 @@ function Homepage({details, profile}) {
       <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       {/* Conditionally render AudioFeed or VideoFeed based on activeTab */}
-      {activeTab === 'audio' ? <AudioFeed profile={profile}  /> : <VideoFeed />}
+      {activeTab === 'audio' ? <AudioFeed profile={profile}  /> : <VideoFeed profile={profile} />}
 
       <BottomNav />
       

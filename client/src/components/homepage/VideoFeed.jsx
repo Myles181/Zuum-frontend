@@ -7,7 +7,7 @@ import VideoPlayer from "./feed/VideoPlayer";
 import useProfile from "../../../Hooks/useProfile";
 
 
-const VideoFeed = () => {
+const VideoFeed = ({profile}) => {
   const [page, setPage] = useState(1);
   const [allPosts, setAllPosts] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -16,7 +16,7 @@ const VideoFeed = () => {
   const loadObserver = useRef(null);
   const scrollObserver = useRef(null);
   const { loading, error, posts, pagination } = useVideoPosts(page, limit);
-  const { profile, loading: authLoading } = useProfile();
+
 
   // Load posts
   useEffect(() => {
