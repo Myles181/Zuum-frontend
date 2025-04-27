@@ -4,10 +4,11 @@ import { MdCampaign } from "react-icons/md";
 import a from "../../../assets/icons/Mask group1.svg";
 import b from "../../../assets/icons/dots-icon.svg";
 
-import CommentModal from "../../details/Comments";
+
 import ShareModal from "../../details/Share";
 import { useNavigate } from "react-router-dom";
 import ReactionButton from "../../details/VideoReactions";
+import CommentModal from "../../details/VideoComments";
 
 const VideoSideActions = ({ post, data, profileId }) => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
@@ -64,7 +65,8 @@ const VideoSideActions = ({ post, data, profileId }) => {
         isOpen={isShareModalOpen}
         onClose={() => setIsShareModalOpen(false)}
         url={`${window.location.origin}/video/${post.id}`}
-        title={post.caption || "Check out this video"}
+        title={data?.title ?? 'Check this out'}
+        postId={post.id}
       />
     </div>
   );

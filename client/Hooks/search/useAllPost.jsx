@@ -206,14 +206,37 @@ export const useUserPosts = () => {
 
 
 
+
+
+
+
+
+
+
+
+
+
+/**
+ * Custom hook for promoting posts (audio, video, or beats)
+ * 
+ * @returns {Object} An object containing the promotePost function and related state
+ */
 export const usePromotePost = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [responseData, setResponseData] = useState(null);
+  const [requestData, setRequestData] = useState(null);
 
+  /**
+   * Promotes a post by sending a request to the promotion API
+   * 
+   * @param {string} postId - The ID of the post to promote
+   * @param {string} type - The type of post ('audio', 'video', or 'beat')
+   * @returns {Promise<Object|undefined>} The response data if successful
+   */
   const promotePost = async (postId, type) => {
-    console.debug('[usePromotePost] Starting promotion', { postId, type });
+    console.debug('[usePromotePost] Starting promotion with parameters:', { postId, type });
     setLoading(true);
     setError(null);
     setSuccess(false);
@@ -221,17 +244,34 @@ export const usePromotePost = () => {
 
     try {
       const token = localStorage.getItem('authToken');
-      console.debug('[usePromotePost] Retrieved token:', token);
-
+      if (!token) {
+        throw new Error('Authentication token not found. Please log in again.');
+      }
+      
       // Validate post type
       const validTypes = ['audio', 'video', 'beat'];
       if (!validTypes.includes(type)) {
-        throw new Error('Invalid post type');
+        setError('Invalid post type');
+        console.error('[usePromotePost] Invalid post type:', type);
+        return;
       }
-
+      
+      // Create payload with current timestamp
+      const payload = {
+        postId: String(postId), // Ensure postId is a string
+        type,
+        timeline: new Date().toISOString()
+      };
+      
+      // Store and log the request data for debugging
+      setRequestData(payload);
+      console.log('[usePromotePost] Sending request with payload:', payload);
+      console.log('[usePromotePost] API URL:', `${API_URL}/payment/promote`);
+      console.log('[usePromotePost] Auth token exists:', !!token);
+      
       const response = await axios.post(
         `${API_URL}/payment/promote`,
-        { postId, type },
+        payload,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -240,26 +280,29 @@ export const usePromotePost = () => {
         }
       );
 
-      console.debug('[usePromotePost] Response received:', response);
+      console.log('[usePromotePost] Response received:', response);
 
-      if (response.status === 200) {
-        setSuccess(true);
-        setResponseData(response.data);
-        console.debug('[usePromotePost] Post promoted successfully:', response.data);
-        return response.data;
-      } else {
-        setError('An unexpected response was received');
-        console.error('[usePromotePost] Unexpected status code:', response.status, response.data);
-      }
+      setSuccess(true);
+      setResponseData(response.data);
+      return response.data;
+      
     } catch (err) {
       console.error('[usePromotePost] Error caught:', err);
 
+      // Log request details for debugging
+      console.log('[usePromotePost] Request that failed:', {
+        url: `${API_URL}/payment/promote`,
+        payload: requestData
+      });
+
       if (err.response) {
-        console.error('[usePromotePost] Server response error:', {
+        console.error('[usePromotePost] Server response error details:', {
           status: err.response.status,
-          data: err.response.data
+          data: err.response.data,
+          headers: err.response.headers
         });
 
+        // Handle specific error cases
         switch (err.response.status) {
           case 400:
             setError(err.response.data.message || 'Invalid post type');
@@ -268,31 +311,37 @@ export const usePromotePost = () => {
             setError('Post not found');
             break;
           case 406:
-            setError('Insufficient funds');
+            setError('Insufficient funds to promote this post');
             break;
           case 500:
-            setError('Server error: Please try again later');
+            setError('Server error: The promotion service encountered an issue. Please check your data and try again later.');
             break;
           default:
-            setError('An unexpected error occurred');
+            setError(`Error ${err.response.status}: ${err.response.data.message || 'An unexpected error occurred'}`);
         }
       } else if (err.request) {
         console.error('[usePromotePost] No response received:', err.request);
-        setError('Network error: No response from server');
+        setError('Network error: Unable to connect to the server. Please check your internet connection.');
       } else {
         console.error('[usePromotePost] Request setup error:', err.message);
-        setError('Failed to promote post: ' + err.message);
+        setError(`Failed to promote post: ${err.message}`);
       }
+      
+      // Return the error to allow component-level handling
+      return { error: err.message, details: err.response?.data };
     } finally {
       setLoading(false);
-      console.debug('[usePromotePost] promotePost finished, loading=false');
     }
   };
 
+  /**
+   * Resets the hook state
+   */
   const reset = () => {
     setError(null);
     setSuccess(false);
     setResponseData(null);
+    setRequestData(null);
   };
 
   return { 
@@ -301,6 +350,7 @@ export const usePromotePost = () => {
     error, 
     success, 
     responseData,
+    requestData, // Expose request data for debugging
     reset
   };
 };

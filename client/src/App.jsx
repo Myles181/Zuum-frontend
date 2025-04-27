@@ -39,6 +39,7 @@ import SharedAudioPage from './components/homepage/SharePage';
 import { usePreloadEssentialData } from '../Hooks/UsePreLoader';
 import { AlertProvider } from './contexts/AlertConntexts';
 import SubscriptionPopup from './components/subscription/Popup';
+import Jet from './pages/Jet';
 
 export const AuthContext = React.createContext();
 
@@ -160,6 +161,7 @@ const App = () => {
           <Route path="/beats/:id" element={<BeatDetails />} />
           <Route path="/purchasedbeats" element={<PurchasedBeats />} />
           <Route path="/promotion" element={<PromotionPage />} />
+          <Route path="/jet" element={<Jet />} />
           <Route path="/shared-audio/:shareId" element={<SharedAudioPage />} />
         </Routes>
       </>
