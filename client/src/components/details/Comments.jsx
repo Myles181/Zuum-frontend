@@ -10,39 +10,25 @@ const CommentModal = ({ comments: initialComments, postId }) => {
   const [comments, setComments] = useState(() =>
     Array.isArray(initialComments) ? initialComments : []
   );
-  const [optimisticId, setOptimisticId] = useState(null);
   const commentsEndRef = useRef(null);
 
-  const { createComment, isLoading, error, isSuccess, commentData } = useCreateComment();
+  const { createComment, isLoading, error } = useCreateComment();
   const { profile } = useProfile();
 
-  // Sync comments when prop updates
+  // Sync comments when prop updates, but preserve our optimistic ones
   useEffect(() => {
     if (Array.isArray(initialComments)) {
-      setComments(initialComments);
+      // Keep our local comments that aren't in the server data
+      const localOnlyComments = comments.filter(
+        localComment => !initialComments.some(
+          serverComment => serverComment.id === localComment.id
+        )
+      );
+      
+      // Combine server data with local-only comments
+      setComments([...initialComments, ...localOnlyComments]);
     }
   }, [initialComments]);
-
-  // Replace optimistic comment on success
-  useEffect(() => {
-    if (isSuccess && commentData && optimisticId) {
-      setComments(prev => prev.map(comment =>
-        comment.id === optimisticId
-          ? {
-              id: commentData.id,
-              username: commentData.username || profile?.username || 'You',
-              profile_picture: commentData.profile_picture || profile?.image || '/default-profile.jpg',
-              comment: commentData.comment,
-              created_at: commentData.created_at,
-              likes: commentData.likes ?? 0,
-              isLiked: false,
-            }
-          : comment
-      ));
-      setOptimisticId(null);
-      scrollToBottom();
-    }
-  }, [isSuccess, commentData, optimisticId, profile]);
 
   const scrollToBottom = () => {
     setTimeout(() => {
@@ -56,7 +42,10 @@ const CommentModal = ({ comments: initialComments, postId }) => {
     const trimmedComment = newComment.trim();
     if (!trimmedComment) return;
 
-    const tempId = Date.now();
+    // Generate a temporary ID for the optimistic comment
+    const tempId = `temp-${Date.now()}`;
+    
+    // Create optimistic comment object
     const tempComment = {
       id: tempId,
       username: profile?.username || 'You',
@@ -65,18 +54,27 @@ const CommentModal = ({ comments: initialComments, postId }) => {
       created_at: new Date().toISOString(),
       likes: 0,
       isLiked: false,
+      isOptimistic: true // Flag to identify our local comments
     };
 
-    setOptimisticId(tempId);
+    // Add comment to UI immediately
     setComments(prev => [...prev, tempComment]);
-    setNewComment('');
+    setNewComment(''); // Clear input field
+    
+    // Scroll to the new comment
     scrollToBottom();
 
+    // Now attempt to send to server, but don't update our UI on success
     try {
       await createComment(postId, trimmedComment);
-    } catch {
-      setComments(prev => prev.filter(c => c.id !== tempId));
-      setOptimisticId(null);
+      // Don't do anything with the response - we want to keep our optimistic UI
+    } catch (err) {
+      // Mark as failed but keep it visible
+      setComments(prev => prev.map(c => 
+        c.id === tempId 
+          ? {...c, isFailed: true}
+          : c
+      ));
     }
   };
 
@@ -90,23 +88,28 @@ const CommentModal = ({ comments: initialComments, postId }) => {
     return `${Math.floor(diff/86400)}d`;
   };
 
+  // Generate a safe key for React lists
+  const generateSafeKey = (comment, index) => {
+    if (comment.id) return `comment-${comment.id}`;
+    return `comment-index-${index}`;
+  };
+
   return (
     <>
       {/* Comment Trigger */}
-<button
-  onClick={e => {
-    e.stopPropagation();
-    setIsModalOpen(true);
-  }}
-  className="flex flex-col items-center text-white rounded-full"
-  aria-label="View comments"
->
-  <div className="rounded-full p-2 hover:bg-white/10 transition-colors">
-    <FaComment className="text-xl" />
-  </div>
-  <span className="text-sm">{comments.length}</span>
-</button>
-
+      <button
+        onClick={e => {
+          e.stopPropagation();
+          setIsModalOpen(true);
+        }}
+        className="flex flex-col items-center text-white rounded-full"
+        aria-label="View comments"
+      >
+        <div className="rounded-full p-2 hover:bg-white/10 transition-colors">
+          <FaComment className="text-xl" />
+        </div>
+        <span className="text-sm">{comments.length}</span>
+      </button>
 
       <AnimatePresence>
         {isModalOpen && (
@@ -147,9 +150,9 @@ const CommentModal = ({ comments: initialComments, postId }) => {
               <div className="flex-1 overflow-y-auto px-4">
                 <div className="space-y-4 py-2">
                   {comments.length ? (
-                    comments.map(comment => (
+                    comments.map((comment, index) => (
                       <motion.div
-                        key={comment.id}
+                        key={generateSafeKey(comment, index)}
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2 }}
@@ -162,8 +165,13 @@ const CommentModal = ({ comments: initialComments, postId }) => {
                           onError={e => e.target.src = '/default-profile.jpg'}
                         />
                         <div className="flex-1 min-w-0">
-                          <div className="bg-gray-100 rounded-2xl p-3">
-                            <p className="font-semibold text-sm">{comment.username}</p>
+                          <div className={`bg-gray-100 rounded-2xl p-3 ${comment.isFailed ? 'border border-red-300' : ''}`}>
+                            <div className="flex justify-between items-start">
+                              <p className="font-semibold text-sm">{comment.username}</p>
+                              {comment.isFailed && (
+                                <span className="text-xs text-red-500 ml-2">Failed to send</span>
+                              )}
+                            </div>
                             <p className="text-gray-800 mt-1 break-words">{comment.comment}</p>
                           </div>
                           <div className="flex items-center mt-1 ml-2 gap-4 text-xs text-gray-500">

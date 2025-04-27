@@ -3,86 +3,86 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+/**
+ * Custom hook to create a comment on an audio post.
+ * Handles casting, detailed error reporting, and stores response data.
+ */
 export const useCreateVideoComment = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [response, setResponse] = useState(null);
+  const [commentData, setCommentData] = useState(null);
 
-  const createVideoComment = async ({ post_id, comment }) => {
+  const createComment = async (postId, trimmedComment) => {
     setLoading(true);
     setError(null);
     setSuccess(false);
-    setResponse(null);
+    setCommentData(null);
 
     try {
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('Authentication required. Please log in.');
-      }
+      // Cast postId to string per API schema requirements
+      const payload = {
+        post_id: String(postId),
+        comment: trimmedComment,
+      };
 
-      const result = await axios.post(
+      // Debugging log to confirm payload & endpoint
+      console.debug('Posting comment:', payload, 'to', `${API_URL}/video/comment/create`);
+
+      const response = await axios.post(
         `${API_URL}/video/comment/create`,
-        { post_id, comment },
+        payload,
         {
           headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          }
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         }
       );
 
-      if (result.status === 201) {
+      if (response.status === 201) {
         setSuccess(true);
-        setResponse({
-          message: 'Comment added successfully',
-          data: result.data
-        });
-        return result.data;
-      }
-      throw new Error('Unexpected response from server');
-      
-    } catch (err) {
-      let errorMessage = 'Failed to post comment';
-      
-      if (axios.isAxiosError(err)) {
-        switch (err.response?.status) {
-          case 400:
-            errorMessage = err.response.data?.error || 'Invalid comment data';
-            break;
-          case 404:
-            errorMessage = 'Video post not found';
-            break;
-          case 500:
-            errorMessage = 'Server error. Please try again later';
-            break;
-          default:
-            errorMessage = err.response?.data?.message || err.message;
-        }
+        setCommentData(response.data);
+        return response.data;
       } else {
-        errorMessage = err.message;
+        // Unexpected status code
+        const msg = `Unexpected status code: ${response.status}`;
+        console.warn(msg, response.data);
+        setError(msg);
       }
-
-      setError(errorMessage);
-      throw errorMessage;
+    } catch (err) {
+      // Detailed error parsing
+      if (err.response && err.response.data) {
+        console.error('Server validation errors:', err.response.data);
+        // If API returns structured errors, join them
+        const data = err.response.data;
+        if (data.errors) {
+          const messages = Object.values(data.errors).flat().join(' | ');
+          setError(messages);
+        } else if (data.message) {
+          setError(data.message);
+        } else {
+          setError(JSON.stringify(data));
+        }
+      } else if (err.request) {
+        console.error('No response received:', err.request);
+        setError('Network error: No response from server');
+      } else {
+        console.error('Error setting up request:', err.message);
+        setError(err.message);
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  const reset = () => {
-    setError(null);
-    setSuccess(false);
-    setResponse(null);
-  };
-
-  return { 
-    createVideoComment, 
-    loading, 
-    error, 
-    success, 
-    response,
-    reset
+  return {
+    createComment,
+    isLoading: loading,
+    error,
+    isSuccess: success,
+    commentData,
   };
 };
 
