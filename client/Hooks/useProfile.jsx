@@ -31,6 +31,7 @@ const useProfile = () => {
         // Check if the response status is OK (200)
         if (response.status === 200) {
           setProfile(response.data); // Set the profile data in state
+
         } else {
           // Handle specific HTTP errors
           if (response.status === 401) {
