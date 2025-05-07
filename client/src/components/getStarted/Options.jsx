@@ -21,7 +21,11 @@ const Options = () => {
               to={`/signup?identity=${option.toLowerCase().replace(/\s+/g, "-")}`} // Convert to lowercase and replace spaces with hyphens
               className="text-black no-underline"
             >
-              {option}
+              {option
+  .split("_")
+  .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+  .join(" ")}
+
             </Link>
           </div>
         ))}
