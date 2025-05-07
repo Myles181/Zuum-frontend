@@ -14,12 +14,15 @@ const ProtectedRoute = () => {
     if (token && fromLogin && !loading) {
       // Clear the flag and force full page refresh
       sessionStorage.removeItem('fromLogin');
-      window.location.reload();
+     
     }
   }, [token, loading]);
 
   if (loading) {
-    return <div><Spinner /></div>;
+    return <div className="flex items-center justify-center h-screen w-screen">
+    <Spinner />
+  </div>
+  
   }
 
   if (!token) {

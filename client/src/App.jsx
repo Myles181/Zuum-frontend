@@ -39,8 +39,9 @@ import SharedAudioPage from './components/homepage/SharePage';
 
 import { AlertProvider } from './contexts/AlertConntexts';
 import SubscriptionPopup from './components/subscription/Popup';
-import Jet from './pages/Jet';
+import {Jet} from './pages/Jet';
 import { AuthProvider, useAuth } from './contexts/AuthContexts';
+import Distribution from './pages/Distribution';
 
 const CustomLoader = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-white">
@@ -133,6 +134,7 @@ const AppRoutes = () => {
         <Route path="/beats/:id" element={<BeatDetails />} />
         <Route path="/purchasedbeats" element={<PurchasedBeats />} />
         <Route path="/promotion" element={<PromotionPage />} />
+        <Route path="/distribution" element={<Distribution />} />
         <Route path="/jet" element={<Jet />} />
         <Route path="/shared-audio/:shareId" element={<SharedAudioPage />} />
       </Routes>
