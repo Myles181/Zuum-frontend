@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import GetStarted from './pages/GetStarted';
 import LandingPage from './pages/LandingPage';
 import Signup from './pages/auth/Signup';
@@ -36,12 +36,12 @@ import BeatDetails from './components/homepage/details/BeatDetails';
 import PurchasedBeats from './components/homepage/details/PurchasedBeats';
 import PromotionPage from './pages/Promotion';
 import SharedAudioPage from './components/homepage/SharePage';
-import { usePreloadEssentialData } from '../Hooks/UsePreLoader';
+
 import { AlertProvider } from './contexts/AlertConntexts';
 import SubscriptionPopup from './components/subscription/Popup';
-import Jet from './pages/Jet';
-
-export const AuthContext = React.createContext();
+import {Jet} from './pages/Jet';
+import { AuthProvider, useAuth } from './contexts/AuthContexts';
+import Distribution from './pages/Distribution';
 
 const CustomLoader = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-white">
@@ -57,143 +57,112 @@ const AuthErrorDisplay = ({ errorMessage }) => (
     <div className="text-center max-w-md">
       <div className="text-red-500 text-5xl mb-4">⚠️</div>
       <h2 className="text-2xl font-bold text-gray-800 mb-2">Authentication Error</h2>
-      <p className="text-gray-600 mb-6">
-        {errorMessage || 'Failed to load your profile data'}
-      </p>
-      <button
-        onClick={() => window.location.reload()}
-        className="bg-[#2D8C72] text-white px-6 py-2 rounded-lg font-medium"
-      >
+      <p className="text-gray-600 mb-6">{errorMessage}</p>
+      <button onClick={() => window.location.reload()} className="bg-[#2D8C72] text-white px-6 py-2 rounded-lg font-medium">
         Try Again
       </button>
-      <p className="mt-4 text-sm text-gray-500">
-        Still having issues? <a href="/login" className="text-[#2D8C72]">Try logging in again</a>
-      </p>
     </div>
   </div>
 );
 
 const PaymentErrorToast = () => (
   <div className="bg-amber-50 border-l-4 border-amber-500 p-4 fixed top-4 right-4 z-50 max-w-md shadow-lg">
-    <div className="flex">
-      <div className="flex-shrink-0">
-        <svg className="h-5 w-5 text-amber-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-          <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-        </svg>
-      </div>
-      <div className="ml-3">
-        <p className="text-sm text-amber-700">
-          Payment information couldn't be loaded. Some features may be limited.
-        </p>
-        <div className="mt-2">
-          <button 
-            onClick={() => window.location.reload()}
-            className="text-sm text-amber-700 font-medium underline hover:text-amber-800"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    </div>
+    <p className="text-sm text-amber-700">
+      Payment information couldn't be loaded. Some features may be limited.
+    </p>
   </div>
 );
 
-const App = () => {
-  const {
-    authProfile,
-    paymentDetails,
-    isLoading,
-    errors,
-    authLoading,
-  } = usePreloadEssentialData();
-  const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(false);
+// Component handling protected routes and popups
+const AppRoutes = () => {
+  const { profile, paymentDetails, loading, error } = useAuth();
+  const [showSubscription, setShowSubscription] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
-    if (authProfile && !authProfile.subscription_status) {
-      setShowSubscriptionPopup(true);
-    }
-  }, [authProfile]);
+    if (!profile) return; // wait for profile
 
-  useEffect(() => {
-    if (authProfile?.id) {
-      initializeSocket(authProfile.id);
-    }
-  }, [authProfile?.id]);
-
-  const ProtectedRoutesWithLoader = () => {
-    if (isLoading) return <CustomLoader />;
-    if (errors?.auth) return <AuthErrorDisplay errorMessage={errors.auth.message} />;
-    if (showSubscriptionPopup) {
-      return (
-        <SubscriptionPopup
-          details={paymentDetails}
-          onClose={() => setShowSubscriptionPopup(false)}
-        />
-      );
+    // Only show popup if not on subscribe page
+    if (!profile.subscription_status) {
+      if (location.pathname === '/subscribe' || '/home') {
+        setShowSubscription(false);
+      } else {
+        setShowSubscription(true);
+      }
     }
 
-    return (
-      <>
-        {errors?.payment && <PaymentErrorToast />}
-        <Routes>
-          <Route path="/home" element={<Homepage details={paymentDetails} profile={authProfile}/>} />
-          <Route path="/search" element={<Search />} />
-          <Route path="/settings" element={<Settings />} />
-          <Route path="/profile" element={<ArtistPage profile={authProfile} error={errors} />} />
-          <Route path="/profile/:userId" element={<UserProfilePage />} />
-          <Route path="/editprofile" element={<EditProfile profile={authProfile} />} />
-          <Route path="/activity" element={<ActivityPage />} />
-          <Route path="/messages" element={<Chat />} />
-          <Route path="/message" element={<ChatListPage />} />
-          <Route path="/chat/:roomId" element={<MessagePage />} />
-          <Route path="/music/:postId" element={<MusicDetailsPage />} />
-          <Route path="/add" element={<UploadPage profile={authProfile} />} />
-          <Route path="/addpaybeat" element={<UploadBeat />} />
-          <Route path="/addbeat" element={<MusicUploadInterface />} />
-          <Route path="/addvideo" element={<UploadVideo />} />
-          <Route path="/video/:postId" element={<VideoDetails />} />
-          <Route path="/all" element={<FollowersListPage />} />
-          <Route path="/subscribe" element={<SubscriptionPage profile={authProfile}  details={paymentDetails} />} />
-          <Route path="/details" element={<SubscriptionDetails />} />
-          <Route path="/lock" element={<LockedMusicPlayer />} />
-          <Route path="/userbeats/:userId" element={<PurchaseFeed />} />
-          <Route path="/dashboard" element={<MusicDashboard />} />
-          <Route path="/beats/:id" element={<BeatDetails />} />
-          <Route path="/purchasedbeats" element={<PurchasedBeats />} />
-          <Route path="/promotion" element={<PromotionPage />} />
-          <Route path="/jet" element={<Jet />} />
-          <Route path="/shared-audio/:shareId" element={<SharedAudioPage />} />
-        </Routes>
-      </>
-    );
-  };
+    // Initialize socket once
+    if (profile.id) {
+      initializeSocket(profile.id);
+    }
+  }, [profile, location.pathname]);
+
+  if (loading) return <CustomLoader />;
+  if (error) return <AuthErrorDisplay errorMessage={error} />;
 
   return (
-    <AlertProvider>
-      <AuthContext.Provider value={{ 
-        profile: authProfile, 
-        loading: authLoading, 
-      }}>
-        <Router>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/start" element={<GetStarted />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login  />} />
-            <Route path="/forgot" element={<ForgotPassword />} />
-            <Route path="/reset" element={<ResetPassword />} />
-            <Route path="/verify" element={<VerifyOTP />} />
+    <>
+      {paymentDetails === null && <PaymentErrorToast />}
+      {showSubscription && <SubscriptionPopup details={paymentDetails} onClose={() => setShowSubscription(false)} />}
 
-            {/* Protected Routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/*" element={<ProtectedRoutesWithLoader />} />
-            </Route>
-          </Routes>
-        </Router>
-      </AuthContext.Provider>
-    </AlertProvider>
+      <Routes>
+        {/* Subscription page should not trigger the popup */}
+        <Route path="/subscribe" element={<SubscriptionPage profile={profile} details={paymentDetails} />} />
+        <Route path="/home" element={<Homepage details={paymentDetails} profile={profile} />} />
+        {/* Rest of protected routes */}
+       
+        <Route path="/search" element={<Search />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/profile" element={<ArtistPage profile={profile} />} />
+        <Route path="/profile/:userId" element={<UserProfilePage />} />
+        <Route path="/editprofile" element={<EditProfile profile={profile} />} />
+        <Route path="/activity" element={<ActivityPage />} />
+        <Route path="/messages" element={<Chat />} />
+        <Route path="/message" element={<ChatListPage />} />
+        <Route path="/chat/:roomId" element={<MessagePage />} />
+        <Route path="/music/:postId" element={<MusicDetailsPage />} />
+        <Route path="/add" element={<UploadPage profile={profile} />} />
+        <Route path="/addpaybeat" element={<UploadBeat />} />
+        <Route path="/addbeat" element={<MusicUploadInterface />} />
+        <Route path="/addvideo" element={<UploadVideo />} />
+        <Route path="/video/:postId" element={<VideoDetails />} />
+        <Route path="/all" element={<FollowersListPage />} />
+        <Route path="/details" element={<SubscriptionDetails />} />
+        <Route path="/lock" element={<LockedMusicPlayer />} />
+        <Route path="/userbeats/:userId" element={<PurchaseFeed />} />
+        <Route path="/dashboard" element={<MusicDashboard />} />
+        <Route path="/beats/:id" element={<BeatDetails />} />
+        <Route path="/purchasedbeats" element={<PurchasedBeats />} />
+        <Route path="/promotion" element={<PromotionPage />} />
+        <Route path="/distribution" element={<Distribution />} />
+        <Route path="/jet" element={<Jet />} />
+        <Route path="/shared-audio/:shareId" element={<SharedAudioPage />} />
+      </Routes>
+    </>
   );
 };
+
+const App = () => (
+  <AlertProvider>
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/start" element={<GetStarted />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/forgot" element={<ForgotPassword />} />
+          <Route path="/reset" element={<ResetPassword />} />
+          <Route path="/verify" element={<VerifyOTP />} />
+          {/* Protected Routes */}
+          <Route element={<ProtectedRoute />}>
+            <Route path="/*" element={<AppRoutes />} />
+          </Route>
+        </Routes>
+      </Router>
+    </AuthProvider>
+  </AlertProvider>
+);
 
 export default App;

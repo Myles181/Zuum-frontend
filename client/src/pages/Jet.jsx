@@ -1,521 +1,124 @@
-"use client"
+import { useState } from 'react';
+import { Music, Share2, ChevronRight, CheckCircle } from 'lucide-react';
+import Navbar from '../components/profile/NavBar';
+import BottomNav from '../components/homepage/BottomNav';
 
-import { useState, useEffect } from "react"
-import { motion, AnimatePresence } from "framer-motion"
-import { Music, ChevronLeft, ChevronRight, Upload, CheckCircle } from "lucide-react"
-import ReleaseInfoStep from "../components/distribution/ReleaseInfoStep"
-import ArtistProfileStep from "../components/distribution/ArtistPage"
-import FileUploadStep from "../components/distribution/FileUploadStep"
-import MetadataStep from "../components/distribution/MetaDataStep"
-import DistributionStep from "../components/distribution/DistributionStep"
-import Navbar from "../components/profile/NavBar"
-import BottomNav from "../components/homepage/BottomNav"
-
-// Step Components
-
-
-const Jet = () => {
-  // Step management
-  const [currentStep, setCurrentStep] = useState(1)
-  const totalSteps = 5
-
-  // Form data state
-  const [formData, setFormData] = useState({
-    // Artist Profile
-    hasDistributed: "",
-    artistName: "",
-    existingProfiles: {
-      spotify: "",
-      appleMusic: "",
-      youtubeMusic: "",
-    },
-
-    // Release Info
-    releaseType: "single",
-    title: "",
-    numberOfTracks: 2,
-    tracks: [],
-
-    // Artwork & Audio
-    coverArt: null,
-    audioFile: null,
-
-    // Metadata
-    genre: "",
-    secondaryGenre: "",
-    releaseDate: "",
-    isExplicit: false,
-    clipStartTime: 0,
-
-    // Rights & Distribution
-    copyright: {
-      year: new Date().getFullYear(),
-      owner: "",
-    },
-    recordLabel: "no",
-    recordLabelName: "",
-    songwriter: "self",
-    songwriters: [""],
-    lyrics: "",
-
-    // Distribution
-    allPlatforms: true,
-    platforms: {
-      spotify: true,
-      appleMusic: true,
-      youtubeMusic: true,
-      amazonMusic: false,
-      tidal: false,
-      deezer: false,
-    },
-
-    // Promotion
-    promotionPackage: "none",
-
-    // Agreements
-    agreements: {
-      terms: false,
-      youtubeAck: false,
-      promoAck: false,
-      rightsAck: false,
-      nameAck: false,
-      distributionAck: false,
-    },
-  })
-
-  // UI state
-  const [errors, setErrors] = useState({})
-  const [loading, setLoading] = useState(false)
-  const [success, setSuccess] = useState(false)
-
-  // Initialize tracks when number changes
-  useEffect(() => {
-    if (formData.releaseType === "album") {
-      const trackCount = Number.parseInt(formData.numberOfTracks)
-      const newTracks = []
-
-      for (let i = 0; i < trackCount; i++) {
-        newTracks.push({
-          title: formData.tracks[i]?.title || "",
-          songwriter: formData.tracks[i]?.songwriter || "",
-          featuredArtist: formData.tracks[i]?.featuredArtist || "",
-          lyrics: formData.tracks[i]?.lyrics || "",
-          clipStartTime: formData.tracks[i]?.clipStartTime || 0,
-          genre: formData.tracks[i]?.genre || "",
-          audioFile: formData.tracks[i]?.audioFile || null,
-        })
-      }
-
-      setFormData((prev) => ({
-        ...prev,
-        tracks: newTracks,
-      }))
+export const  Jet = () => {
+  const [selectedOption, setSelectedOption] = useState(null);
+  
+  const handleOptionSelect = (option) => {
+    // Navigate to your existing promotion/distribution pages instead
+    if (option === 'promotion') {
+      // Replace with your navigation logic to promotion page
+      console.log('Navigate to promotion page');
+       window.location.href = '/promotion';
+    } else {
+      // Replace with your navigation logic to distribution page
+      console.log('Navigate to distribution page');
+      window.location.href = '/distribution';
     }
-  }, [formData.numberOfTracks, formData.releaseType])
-
-  // Form validation
-  const validateStep = (step) => {
-    const newErrors = {}
-
-    switch (step) {
-      case 1: // Artist Profile
-        if (!formData.hasDistributed) {
-          newErrors.hasDistributed = "Please select an option"
-        } else if (formData.hasDistributed === "yes") {
-          if (!formData.existingProfiles.spotify) newErrors["existingProfiles.spotify"] = "Spotify URL is required"
-          if (!formData.existingProfiles.appleMusic)
-            newErrors["existingProfiles.appleMusic"] = "Apple Music URL is required"
-          if (!formData.existingProfiles.youtubeMusic)
-            newErrors["existingProfiles.youtubeMusic"] = "YouTube Music URL is required"
-        } else if (formData.hasDistributed === "no") {
-          if (!formData.artistName.trim()) newErrors.artistName = "Artist name is required"
-        }
-        break
-
-      case 2: // Release Info
-        if (!formData.title.trim()) newErrors.title = "Title is required"
-        if (formData.releaseType === "album") {
-          // Validate album tracks
-          formData.tracks.forEach((track, index) => {
-            if (!track.title.trim()) newErrors[`track${index}Title`] = "Track title is required"
-          })
-        }
-        break
-
-      case 3: // Artwork & Audio
-        if (!formData.coverArt) newErrors.coverArt = "Cover art is required"
-        if (formData.releaseType === "single" && !formData.audioFile) {
-          newErrors.audioFile = "Audio file is required"
-        } else if (formData.releaseType === "album") {
-          formData.tracks.forEach((track, index) => {
-            if (!track.audioFile) newErrors[`track${index}Audio`] = "Audio file is required"
-          })
-        }
-        break
-
-      case 4: // Metadata & Rights
-        if (!formData.genre) newErrors.genre = "Primary genre is required"
-        if (!formData.releaseDate) newErrors.releaseDate = "Release date is required"
-        if (!formData.copyright.owner.trim()) newErrors["copyright.owner"] = "Copyright owner is required"
-        if (formData.songwriter === "self" && formData.songwriters.some((sw) => !sw.trim())) {
-          newErrors.songwriters = "All songwriter fields must be filled"
-        }
-        if (formData.releaseType === "single" && !formData.lyrics.trim()) {
-          newErrors.lyrics = "Lyrics are required"
-        }
-        break
-
-      case 5: // Distribution & Agreements
-        if (!formData.allPlatforms && !Object.values(formData.platforms).some((v) => v)) {
-          newErrors.platforms = "Select at least one platform"
-        }
-
-        // Check all agreements
-        Object.keys(formData.agreements).forEach((key) => {
-          if (!formData.agreements[key]) {
-            newErrors[`agreements.${key}`] = "You must agree to continue"
-          }
-        })
-        break
-
-      default:
-        break
-    }
-
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  // Step navigation
-  const goToNextStep = () => {
-    if (validateStep(currentStep) && currentStep < totalSteps) {
-      setCurrentStep(currentStep + 1)
-      window.scrollTo(0, 0)
-    }
-  }
-
-  const goToPrevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1)
-      window.scrollTo(0, 0)
-    }
-  }
-
-  // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!validateStep(currentStep)) return
-
-    setLoading(true)
-
-    try {
-      // Simulate API call with a timeout
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // Build FormData for API submission
-      const submitData = new FormData()
-
-      // Add all form data
-      submitData.append("artistName", formData.artistName)
-      submitData.append("hasDistributed", formData.hasDistributed)
-      submitData.append("existingProfiles", JSON.stringify(formData.existingProfiles))
-      submitData.append("releaseType", formData.releaseType)
-      submitData.append("title", formData.title)
-      submitData.append("coverArt", formData.coverArt)
-
-      if (formData.releaseType === "single") {
-        submitData.append("audioFile", formData.audioFile)
-        submitData.append("lyrics", formData.lyrics)
-      } else {
-        submitData.append(
-          "tracks",
-          JSON.stringify(
-            formData.tracks.map((t) => ({
-              ...t,
-              audioFile: null, // Don't stringify the file
-            })),
-          ),
-        )
-
-        // Add each track audio file separately
-        formData.tracks.forEach((track, index) => {
-          if (track.audioFile) {
-            submitData.append(`track${index}Audio`, track.audioFile)
-          }
-        })
-      }
-
-      submitData.append("genre", formData.genre)
-      submitData.append("secondaryGenre", formData.secondaryGenre)
-      submitData.append("releaseDate", formData.releaseDate)
-      submitData.append("isExplicit", formData.isExplicit)
-      submitData.append("clipStartTime", formData.clipStartTime)
-      submitData.append("copyright", JSON.stringify(formData.copyright))
-      submitData.append("recordLabel", formData.recordLabel)
-      submitData.append("recordLabelName", formData.recordLabelName)
-      submitData.append("songwriter", formData.songwriter)
-      submitData.append("songwriters", JSON.stringify(formData.songwriters))
-      submitData.append("allPlatforms", formData.allPlatforms)
-      submitData.append("platforms", JSON.stringify(formData.platforms))
-      submitData.append("promotionPackage", formData.promotionPackage)
-      submitData.append("agreements", JSON.stringify(formData.agreements))
-
-      // For demo purposes, just log the data
-      console.log("Submitting music:", Object.fromEntries(submitData.entries()))
-
-      setSuccess(true)
-    } catch (error) {
-      console.error("Submission error:", error)
-      setErrors((prev) => ({ ...prev, submit: "Failed to submit. Please try again." }))
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  // Reset form
-  const handleReset = () => {
-    setFormData({
-      // Artist Profile
-      hasDistributed: "",
-      artistName: "",
-      existingProfiles: {
-        spotify: "",
-        appleMusic: "",
-        youtubeMusic: "",
-      },
-
-      // Release Info
-      releaseType: "single",
-      title: "",
-      numberOfTracks: 2,
-      tracks: [],
-
-      // Artwork & Audio
-      coverArt: null,
-      audioFile: null,
-
-      // Metadata
-      genre: "",
-      secondaryGenre: "",
-      releaseDate: "",
-      isExplicit: false,
-      clipStartTime: 0,
-
-      // Rights & Distribution
-      copyright: {
-        year: new Date().getFullYear(),
-        owner: "",
-      },
-      recordLabel: "no",
-      recordLabelName: "",
-      songwriter: "self",
-      songwriters: [""],
-      lyrics: "",
-
-      // Distribution
-      allPlatforms: true,
-      platforms: {
-        spotify: true,
-        appleMusic: true,
-        youtubeMusic: true,
-        amazonMusic: false,
-        tidal: false,
-        deezer: false,
-      },
-
-      // Promotion
-      promotionPackage: "none",
-
-      // Agreements
-      agreements: {
-        terms: false,
-        youtubeAck: false,
-        promoAck: false,
-        rightsAck: false,
-        nameAck: false,
-        distributionAck: false,
-      },
-    })
-    setCurrentStep(1)
-    setSuccess(false)
-    setErrors({})
-  }
-
-  // Render success state
-  const renderSuccess = () => (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-4 md:p-8 text-center">
-      <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-6 md:mb-8 rounded-full bg-green-50 flex items-center justify-center">
-        <CheckCircle className="w-10 h-10 md:w-12 md:h-12 text-green-600" />
-      </div>
-      <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3 md:mb-4">Submission Successful!</h2>
-      <p className="text-gray-600 mb-6 md:mb-8 text-base md:text-lg">Your music has been submitted for distribution.</p>
-      <button
-        onClick={handleReset}
-        className="px-6 py-3 bg-[#247a63] text-white rounded-lg hover:bg-[#1c6350] transition-colors text-base md:text-lg font-medium"
-      >
-        Submit Another Release
-      </button>
-    </motion.div>
-  )
-
-  // Progress indicator
-  const renderProgressBar = () => {
-    if (success) return null
-
-    return (
-      <div className="mb-6 md:mb-10">
-        {/* Mobile progress indicator (dots) */}
-        <div className="flex md:hidden justify-center items-center gap-2 mb-4">
-          {[1, 2, 3, 4, 5].map((step) => (
-            <div
-              key={step}
-              className={`w-2.5 h-2.5 rounded-full transition-all ${
-                currentStep === step ? "bg-[#247a63] w-4 h-4" : currentStep > step ? "bg-[#247a63]/60" : "bg-gray-200"
-              }`}
-            ></div>
-          ))}
+    setSelectedOption(option);
+  };
+  
+  return (
+    <div className="min-h-screen bg-white my-13">
+       <Navbar name="Creator Hub"  />
+      <header className="pt-12 pb-10 px-4 text-center">
+        <div className="inline-block mb-4">
+          <div className="h-16 w-16 bg-[#1c6350] rounded-full flex items-center justify-center mx-auto">
+            <Music size={32} className="text-white" />
+          </div>
         </div>
-        <div className="text-center md:hidden mb-4 text-sm font-medium text-gray-700">
-          Step {currentStep}:{currentStep === 1 && " Artist Profile"}
-          {currentStep === 2 && " Release Information"}
-          {currentStep === 3 && " Upload Files"}
-          {currentStep === 4 && " Metadata & Rights"}
-          {currentStep === 5 && " Distribution"}
-        </div>
-
-        {/* Desktop progress indicator (icons) */}
-        <div className="hidden md:flex justify-between items-center mb-6 relative">
-          {/* Progress line */}
-          <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -translate-y-1/2 z-0"></div>
-          <div
-            className="absolute top-1/2 left-0 h-1 bg-[#247a63] -translate-y-1/2 z-0 transition-all duration-300"
-            style={{ width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%` }}
-          ></div>
-
-          {/* Step indicators */}
-          {[1, 2, 3, 4, 5].map((step) => (
-            <div key={step} className="z-10">
-              <div
-                className={`relative flex items-center justify-center w-12 h-12 rounded-full text-sm font-medium transition-all ${
-                  currentStep >= step
-                    ? "bg-[#247a63] text-white shadow-md"
-                    : "bg-white border-2 border-gray-200 text-gray-400"
-                }`}
-              >
-                {step}
-                <span className="absolute -bottom-8 text-xs font-medium whitespace-nowrap text-center">
-                  {step === 1 && "Artist"}
-                  {step === 2 && "Release"}
-                  {step === 3 && "Files"}
-                  {step === 4 && "Metadata"}
-                  {step === 5 && "Distribution"}
-                </span>
+        <h1 className="text-4xl font-bold mb-3 text-[#1c6350]">
+          Music Creator Hub
+        </h1>
+        <p className="text-lg text-gray-600 max-w-lg mx-auto">
+          Take your music to the next level - choose how you want to share your sound with the world
+        </p>
+      </header>
+      
+      <main className="container mx-auto px-4 pt-4 pb-16 max-w-5xl">
+        <div className="grid md:grid-cols-2 gap-8">
+          {/* Promotion Option */}
+          <div 
+            className="bg-white rounded-xl p-8 border-2 border-[#1c6350] shadow-lg shadow-[#1c6350]/10 hover:shadow-xl hover:shadow-[#1c6350]/20 transition-all cursor-pointer transform hover:-translate-y-1"
+            onClick={() => handleOptionSelect('promotion')}
+          >
+            <div className="flex justify-between items-start mb-8">
+              <div className="p-4 bg-[#1c6350] rounded-xl text-white">
+                <Music size={32} />
+              </div>
+              <ChevronRight className="text-[#1c6350]" size={28} />
+            </div>
+            <h2 className="text-2xl font-bold mb-4 text-[#1c6350]">In-App Promotion</h2>
+            <p className="text-gray-600 mb-6 text-lg">
+              Amplify your music within our platform. Get featured in playlists, gain exposure to our community of listeners, and build your audience.
+            </p>
+            <div className="space-y-4">
+              <div className="flex items-center text-gray-700">
+                <CheckCircle size={18} className="text-[#1c6350] mr-3" />
+                <span className="text-base">Featured in app playlists</span>
+              </div>
+              <div className="flex items-center text-gray-700">
+                <CheckCircle size={18} className="text-[#1c6350] mr-3" />
+                <span className="text-base">Spotlight on discover page</span>
+              </div>
+              <div className="flex items-center text-gray-700">
+                <CheckCircle size={18} className="text-[#1c6350] mr-3" />
+                <span className="text-base">Targeted user recommendations</span>
               </div>
             </div>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
-  // Render current step content
-  const renderStepContent = () => {
-    if (success) {
-      return renderSuccess()
-    }
-
-    return (
-      <AnimatePresence mode="wait">
-        <motion.div
-          key={currentStep}
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: -20 }}
-          transition={{ duration: 0.3 }}
-        >
-          {currentStep === 1 && (
-            <ArtistProfileStep formData={formData} setFormData={setFormData} errors={errors} setErrors={setErrors} />
-          )}
-
-          {currentStep === 2 && (
-            <ReleaseInfoStep formData={formData} setFormData={setFormData} errors={errors} setErrors={setErrors} />
-          )}
-
-          {currentStep === 3 && (
-            <FileUploadStep formData={formData} setFormData={setFormData} errors={errors} setErrors={setErrors} />
-          )}
-
-          {currentStep === 4 && (
-            <MetadataStep formData={formData} setFormData={setFormData} errors={errors} setErrors={setErrors} />
-          )}
-
-          {currentStep === 5 && (
-            <DistributionStep formData={formData} setFormData={setFormData} errors={errors} setErrors={setErrors} />
-          )}
-        </motion.div>
-      </AnimatePresence>
-    )
-  }
-
-  return (
-    <div className="h-full bg-gray-50 md:py-12 my-13 ">
-    <Navbar  name='distribution'/>
-      <div className="max-w-3xl mx-auto bg-white rounded-xl md:rounded-2xl shadow-lg overflow-hidden">
-        <div className="bg-gradient-to-r from-[#247a63]/20 to-white p-4 md:p-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
-            <Music className="mr-3 md:mr-4 text-[#247a63]" size={24} />
-            Music Distribution
-          </h1>
-          <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-base">
-            Submit your music to major streaming platforms
-          </p>
-        </div>
-
-        <div className="p-4 md:p-8">
-          {renderProgressBar()}
-
-          <form onSubmit={handleSubmit}>
-            {renderStepContent()}
-
-            {!success && (
-              <div className="mt-6 md:mt-10 flex justify-between">
-                {currentStep > 1 ? (
-                  <button
-                    type="button"
-                    onClick={goToPrevStep}
-                    className="px-4 md:px-6 py-2.5 md:py-3 flex items-center gap-1 md:gap-2 text-gray-700 hover:text-[#247a63] transition-colors text-sm md:text-base"
-                  >
-                    <ChevronLeft size={16} /> Back
-                  </button>
-                ) : (
-                  <div></div>
-                )}
-
-                {currentStep < totalSteps ? (
-                  <button
-                    type="button"
-                    onClick={goToNextStep}
-                    className="px-5 md:px-8 py-2.5 md:py-3 bg-[#247a63] text-white rounded-lg hover:bg-[#1c6350] transition-colors flex items-center gap-1 md:gap-2 shadow-md text-sm md:text-base"
-                  >
-                    Next <ChevronRight size={16} />
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="px-5 md:px-8 py-2.5 md:py-3 bg-[#247a63] text-white rounded-lg hover:bg-[#1c6350] transition-colors flex items-center gap-1 md:gap-2 shadow-md disabled:opacity-50 disabled:hover:bg-[#247a63] text-sm md:text-base"
-                  >
-                    {loading ? "Submitting..." : "Submit Music"} <Upload size={16} />
-                  </button>
-                )}
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <button className="w-full py-3 px-4 bg-[#1c6350] text-white rounded-lg font-medium text-lg flex items-center justify-center">
+                <span>Promote Your Music</span>
+                <ChevronRight size={20} className="ml-2" />
+              </button>
+            </div>
+          </div>
+          
+          {/* Distribution Option */}
+          <div 
+            className="bg-white rounded-xl p-8 border-2 border-[#1c6350] shadow-lg shadow-[#1c6350]/10 hover:shadow-xl hover:shadow-[#1c6350]/20 transition-all cursor-pointer transform hover:-translate-y-1"
+            onClick={() => handleOptionSelect('distribution')}
+          >
+            <div className="flex justify-between items-start mb-8">
+              <div className="p-4 bg-[#1c6350] rounded-xl text-white">
+                <Share2 size={32} />
               </div>
-            )}
-          </form>
+              <ChevronRight className="text-[#1c6350]" size={28} />
+            </div>
+            <h2 className="text-2xl font-bold mb-4 text-[#1c6350]">Global Distribution</h2>
+            <p className="text-gray-600 mb-6 text-lg">
+              Share your music across all major streaming platforms. Reach millions of potential listeners worldwide and maximize your revenue.
+            </p>
+            <div className="space-y-4">
+              <div className="flex items-center text-gray-700">
+                <CheckCircle size={18} className="text-[#1c6350] mr-3" />
+                <span className="text-base">Release to 150+ platforms</span>
+              </div>
+              <div className="flex items-center text-gray-700">
+                <CheckCircle size={18} className="text-[#1c6350] mr-3" />
+                <span className="text-base">Royalty collection</span>
+              </div>
+              <div className="flex items-center text-gray-700">
+                <CheckCircle size={18} className="text-[#1c6350] mr-3" />
+                <span className="text-base">Release scheduling</span>
+              </div>
+            </div>
+            <div className="mt-8 pt-6 border-t border-gray-200">
+              <button className="w-full py-3 px-4 bg-[#1c6350] text-white rounded-lg font-medium text-lg flex items-center justify-center">
+                <span>Distribute Your Music</span>
+                <ChevronRight size={20} className="ml-2" />
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
-      <BottomNav />
+        
+        <div className="mt-12 text-center text-gray-500">
+          <p>Need help deciding? <a href="#" className="text-[#1c6350] font-medium hover:underline">Contact our support team</a></p>
+        </div>
+      </main>
+      <BottomNav activeTab="home" />
     </div>
-  )
+  );
 }
-
-export default Jet

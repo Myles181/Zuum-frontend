@@ -33,6 +33,8 @@ const SubscriptionPage = ({ onSuccess, onError, profile, details }) => {
         return { amount: '₦20,000', description: '/month' };
       case 'label owner':
         return { amount: '₦30,000', description: '/month' };
+        case 'dev':
+          return { amount: '₦200', description: '/month' };
       default:
         return { amount: '₦--,---', description: '/month' };
     }
@@ -220,7 +222,7 @@ const SubscriptionPage = ({ onSuccess, onError, profile, details }) => {
           <div className="flex justify-between items-center pt-3 border-t border-gray-200">
             <span className="text-sm font-medium text-gray-700">Total:</span>
             <span className="font-bold text-[#2D8C72]">
-              {details.amount}
+              {details?.paymentDetails?.amount}
               <span className="text-sm font-normal text-gray-500 ml-1">/Year</span>
             </span>
           </div>
