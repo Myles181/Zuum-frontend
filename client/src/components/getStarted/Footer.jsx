@@ -15,27 +15,8 @@ const Footers = () => {
         />
       </div>
       <div className="footer-links flex justify-between w-full max-w-3xl text-left">
-        <div className="footer-column">
-          <h3 className="text-sm font-bold mb-2">Company</h3>
-          <ul>
-            <li>
-              <a
-                href="#"
-                className="text-xs text-gray-600 hover:text-blue-500"
-              >
-                Instant Share
-              </a>
-            </li>
-            <li>
-              <a
-                href="#"
-                className="text-xs text-gray-600 hover:text-blue-500"
-              >
-                Music promotion
-              </a>
-            </li>
-          </ul>
-        </div>
+      
+          
         <div className="footer-column">
           <h3 className="text-sm font-bold mb-2">Products</h3>
           <ul>
@@ -101,14 +82,14 @@ const Footers = () => {
         Copyright &copy; <span id="year">{new Date().getFullYear()}</span>{" "}
         Zuum. All rights reserved
       </p>
-      <div className="footer-policy flex justify-center gap-5 mt-2">
+      {/* <div className="footer-policy flex justify-center gap-5 mt-2">
         <a href="#" className="text-xs text-gray-600 hover:text-blue-500">
           Privacy Policy
         </a>
         <a href="#" className="text-xs text-gray-600 hover:text-blue-500">
           Term of Use
         </a>
-      </div>
+      </div> */}
     </div>
   </footer></div>
   )

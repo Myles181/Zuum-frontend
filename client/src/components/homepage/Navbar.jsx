@@ -8,7 +8,7 @@ const Navbar = ({ activeTab, handleTabClick }) => {
     <div className="navbar bg-white/20 backdrop-blur-lg border-b border-white/10 shadow-sm flex items-center justify-between px-4 py-2 fixed top-0 left-0 w-full z-50">
       <div className="nav-left">
         <Link
-          to="/promotion"
+          to="/jet"
           className="text-white/80 hover:text-white transition-colors"
         >
           <MdRocketLaunch className="w-6 h-6" />  {/* ← swapped here */}
