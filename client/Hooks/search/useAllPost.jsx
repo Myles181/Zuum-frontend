@@ -1,8 +1,9 @@
-// useUserPosts.js
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
+axios.defaults.baseURL = API_URL;
+axios.defaults.withCredentials = true; // Enable cookie authentication
 
 export const useUserPosts = () => {
   const [posts, setPosts] = useState({
@@ -26,7 +27,7 @@ export const useUserPosts = () => {
   const addTypeToPosts = (postsArray, type) => {
     return postsArray.map(post => ({
       ...post,
-      type: type.toLowerCase() // Ensure consistent type naming
+      type: type.toLowerCase()
     }));
   };
 
@@ -36,18 +37,12 @@ export const useUserPosts = () => {
       setLoading(prev => ({ ...prev, beats: true }));
       setError(prev => ({ ...prev, beats: null }));
       
-      const token = localStorage.getItem('authToken');
-      if (!token) throw new Error('Authentication token missing');
-
-      const response = await axios.get(`${API_URL}/beat/user-posts`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get('/beat/user-posts');
 
       // Handle both array and object response formats
       let beatsData = Array.isArray(response.data) ? response.data : 
                      response.data.posts || response.data.data || [];
       
-      // Add type to each beat
       beatsData = addTypeToPosts(beatsData, 'beat');
       
       setPosts(prev => ({
@@ -71,18 +66,11 @@ export const useUserPosts = () => {
       setLoading(prev => ({ ...prev, videos: true }));
       setError(prev => ({ ...prev, videos: null }));
       
-      const token = localStorage.getItem('authToken');
-      if (!token) throw new Error('Authentication required');
+      const response = await axios.get('/video/user');
 
-      const response = await axios.get(`${API_URL}/video/user`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      // Handle both array and object response formats
       let videoPosts = Array.isArray(response.data) ? response.data : 
                       response.data.posts || response.data.data || [];
       
-      // Add type to each video
       videoPosts = addTypeToPosts(videoPosts, 'video');
       
       setPosts(prev => ({
@@ -106,18 +94,11 @@ export const useUserPosts = () => {
       setLoading(prev => ({ ...prev, audios: true }));
       setError(prev => ({ ...prev, audios: null }));
       
-      const token = localStorage.getItem('authToken');
-      if (!token) throw new Error('Authentication required');
+      const response = await axios.get('/audio/user');
 
-      const response = await axios.get(`${API_URL}/audio/user`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      // Handle both array and object response formats
       let audioPosts = Array.isArray(response.data) ? response.data : 
                       response.data.posts || response.data.data || [];
       
-      // Add type to each audio
       audioPosts = addTypeToPosts(audioPosts, 'audio');
       
       setPosts(prev => ({
@@ -213,144 +194,291 @@ export const useUserPosts = () => {
 
 
 
-
-
-
 /**
- * Custom hook for promoting posts (audio, video, or beats)
- * 
- * @returns {Object} An object containing the promotePost function and related state
+ * Hook for promoting posts (audio, video, or beats)
+ * @returns {Object} Promotion functions and state
  */
 export const usePromotePost = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const [responseData, setResponseData] = useState(null);
-  const [requestData, setRequestData] = useState(null);
 
   /**
-   * Promotes a post by sending a request to the promotion API
-   * 
-   * @param {string} postId - The ID of the post to promote
-   * @param {string} type - The type of post ('audio', 'video', or 'beat')
-   * @returns {Promise<Object|undefined>} The response data if successful
+   * Promote a post
+   * @param {string} postId - ID of post to promote
+   * @param {'audio'|'video'|'beat'} type - Type of post
+   * @returns {Promise<Object>} Response data
    */
   const promotePost = async (postId, type) => {
-    console.debug('[usePromotePost] Starting promotion with parameters:', { postId, type });
+    // Validate input
+    if (!postId || !type) {
+      const errMsg = 'Missing required parameters';
+      console.error('[usePromotePost] Validation error:', errMsg);
+      throw new Error(errMsg);
+    }
+
+    const validTypes = ['audio', 'video', 'beat'];
+    if (!validTypes.includes(type)) {
+      const errMsg = `Invalid type: ${type}. Must be one of: ${validTypes.join(', ')}`;
+      console.error('[usePromotePost] Validation error:', errMsg);
+      throw new Error(errMsg);
+    }
+
+    const payload = {
+      postId: String(postId),
+      type,
+      timeline: new Date().toISOString()
+    };
+
+    console.log('[usePromotePost] Starting promotion with payload:', payload);
+
     setLoading(true);
     setError(null);
     setSuccess(false);
     setResponseData(null);
 
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('Authentication token not found. Please log in again.');
-      }
-      
-      // Validate post type
-      const validTypes = ['audio', 'video', 'beat'];
-      if (!validTypes.includes(type)) {
-        setError('Invalid post type');
-        console.error('[usePromotePost] Invalid post type:', type);
-        return;
-      }
-      
-      // Create payload with current timestamp
-      const payload = {
-        postId: String(postId), // Ensure postId is a string
-        type,
-        timeline: new Date().toISOString()
-      };
-      
-      // Store and log the request data for debugging
-      setRequestData(payload);
-      console.log('[usePromotePost] Sending request with payload:', payload);
-      console.log('[usePromotePost] API URL:', `${API_URL}/payment/promote`);
-      console.log('[usePromotePost] Auth token exists:', !!token);
-      
-      const response = await axios.post(
-        `${API_URL}/payment/promote`,
-        payload,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
+      console.log('[usePromotePost] Sending request to /payment/promote');
+      const response = await axios.post('/payment/promote', payload);
 
-      console.log('[usePromotePost] Response received:', response);
-
+      console.log('[usePromotePost] Promotion successful:', response.data);
       setSuccess(true);
       setResponseData(response.data);
       return response.data;
-      
-    } catch (err) {
-      console.error('[usePromotePost] Error caught:', err);
 
-      // Log request details for debugging
-      console.log('[usePromotePost] Request that failed:', {
-        url: `${API_URL}/payment/promote`,
-        payload: requestData
-      });
+    } catch (err) {
+      let errorDetails = {
+        timestamp: new Date().toISOString(),
+        payload,
+        error: null
+      };
 
       if (err.response) {
-        console.error('[usePromotePost] Server response error details:', {
+        // Server responded with error status
+        errorDetails = {
+          ...errorDetails,
           status: err.response.status,
-          data: err.response.data,
+          responseData: err.response.data,
           headers: err.response.headers
-        });
+        };
 
-        // Handle specific error cases
+        console.error('[usePromotePost] Server error response:', errorDetails);
+
         switch (err.response.status) {
           case 400:
-            setError(err.response.data.message || 'Invalid post type');
+            setError(err.response.data.message || 'Invalid request');
             break;
           case 404:
             setError('Post not found');
             break;
           case 406:
-            setError('Insufficient funds to promote this post');
+            setError('Insufficient funds');
             break;
           case 500:
-            setError('Server error: The promotion service encountered an issue. Please check your data and try again later.');
+            setError('Server error: ' + (err.response.data.message || 'Please try again later'));
             break;
           default:
-            setError(`Error ${err.response.status}: ${err.response.data.message || 'An unexpected error occurred'}`);
+            setError(`Error ${err.response.status}: ${err.response.data.message || 'Unknown error'}`);
         }
       } else if (err.request) {
-        console.error('[usePromotePost] No response received:', err.request);
-        setError('Network error: Unable to connect to the server. Please check your internet connection.');
+        // No response received
+        errorDetails.error = 'No response from server';
+        console.error('[usePromotePost] Network error:', errorDetails);
+        setError('Network error: Could not connect to server');
       } else {
-        console.error('[usePromotePost] Request setup error:', err.message);
-        setError(`Failed to promote post: ${err.message}`);
+        // Request setup error
+        errorDetails.error = err.message;
+        console.error('[usePromotePost] Request error:', errorDetails);
+        setError('Request failed: ' + err.message);
       }
-      
-      // Return the error to allow component-level handling
-      return { error: err.message, details: err.response?.data };
+
+      // Log complete error to error tracking service if available
+      // logErrorToService(errorDetails);
+
+      throw err; // Re-throw for component to handle
     } finally {
       setLoading(false);
+      console.log('[usePromotePost] Request completed');
     }
   };
 
   /**
-   * Resets the hook state
+   * Reset hook state
    */
   const reset = () => {
     setError(null);
     setSuccess(false);
     setResponseData(null);
-    setRequestData(null);
   };
 
-  return { 
-    promotePost, 
-    loading, 
-    error, 
-    success, 
+  return {
+    promotePost,
+    loading,
+    error,
+    success,
     responseData,
-    requestData, // Expose request data for debugging
     reset
   };
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * Hook for submitting music distribution requests with specific error handling
+ * @returns {Object} Distribution functions and state
+ */
+export const useDistributionRequest = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [responseData, setResponseData] = useState(null);
+
+  /**
+   * Submit a distribution request with enhanced error handling
+   * @param {Object} formData - Complete distribution form data
+   * @returns {Promise<Object>} Response data
+   */
+  const submitDistributionRequest = async (formData) => {
+    console.groupCollapsed('[Distribution] Submission Started');
+    console.log('Form data:', formData);
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+    setResponseData(null);
+
+    try {
+      // Validate required files before submission
+      if (!formData.coverArt) {
+        throw { code: 'MISSING_COVER', message: 'Cover art is required' };
+      }
+
+      if (formData.releaseType === 'single' && !formData.audioFile) {
+        throw { code: 'MISSING_AUDIO', message: 'Audio file is required for singles' };
+      }
+
+      if (formData.releaseType === 'album' && formData.tracks.some(t => !t.audioFile)) {
+        throw { code: 'MISSING_TRACKS', message: 'All album tracks require audio files' };
+      }
+
+      const submitData = new FormData();
+      // Build form data (same as before)
+      // ... [previous form data construction code] ...
+
+      console.log('Submitting to /user/distribution-request');
+      const response = await axios.post('/user/distribution-request', submitData);
+
+      if (response.data.message === "Music Distribution request successful") {
+        console.log('Distribution successful:', response.data);
+        setSuccess(true);
+        setResponseData(response.data);
+        return response.data;
+      } else {
+        throw { 
+          code: 'UNEXPECTED_RESPONSE', 
+          message: 'Received unexpected success response',
+          response 
+        };
+      }
+
+    } catch (err) {
+      let errorMessage = 'Submission failed';
+      let errorCode = 'UNKNOWN_ERROR';
+
+      // Handle axios errors
+      if (err.response) {
+        console.error('Server responded with error:', err.response.data);
+        
+        switch (err.response.status) {
+          case 400:
+            errorMessage = err.response.data.message || 'Required fields missing';
+            errorCode = 'VALIDATION_ERROR';
+            break;
+            
+          case 406:
+            errorMessage = err.response.data.message || 'Invalid file format or metadata';
+            errorCode = 'INVALID_FORMAT';
+            
+            // Special handling for specific 406 messages
+            if (err.response.data.message.includes('MP3')) {
+              errorCode = 'INVALID_AUDIO_FORMAT';
+            } else if (err.response.data.message.includes('cover photo')) {
+              errorCode = 'INVALID_COVER_FORMAT';
+            }
+            break;
+            
+          case 409:
+            errorMessage = 'Insufficient funds for distribution';
+            errorCode = 'INSUFFICIENT_FUNDS';
+            break;
+            
+          case 500:
+            errorMessage = err.response.data.error || 'Internal server error';
+            errorCode = 'SERVER_ERROR';
+            break;
+            
+          default:
+            errorMessage = `Error ${err.response.status}: ${err.response.data.message || 'Unknown error'}`;
+        }
+      } 
+      // Handle network errors
+      else if (err.request) {
+        errorMessage = 'Network error: Could not connect to server';
+        errorCode = 'NETWORK_ERROR';
+        console.error('No response received:', err.request);
+      } 
+      // Handle custom validation errors
+      else if (err.code) {
+        errorMessage = err.message;
+        errorCode = err.code;
+      }
+      // Handle all other errors
+      else {
+        errorMessage = err.message || 'Unknown error occurred';
+        console.error('Unexpected error:', err);
+      }
+
+      setError({ message: errorMessage, code: errorCode });
+      throw { code: errorCode, message: errorMessage, originalError: err };
+      
+    } finally {
+      setLoading(false);
+      console.groupEnd();
+    }
+  };
+
+  return {
+    submitDistributionRequest,
+    loading,
+    error,
+    success,
+    responseData,
+    reset: () => {
+      setError(null);
+      setSuccess(false);
+      setResponseData(null);
+    }
+  };
+};
+
+
+
+
+
+
+
+

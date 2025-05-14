@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useNotifications from '../../../Hooks/notification/useNotification';
 import Spinner from '../Spinner';
 
@@ -135,9 +135,16 @@ const NotificationSection = () => {
   return (
     <div className="p-4 bg-gray-50 min-h-screen">
       <div className="max-w-xl mx-auto bg-white rounded-lg shadow overflow-hidden">
-        <div className="px-4 py-3 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-800">Notifications</h2>
-        </div>
+      <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-white shadow-sm">
+  <h2 className="text-xl font-semibold text-gray-800">Notifications</h2>
+  <Link 
+    to="/zuum-news"
+    className="text-sm font-medium bg-[#2D8C72] text-white px-3 py-1.5 rounded-md hover:bg-[#256b58] transition duration-200 cursor-pointer"
+  >
+    Zuum News 
+  </Link>
+</div>
+
         <div className="divide-y divide-gray-100">
           {notifications.map((notification) => (
             <div
