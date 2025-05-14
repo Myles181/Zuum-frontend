@@ -31,6 +31,9 @@ const AudioFeed = ({ profile }) => {
     pagination: postsPagination,
   } = useAudioPosts(page, limit);
 
+  console.log(posts);
+  
+
   const {
     loading: beatsLoading,
     error: beatsError,

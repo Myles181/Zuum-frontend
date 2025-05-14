@@ -196,62 +196,45 @@ export const useCreateVideoPost = () => {
 
 
 
+
+axios.defaults.baseURL = API_URL;
+axios.defaults.withCredentials = true; // Enable cookie authentication
+
+// Hook for fetching video posts with pagination
 export const useVideoPosts = (page = 1, limit = 10, videoId = null, userId = null) => {
-  const [loading, setLoading] = useState(true); // Tracks loading state
-  const [error, setError] = useState(null); // Tracks error messages
-  const [posts, setPosts] = useState([]); // Stores the fetched video posts
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [posts, setPosts] = useState([]);
   const [pagination, setPagination] = useState({
     total: 0,
     totalPages: 0,
     currentPage: page,
     hasNext: false,
     hasPrev: false,
-  }); // Stores pagination details
+  });
 
-  // Fetch video posts when `page`, `limit`, `videoId`, or `userId` changes
   useEffect(() => {
     const fetchVideoPosts = async () => {
       setLoading(true);
       setError(null);
 
       try {
-        const token = localStorage.getItem("authToken"); // Retrieve the authentication token
-
-        if (!token) {
-          throw new Error("Authentication token not found. Please log in.");
-        }
-
         let response;
 
         if (videoId) {
-          // Fetch a specific video post by ID
-          response = await axios.get(`${API_URL}/video/${videoId}`, {
-            headers: {
-              Authorization: `Bearer ${token}`, // Include the auth token
-            },
-          });
+          response = await axios.get(`/video/${videoId}`);
         } else if (userId) {
-          // Fetch video posts for a specific user
-          response = await axios.get(`${API_URL}/video/user/${userId}`, {
-            params: { page, limit },
-            headers: {
-              Authorization: `Bearer ${token}`, // Include the auth token
-            },
+          response = await axios.get(`/video/user/${userId}`, {
+            params: { page, limit }
           });
         } else {
-          // Fetch all video posts with pagination
-          response = await axios.get(`${API_URL}/video`, {
-            params: { page, limit },
-            headers: {
-              Authorization: `Bearer ${token}`, // Include the auth token
-            },
+          response = await axios.get('/video', {
+            params: { page, limit }
           });
         }
 
-        // Check if the response is successful
         if (response.status === 200) {
           if (videoId) {
-            // If fetching a single post, set it as the only post in the array
             setPosts([response.data.post]);
             setPagination({
               total: 1,
@@ -261,7 +244,6 @@ export const useVideoPosts = (page = 1, limit = 10, videoId = null, userId = nul
               hasPrev: false,
             });
           } else {
-            // If fetching posts, update the posts and pagination state
             const { posts, pagination } = response.data;
             setPosts(posts);
             setPagination({
@@ -274,32 +256,26 @@ export const useVideoPosts = (page = 1, limit = 10, videoId = null, userId = nul
           }
         }
       } catch (err) {
-        // Handle errors
         if (err.response) {
-          // The request was made and the server responded with a status code
           if (err.response.status === 401) {
-            setError("Unauthorized: Please log in to access this resource.");
+            setError("Unauthorized: Please log in");
           } else if (err.response.status === 404) {
-            setError("Video post not found.");
+            setError("Video post not found");
           } else {
-            setError(
-              err.response.data?.message || "An error occurred while fetching video posts."
-            );
+            setError(err.response.data?.message || "An error occurred");
           }
         } else if (err.request) {
-          // The request was made but no response was received
-          setError("Network error: No response from server.");
+          setError("Network error: No response from server");
         } else {
-          // Something happened in setting up the request
-          setError(err.message || "An unexpected error occurred.");
+          setError(err.message || "An unexpected error occurred");
         }
       } finally {
-        setLoading(false); // Stop loading
+        setLoading(false);
       }
     };
 
     fetchVideoPosts();
-  }, [page, limit, videoId, userId]); // Re-run effect when `page`, `limit`, `videoId`, or `userId` changes
+  }, [page, limit, videoId, userId]);
 
   return {
     loading,
@@ -309,8 +285,7 @@ export const useVideoPosts = (page = 1, limit = 10, videoId = null, userId = nul
   };
 };
 
-
-
+// Hook for fetching a single video post
 export const useGetVideoPost = (postId) => {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -320,14 +295,7 @@ export const useGetVideoPost = (postId) => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem('authToken');
-      console.log('Fetching video post with token:', token);
-      const response = await axios.get(`${API_URL}/video/${postId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      console.log('Response:', response);
+      const response = await axios.get(`/video/${postId}`);
       if (response.status === 200) {
         setData(response.data.post);
       } else {
@@ -335,14 +303,17 @@ export const useGetVideoPost = (postId) => {
       }
     } catch (err) {
       if (err.response) {
-        setError(`Server error: ${err.response.status} - ${err.response.statusText}`);
-        console.error('Server error:', err.response.data);
+        if (err.response.status === 401) {
+          setError('Unauthorized: Please log in');
+        } else if (err.response.status === 404) {
+          setError('Video post not found');
+        } else {
+          setError(`Server error: ${err.response.status}`);
+        }
       } else if (err.request) {
         setError('Network error: No response from server');
-        console.error('Network error:', err.request);
       } else {
         setError(`Failed to fetch video post: ${err.message}`);
-        console.error('Error:', err);
       }
     } finally {
       setLoading(false);
@@ -355,53 +326,44 @@ export const useGetVideoPost = (postId) => {
     }
   }, [postId]);
 
-  return { data, loading, error };
+  return { 
+    data, 
+    loading, 
+    error,
+    refetch: fetchVideoPost
+  };
 };
 
-
-
-
+// Hook for creating video comments
 export const useCreateVideoComment = () => {
-  const [loading, setLoading] = useState(false); // Tracks if the request is in progress
-  const [error, setError] = useState(null); // Stores any error that occurs
-  const [success, setSuccess] = useState(false); // Tracks if the comment was successfully added
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const createVideoComment = async (postId, comment) => {
-    setLoading(true); // Start loading
-    setError(null); // Reset error state
-    setSuccess(false); // Reset success state
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
 
     try {
-      const token = localStorage.getItem('authToken'); // Retrieve the authentication token
+      const response = await axios.post('/video/comment/create', {
+        post_id: postId,
+        comment: comment,
+      });
 
-      // Make the POST request to the API endpoint
-      const response = await axios.post(
-        `${API_URL}video/comment/create`,
-        {
-          post_id: postId,
-          comment: comment,
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Include the auth token
-          },
-        }
-      );
-
-      // Handle successful response (status code 201)
       if (response.status === 201) {
-        setSuccess(true); // Set success state
+        setSuccess(true);
       } else {
-        // Handle unexpected status codes
         setError('An unexpected error occurred');
       }
     } catch (err) {
-      // Handle errors
       if (err.response) {
-        // The request was made and the server responded with a status code
         switch (err.response.status) {
           case 400:
             setError('Validation error: Please check your input');
+            break;
+          case 401:
+            setError('Unauthorized: Please log in');
             break;
           case 404:
             setError('Post not found');
@@ -413,84 +375,65 @@ export const useCreateVideoComment = () => {
             setError('An unexpected error occurred');
         }
       } else if (err.request) {
-        // The request was made but no response was received
         setError('Network error: No response from server');
       } else {
-        // Something happened in setting up the request
         setError('Failed to create comment: ' + err.message);
       }
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
-  // Return the function to create a comment, loading, error, and success states
-  return { createVideoComment, loading, error, success };
+  return { 
+    createVideoComment, 
+    loading, 
+    error, 
+    success 
+  };
 };
 
-
-
-
+// Hook for fetching user's video posts
 export const useUserVideoPosts = () => {
-  const [loading, setLoading] = useState(true); // Tracks loading state
-  const [error, setError] = useState(null); // Tracks error messages
-  const [posts, setPosts] = useState([]); // Stores the fetched video posts
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [posts, setPosts] = useState([]);
+
+  const fetchUserVideoPosts = async () => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.get('/video/user');
+      if (response.status === 200) {
+        setPosts(response.data.posts);
+      }
+    } catch (err) {
+      if (err.response) {
+        if (err.response.status === 401) {
+          setError("Unauthorized: Please log in");
+        } else if (err.response.status === 500) {
+          setError("Server error. Please try again later.");
+        } else {
+          setError(err.response.data?.message || "An error occurred");
+        }
+      } else if (err.request) {
+        setError("Network error: No response from server");
+      } else {
+        setError(err.message || "An unexpected error occurred");
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUserVideoPosts = async () => {
-      setLoading(true);
-      setError(null);
-
-      try {
-        const token = localStorage.getItem("authToken"); // Retrieve the authentication token
-
-        if (!token) {
-          throw new Error("Authentication token not found. Please log in.");
-        }
-
-        // Fetch video posts for the authenticated user
-        const response = await axios.get(`${API_URL}/video/user`, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Include the auth token
-          },
-        });
-
-        // Check if the request was successful
-        if (response.status === 200) {
-          setPosts(response.data.posts); // Update the posts state
-        }
-      } catch (err) {
-        // Handle errors
-        if (err.response) {
-          // The request was made and the server responded with a status code
-          if (err.response.status === 401) {
-            setError("Unauthorized: Please log in to access this resource.");
-          } else if (err.response.status === 500) {
-            setError("Server error. Please try again later.");
-          } else {
-            setError(
-              err.response.data?.message || "An error occurred while fetching video posts."
-            );
-          }
-        } else if (err.request) {
-          // The request was made but no response was received
-          setError("Network error: No response from server.");
-        } else {
-          // Something happened in setting up the request
-          setError(err.message || "An unexpected error occurred.");
-        }
-      } finally {
-        setLoading(false); // Stop loading
-      }
-    };
-
     fetchUserVideoPosts();
-  }, []); // Run effect only once on component mount
+  }, []);
 
   return {
     loading,
     error,
     posts,
+    refresh: fetchUserVideoPosts
   };
 };
-

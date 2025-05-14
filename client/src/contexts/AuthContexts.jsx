@@ -1,134 +1,108 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
-import {jwtDecode} from 'jwt-decode';
+
+const API_URL = import.meta.env.VITE_API_URL;
+axios.defaults.baseURL = API_URL;
+axios.defaults.withCredentials = true; // Crucial for cookies
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [logoutTimer, setLogoutTimer] = useState(null);
-  const [paymentDetails, setPaymentDetails] = useState(null);
   const [profile, setProfile] = useState(null);
+  const [paymentDetails, setPaymentDetails] = useState(null);
+  const [initialCheckDone, setInitialCheckDone] = useState(false);
 
-  // ======= TOKEN HELPERS =======
-  const isTokenValid = (tok) => {
+  // Main authentication check - fetches profile
+  const checkAuth = useCallback(async () => {
     try {
-      const decoded = jwtDecode(tok);
-      return decoded.exp * 1000 > Date.now();
-    } catch {
+      const response = await axios.get('/user/profile');
+      setProfile(response.data);
+      return true;
+    } catch (err) {
+      setProfile(null);
+      setPaymentDetails(null);
       return false;
     }
-  };
-
-  const setAutoLogout = (tok) => {
-    try {
-      const decoded = jwtDecode(tok);
-      const expiresIn = decoded.exp * 1000 - Date.now();
-      if (logoutTimer) clearTimeout(logoutTimer);
-      const timer = setTimeout(() => {
-        logout();
-        setError('Session expired. Please log in again.');
-      }, expiresIn);
-      setLogoutTimer(timer);
-    } catch (err) {
-      console.error('Auto-logout setup failed', err);
-    }
-  };
-
-  const logout = () => {
-    setToken(null);
-    localStorage.removeItem('authToken');
-    if (logoutTimer) clearTimeout(logoutTimer);
-  };
-
-  // ======= FETCH HELPERS =======
-  const fetchPaymentImmediately = async (tok) => {
-    try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/payment/create`, {
-        headers: { Authorization: `Bearer ${tok}` }
-      });
-      setPaymentDetails(res.data);
-    } catch (err) {
-      console.error('Payment fetch failed', err);
-    }
-  };
-
-  console.log(paymentDetails, 'payment details from auth context');
-  
-
-  const fetchProfileInBackground = async (tok) => {
-    try {
-      const res = await axios.get(`${import.meta.env.VITE_API_URL}/user/profile`, {
-        headers: { Authorization: `Bearer ${tok}` }
-      });
-      setProfile(res.data);
-    } catch (err) {
-      console.error('Profile fetch failed', err);
-    }
-  };
-
-  // ======= INITIAL LOAD =======
-  useEffect(() => {
-    const stored = localStorage.getItem('authToken');
-    if (stored && isTokenValid(stored)) {
-      setToken(stored);
-      setAutoLogout(stored);
-      fetchPaymentImmediately(stored);
-      fetchProfileInBackground(stored);
-    } else {
-      localStorage.removeItem('authToken');
-    }
-    setLoading(false);
   }, []);
 
-  // ======= LOGIN =======
+  // Payment functions
+  const fetchPaymentDetails = useCallback(async () => {
+    try {
+      const res = await axios.get('/payment/create');
+      setPaymentDetails(res.data);
+      return res.data;
+    } catch (err) {
+      console.error('Payment fetch failed', err);
+      setPaymentDetails(null);
+      throw err;
+    }
+  }, []);
+
   const login = async (credentials) => {
     setLoading(true);
     setError(null);
     try {
-      const { data } = await axios.post(
-        `${import.meta.env.VITE_API_URL}/auth/login`, credentials
-      );
-      const { token: tok } = data;
-      if (!isTokenValid(tok)) throw new Error('Invalid token');
-      setToken(tok);
-      localStorage.setItem('authToken', tok);
-      setAutoLogout(tok);
-      // Immediately load payment, profile in background
-      await fetchPaymentImmediately(tok);
-      fetchProfileInBackground(tok);
-    } catch (err) {
-      console.error('Login error', err);
-      if (err.response) {
-        const { status } = err.response;
-        if (status === 401) setError('Invalid credentials.');
-        else setError('Login failed.');
-      } else {
-        setError('Network error.');
+      // 1. Send login request
+      await axios.post('/auth/login', credentials);
+      
+      // 2. Verify auth by fetching profile
+      const isAuthenticated = await checkAuth();
+      
+      if (!isAuthenticated) {
+        throw new Error('Login succeeded but authentication failed');
       }
+
+      // 3. Fetch payment details after successful auth
+      await fetchPaymentDetails();
+    } catch (err) {
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || err.message);
+      setProfile(null);
+      setPaymentDetails(null);
     } finally {
       setLoading(false);
     }
   };
 
-  // ======= CLEANUP =======
+  const logout = async () => {
+    try {
+      await axios.post('/auth/logout');
+    } catch (err) {
+      console.error('Logout error:', err);
+    } finally {
+      setProfile(null);
+      setPaymentDetails(null);
+    }
+  };
+
+  // Initial authentication check
   useEffect(() => {
-    return () => {
-      if (logoutTimer) clearTimeout(logoutTimer);
+    const initAuth = async () => {
+      const isAuthenticated = await checkAuth();
+      if (isAuthenticated) {
+        await fetchPaymentDetails();
+      }
+      setInitialCheckDone(true);
+      setLoading(false);
     };
-  }, [logoutTimer]);
+    
+    if (!initialCheckDone) {
+      initAuth();
+    }
+  }, [checkAuth, fetchPaymentDetails, initialCheckDone]);
 
   const value = {
-    token,
     loading,
     error,
+    profile,
+    paymentDetails,
     login,
     logout,
-    isAuthenticated: !!token && isTokenValid(token),
-    paymentDetails,
-    profile,
+    isAuthenticated: !!profile,
+    checkAuth,
+    fetchPaymentDetails
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

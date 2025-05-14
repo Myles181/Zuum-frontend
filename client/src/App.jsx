@@ -81,6 +81,8 @@ const AppRoutes = () => {
 
   useEffect(() => {
     if (!profile) return; // wait for profile
+    console.log(profile);
+    
 
     // Only show popup if not on subscribe page
     if (!profile.subscription_status) {

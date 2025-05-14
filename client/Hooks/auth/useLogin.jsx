@@ -1,46 +1,56 @@
 import { useState } from "react";
 import axios from "axios";
-// import { useSearchParams } from "react-router-dom";
 
-// Get the Api url
+// Configure axios to send and accept cookies
+// axios.defaults.withCredentials = true;
+
+// Get the API base URL
 const API_URL = import.meta.env.VITE_API_URL;
 
-console.log(API_URL);
+// Custom hook for user login using cookies with debug logs
+// Custom hook for user login using cookies with debug logs
+export const useLogin = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [token, setToken] = useState(null); // Optional: store token in state
 
-// Custom hook for user login
-const useLogin = () => {
-  const [loading, setLoading] = useState(false); // Tracks loading state
-  const [error, setError] = useState(null); // Tracks error messages
-  const [token, setToken] = useState(null); // Stores the JWT token on successful login
+  // Utility to read cookie by name
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+  };
 
-  // Function to handle user login
-  const login = async (credentials) => {
-    setLoading(true); // Start loading
-    setError(null); // Reset any previous errors
-    setToken(null); // Reset token
-
+   const login = async (credentials) => {
+    console.debug("[useLogin] Starting login with credentials:", credentials);
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
     try {
-      // Make a POST request to the API
+      console.debug("[useLogin] Sending POST to", `${API_URL}/auth/login`);
       const response = await axios.post(
-        // "https://zuum-backend-qs8x.onrender.com/api/auth/login", // Replace with your actual login endpoint
         `${API_URL}/auth/login`,
         credentials
       );
-
-      // Check the response status
+      console.debug("[useLogin] Received response:", response);
       if (response.status === 200) {
-        const { token } = response.data; // Extract the JWT token from the response
-        setToken(token); // Store the token
-
-        
-        // Save the token to localStorage
-        localStorage.setItem("authToken", token);
+        console.debug("[useLogin] Login successful, checking cookies...");
+        const cookieToken = getCookie("token"); // Assuming token is in 'token' cookie
+        if (cookieToken) {
+          console.debug("[useLogin] Token extracted from cookie:", cookieToken);
+          setToken(cookieToken); // Optional: use it in context/localStorage
+        } else {
+          console.warn("[useLogin] Token not found in cookies.");
+        }
+        setSuccess(true);
       }
     } catch (err) {
-      // Handle errors based on status code
+      console.error("[useLogin] Error during login:", err);
       if (err.response) {
-        const { status } = err.response;
-
+        console.debug("[useLogin] Response status:", err.response.status);
+        const { status, data } = err.response;
+        console.debug("[useLogin] Response data:", data);
         if (status === 400) {
           setError("Validation errors. Please check your input.");
         } else if (status === 401) {
@@ -53,45 +63,47 @@ const useLogin = () => {
           setError("An unexpected error occurred.");
         }
       } else {
+        console.debug("[useLogin] No response from server, network error:", err.message);
         setError("Network error. Please check your internet connection.");
       }
     } finally {
-      setLoading(false); // Stop loading regardless of success or failure
+      console.debug("[useLogin] Ending login, loading=false");
+      setLoading(false);
     }
   };
 
-  return { loading, error, token, login };
+  return { loading, error, success, login, token };
 };
 
-// Custom hook for forgot password
-const useForgotPassword = () => {
-  const [loading, setLoading] = useState(false); // Tracks loading state
-  const [error, setError] = useState(null); // Tracks error messages
-  const [success, setSuccess] = useState(false); // Tracks success state
+// Custom hook for initiating forgot-password with debug logs
+export const useForgotPassword = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
-  // Function to send a password reset link to the user's email
   const forgotPassword = async (email) => {
-    setLoading(true); // Start loading
-    setError(null); // Reset any previous errors
-    setSuccess(false); // Reset success state
-
+    console.debug("[useForgotPassword] Triggering forgot password for:", email);
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
     try {
-      // Make a POST request to the API
+      console.debug("[useForgotPassword] Sending POST to", `${API_URL}/auth/forgot-password`);
       const response = await axios.post(
-        `${API_URL}/auth/forgot-password`, // Replace with your actual forgot password endpoint
+        `${API_URL}/auth/forgot-password`,
         { email }
       );
-
-      // Check the response status
+      console.debug("[useForgotPassword] Received response:", response);
       if (response.status === 200) {
-        localStorage.setItem('password-reset-email', email)
+        console.debug("[useForgotPassword] Forgot password email sent");
+        localStorage.setItem('password-reset-email', email);
         setSuccess(true);
       }
     } catch (err) {
-      // Handle errors based on status code
+      console.error("[useForgotPassword] Error during forgot password:", err);
       if (err.response) {
-        const { status } = err.response;
-
+        console.debug("[useForgotPassword] Response status:", err.response.status);
+        const { status, data } = err.response;
+        console.debug("[useForgotPassword] Response data:", data);
         if (status === 404) {
           setError("User not found. Please check your email.");
         } else if (status === 500) {
@@ -100,58 +112,67 @@ const useForgotPassword = () => {
           setError("An unexpected error occurred.");
         }
       } else {
+        console.debug("[useForgotPassword] Network or other error:", err.message);
         setError("Network error. Please check your internet connection.");
       }
     } finally {
-      setLoading(false); // Stop loading regardless of success or failure
+      console.debug("[useForgotPassword] Ending forgot password, loading=false");
+      setLoading(false);
     }
   };
 
   return { loading, error, success, forgotPassword };
 };
 
-// Custom hook for forgot password
-const useResetPassword = () => {
+// Custom hook for resetting password with debug logs
+export const useResetPassword = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
 
-  const ResetPassword = async (token, newPassword) => {
+  const resetPassword = async (token, newPassword) => {
+    console.debug("[useResetPassword] Starting reset with token and newPassword");
     setLoading(true);
     setError(null);
     setSuccess(false);
 
     try {
       const email = localStorage.getItem("password-reset-email");
+      console.debug("[useResetPassword] Retrieved email from storage:", email);
       if (!email) {
         setError("Email not found. Redirecting to Forgot Password page...");
-      }
-
-      const response = await axios.post(`${API_URL}/auth/reset-password`, {
-        email,
-        token,
-        newPassword,
-      });
-
-      if (response.status === 200) {
-        setSuccess(true);
-        setTimeout(() => {
-          window.location.href = "/login"; // Redirect manually
-        }, 2000);
+        console.debug("[useResetPassword] No email found, returning early");
         return;
       }
+
+      console.debug("[useResetPassword] Sending POST to", `${API_URL}/auth/reset-password`);
+      const response = await axios.post(
+        `${API_URL}/auth/reset-password`,
+        { email, token, newPassword }
+      );
+      console.debug("[useResetPassword] Received response:", response);
+
+      if (response.status === 200) {
+        console.debug("[useResetPassword] Password reset successful");
+        setSuccess(true);
+        setTimeout(() => {
+          console.debug("[useResetPassword] Redirecting to /login");
+          window.location.href = "/login";
+        }, 2000);
+      }
     } catch (err) {
-      console.log(err)
+      console.error("[useResetPassword] Error during reset password:", err);
+      console.debug("[useResetPassword] Error details:", err.response?.data || err.message);
       setError(
-        err.response?.data?.error.msg || err.response?.data?.error || "An unexpected error occurred."
+        err.response?.data?.error?.msg ||
+        err.response?.data?.error ||
+        "An unexpected error occurred."
       );
     } finally {
+      console.debug("[useResetPassword] Ending reset, loading=false");
       setLoading(false);
     }
   };
 
-  return { loading, error, success, ResetPassword }; // Ensure consistent return
+  return { loading, error, success, resetPassword };
 };
-
-
-export { useLogin, useForgotPassword, useResetPassword };

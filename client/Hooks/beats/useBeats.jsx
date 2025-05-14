@@ -1,95 +1,77 @@
 import { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL; // Ensure this is correctly set in your environment
+const API_URL = import.meta.env.VITE_API_URL;
+axios.defaults.baseURL = API_URL;
+axios.defaults.withCredentials = true; // Enable cookie authentication
 
-// Hook for creating a new beat post
+// Hook for creating a new beat post with cookies
 export const useCreateBeatPost = () => {
-  const [loading, setLoading] = useState(false); // Tracks if the request is in progress
-  const [error, setError] = useState(null); // Stores any error that occurs
-  const [success, setSuccess] = useState(false); // Indicates if the request was successful 
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
 
   const createBeatPost = async (formData) => {
     console.debug('[useCreateBeatPost] Starting createBeatPost', { formData });
-    setLoading(true); // Start loading
-    setError(null);   // Reset error state
-    setSuccess(false);// Reset success state
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
 
     try {
-      const token = localStorage.getItem('authToken'); // Retrieve the authentication token
-      console.debug('[useCreateBeatPost] Retrieved token:', token);
-
-      // Make the POST request to the API endpoint
-      const response = await axios.post(
-        `${API_URL}/beat/create`,
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,         // Include the auth token
-            'Content-Type': 'multipart/form-data',    // Set content type for file uploads
-          },
-          onUploadProgress: (progressEvent) => {
-            const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-            console.debug(`[useCreateBeatPost] Upload progress: ${percent}%`);
-          }
+      const response = await axios.post('/beat/create', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: (progressEvent) => {
+          const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          console.debug(`[useCreateBeatPost] Upload progress: ${percent}%`);
         }
-      );
+      });
 
       console.debug('[useCreateBeatPost] Response received:', response);
 
-      // Handle successful response (status code 201)
       if (response.status === 201) {
-        setSuccess(true); // Mark the request as successful
+        setSuccess(true);
         console.debug('[useCreateBeatPost] Beat post created successfully:', response.data);
-        return response.data; // Return the response data
+        return response.data;
       } else {
-        // Handle unexpected status codes
         setError('An unexpected error occurred');
         console.error('[useCreateBeatPost] Unexpected status code:', response.status, response.data);
       }
     } catch (err) {
-      // Handle errors
       console.error('[useCreateBeatPost] Error caught:', err);
 
       if (err.response) {
-        // The request was made and the server responded with a status code
         console.error('[useCreateBeatPost] Server response error:', {
           status: err.response.status,
           data: err.response.data
         });
         if (err.response.status === 400) {
           setError(err.response.data.message || 'Validation error or missing files');
+        } else if (err.response.status === 401) {
+          setError('Unauthorized: Please log in');
         } else if (err.response.status === 500) {
           setError('Server error: Please try again later');
         } else {
           setError('An unexpected error occurred');
         }
       } else if (err.request) {
-        // The request was made but no response was received
         console.error('[useCreateBeatPost] No response received:', err.request);
         setError('Network error: No response from server');
       } else {
-        // Something happened in setting up the request
         console.error('[useCreateBeatPost] Request setup error:', err.message);
         setError('Failed to create beat post: ' + err.message);
       }
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
       console.debug('[useCreateBeatPost] createBeatPost finished, loading=false');
     }
   };
 
-  // Return the create function and state variables
   return { createBeatPost, loading, error, success };
 };
 
-
-
-
-
-
-
-
+// Hook for fetching beats with pagination
 export const useFetchBeats = ({
   initialPage = 1,
   initialLimit = 10
@@ -106,18 +88,13 @@ export const useFetchBeats = ({
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const token = localStorage.getItem('authToken');
 
   const fetchBeats = useCallback(async () => {
     setLoading(true);
     setError(null);
 
     try {
-      const response = await axios.get(`${API_URL}/beat`, {
-        headers: {
-          Authorization: `Bearer ${token}`,         // Include the auth token
-          'Content-Type': 'multipart/form-data',    // Set content type for file uploads
-        },
+      const response = await axios.get('/beat', {
         params: { page, limit }
       });
 
@@ -128,11 +105,11 @@ export const useFetchBeats = ({
       if (payload.status === true && Array.isArray(payload.posts)) {
         setBeats(payload.posts);
         setPagination({
-          total:       payload.pagination.total,
-          totalPages:  payload.pagination.totalPages,
+          total: payload.pagination.total,
+          totalPages: payload.pagination.totalPages,
           currentPage: payload.pagination.currentPage,
-          hasNext:     payload.pagination.hasNext,
-          hasPrev:     payload.pagination.hasPrev
+          hasNext: payload.pagination.hasNext,
+          hasPrev: payload.pagination.hasPrev
         });
       } else {
         console.error('[useFetchBeats] Unexpected payload shape', payload);
@@ -148,7 +125,11 @@ export const useFetchBeats = ({
     } catch (err) {
       console.error('[useFetchBeats] Error fetching beats:', err);
       if (err.response) {
-        setError(err.response.data.message || 'Server error');
+        if (err.response.status === 401) {
+          setError('Unauthorized: Please log in');
+        } else {
+          setError(err.response.data.message || 'Server error');
+        }
       } else if (err.request) {
         setError('Network error: No response from server');
       } else {
@@ -176,12 +157,7 @@ export const useFetchBeats = ({
   };
 };
 
-
-
-
-
-
-// Hook for fetching a specific beat post by ID
+// Hook for fetching a specific beat post by ID with cookies
 export const useGetBeatPost = (postId) => {
   const [beat, setBeat] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -200,18 +176,7 @@ export const useGetBeatPost = (postId) => {
     setBeat(null);
 
     try {
-      const token = localStorage.getItem('authToken');
-      console.debug('[useGetBeatPost] Retrieved token:', token);
-
-      const response = await axios.get(
-        `${API_URL}/beat/${id}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      );
-
+      const response = await axios.get(`/beat/${id}`);
       console.debug('[useGetBeatPost] Response received:', response);
 
       if (response.status === 200) {
@@ -231,7 +196,9 @@ export const useGetBeatPost = (postId) => {
           data: err.response.data
         });
         
-        if (err.response.status === 404) {
+        if (err.response.status === 401) {
+          setError('Unauthorized: Please log in');
+        } else if (err.response.status === 404) {
           setError('Beat post not found');
         } else if (err.response.status === 500) {
           setError('Server error: Please try again later');
@@ -251,16 +218,14 @@ export const useGetBeatPost = (postId) => {
     }
   }, [postId]);
 
-  // Fetch the beat when the hook is initialized or postId changes
   useEffect(() => {
     if (postId) {
       fetchBeatPost();
     }
   }, [postId, fetchBeatPost]);
 
-  return { beat, loading, error, fetchBeatPost };
+  return { beat, loading, error, refetch: fetchBeatPost };
 };
-
 
 
 

@@ -4,28 +4,28 @@ import { useAuth } from './AuthContexts';
 import Spinner from '../components/Spinner';
 
 const ProtectedRoute = () => {
-  const { token, loading } = useAuth();
+  const { isAuthenticated, loading, profile, checkAuth } = useAuth();
   const location = useLocation();
 
   useEffect(() => {
-    // Check if we're coming from login (flag set in sessionStorage)
-    const fromLogin = sessionStorage.getItem('fromLogin') === 'true';
-    
-    if (token && fromLogin && !loading) {
-      // Clear the flag and force full page refresh
-      sessionStorage.removeItem('fromLogin');
-     
-    }
-  }, [token, loading]);
+    // Additional verification on protected route mount
+    const verifyAuth = async () => {
+      if (!loading) {
+        await checkAuth();
+      }
+    };
+    verifyAuth();
+  }, [checkAuth, loading]);
 
   if (loading) {
-    return <div className="flex items-center justify-center h-screen w-screen">
-    <Spinner />
-  </div>
-  
+    return (
+      <div className="flex items-center justify-center h-screen w-screen">
+        <Spinner />
+      </div>
+    );
   }
 
-  if (!token) {
+  if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 

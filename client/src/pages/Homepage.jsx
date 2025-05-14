@@ -38,6 +38,7 @@ function Homepage({details, profile}) {
 
       {/* Conditionally render AudioFeed or VideoFeed based on activeTab */}
       {activeTab === 'audio' ? <AudioFeed profile={profile}  /> : <VideoFeed profile={profile} />}
+      
 
       <BottomNav />
       

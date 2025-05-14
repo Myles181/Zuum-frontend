@@ -14,7 +14,8 @@ const Navbar = ({
   const displayName = name.length > 8 ? name.substring(0, 10) + "..." : name;
 
   return (
-    <div className="navbar bg-white shadow-md flex items-center justify-between px-4 py-3 fixed top-0 left-0 w-full z-50">
+  <div className="navbar bg-white/80 backdrop-blur-md shadow-md flex items-center justify-between px-4 py-3 fixed top-0 left-0 w-full z-50">
+
       {/* Left Section */}
       <div className="nav-left">
         {isMessagePage || isDashboardPage ? (
