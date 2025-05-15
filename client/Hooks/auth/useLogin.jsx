@@ -45,6 +45,17 @@ export const useLogin = () => {
         }
         setSuccess(true);
       }
+      else if (response.status === 400) {
+        setError("Validation errors. Please check your input.");
+      } else if (response.status === 401) {
+        setError("Invalid credentials. Please check your email and password.");
+      } else if (response.status === 406) {
+        setError("Email is not verified. Please verify your email first.");
+      } else if (response.status === 500) {
+        setError("Server error. Please try again later.");
+      } else {
+        setError("An unexpected error occurred.");
+      }
     } catch (err) {
       console.error("[useLogin] Error during login:", err);
       if (err.response) {

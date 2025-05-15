@@ -1,7 +1,7 @@
 // socketService.js
 import io from 'socket.io-client';
 
-const API_SOCKET_URL = 'https://zuum-backend-qs8x.onrender.com/';
+const API_SOCKET_URL = import.meta.env.VITE_API_URL; // Ensure this is set in .env;
 
 let socket;
 

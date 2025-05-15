@@ -2,8 +2,6 @@
 // import { useState, useEffect } from 'react';
 // import io from 'socket.io-client';
 
-// const SOCKET_SERVER_URL = 'https://zuum-backend-qs8x.onrender.com/';
-
 // // Module-level variable to hold the singleton socket instance
 // let socketInstance = null;
 

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+const API_URL = import.meta.env.VITE_API_URL; // Ensure this is set in .env
 
 // Custom hook for Google authentication
 const useGoogleAuth = () => {
@@ -15,7 +16,7 @@ const useGoogleAuth = () => {
 
     try {
       // Redirect the user to the Google authentication endpoint
-      window.location.href = "https://zuum-backend-qs8x.onrender.com/api/auth/google";
+      window.location.href = `${API_URL}/auth/google`;
     } catch (err) {
       console.error("Error during Google authentication:", err);
       setError("An unexpected error occurred while redirecting to Google.");
