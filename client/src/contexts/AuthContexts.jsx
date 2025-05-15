@@ -58,9 +58,28 @@ export const AuthProvider = ({ children }) => {
       await fetchPaymentDetails();
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.response?.data?.message || err.message);
+      // setError(err.response?.data?.message || err.message);
       setProfile(null);
       setPaymentDetails(null);
+      if (err.response) {
+        console.debug("[useLogin] Response status:", err.response.status);
+        const { status, data } = err.response;
+        console.debug("[useLogin] Response data:", data);
+        if (status === 400) {
+          setError("Validation errors. Please check your input.");
+        } else if (status === 401) {
+          setError("Invalid credentials. Please check your email and password.");
+        } else if (status === 406) {
+          setError("Email is not verified. Please verify your email first.");
+        } else if (status === 500) {
+          setError("Server error. Please try again later.");
+        } else {
+          setError("An unexpected error occurred.");
+        }
+      } else {
+        console.debug("[useLogin] No response from server, network error:", err.message);
+        setError("Network error. Please check your internet connection.");
+      }
     } finally {
       setLoading(false);
     }
