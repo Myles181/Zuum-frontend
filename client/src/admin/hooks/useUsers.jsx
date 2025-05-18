@@ -8,13 +8,14 @@ axios.defaults.withCredentials = true; // Enable cookie authentication
 
 
 
+
 /**
  * Custom hook for handling admin-related API operations
  */
 export const useAdmins = () => {
   // User data states
   const [users, setUsers] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);  
+  const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [pagination, setPagination] = useState({
     currentPage: 1,
@@ -83,10 +84,13 @@ export const useAdmins = () => {
   const deactivateUser = async (userId) => {
     setIsLoading(true);
     try {
-      const response = await axios.patch(
-        `/admin/users/${userId}/deactivate`,
-        {},
-        { withCredentials: true }
+      const response = await axios.post(
+        '/admin/auth/deactivate',
+        { userId },
+        { 
+          withCredentials: true,
+          headers: { 'Content-Type': 'application/json' }
+        }
       );
       
       if (response.status === 200) {

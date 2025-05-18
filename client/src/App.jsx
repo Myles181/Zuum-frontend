@@ -48,6 +48,7 @@ import VerifyEmailForm from './admin/pages/Verify';
 import AdminDashboard from './admin/pages/Users';
 import { AdminProvider } from './contexts/AdminContexts';
 import AdminProtectedRoute from './contexts/AdminProtectedRoutes';
+import PromotionPlatforms from './pages/upload/GlobalPromotion';
 
 const CustomLoader = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-white">
@@ -144,6 +145,7 @@ const AppRoutes = () => {
         <Route path="/promotion" element={<PromotionPage />} />
         <Route path="/distribution" element={<Distribution />} />
         <Route path="/jet" element={<Jet />} />
+        <Route path="/global" element={<PromotionPlatforms />} />
         <Route path="/shared-audio/:shareId" element={<SharedAudioPage />} />
       </Routes>
     </>
