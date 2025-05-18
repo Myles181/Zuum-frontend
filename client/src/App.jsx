@@ -42,6 +42,12 @@ import SubscriptionPopup from './components/subscription/Popup';
 import {Jet} from './pages/Jet';
 import { AuthProvider, useAuth } from './contexts/AuthContexts';
 import Distribution from './pages/Distribution';
+import AdminLogin from './admin/pages/Login';
+import AdminSignup from './admin/pages/Signup';
+import VerifyEmailForm from './admin/pages/Verify';
+import AdminDashboard from './admin/pages/Users';
+import { AdminProvider } from './contexts/AdminContexts';
+import AdminProtectedRoute from './contexts/AdminProtectedRoutes';
 
 const CustomLoader = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-white">
@@ -147,6 +153,7 @@ const AppRoutes = () => {
 const App = () => (
   <AlertProvider>
     <AuthProvider>
+      <AdminProvider>
       <Router>
         <Routes>
           {/* Public Routes */}
@@ -157,12 +164,23 @@ const App = () => (
           <Route path="/forgot" element={<ForgotPassword />} />
           <Route path="/reset" element={<ResetPassword />} />
           <Route path="/verify" element={<VerifyOTP />} />
+          <Route path="/adlog" element={<AdminLogin />} />
+            <Route path="/adsin" element={<AdminSignup />} />
+             <Route path="/adver" element={<VerifyEmailForm />} />
+             
           {/* Protected Routes */}
           <Route element={<ProtectedRoute />}>
             <Route path="/*" element={<AppRoutes />} />
           </Route>
+
+              {/* Admin Protected Routes - Must come before the wildcard */}
+            <Route element={<AdminProtectedRoute />}>
+              <Route path="/admin/*" element={<AdminDashboard />} />
+              <Route path="/users" element={<AdminDashboard />} />
+            </Route>
         </Routes>
       </Router>
+      </AdminProvider>
     </AuthProvider>
   </AlertProvider>
 );
