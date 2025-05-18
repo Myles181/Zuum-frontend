@@ -2,20 +2,17 @@ import { useState } from 'react';
 import { Music, Share2, ChevronRight, CheckCircle } from 'lucide-react';
 import Navbar from '../components/profile/NavBar';
 import BottomNav from '../components/homepage/BottomNav';
+import { useNavigate } from 'react-router-dom';
 
 export const  Jet = () => {
   const [selectedOption, setSelectedOption] = useState(null);
+    const navigate = useNavigate();
   
-  const handleOptionSelect = (option) => {
-    // Navigate to your existing promotion/distribution pages instead
+ const handleOptionSelect = (option) => {
     if (option === 'promotion') {
-      // Replace with your navigation logic to promotion page
-      console.log('Navigate to promotion page');
-       window.location.href = '/promotion';
+      navigate('/promotion');
     } else {
-      // Replace with your navigation logic to distribution page
-      console.log('Navigate to distribution page');
-      window.location.href = '/distribution';
+      navigate('/distribution');
     }
     setSelectedOption(option);
   };
