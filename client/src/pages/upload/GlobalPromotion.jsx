@@ -1,27 +1,26 @@
 import { useState } from 'react';
-import { Newspaper, Tv, Radio, Music, Globe, TrendingUp, ListMusic, PlayCircle, Check, X } from 'lucide-react';
+import { Newspaper, Tv, Radio, Music, Globe, TrendingUp, ListMusic, PlayCircle, Check, X, Music2, ChevronRight } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from '../../components/profile/NavBar';
 import BottomNav from '../../components/homepage/BottomNav';
 
 const PromotionPlatforms = () => {
- const [activeTab, setActiveTab] = useState('print');
-  const [expandedPlatform, setExpandedPlatform] = useState(null);
+  const [activeTab, setActiveTab] = useState('tiktok'); // Default to TikTok tab
   const [selectedPlatform, setSelectedPlatform] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
-    const tabs = [
+  const tabs = [
+    { id: 'tiktok', icon: <Music2 size={18} />, label: 'TikTok' },
     { id: 'print', icon: <Newspaper size={18} />, label: 'Print Media' },
     { id: 'tv', icon: <Tv size={18} />, label: 'TV Promotion' },
     { id: 'radio', icon: <Radio size={18} />, label: 'Radio' },
     { id: 'digital', icon: <Globe size={18} />, label: 'Digital' },
     { id: 'chart', icon: <TrendingUp size={18} />, label: 'Charts' },
-    { id: 'playlist', icon: <ListMusic size={18} />, label: 'Playlists' },
+    { id: 'playlist', icon: <ListMusic size={18} />, label: 'Playlist' },
     { id: 'international', icon: <PlayCircle size={18} />, label: 'International' }
   ];
 
-
-  const platformData = {
+ const platformData = {
    print: [
     { id: 1, name: 'Thisday', price: 45000, total: 49050 },
     { id: 2, name: 'Sunnews', price: 45000, total: 49050 },
@@ -110,8 +109,58 @@ const PromotionPlatforms = () => {
     { id: 3, name: 'AP News', price: 500000, total: 545000 },
     { id: 4, name: 'New York Times', price: 550000, total: 599500 },
     { id: 5, name: 'Business Insider', price: 550000, total: 599500 }
-  ]
-}
+  ],
+
+ tiktok: [
+      {
+        id: 1,
+        name: 'Mid TikTok Promotion',
+        price: 1000000,
+        total: 1090000,
+        features: [
+          '1 Personal CapCut Template',
+          'Intensive Push on TikTok',
+          'Activation from Micro & Top Influencers',
+          'Sound Activation Strategy',
+          'Audience Retention Strategy',
+          'Organic growth and curated attention'
+        ],
+        tag: 'Perfect for artists who want a strong start'
+      },
+      {
+        id: 2,
+        name: 'Wild TikTok Promotion',
+        price: 3000000,
+        total: 3270000,
+        features: [
+          '1 Personal CapCut Template',
+          'Intensive Push on TikTok',
+          'Activation from Top Influencers',
+          'Sound Placement on TikTok Lyrics Pages',
+          'Full TikTok Promotion Strategy & Execution',
+          'Strategic targeting to help your sound trend'
+        ],
+        tag: 'Go wild and viral with aggressive backing'
+      },
+      {
+        id: 3,
+        name: 'Mass TikTok Promotion',
+        price: 7000000,
+        total: 7630000,
+        features: [
+          '3 Custom CapCut Templates',
+          'Extreme Hard Push on TikTok',
+          'Activation by High-Profile & Famous Influencers',
+          'TikTok Challenge to push virality',
+          'Song Placement on 3 TikTok Lyrics Pages',
+          'Full Strategic Promotion Campaign Plan',
+          'Dedicated Team to Monitor & Push Your Sound',
+          'Guaranteed Trend Activation'
+        ],
+        tag: 'Maximum exposure and high-level activation'
+      }
+    ]
+  };
 
   const formatCurrency = (value, currency = '₦') => {
     return `${currency}${value.toLocaleString()}`;
@@ -130,11 +179,19 @@ const PromotionPlatforms = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 my-13">
+    <div className={`min-h-screen  my-13 ${
+        activeTab === 'tiktok' 
+          ? 'bg-gradient-to-r from-black to-gray-900' 
+          : 'bg-gray-50'
+      }`}>
       <Navbar name="Global Promotion" />
       
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-[#1a5f4b] to-[#2a9d8f] text-white py-12 px-4">
+      {/* Hero Section with dynamic background */}
+      <div className={`py-12 px-4 text-white ${
+        activeTab === 'tiktok' 
+          ? 'bg-gradient-to-r from-black to-gray-900' 
+          : 'bg-gradient-to-r from-[#1a5f4b] to-[#2a9d8f]'
+      }`}>
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ scale: 0.9 }}
@@ -142,13 +199,27 @@ const PromotionPlatforms = () => {
             transition={{ duration: 0.5 }}
             className="inline-block mb-6"
           >
-            <div className="h-16 w-16 bg-white/10 rounded-full flex items-center justify-center mx-auto backdrop-blur-sm border border-white/20">
-              <Globe size={28} className="text-white" />
+            <div className={`h-16 w-16 rounded-full flex items-center justify-center mx-auto ${
+              activeTab === 'tiktok'
+                ? 'bg-gradient-to-br from-[#FE2C55] to-[#25F4EE]'
+                : 'bg-white/10 backdrop-blur-sm border border-white/20'
+            }`}>
+              {activeTab === 'tiktok' ? (
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="white">
+                  <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+                </svg>
+              ) : (
+                <Globe size={28} className="text-white" />
+              )}
             </div>
           </motion.div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-3">Amplify Your Reach</h1>
+          <h1 className="text-3xl md:text-4xl font-bold mb-3">
+            {activeTab === 'tiktok' ? 'TikTok Viral Packages' : 'Amplify Your Reach'}
+          </h1>
           <p className="text-lg opacity-90 max-w-2xl mx-auto">
-            Premium promotion packages across print, TV, digital and international media
+            {activeTab === 'tiktok' 
+              ? 'Make your music trend on TikTok with our powerful promotion packages' 
+              : 'Premium promotion packages across print, TV, digital and international media'}
           </p>
         </div>
       </div>
@@ -161,7 +232,13 @@ const PromotionPlatforms = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center px-4 py-2.5 rounded-lg whitespace-nowrap transition-all text-sm font-medium ${activeTab === tab.id ? 'bg-[#1c6350] text-white' : 'text-gray-600 hover:bg-gray-100'}`}
+                className={`flex items-center px-4 py-2.5 rounded-lg whitespace-nowrap transition-all text-sm font-medium ${
+                  activeTab === tab.id 
+                    ? tab.id === 'tiktok'
+                      ? 'bg-black text-white'
+                      : 'bg-[#1c6350] text-white'
+                    : 'text-gray-600 hover:bg-gray-100'
+                }`}
               >
                 <span className="mr-2">{tab.icon}</span>
                 {tab.label}
@@ -186,67 +263,119 @@ const PromotionPlatforms = () => {
           </div>
         </div>
 
-        {/* Platforms Grid */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {platformData[activeTab]?.map((platform) => (
-            <motion.div 
-              key={platform.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow"
-            >
-              <div className="p-5">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="font-semibold text-lg text-gray-800">{platform.name}</h3>
-                  <div className="bg-[#1c6350]/10 text-[#1c6350] text-xs font-medium px-2 py-1 rounded">
-                    {platform.duration || (activeTab === 'tv' ? '4-6 weeks' : '1 month')}
-                  </div>
-                </div>
-                
-                <div className="flex items-end justify-between mb-4">
-                  <div>
-                    <span className="text-sm text-gray-500 line-through">
-                      {formatCurrency(platform.price, platform.currency)}
-                    </span>
-                    <div className="text-2xl font-bold text-[#1c6350]">
-                      {formatCurrency(platform.total, platform.currency)}
+        {/* Content Section */}
+        {activeTab === 'tiktok' ? (
+  <div className="space-y-6">
+    {platformData.tiktok.map((pkg) => (
+      <motion.div
+        key={pkg.id}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="bg-gradient-to-br from-black to-gray-800 rounded-xl shadow-lg overflow-hidden border border-gray-100"
+      >
+        {/* Inner container with slightly transparent background */}
+        <div className="p-6 bg-black/30 backdrop-blur-sm">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h3 className="text-2xl font-bold text-white">{pkg.name}</h3>
+              <p className="text-white/80 italic">{pkg.tag}</p>
+            </div>
+            <div className="bg-white text-black text-xl font-bold px-4 py-2 rounded-full">
+              {formatCurrency(pkg.total)}
+            </div>
+          </div>
+
+          <div className="my-6">
+            <h4 className="text-lg font-semibold mb-3 text-white">What You Get:</h4>
+            <ul className="space-y-3">
+              {pkg.features.map((feature, i) => (
+                <li key={i} className="flex items-start">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="h-5 w-5 rounded-full bg-white flex items-center justify-center">
+                      <Check className="h-3 w-3 text-black" />
                     </div>
                   </div>
-                  <button 
-                    onClick={() => handleSelectPlatform(platform)}
-                    className="px-4 py-2 bg-[#1c6350] hover:bg-[#15503f] text-white rounded-lg text-sm font-medium transition-colors"
-                  >
-                    Select
-                  </button>
-                </div>
+                  <span className="ml-3 text-white">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
-                <div className="pt-3 border-t border-gray-100">
-                  <div className="text-sm text-gray-600 mb-2">Includes:</div>
-                  <ul className="grid grid-cols-2 gap-2 text-sm">
-                    <li className="flex items-center">
-                      <Check className="h-4 w-4 text-green-500 mr-2" />
-                      <span>Platform fee</span>
-                    </li>
-                    <li className="flex items-center">
-                      <Check className="h-4 w-4 text-green-500 mr-2" />
-                      <span>VAT 7.5%</span>
-                    </li>
-                    <li className="flex items-center">
-                      <Check className="h-4 w-4 text-green-500 mr-2" />
-                      <span>Payment fee</span>
-                    </li>
-                    <li className="flex items-center">
-                      <Check className="h-4 w-4 text-green-500 mr-2" />
-                      <span>Support</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </motion.div>
-          ))}
+          <button
+            onClick={() => handleSelectPlatform(pkg)}
+            className="w-full py-3 px-4 bg-white hover:bg-gray-100 text-black rounded-lg font-bold text-lg transition-colors flex items-center justify-center"
+          >
+            <span>Select Package</span>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="black" className="ml-2">
+              <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
+            </svg>
+          </button>
         </div>
+      </motion.div>
+    ))}
+  </div>
+) : (
+  <div className="grid md:grid-cols-2 gap-6">
+    {platformData[activeTab]?.map((platform) => (
+      <motion.div 
+        key={platform.id}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow"
+      >
+        <div className="p-5">
+          <div className="flex justify-between items-start mb-3">
+            <h3 className="font-semibold text-lg text-gray-800">{platform.name}</h3>
+            <div className="bg-[#1c6350]/10 text-[#1c6350] text-xs font-medium px-2 py-1 rounded">
+              {platform.duration || (activeTab === 'tv' ? '4-6 weeks' : '1 month')}
+            </div>
+          </div>
+          
+          <div className="flex items-end justify-between mb-4">
+            <div>
+              <span className="text-sm text-gray-500 line-through">
+                {formatCurrency(platform.price, platform.currency)}
+              </span>
+              <div className="text-2xl font-bold text-[#1c6350]">
+                {formatCurrency(platform.total, platform.currency)}
+              </div>
+            </div>
+            <button 
+              onClick={() => handleSelectPlatform(platform)}
+              className="px-4 py-2 bg-[#1c6350] hover:bg-[#15503f] text-white rounded-lg text-sm font-medium transition-colors"
+            >
+              Select
+            </button>
+          </div>
 
+          <div className="pt-3 border-t border-gray-100">
+            <div className="text-sm text-gray-600 mb-2">Includes:</div>
+            <ul className="grid grid-cols-2 gap-2 text-sm">
+              <li className="flex items-center">
+                <Check className="h-4 w-4 text-green-500 mr-2" />
+                <span>Platform fee</span>
+              </li>
+              <li className="flex items-center">
+                <Check className="h-4 w-4 text-green-500 mr-2" />
+                <span>VAT 7.5%</span>
+              </li>
+              <li className="flex items-center">
+                <Check className="h-4 w-4 text-green-500 mr-2" />
+                <span>Payment fee</span>
+              </li>
+              <li className="flex items-center">
+                <Check className="h-4 w-4 text-green-500 mr-2" />
+                <span>Support</span>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </motion.div>
+    ))}
+  </div>
+)}
         {/* Empty State */}
         {platformData[activeTab]?.length === 0 && (
           <div className="text-center py-12">
