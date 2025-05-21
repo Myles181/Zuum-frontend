@@ -10,6 +10,7 @@ const PromotionPlatforms = () => {
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   const tabs = [
+    { id: 'youtube', icon: <PlayCircle size={18} />, label: 'YouTube' },
     { id: 'tiktok', icon: <Music2 size={18} />, label: 'TikTok' },
     { id: 'print', icon: <Newspaper size={18} />, label: 'Print Media' },
     { id: 'tv', icon: <Tv size={18} />, label: 'TV Promotion' },
@@ -159,8 +160,68 @@ const PromotionPlatforms = () => {
         ],
         tag: 'Maximum exposure and high-level activation'
       }
-    ]
-  };
+    ],
+      youtube: [
+    {
+      id: 1,
+      name: 'Normal YouTube Promotion',
+      price: 150000,
+      total: 163700,
+      features: [
+        'Up to 5k - 10k views',
+        'Up to 300 - 500 subscribers',
+        'Organic comments + likes',
+        '1 week - 2 weeks delivery',
+        'YouTube account or video link required'
+      ],
+      tag: 'Perfect for growing your channel organically'
+    },
+    {
+      id: 2,
+      name: 'Mid YouTube Promotion',
+      price: 320000,
+      total: 349200,
+      features: [
+        'Up to 15k - 30k views',
+        'Up to 1k subscribers',
+        'Organic comments + likes',
+        '1 week - 2 weeks delivery',
+        'YouTube account or video link required'
+      ],
+      tag: 'Great for established channels needing a boost'
+    },
+    {
+      id: 3,
+      name: 'Wild YouTube Promotion',
+      price: 610000,
+      total: 665700,
+      features: [
+        'Up to 40k - 50k+ views',
+        'Up to 2k+ subscribers',
+        'Organic comments + likes',
+        '1 week - 2 weeks delivery',
+        'YouTube account or video link required'
+      ],
+      tag: 'For serious creators wanting rapid growth'
+    },
+    {
+      id: 4,
+      name: 'Mass YouTube Promotion',
+      price: 2000000,
+      total: 2182400,
+      features: [
+        'Up to 100k+ views',
+        'Up to 10k subscribers',
+        'Organic comments + likes',
+        '1 week - 2 weeks delivery',
+        'YouTube account or video link required',
+        'Dedicated campaign manager'
+      ],
+      tag: 'Maximum exposure for professional creators'
+    }
+  ]
+};
+  
 
   const formatCurrency = (value, currency = '₦') => {
     return `${currency}${value.toLocaleString()}`;
@@ -178,20 +239,27 @@ const PromotionPlatforms = () => {
     // Add success notification/modal here if needed
   };
 
+  
+
   return (
     <div className={`min-h-screen  my-13 ${
-        activeTab === 'tiktok' 
-          ? 'bg-gradient-to-r from-black to-gray-900' 
-          : 'bg-gray-50'
+        activeTab === 'youtube'
+    ? 'bg-red-700 text-white'
+    : activeTab === 'tiktok'
+      ? 'bg-black text-white'
+      : 'bg-gray-50 text-white'
+ 
       }`}>
       <Navbar name="Global Promotion" />
       
       {/* Hero Section with dynamic background */}
       <div className={`py-12 px-4 text-white ${
-        activeTab === 'tiktok' 
-          ? 'bg-gradient-to-r from-black to-gray-900' 
-          : 'bg-gradient-to-r from-[#1a5f4b] to-[#2a9d8f]'
-      }`}>
+  activeTab === 'youtube' 
+    ? 'bg-gradient-to-r from-red-900 to-red-700'
+    : activeTab === 'tiktok' 
+      ? 'bg-gradient-to-r from-black to-gray-900' 
+      : 'bg-gradient-to-r from-[#1a5f4b] to-[#2a9d8f]'
+}`}>
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ scale: 0.9 }}
@@ -200,14 +268,19 @@ const PromotionPlatforms = () => {
             className="inline-block mb-6"
           >
             <div className={`h-16 w-16 rounded-full flex items-center justify-center mx-auto ${
-              activeTab === 'tiktok'
-                ? 'bg-gradient-to-br from-[#FE2C55] to-[#25F4EE]'
+              activeTab === 'youtube'
+                ? 'bg-red-700'
                 : 'bg-white/10 backdrop-blur-sm border border-white/20'
             }`}>
               {activeTab === 'tiktok' ? (
                 <svg viewBox="0 0 24 24" width="28" height="28" fill="white">
                   <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
                 </svg>
+              ) : activeTab === 'youtube' ? ( 
+
+                 <svg viewBox="0 0 24 24" width="28" height="28" fill="white" >
+              <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+            </svg>
               ) : (
                 <Globe size={28} className="text-white" />
               )}
@@ -236,6 +309,8 @@ const PromotionPlatforms = () => {
                   activeTab === tab.id 
                     ? tab.id === 'tiktok'
                       ? 'bg-black text-white'
+                    : tab.id === 'youtube'
+                      ? 'bg-red-700 text-white'
                       : 'bg-[#1c6350] text-white'
                     : 'text-gray-600 hover:bg-gray-100'
                 }`}
@@ -264,7 +339,59 @@ const PromotionPlatforms = () => {
         </div>
 
         {/* Content Section */}
-        {activeTab === 'tiktok' ? (
+        {activeTab === 'youtube' ? (
+  <div className="space-y-6">
+    {platformData.youtube.map((pkg) => (
+      <motion.div
+        key={pkg.id}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="bg-gradient-to-br from-red-900 to-red-800 rounded-xl shadow-lg overflow-hidden border border-red-100"
+      >
+        {/* Inner container with slightly transparent background */}
+        <div className="p-6 bg-red-900/30 backdrop-blur-sm">
+          <div className="flex justify-between items-start mb-4">
+            <div>
+              <h3 className="text-2xl font-bold text-white">{pkg.name}</h3>
+              <p className="text-white/80 italic">{pkg.tag}</p>
+            </div>
+            <div className="bg-white text-red-600 text-xl font-bold px-4 py-2 rounded-full">
+              {formatCurrency(pkg.total)}
+            </div>
+          </div>
+
+          <div className="my-6">
+            <h4 className="text-lg font-semibold mb-3 text-white">What You Get:</h4>
+            <ul className="space-y-3">
+              {pkg.features.map((feature, i) => (
+                <li key={i} className="flex items-start">
+                  <div className="flex-shrink-0 mt-1">
+                    <div className="h-5 w-5 rounded-full bg-white flex items-center justify-center">
+                      <Check className="h-3 w-3 text-red-600" />
+                    </div>
+                  </div>
+                  <span className="ml-3 text-white">{feature}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <button
+            onClick={() => handleSelectPlatform(pkg)}
+            className="w-full py-3 px-4 bg-white hover:bg-gray-100 text-red-600 rounded-lg font-bold text-lg transition-colors flex items-center justify-center"
+          >
+            <span>Select Package</span>
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" className="ml-2">
+              <path d="M19.615 3.184c-3.604-.246-11.631-.245-15.23 0-3.897.266-4.356 2.62-4.385 8.816.029 6.185.484 8.549 4.385 8.816 3.6.245 11.626.246 15.23 0 3.897-.266 4.356-2.62 4.385-8.816-.029-6.185-.484-8.549-4.385-8.816zm-10.615 12.816v-8l8 3.993-8 4.007z"/>
+            </svg>
+          </button>
+        </div>
+      </motion.div>
+    ))}
+  </div>
+) : activeTab === 'tiktok' ? (
+
   <div className="space-y-6">
     {platformData.tiktok.map((pkg) => (
       <motion.div

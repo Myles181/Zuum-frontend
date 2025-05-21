@@ -41,7 +41,7 @@ const NotificationSection = () => {
       try {
         await markNotificationAsRead(notification.id);
       } catch (err) {
-        console.error("Failed to mark notification as read:", err);
+        console.error("Failed to mark notification as read:", err)
       }
     }
     if (notification.post_id) {
@@ -58,7 +58,7 @@ const NotificationSection = () => {
       }
     }
     if (notification.post_id) {
-      navigate(`/music/${notification.post_id}`);
+      navigate(`/shared-audio/${notification.post_id}`);
     }
   };
 
@@ -71,7 +71,7 @@ const NotificationSection = () => {
       }
     }
     if (notification.post_id) {
-      navigate(`/video/${notification.post_id}`);
+      navigate(`/videos/${notification.post_id}`);
     }
   };
 
