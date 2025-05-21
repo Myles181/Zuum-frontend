@@ -49,6 +49,7 @@ import AdminDashboard from './admin/pages/Users';
 import { AdminProvider } from './contexts/AdminContexts';
 import AdminProtectedRoute from './contexts/AdminProtectedRoutes';
 import PromotionPlatforms from './pages/upload/GlobalPromotion';
+import VideoViewerPage from './components/homepage/sale/ViewVideo';
 
 const CustomLoader = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-white">
@@ -134,7 +135,7 @@ const AppRoutes = () => {
         <Route path="/addpaybeat" element={<UploadBeat />} />
         <Route path="/addbeat" element={<MusicUploadInterface />} />
         <Route path="/addvideo" element={<UploadVideo />} />
-        <Route path="/video/:postId" element={<VideoDetails />} />
+        {/* <Route path="/video/:postId" element={<VideoDetails />} /> */}
         <Route path="/all" element={<FollowersListPage />} />
         <Route path="/details" element={<SubscriptionDetails />} />
         <Route path="/lock" element={<LockedMusicPlayer />} />
@@ -147,6 +148,7 @@ const AppRoutes = () => {
         <Route path="/jet" element={<Jet />} />
         <Route path="/global" element={<PromotionPlatforms />} />
         <Route path="/shared-audio/:shareId" element={<SharedAudioPage />} />
+        <Route path="/videos/:id" element={<VideoViewerPage />} />
       </Routes>
     </>
   );
@@ -155,6 +157,7 @@ const AppRoutes = () => {
 const App = () => (
   <AlertProvider>
     <AuthProvider>
+      {/* <SocketContextProvider> */}
       <AdminProvider>
       <Router>
         <Routes>
@@ -183,6 +186,7 @@ const App = () => (
         </Routes>
       </Router>
       </AdminProvider>
+      {/* </SocketContextProvider> */}
     </AuthProvider>
   </AlertProvider>
 );
