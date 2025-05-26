@@ -13,7 +13,7 @@ const NotificationSection = () => {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center h-full">
+      <div className="flex justify-center items-center py-20">
         <Spinner />
       </div>
     );
@@ -21,16 +21,10 @@ const NotificationSection = () => {
 
   if (error) {
     return (
-      <div className="text-center p-3 text-red-500">
-        Error: {error}
-      </div>
-    );
-  }
-
-  if (notifications.length === 0) {
-    return (
-      <div className="text-center p-3 h-full">
-        No notifications found.
+      <div className="flex items-center justify-center py-20">
+        <div className="p-4 bg-red-50 rounded-lg border border-red-200 text-red-600">
+          Error: {error}
+        </div>
       </div>
     );
   }
@@ -88,13 +82,13 @@ const NotificationSection = () => {
     }
   };
 
-  // Render action button based solely on green styling.
+  // Render action button based on notification type
   const renderActionButton = (notification) => {
     switch (notification.type) {
       case 'POST_VIDEO':
         return (
           <button
-            className="bg-[#2D8C72] text-white px-3 py-1 rounded shadow hover:bg-green-700 transition-all text-sm"
+            className="text-white text-sm px-4 py-1.5 rounded-full bg-[#2D8C72] hover:bg-[#256b58] transition-all shadow-sm"
             onClick={(e) => {
               e.stopPropagation();
               handleVideoReplyClick(notification);
@@ -106,7 +100,7 @@ const NotificationSection = () => {
       case 'FOLLOW':
         return (
           <button
-            className="bg-[#2D8C72] text-white px-3 py-1 rounded shadow hover:bg-green-700 transition-all text-sm"
+            className="text-white text-sm px-4 py-1.5 rounded-full bg-[#2D8C72] hover:bg-[#256b58] transition-all shadow-sm"
             onClick={(e) => {
               e.stopPropagation();
               handleFollowClick(notification);
@@ -118,7 +112,7 @@ const NotificationSection = () => {
       case 'POST_AUDIO':
         return (
           <button
-            className="bg-[#2D8C72] text-white px-3 py-1 rounded shadow hover:bg-green-700 transition-all text-sm"
+            className="text-white text-sm px-4 py-1.5 rounded-full bg-[#2D8C72] hover:bg-[#256b58] transition-all shadow-sm"
             onClick={(e) => {
               e.stopPropagation();
               handleAudioReplyClick(notification);
@@ -133,46 +127,59 @@ const NotificationSection = () => {
   };
 
   return (
-    <div className="p-4 bg-gray-50 min-h-screen">
-      <div className="max-w-xl mx-auto bg-white rounded-lg shadow overflow-hidden">
-      <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between bg-white shadow-sm">
-  <h2 className="text-xl font-semibold text-gray-800">Notifications</h2>
-  <Link 
-    to="/zuum-news"
-    className="text-sm font-medium bg-[#2D8C72] text-white px-3 py-1.5 rounded-md hover:bg-[#256b58] transition duration-200 cursor-pointer"
-  >
-    Zuum News 
-  </Link>
-</div>
+    <div className="container mx-auto px-4 py-6 mt-16 mb-20">
+      <div className="w-full max-w-3xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-white">
+          <h2 className="text-xl font-bold text-gray-800">Notifications</h2>
+          <Link 
+            to="/zuum-news"
+            className="text-sm font-medium bg-[#2D8C72] text-white px-4 py-2 rounded-full hover:bg-[#256b58] transition duration-200"
+          >
+            Zuum News 
+          </Link>
+        </div>
 
-        <div className="divide-y divide-gray-100">
-          {notifications.map((notification) => (
-            <div
-              key={notification.id}
-              className={`flex items-center justify-between p-3 hover:bg-gray-50 cursor-pointer transition-colors ${
-                !notification.read ? "bg-green-50" : ""
-              }`}
-              onClick={() => handleNotificationClick(notification)}
-            >
-              <div className="flex items-center space-x-3">
-                <img
-                  src={notification.action_user_image || placeholderImage}
-                  alt={notification.name}
-                  className="w-10 h-10 rounded-full object-cover"
-                />
+        {notifications?.length === 0 ? (
+          <div className="flex flex-col items-center justify-center py-16 px-4 text-gray-500">
+            <svg className="w-16 h-16 mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+            </svg>
+            <p className="text-lg font-medium">No notifications yet</p>
+            <p className="text-sm mt-1">We'll notify you when something happens</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-50">
+            {notifications.map((notification) => (
+              <div
+                key={notification.id}
+                className={`flex items-center justify-between p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
+                  !notification.read ? "bg-green-50" : ""
+                }`}
+                onClick={() => handleNotificationClick(notification)}
+              >
+                <div className="flex items-center space-x-4">
+                  <img
+                    src={notification.action_user_image || placeholderImage}
+                    alt={notification.name}
+                    className="w-12 h-12 rounded-full object-cover border-2 border-white shadow-sm"
+                  />
+                  <div>
+                    <h4 className="text-base font-semibold text-gray-800">
+                      {notification.name}
+                    </h4>
+                    <p className="text-sm text-gray-600 mt-0.5">{notification.message}</p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {notification.timestamp ? new Date(notification.timestamp).toLocaleString() : 'Recently'}
+                    </p>
+                  </div>
+                </div>
                 <div>
-                  <h4 className="text-base font-semibold text-gray-800">
-                    {notification.name}
-                  </h4>
-                  <p className="text-xs text-gray-600">{notification.message}</p>
+                  {renderActionButton(notification)}
                 </div>
               </div>
-              <div>
-                {renderActionButton(notification)}
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
