@@ -16,6 +16,7 @@ const AudioFeed = ({ profile }) => {
   const [duration, setDuration] = useState(0);
   const [showTapIcon, setShowTapIcon] = useState(false);
   const [tapIconType, setTapIconType] = useState("play");
+  const [currentAudioUrl, setCurrentAudioUrl] = useState(null);
   const limit = 10;
   const beatsLimit = 10;
   const containerRef = useRef(null);
@@ -23,6 +24,7 @@ const AudioFeed = ({ profile }) => {
   const iconTimeout = useRef(null);
   const scrollObserver = useRef(null);
   const audioRefs = useRef([]);
+  const backgroundAudioRef = useRef(null);
 
   const {
     loading: postsLoading,
@@ -30,9 +32,6 @@ const AudioFeed = ({ profile }) => {
     posts,
     pagination: postsPagination,
   } = useAudioPosts(page, limit);
-
-  console.log(posts);
-  
 
   const {
     loading: beatsLoading,
@@ -47,6 +46,25 @@ const AudioFeed = ({ profile }) => {
     ),
     [allPosts, allBeats]
   );
+
+  // Update current audio URL when index changes
+  useEffect(() => {
+    if (combinedContent.length > 0 && currentIndex < combinedContent.length) {
+      const currentContent = combinedContent[currentIndex];
+      const audioUrl = currentContent.type === "audio" 
+        ? currentContent.audio_upload 
+        : currentContent.audio_file || currentContent.audio_upload;
+      setCurrentAudioUrl(audioUrl || null);
+    }
+  }, [currentIndex, combinedContent]);
+
+  // Sync background audio with current audio
+  useEffect(() => {
+    if (backgroundAudioRef.current && currentAudioUrl) {
+      backgroundAudioRef.current.src = currentAudioUrl;
+      backgroundAudioRef.current.load();
+    }
+  }, [currentAudioUrl]);
 
   useEffect(() => {
     if (posts.length) {
@@ -105,7 +123,8 @@ const AudioFeed = ({ profile }) => {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setCurrentIndex(Number(entry.target.dataset.index));
+            const newIndex = Number(entry.target.dataset.index);
+            setCurrentIndex(newIndex);
           }
         });
       },
@@ -166,38 +185,75 @@ const AudioFeed = ({ profile }) => {
   }
 
   return (
-    <div
-      ref={containerRef}
-      className="h-screen w-full overflow-y-scroll snap-y snap-mandatory bg-black"
-      style={{ overscrollBehavior: "none" }}
-    >
-      {combinedContent.map((content, idx) => (
-        <AudioPost
-          profile={profile}
-          key={`${content.type}-${content.id}`}
-          post={content}
-          isActive={idx === currentIndex}
-          onTap={() => handleTap(idx)}
-          currentTime={currentTime}
-          duration={duration}
-          showTapIcon={showTapIcon && idx === currentIndex}
-          tapIconType={tapIconType}
-          data-index={idx}
-          ref={idx === combinedContent.length - 1 ? lastPostRef : null}
-          setAudioRef={(el) => (audioRefs.current[idx] = el)}
-          onTimeUpdate={(e) => handleTimeUpdate(idx, e)}
-          onLoadedMetadata={(e) => handleLoadedMetadata(idx, e)}
-          isLocked={content.type === "beat"}
-          contentType={content.type}
-        />
-      ))}
-
-      {/* Inline Loader Under Feed */}
-      {(postsLoading || beatsLoading) && (
-        <div className="flex justify-center py-6">
-          <Spinner />
+    <div className="relative w-full h-screen bg-black overflow-hidden ">
+      {/* Blurred background audio visualization */}
+      {currentAudioUrl && (
+        <div className="absolute inset-0 overflow-hidden">
+          <audio
+            ref={backgroundAudioRef}
+            autoPlay
+            loop
+            muted
+            className="hidden"
+          />
+          <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-black via-black/70 to-black filter blur-2xl opacity-70">
+            {/* You could add audio visualization here if desired */}
+          </div>
         </div>
       )}
+
+      {/* Phone container */}
+      <div className="relative flex justify-center items-center w-full h-full">
+        <div
+          ref={containerRef}
+          className="h-full w-full md:w-[414px] md:my-4 overflow-y-scroll snap-y snap-mandatory bg-black relative z-10"
+          style={{ 
+            overscrollBehavior: "none",
+            scrollBehavior: "smooth",
+            scrollSnapType: "y mandatory",
+            scrollbarWidth: "none",
+            msOverflowStyle: "none",
+          }}
+        >
+          {/* Hide scrollbar for Chrome/Safari */}
+          <style>{`
+            .snap-y::-webkit-scrollbar {
+              display: none;
+            }
+          `}</style>
+
+          {combinedContent.map((content, idx) => (
+            <div 
+              key={`${content.type}-${content.id}`}
+              className="snap-slide w-full h-full"
+              data-index={idx}
+              ref={idx === combinedContent.length - 1 ? lastPostRef : null}
+            >
+              <AudioPost
+                profile={profile}
+                post={content}
+                isActive={idx === currentIndex}
+                onTap={() => handleTap(idx)}
+                currentTime={currentTime}
+                duration={duration}
+                showTapIcon={showTapIcon && idx === currentIndex}
+                tapIconType={tapIconType}
+                setAudioRef={(el) => (audioRefs.current[idx] = el)}
+                onTimeUpdate={(e) => handleTimeUpdate(idx, e)}
+                onLoadedMetadata={(e) => handleLoadedMetadata(idx, e)}
+                isLocked={content.type === "beat"}
+                contentType={content.type}
+              />
+            </div>
+          ))}
+
+          {(postsLoading || beatsLoading) && (
+            <div className="flex justify-center py-6">
+              <Spinner />
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

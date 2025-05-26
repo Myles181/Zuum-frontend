@@ -50,6 +50,7 @@ import { AdminProvider } from './contexts/AdminContexts';
 import AdminProtectedRoute from './contexts/AdminProtectedRoutes';
 import PromotionPlatforms from './pages/upload/GlobalPromotion';
 import VideoViewerPage from './components/homepage/sale/ViewVideo';
+import PromotionRequirementsForm from './components/upload/Globalreq';
 
 const CustomLoader = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-white">
@@ -147,6 +148,7 @@ const AppRoutes = () => {
         <Route path="/distribution" element={<Distribution />} />
         <Route path="/jet" element={<Jet />} />
         <Route path="/global" element={<PromotionPlatforms />} />
+         <Route path="/req" element={<PromotionRequirementsForm />} />
         <Route path="/shared-audio/:shareId" element={<SharedAudioPage />} />
         <Route path="/videos/:id" element={<VideoViewerPage />} />
       </Routes>

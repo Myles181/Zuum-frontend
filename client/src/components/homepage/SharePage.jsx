@@ -46,7 +46,7 @@ const SharedAudioPage = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-900">
-        <div className="text-white text-xl">Loading shared audio...</div>
+        <div className="text-white text-xl">Loading  audio...</div>
       </div>
     );
   }
@@ -57,7 +57,7 @@ const SharedAudioPage = () => {
         <div className="text-white text-xl mb-4">{error}</div>
         <button 
           className="bg-purple-600 text-white px-4 py-2 rounded-lg"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/home")}
         >
           Return to Home
         </button>
@@ -71,7 +71,7 @@ const SharedAudioPage = () => {
         <div className="text-white text-xl mb-4">Shared audio not found</div>
         <button 
           className="bg-purple-600 text-white px-4 py-2 rounded-lg"
-          onClick={() => navigate("/")}
+          onClick={() => navigate("/home")}
         >
           Return to Home
         </button>
@@ -103,9 +103,7 @@ const SharedAudioPage = () => {
             </button>
             <div className="flex items-center space-x-2">
             
-              <span className="text-xs px-2 py-0.5 rounded-full text-white bg-purple-500">
-                SHARED
-              </span>
+             
             </div>
           </div>
         </div>

@@ -22,96 +22,49 @@ const PromotionPlatforms = () => {
   ];
 
  const platformData = {
-   print: [
-    { id: 1, name: 'Thisday', price: 45000, total: 49050 },
-    { id: 2, name: 'Sunnews', price: 45000, total: 49050 },
-    { id: 3, name: 'Thenation', price: 45000, total: 49050 },
-    { id: 4, name: 'Guardian', price: 45000, total: 49050 },
-    { id: 5, name: 'Tribune', price: 45000, total: 49050 },
-    { id: 6, name: 'Vanguard', price: 45000, total: 49050 },
-    { id: 7, name: 'Businessday', price: 85000, total: 92650 },
-    { id: 8, name: 'Leadership', price: 45000, total: 49050 },
-    { id: 9, name: 'Dailytrust', price: 70000, total: 76300 },
-    { id: 10, name: 'Independent', price: 50000, total: 54500 },
-    { id: 11, name: 'News Digest', price: 90000, total: 98100 },
-    { id: 12, name: 'Withinnigeria', price: 50000, total: 54500 },
-    { id: 13, name: 'Pmnewsnigeria', price: 50000, total: 54500 },
-    { id: 14, name: 'Telegraph', price: 50000, total: 54500 },
-    { id: 15, name: 'Premium Times', price: 170000, total: 185300 },
-    { id: 16, name: 'Punch', price: 100000, total: 109000 },
-    { id: 17, name: 'Legit.ng', price: 200000, total: 218000 },
-    { id: 18, name: 'Yabaleft', price: 350000, total: 381500 },
-    { id: 19, name: 'Pulse', price: 210000, total: 228900 }
+  print: [
+    { id: 1, name: 'Thisday', price: 54936, total: 49050 },
+    { id: 2, name: 'Sunnews', price: 54936, total: 49050 },
+    { id: 3, name: 'Thenation', price: 54936, total: 49050 },
+    { id: 4, name: 'Guardian', price: 54936, total: 49050 },
+    { id: 5, name: 'Tribune', price: 54936, total: 49050 },
+    { id: 6, name: 'Vanguard', price: 54936, total: 49050 },
+    { id: 7, name: 'Businessday', price: 103768, total: 92650 },
+    { id: 8, name: 'Leadership', price: 54936, total: 49050 },
+    { id: 9, name: 'Dailytrust', price: 85456, total: 76300 },
+    { id: 10, name: 'Independent', price: 61040, total: 54500 },
+    { id: 11, name: 'News Digest', price: 109872, total: 98100 },
+    { id: 12, name: 'Withinnigeria', price: 61040, total: 54500 },
+    { id: 13, name: 'Pmnewsnigeria', price: 61040, total: 54500 },
+    { id: 14, name: 'Telegraph', price: 61040, total: 54500 },
+    { id: 15, name: 'Premium Times', price: 207536, total: 185300 },
+    { id: 16, name: 'Punch', price: 122080, total: 109000 },
+    { id: 17, name: 'Legit.ng', price: 244160, total: 218000 },
+    { id: 18, name: 'Yabaleft', price: 427280, total: 381500 },
+    { id: 19, name: 'Pulse', price: 256368, total: 228900 }
   ],
-
-   tv: [
-    { id: 1, name: 'Trace TV (New)', price: 1500000, total: 1635000 },
-    { id: 2, name: 'Trace TV (B2B)', price: 780000, total: 850200 },
-    { id: 3, name: 'MTV Base (3 times weekly)', price: 850000, total: 926500 },
-    { id: 4, name: 'MTV Base (5 times weekly)', price: 1200000, total: 1308000 },
-    { id: 5, name: 'SoundCity (5 times weekly)', price: 950000, total: 1035500 },
-    { id: 6, name: 'SoundCity (2 times daily)', price: 1100000, total: 1199000 },
-    { id: 7, name: 'Hip TV (3 times weekly)', price: 750000, total: 817500 },
-    { id: 8, name: 'Hip TV (Nextrated Interview)', price: 600000, total: 654000 },
-    { id: 9, name: 'Afropop TV (2 times daily)', price: 600000, total: 654000 },
-    { id: 10, name: 'Afropop TV (5 times daily)', price: 1200000, total: 1308000 },
-    { id: 11, name: 'On TV', price: 550000, total: 599500 },
-    { id: 12, name: 'Terrestrial TV Stations Plug', price: 600000, total: 654000 },
-    { id: 13, name: 'BRT TV (Established Artist)', price: 600000, total: 654000 },
-    { id: 14, name: 'BRT TV (Up & Coming)', price: 500000, total: 545000 }
+  tv: [
+    { id: 1, name: 'TVC', price: 146496, total: 130800 },
+    { id: 2, name: 'AIT', price: 122080, total: 109000 },
+    { id: 3, name: 'Channels', price: 244160, total: 218000 },
+    { id: 4, name: 'Arise TV', price: 366240, total: 327000 },
+    { id: 5, name: 'NTA', price: 122080, total: 109000 }
   ],
-
-   radio: [
-    { id: 1, name: 'Beat FM', price: 150000, total: 163500 },
-    { id: 2, name: 'Tincity', price: 150000, total: 163500 },
-    { id: 3, name: 'Lagos Talks FM', price: 150000, total: 163500 },
-    { id: 4, name: 'Solid FM', price: 150000, total: 163500 },
-    { id: 5, name: 'Nigeria Info FM', price: 150000, total: 163500 },
-    { id: 6, name: 'Cool FM', price: 150000, total: 163500 },
-    { id: 7, name: 'Ray Power FM', price: 150000, total: 163500 },
-    { id: 8, name: 'Brila FM', price: 150000, total: 163500 },
-    { id: 9, name: 'Max FM', price: 150000, total: 163500 },
-    { id: 10, name: 'Wazobia FM', price: 150000, total: 163500 },
-    { id: 11, name: 'Naija FM', price: 150000, total: 163500 }
-    ],
-
-   digital: [
-    { id: 1, name: 'Audiomack front page Trending', price: 200000, total: 218000 },
-    { id: 2, name: 'Boomplay front page Trending', price: 300000, total: 327000 },
-    { id: 3, name: 'EPK (Electronic Press Kit)', price: 80000, total: 87200 },
-    { id: 4, name: 'Instablog9ja', price: 400000, total: 436450 },
-    { id: 5, name: 'Gossipmill', price: 370000, total: 403716 },
-    { id: 6, name: 'Legit', price: 250000, total: 272781 },
-    { id: 7, name: 'Tunde Ednut', price: 650000, total: 709231 },
-    { id: 8, name: 'Yabaleft', price: 380000, total: 414628 },
-    { id: 9, name: 'Pulse', price: 380000, total: 414628 },
-    { id: 10, name: 'GoldMyne TV', price: 300000, total: 327338 },
-    { id: 11, name: 'Gistreel', price: 380000, total: 414628 },
-    { id: 12, name: 'Kraks TV', price: 250000, total: 272781 }
+  radio: [
+    { id: 1, name: 'Nigeriainfo', price: 97664, total: 87200 },
+    { id: 2, name: 'CoolFM', price: 122080, total: 109000 },
+    { id: 3, name: 'Wazobia', price: 85456, total: 76300 },
+    { id: 4, name: 'Raypower', price: 73296, total: 65450 },
+    { id: 5, name: 'BeatFM', price: 85456, total: 76300 }
   ],
-
-   chart: [
-    { id: 1, name: 'Deezer Top 50', price: 1100000, total: 1199000, duration: '1 month' },
-    { id: 2, name: 'Audiomack chart (afro sound)', price: 3500000, total: 3815000, duration: '3 weeks' },
-    { id: 3, name: 'Audiomack Hiphop Chart', price: 2800000, total: 3052000, duration: '3 weeks' }
+  digital: [
+    { id: 1, name: 'Instagram', price: 61040, total: 54500 },
+    { id: 2, name: 'Facebook', price: 61040, total: 54500 },
+    { id: 3, name: 'Twitter', price: 61040, total: 54500 },
+    { id: 4, name: 'LinkedIn', price: 61040, total: 54500 },
+    { id: 5, name: 'Google Ads', price: 61040, total: 54500 }
   ],
-
-   playlist: [
-    { id: 1, name: 'Spotify Curated Playlist', price: 25000, total: 27344, duration: '1 month' },
-    { id: 2, name: 'Apple Music Curated Playlist', price: 25000, total: 27344, duration: '1 month' },
-    { id: 3, name: 'Audiomack Curated Playlist', price: 25000, total: 27344, duration: '1 month' },
-    { id: 4, name: 'Boomplay Editorials Playlist', price: 80000, total: 87660, duration: '1 month' },
-    { id: 5, name: 'Audiomack Editorials Playlist', price: 120000, total: 131490, duration: '1 month' }
-  ],
-
-   international:  [
-    { id: 1, name: '$700 Package (100+ intl sites)', price: 700, currency: '$', total: 763 },
-    { id: 2, name: 'Forbes', price: 5000, currency: '$', total: 5450 },
-    { id: 3, name: 'AP News', price: 500000, total: 545000 },
-    { id: 4, name: 'New York Times', price: 550000, total: 599500 },
-    { id: 5, name: 'Business Insider', price: 550000, total: 599500 }
-  ],
-
+  
  tiktok: [
       {
         id: 1,
@@ -247,7 +200,7 @@ const PromotionPlatforms = () => {
     ? 'bg-red-700 text-white'
     : activeTab === 'tiktok'
       ? 'bg-black text-white'
-      : 'bg-gray-50 text-white'
+      : 'bg-gray-50 '
  
       }`}>
       <Navbar name="Global Promotion" />
