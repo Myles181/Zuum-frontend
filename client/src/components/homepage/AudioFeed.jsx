@@ -16,7 +16,6 @@ const AudioFeed = ({ profile }) => {
   const [duration, setDuration] = useState(0);
   const [showTapIcon, setShowTapIcon] = useState(false);
   const [tapIconType, setTapIconType] = useState("play");
-  const [currentAudioUrl, setCurrentAudioUrl] = useState(null);
   const limit = 10;
   const beatsLimit = 10;
   const containerRef = useRef(null);
@@ -24,7 +23,6 @@ const AudioFeed = ({ profile }) => {
   const iconTimeout = useRef(null);
   const scrollObserver = useRef(null);
   const audioRefs = useRef([]);
-  const backgroundAudioRef = useRef(null);
 
   const {
     loading: postsLoading,
@@ -32,6 +30,8 @@ const AudioFeed = ({ profile }) => {
     posts,
     pagination: postsPagination,
   } = useAudioPosts(page, limit);
+
+  console.log(posts);
 
   const {
     loading: beatsLoading,
@@ -46,25 +46,6 @@ const AudioFeed = ({ profile }) => {
     ),
     [allPosts, allBeats]
   );
-
-  // Update current audio URL when index changes
-  useEffect(() => {
-    if (combinedContent.length > 0 && currentIndex < combinedContent.length) {
-      const currentContent = combinedContent[currentIndex];
-      const audioUrl = currentContent.type === "audio" 
-        ? currentContent.audio_upload 
-        : currentContent.audio_file || currentContent.audio_upload;
-      setCurrentAudioUrl(audioUrl || null);
-    }
-  }, [currentIndex, combinedContent]);
-
-  // Sync background audio with current audio
-  useEffect(() => {
-    if (backgroundAudioRef.current && currentAudioUrl) {
-      backgroundAudioRef.current.src = currentAudioUrl;
-      backgroundAudioRef.current.load();
-    }
-  }, [currentAudioUrl]);
 
   useEffect(() => {
     if (posts.length) {
@@ -123,8 +104,7 @@ const AudioFeed = ({ profile }) => {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const newIndex = Number(entry.target.dataset.index);
-            setCurrentIndex(newIndex);
+            setCurrentIndex(Number(entry.target.dataset.index));
           }
         });
       },
@@ -185,47 +165,32 @@ const AudioFeed = ({ profile }) => {
   }
 
   return (
-    <div className="relative w-full h-screen bg-black overflow-hidden ">
-      {/* Blurred background audio visualization */}
-      {currentAudioUrl && (
-        <div className="absolute inset-0 overflow-hidden">
-          <audio
-            ref={backgroundAudioRef}
-            autoPlay
-            loop
-            muted
-            className="hidden"
-          />
-          <div className="absolute inset-0 w-full h-full bg-gradient-to-b from-black via-black/70 to-black filter blur-2xl opacity-70">
-            {/* You could add audio visualization here if desired */}
-          </div>
-        </div>
-      )}
+    <div className="flex justify-center w-full h-screen bg-black">
+      {/* Container with phone-like dimensions on larger screens */}
+      <div
+        ref={containerRef}
+        className="h-full w-full md:w-[414px] md:h-[736px] md:my-4 overflow-y-scroll snap-y snap-mandatory bg-black relative"
+        style={{ 
+          overscrollBehavior: "none",
+          scrollBehavior: "smooth",
+          scrollSnapType: "y mandatory",
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+          maxWidth: "100%", // Ensure it doesn't exceed screen width on mobile
+        }}
+      >
+        {/* Hide scrollbar for Chrome/Safari */}
+        <style>{`
+          .snap-y::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
 
-      {/* Phone container */}
-      <div className="relative flex justify-center items-center w-full h-full">
-        <div
-          ref={containerRef}
-          className="h-full w-full md:w-[414px] md:my-4 overflow-y-scroll snap-y snap-mandatory bg-black relative z-10"
-          style={{ 
-            overscrollBehavior: "none",
-            scrollBehavior: "smooth",
-            scrollSnapType: "y mandatory",
-            scrollbarWidth: "none",
-            msOverflowStyle: "none",
-          }}
-        >
-          {/* Hide scrollbar for Chrome/Safari */}
-          <style>{`
-            .snap-y::-webkit-scrollbar {
-              display: none;
-            }
-          `}</style>
-
-          {combinedContent.map((content, idx) => (
+        {combinedContent.length > 0 ? (
+          combinedContent.map((content, idx) => (
             <div 
-              key={`${content.type}-${content.id}`}
-              className="snap-slide w-full h-full"
+              key={`${content.type}-${content.id}`} 
+              className="snap-slide w-full h-full" 
               data-index={idx}
               ref={idx === combinedContent.length - 1 ? lastPostRef : null}
             >
@@ -245,14 +210,18 @@ const AudioFeed = ({ profile }) => {
                 contentType={content.type}
               />
             </div>
-          ))}
+          ))
+        ) : (
+          <div className="h-full w-full flex items-center justify-center snap-start">
+            <p className="text-white">No audio available</p>
+          </div>
+        )}
 
-          {(postsLoading || beatsLoading) && (
-            <div className="flex justify-center py-6">
-              <Spinner />
-            </div>
-          )}
-        </div>
+        {(postsLoading || beatsLoading) && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-70 z-50">
+            <Spinner />
+          </div>
+        )}
       </div>
     </div>
   );

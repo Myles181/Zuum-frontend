@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Music, Share2, ChevronRight, CheckCircle, Globe, Rocket } from 'lucide-react';
+import { Music, Share2, ChevronRight, CheckCircle, Globe, Rocket, List } from 'lucide-react';
 import Navbar from '../components/profile/NavBar';
 import BottomNav from '../components/homepage/BottomNav';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
 export const Jet = () => {
@@ -61,6 +61,17 @@ export const Jet = () => {
           Take your music to the next level - choose how you want to share your sound with the world
         </p>
       </header>
+
+          <div className="fixed bottom-20 right-6 z-50">
+        <Link
+          to="/user/promotions"
+          className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-[#1a5f4b] to-[#2d7a63] text-white border-2 border-[#1a5f4b] font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105" 
+        >
+          <List className="w-5 h-5" />
+          <span>My Promotions</span>
+        
+        </Link>
+      </div>
 
       <main className="container mx-auto px-4 pt-4 pb-16 max-w-5xl">
         {/* Global Promotion Option - NEW STARRED SECTION */}
