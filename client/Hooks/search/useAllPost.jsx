@@ -482,3 +482,212 @@ export const useDistributionRequest = () => {
 
 
 
+
+
+
+export const usePackages = () => {
+  const [packages, setPackages] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  const fetchPackages = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await axios.get('/packages');
+
+      // Handle both array and object response formats
+      let packagesData = Array.isArray(response.data) ? response.data : 
+                       response.data.packages || response.data.data || [];
+      
+      setPackages(packagesData);
+    } catch (err) {
+      setError(err.response?.data?.error || err.message || 'Failed to fetch packages');
+      console.error('Error fetching packages:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Fetch packages on component mount
+  useEffect(() => {
+    fetchPackages();
+  }, []);
+
+  return {
+    packages,
+    loading,
+    error,
+    refetch: fetchPackages // Option to manually refetch
+  };
+};
+
+
+
+
+
+
+export const useMassPromotion = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [data, setData] = useState(null);
+
+  const createPromotion = async (formData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      setData(null);
+
+      // Validate category first
+      const validCategories = ['print', 'tv', 'radio', 'chart', 'digital', 'playlist', 'international'];
+      if (!formData.category || !validCategories.includes(formData.category)) {
+        throw new Error('Invalid category');
+      }
+
+      // Prepare form data for file uploads
+      const postData = new FormData();
+      
+      // Add common fields
+      postData.append('category', formData.category);
+      postData.append('package_id', formData.package_id);
+
+      // Add category-specific fields
+      switch (formData.category) {
+        case 'print':
+        case 'international':
+          postData.append('title', formData.title);
+          postData.append('body', formData.body);
+          if (formData.description) postData.append('description', formData.description);
+          postData.append('image', formData.image);
+          break;
+        case 'tv':
+          postData.append('title', formData.title);
+          postData.append('biography', formData.biography);
+          postData.append('hd_video', formData.hd_video);
+          break;
+        case 'radio':
+        case 'chart':
+        case 'playlist':
+          postData.append('song_link', formData.song_link);
+          break;
+        case 'digital':
+          postData.append('artist_name', formData.artist_name);
+          postData.append('biography', formData.biography);
+          postData.append('artist_photo', formData.artist_photo);
+          break;
+        default:
+          throw new Error('Unsupported category');
+      }
+
+      const response = await axios.post('/promotions/mass', postData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+          // Cookies will be sent automatically if withCredentials is true
+        },
+        withCredentials: true // This ensures cookies are included
+      });
+
+      setData(response.data);
+      console.log(response.data);
+      
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 
+                         error.response?.data?.error || 
+                         error.message || 
+                         'Failed to create promotion';
+      setError(errorMessage);
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    createPromotion,
+    loading,
+    error,
+    data,
+    reset: () => {
+      setError(null);
+      setData(null);
+    }
+  };
+};
+
+
+
+
+
+
+
+
+
+
+
+
+export const useUserPromotions = () => {
+  const [promotions, setPromotions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [pagination, setPagination] = useState({
+    limit: 10,
+    offset: 0,
+    total: 0
+  });
+
+  const fetchPromotions = async (params = {}) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await axios.get('/packages/myPromotions', {
+        params: {
+          limit: pagination.limit,
+          offset: pagination.offset,
+          ...params
+        },
+        withCredentials: true
+      });
+
+      setPromotions(response.data.data || []);
+      setPagination(prev => ({
+        ...prev,
+        total: response.data.total || 0
+      }));
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to fetch promotions');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refetch = (params) => {
+    fetchPromotions(params);
+  };
+
+  const loadMore = () => {
+    if (pagination.offset + pagination.limit < pagination.total) {
+      setPagination(prev => ({
+        ...prev,
+        offset: prev.offset + prev.limit
+      }));
+      fetchPromotions();
+    }
+  };
+
+  useEffect(() => {
+    fetchPromotions();
+  }, [pagination.offset, pagination.limit]);
+
+  return {
+    promotions,
+    loading,
+    error,
+    pagination,
+    refetch,
+    loadMore,
+    setLimit: (limit) => setPagination(prev => ({ ...prev, limit, offset: 0 }))
+  };
+};
