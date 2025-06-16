@@ -52,6 +52,9 @@ import PromotionPlatforms from './pages/upload/GlobalPromotion';
 import VideoViewerPage from './components/homepage/sale/ViewVideo';
 import PromotionRequirementsForm from './components/upload/Globalreq';
 import { UserPromotions } from './pages/UserPromotions';
+import DistributionRequestsPage from './admin/pages/Distribution';
+import AdminBeatPurchasesPage from './admin/pages/Beats';
+import AdminPromotionsPage from './admin/pages/promotion';
 
 const CustomLoader = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-white">
@@ -187,6 +190,10 @@ const App = () => (
             <Route element={<AdminProtectedRoute />}>
               <Route path="/admin/*" element={<AdminDashboard />} />
               <Route path="/users" element={<AdminDashboard />} />
+              <Route path="/distribution" element={<DistributionRequestsPage />} />
+              <Route path="/beat" element={<AdminBeatPurchasesPage />} />
+              <Route path="/promotion" element={<AdminPromotionsPage />} />
+
             </Route>
         </Routes>
       </Router>
