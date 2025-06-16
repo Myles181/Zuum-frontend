@@ -7,6 +7,9 @@ import b from "../../assets/public/logo.png";
 import { useSignup } from "../../../Hooks/auth/useSignup";
 import useGoogleAuth from "../../../Hooks/auth/useGoogleAuth";
 
+console.log();
+
+
 function Signup() {
   const [currentStep, setCurrentStep] = useState(1);
   const [passwordVisible, setPasswordVisible] = useState(false);
