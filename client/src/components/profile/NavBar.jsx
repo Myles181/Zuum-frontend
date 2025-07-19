@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { FiMenu, FiChevronLeft, FiSearch, FiSettings } from 'react-icons/fi';
+import { MdRocketLaunch } from 'react-icons/md';
 
 const Navbar = ({ 
   toggleSidebar, 
@@ -24,10 +25,9 @@ const Navbar = ({
             onClick={goBack}
           />
         ) : (
-          <FiMenu
-            className="w-6 h-6 cursor-pointer text-gray-700"
-            onClick={toggleSidebar}
-          />
+          <Link to="/jet">
+            <MdRocketLaunch className="w-6 h-6 text-gray-700" />
+          </Link>
         )}
       </div>
 

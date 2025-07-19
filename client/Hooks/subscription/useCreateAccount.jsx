@@ -3,6 +3,9 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Configure axios to use cookies like AuthContext
+axios.defaults.withCredentials = true;
+
 const useDepositAccount = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -16,21 +19,13 @@ const useDepositAccount = () => {
     setSuccess(false);
     setPaymentDetails(null);
 
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      console.error('[useDepositAccount] No auth token found');
-      setError('Authentication token missing');
-      setLoading(false);
-      return;
-    }
-
+    // Use cookies instead of localStorage token
     const url = `${API_URL}/payment/deposit-account`;
     console.debug(`[useDepositAccount] Making request to: ${url}`);
 
     try {
       const response = await axios.get(url, {
         headers: {
-          Authorization: `Bearer ${token}`,
           Accept: 'application/json',
         },
       });
@@ -115,14 +110,9 @@ export const useSubscriptionPayment = () => {
     setPaymentDetails(null);
 
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('Authentication token not found');
-      }
-
+      // Use cookies instead of localStorage token
       const response = await axios.get(`${API_URL}/payment/subscription`, {
         headers: {
-          Authorization: `Bearer ${token}`,
           Accept: 'application/json'
         }
       });
@@ -209,14 +199,9 @@ export const usePaymentAccount = () => {
     setError(null);
     
     try {
-      const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('Authentication token not found');
-      }
-
+      // Use cookies instead of localStorage token
       const response = await axios.get(`${API_URL}/payment/create`, {
         headers: {
-          Authorization: `Bearer ${token}`,
           Accept: 'application/json'
         }
       });
@@ -286,6 +271,7 @@ export const useWithdrawal = () => {
     setSuccess(false);
     setWithdrawalData(null);
 
+    // Use cookies instead of localStorage token
     const token = localStorage.getItem('authToken');
     if (!token) {
       console.error('[useWithdrawal] No auth token found');

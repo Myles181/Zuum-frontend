@@ -192,7 +192,7 @@ const AudioPost = React.forwardRef(({
       <div className="absolute inset-0 bg-black/30" />
       
       {/* Main content */}
-      <div className="relative z-10 w-full h-full flex flex-col">
+      <div className="relative z-10 w-full h-full">
         {/* Top bar */}
         <div className="absolute top-0 left-0 right-0 p-4 z-30 flex justify-between items-center">
           <div className="flex items-center space-x-2">
@@ -212,17 +212,17 @@ const AudioPost = React.forwardRef(({
           />
         </div>
         
-        {/* Cover image */}
-        <div className="flex-1 flex px-5 items-center justify-center">
+        {/* Cover image - fills entire space */}
+        <div className="w-full h-full flex items-center justify-center px-5">
           <img
             src={post.cover_photo || c}
             alt="Music Cover"
-            className="max-w-full max-h-[70vh] object-contain rounded-lg"
+            className="w-full h-full object-contain rounded-lg"
           />
         </div>
         
         {/* Bottom actions */}
-        <div className="absolute bottom-15 left-0 right-0 p-4 z-30 flex justify-between items-end">
+        <div className="absolute bottom-32 sm:bottom-36 left-0 right-0 p-4 z-30 flex justify-between items-end">
           <div className="flex-1 flex items-center space-x-3">
             <div 
               className="flex items-center space-x-3 flex-1"
@@ -236,43 +236,72 @@ const AudioPost = React.forwardRef(({
               <img
                 src={post.profile_picture || a}
                 alt="Profile"
-                className="w-12 h-12 rounded-full border-2 border-white object-cover"
+                className="max-w-10 max-h-10 sm:max-w-12 sm:max-h-12 rounded-full border-2 border-white bg-gray-800"
               />
-              <div className="flex-1">
-                <h4 className="font-bold text-white">{post.username || post.artist}</h4>
-                <p className="text-white text-sm">{contentInfo.title}</p>
+              <div className="flex-1 min-w-0">
+                <h4 className="font-bold text-white text-sm sm:text-base truncate">{post.username || post.artist}</h4>
+                <p className="text-white text-xs sm:text-sm truncate">{contentInfo.title}</p>
               </div>
             </div>
           </div>
           
-          <div className="flex flex-col items-center space-y-3 bg-black/50 py-2 rounded-full">
-            <ReactionButton
-              postId={post?.id}
-              reactions={data?.reactions || []}
-              profileId={profile?.id}
-            />
+          {/* Redesigned Side Actions Container */}
+          <div className="flex flex-col items-center space-y-6 sm:space-y-8 ml-4">
+            {/* Like/Reaction Button */}
+            <div className="flex flex-col items-center group">
+              <ReactionButton
+                postId={post?.id}
+                reactions={data?.reactions || []}
+                profileId={profile?.id}
+              />
+            </div>
             
-            <CommentModal 
-              comments={data?.comments || []} 
-              postId={post?.id} 
-            />
+            {/* Comment Button */}
+            <div className="flex flex-col items-center group">
+              <CommentModal 
+                comments={data?.comments || []} 
+                postId={post?.id} 
+              />
+            </div>
             
-            <button 
-              onClick={toggleStreamingModal}
-              className="text-white hover:text-gray-200 transition-colors p-2"
-            >
-              <FaBroadcastTower className="text-xl" />
-            </button>
+            {/* Streaming Button */}
+            <div className="flex flex-col items-center group">
+              <div className="relative">
+                <button 
+                  onClick={toggleStreamingModal}
+                  className="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 backdrop-blur-sm rounded-full flex items-center justify-center hover:from-blue-500/30 hover:to-cyan-500/30 transition-all duration-200 hover:scale-110 group-hover:shadow-lg border border-white/20"
+                >
+                  <FaBroadcastTower className="text-white text-lg sm:text-xl" />
+                </button>
+                {/* Streaming label */}
+                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <span className="text-white text-xs font-medium bg-black/30 px-2 py-1 rounded-full backdrop-blur-sm whitespace-nowrap">
+                    Stream
+                  </span>
+                </div>
+              </div>
+            </div>
             
-            <button 
-              onClick={(e) => {
-                e.stopPropagation();
-                setIsShareModalOpen(true);
-              }}
-              className="text-white hover:text-gray-200 transition-colors p-2"
-            >
-              <FaShare className="text-xl" />
-            </button>
+            {/* Share Button */}
+            <div className="flex flex-col items-center group">
+              <div className="relative">
+                <button 
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setIsShareModalOpen(true);
+                  }}
+                  className="w-12 h-12 sm:w-14 sm:h-14 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center hover:bg-white/20 transition-all duration-200 hover:scale-110 group-hover:shadow-lg"
+                >
+                  <FaShare className="text-white text-lg sm:text-xl" />
+                </button>
+                {/* Share label */}
+                <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <span className="text-white text-xs font-medium bg-black/30 px-2 py-1 rounded-full backdrop-blur-sm whitespace-nowrap">
+                    Share
+                  </span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

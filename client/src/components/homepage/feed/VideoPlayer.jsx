@@ -4,7 +4,7 @@ import VideoSideActions from "./VideoSideActions";
 import { useGetVideoPost } from "../../../../Hooks/videoPosts/useCreateVideo";
 import ShareModal from "../../details/Share";
 
-const VideoPlayer = ({ post, index, isCurrent, defaultThumbnail, profileId }) => {
+const VideoPlayer = ({ post, index, isCurrent, defaultThumbnail, profileId, setVideoRef, onManualPause }) => {
   const { data, loading: postLoading, error } = useGetVideoPost(post?.id);
   const videoRef = useRef(null);
 
@@ -13,10 +13,18 @@ const VideoPlayer = ({ post, index, isCurrent, defaultThumbnail, profileId }) =>
   const [progress, setProgress] = useState(0);
   const [showPlayButton, setShowPlayButton] = useState(false);
   const [isVideoLoading, setIsVideoLoading] = useState(true);
+  const [isManuallyPaused, setIsManuallyPaused] = useState(false); // Track manual pause state
 
   // Thumbnail state
   const [thumbnail, setThumbnail] = useState(null);
   const playButtonTimeout = useRef(null);
+
+  // Set video ref for feed control
+  useEffect(() => {
+    if (setVideoRef) {
+      setVideoRef(videoRef.current);
+    }
+  }, [setVideoRef]);
 
   // Generate thumbnail from video
   useEffect(() => {
@@ -62,16 +70,28 @@ const VideoPlayer = ({ post, index, isCurrent, defaultThumbnail, profileId }) =>
     }
   }, [post.video_upload, post.cover_photo]);
 
-  // Autoplay / pause logic
+  // Handle auto-play from feed
   useEffect(() => {
     if (!videoRef.current) return;
-    if (isCurrent) {
-      videoRef.current.play().then(() => setIsPlaying(true)).catch(() => {});
-    } else {
+    
+    if (isCurrent && !isManuallyPaused) {
+      console.log(`Video ${index} is now current - auto-playing`);
+      videoRef.current.play()
+        .then(() => {
+          setIsPlaying(true);
+          console.log(`Successfully auto-played video at index ${index}`);
+        })
+        .catch((error) => {
+          console.warn(`Failed to auto-play video at index ${index}:`, error);
+          setIsPlaying(false);
+        });
+    } else if (!isCurrent) {
+      console.log(`Video ${index} is no longer current - pausing`);
       videoRef.current.pause();
       setIsPlaying(false);
+      setIsManuallyPaused(false); // Reset manual pause when switching away
     }
-  }, [isCurrent]);
+  }, [isCurrent, index, isManuallyPaused]);
 
   // Update progress
   const handleTimeUpdate = () => {
@@ -85,12 +105,20 @@ const VideoPlayer = ({ post, index, isCurrent, defaultThumbnail, profileId }) =>
   const handleVideoClick = () => {
     const vid = videoRef.current;
     if (!vid) return;
+    
     if (vid.paused) {
+      console.log(`Manual play for video ${index}`);
+      setIsManuallyPaused(false);
+      if (onManualPause) onManualPause(false); // Notify feed
       vid.play().then(() => setIsPlaying(true)).catch(() => {});
     } else {
+      console.log(`Manual pause for video ${index}`);
+      setIsManuallyPaused(true);
+      if (onManualPause) onManualPause(true); // Notify feed
       vid.pause();
       setIsPlaying(false);
     }
+    
     setShowPlayButton(true);
     clearTimeout(playButtonTimeout.current);
     playButtonTimeout.current = setTimeout(() => setShowPlayButton(false), 800);
@@ -148,7 +176,7 @@ const VideoPlayer = ({ post, index, isCurrent, defaultThumbnail, profileId }) =>
       )}
 
       {/* Animated progress bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-1 mb-13 bg-gray-400 z-20">
+      <div className="absolute bottom-8 sm:bottom-10 left-0 right-0 h-1 bg-gray-400 z-20">
         <div
           className="h-full bg-[#2D8C72] transition-all duration-300 ease-out"
           style={{ width: `${progress}%` }}

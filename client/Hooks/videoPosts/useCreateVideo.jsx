@@ -292,16 +292,24 @@ export const useGetVideoPost = (postId) => {
   const [error, setError] = useState(null);
 
   const fetchVideoPost = async () => {
+    if (!postId) return;
+    
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`/video/${postId}`);
+      // Use cookies for authentication (matches app's auth pattern)
+      const response = await axios.get(`${API_URL}/video/${postId}`, {
+        withCredentials: true, // Use cookies for authentication
+      });
+      
       if (response.status === 200) {
-        setData(response.data.post);
+        setData(response.data.post || response.data);
+        console.log('Video post data fetched:', response.data);
       } else {
         setError(`Unexpected status code: ${response.status}`);
       }
     } catch (err) {
+      console.error('Error fetching video post:', err);
       if (err.response) {
         if (err.response.status === 401) {
           setError('Unauthorized: Please log in');

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FaUser, FaEnvelope, FaPhone, FaLock, FaEye, FaEyeSlash, FaArrowRight, FaArrowLeft } from "react-icons/fa";
+import { FaUser, FaEnvelope, FaPhone, FaLock, FaEye, FaEyeSlash, FaArrowRight, FaArrowLeft, FaSpinner, FaCheck } from "react-icons/fa";
 import { FcGoogle } from 'react-icons/fc';
 import { Link, useSearchParams, useNavigate } from "react-router-dom";
 import a from "../../assets/public/Group 14.png";
@@ -7,15 +7,11 @@ import b from "../../assets/public/logo.png";
 import { useSignup } from "../../../Hooks/auth/useSignup";
 import useGoogleAuth from "../../../Hooks/auth/useGoogleAuth";
 
-console.log();
-
-
 function Signup() {
   const [currentStep, setCurrentStep] = useState(1);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-  const [animation, setAnimation] = useState(""); 
-  const [direction, setDirection] = useState("next");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     firstname: "",
     middlename: "",
@@ -112,24 +108,11 @@ function Signup() {
 
   const nextStep = () => {
     if (!validateStep(currentStep)) return;
-    
-    setDirection("next");
-    setAnimation("slide-out");
-    
-    setTimeout(() => {
-      setCurrentStep(currentStep + 1);
-      setAnimation("slide-in");
-    }, 300);
+    setCurrentStep(currentStep + 1);
   };
 
   const prevStep = () => {
-    setDirection("prev");
-    setAnimation("slide-out");
-    
-    setTimeout(() => {
-      setCurrentStep(currentStep - 1);
-      setAnimation("slide-in");
-    }, 300);
+    setCurrentStep(currentStep - 1);
   };
 
   const handleSubmit = async (e) => {
@@ -137,7 +120,10 @@ function Signup() {
     
     if (!validateStep(3)) return;
     
+    setIsSubmitting(true);
     const success = await signup(formData);
+    setIsSubmitting(false);
+    
     if (success) {
       navigate("/verify");
     }
@@ -148,14 +134,44 @@ function Signup() {
   };
 
   const renderStepIndicator = () => {
+    const steps = [
+      { number: 1, title: "Personal Info", icon: <FaUser /> },
+      { number: 2, title: "Account Details", icon: <FaEnvelope /> },
+      { number: 3, title: "Security", icon: <FaLock /> }
+    ];
+
     return (
-      <div className="flex justify-center mb-8">
-        <div className="flex items-center">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 ${currentStep === 1 ? "bg-[#2D8C72] text-white" : "bg-white text-[#2D8C72] border-2 border-[#2D8C72]"}`}>1</div>
-          <div className={`h-1 w-12 transition-colors duration-300 ${currentStep > 1 ? "bg-[#2D8C72]" : "bg-gray-300"}`}></div>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 ${currentStep === 2 ? "bg-[#2D8C72] text-white" : currentStep > 2 ? "bg-white text-[#2D8C72] border-2 border-[#2D8C72]" : "bg-white text-gray-500 border-2 border-gray-300"}`}>2</div>
-          <div className={`h-1 w-12 transition-colors duration-300 ${currentStep > 2 ? "bg-[#2D8C72]" : "bg-gray-300"}`}></div>
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300 ${currentStep === 3 ? "bg-[#2D8C72] text-white" : "bg-white text-gray-500 border-2 border-gray-300"}`}>3</div>
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          {steps.map((step, index) => (
+            <div key={step.number} className="flex items-center">
+              <div className="flex flex-col items-center">
+                <div className={`relative w-12 h-12 rounded-full flex items-center justify-center transition-all duration-500 ${
+                  currentStep === step.number 
+                    ? "bg-gradient-to-r from-[#2D8C72] to-[#246d59] text-white shadow-lg scale-110" 
+                    : currentStep > step.number 
+                    ? "bg-[#2D8C72] text-white" 
+                    : "bg-white/20 text-white/60 border-2 border-white/30"
+                }`}>
+                  {currentStep > step.number ? (
+                    <FaCheck className="w-5 h-5" />
+                  ) : (
+                    <span className="text-sm font-semibold">{step.number}</span>
+                  )}
+                </div>
+                <span className={`text-xs mt-2 text-center transition-colors duration-300 ${
+                  currentStep >= step.number ? "text-white" : "text-white/60"
+                }`}>
+                  {step.title}
+                </span>
+              </div>
+              {index < steps.length - 1 && (
+                <div className={`h-1 w-16 mx-4 transition-all duration-500 ${
+                  currentStep > step.number ? "bg-gradient-to-r from-[#2D8C72] to-[#246d59]" : "bg-white/20"
+                }`}></div>
+              )}
+            </div>
+          ))}
         </div>
       </div>
     );
@@ -163,54 +179,71 @@ function Signup() {
 
   const renderNameStep = () => {
     return (
-      <div className={`rounded-lg shadow-lg p-2 mb-6 transition-all duration-300 ${animation} ${direction}`}>
-        <h2 className="text-xl font-semibold text-white mb-4 text-center">Personal Information</h2>
-        <div className="grid grid-cols-1 gap-4 mb-6">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="First Name"
-              id="firstname"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#2D8C72] text-black bg-white"
-              required
-              value={formData.firstname}
-              onChange={handleInputChange}
-            />
-            {errors.firstname && <p className="text-red-500 text-sm mt-1">{errors.firstname}</p>}
+      <div className="transition-all duration-300">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-white mb-2">Personal Information</h2>
+          <p className="text-white/70 text-sm">Tell us about yourself</p>
+        </div>
+        
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="block text-white/90 text-sm font-medium">First Name *</label>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#2D8C72] to-[#246d59] rounded-lg blur opacity-0 group-focus-within:opacity-20 transition-opacity duration-300"></div>
+              <input
+                type="text"
+                placeholder="Enter your first name"
+                id="firstname"
+                className="relative w-full px-4 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:border-[#2D8C72] focus:bg-white/15 transition-all duration-300"
+                required
+                value={formData.firstname}
+                onChange={handleInputChange}
+              />
+            </div>
+            {errors.firstname && <p className="text-red-300 text-sm mt-1">{errors.firstname}</p>}
           </div>
           
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Middle Name"
-              id="middlename"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#2D8C72] text-black bg-white"
-              value={formData.middlename}
-              onChange={handleInputChange}
-            />
+          <div className="space-y-2">
+            <label className="block text-white/90 text-sm font-medium">Middle Name</label>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#2D8C72] to-[#246d59] rounded-lg blur opacity-0 group-focus-within:opacity-20 transition-opacity duration-300"></div>
+              <input
+                type="text"
+                placeholder="Enter your middle name (optional)"
+                id="middlename"
+                className="relative w-full px-4 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:border-[#2D8C72] focus:bg-white/15 transition-all duration-300"
+                value={formData.middlename}
+                onChange={handleInputChange}
+              />
+            </div>
           </div>
           
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Last Name"
-              id="lastname"
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#2D8C72] text-black bg-white"
-              required
-              value={formData.lastname}
-              onChange={handleInputChange}
-            />
-            {errors.lastname && <p className="text-red-500 text-sm mt-1">{errors.lastname}</p>}
+          <div className="space-y-2">
+            <label className="block text-white/90 text-sm font-medium">Last Name *</label>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#2D8C72] to-[#246d59] rounded-lg blur opacity-0 group-focus-within:opacity-20 transition-opacity duration-300"></div>
+              <input
+                type="text"
+                placeholder="Enter your last name"
+                id="lastname"
+                className="relative w-full px-4 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:border-[#2D8C72] focus:bg-white/15 transition-all duration-300"
+                required
+                value={formData.lastname}
+                onChange={handleInputChange}
+              />
+            </div>
+            {errors.lastname && <p className="text-red-300 text-sm mt-1">{errors.lastname}</p>}
           </div>
         </div>
         
-        <div className="flex justify-end">
+        <div className="flex justify-end mt-8">
           <button
             type="button"
-            className="bg-[#2D8C72] text-white font-medium p-3 rounded-lg hover:bg-[#246d59] transition duration-300 flex items-center"
             onClick={nextStep}
+            className="bg-gradient-to-r from-[#2D8C72] to-[#246d59] text-white font-semibold px-8 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center group"
           >
-            <FaArrowRight />
+            <span>Next Step</span>
+            <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
           </button>
         </div>
       </div>
@@ -219,65 +252,90 @@ function Signup() {
 
   const renderDetailsStep = () => {
     return (
-      <div className={`rounded-lg shadow-lg p-2 mb-6 transition-all duration-300 ${animation} ${direction}`}>
-        <h2 className="text-xl font-semibold text-white mb-4 text-center">Account Details</h2>
-        
-        <div className="relative mb-4">
-          <FaUser className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10" />
-          <input
-            type="text"
-            placeholder="Username"
-            id="username"
-            className="w-full px-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#2D8C72] text-black bg-white"
-            required
-            value={formData.username}
-            onChange={handleInputChange}
-          />
-          {errors.username && <p className="text-red-500 text-sm mt-1">{errors.username}</p>}
-        </div>
-
-        <div className="relative mb-4">
-          <FaEnvelope className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10" />
-          <input
-            type="email"
-            placeholder="Email"
-            id="email"
-            className="w-full px-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#2D8C72] text-black bg-white"
-            required
-            value={formData.email}
-            onChange={handleInputChange}
-          />
-          {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
-        </div>
-
-        <div className="relative mb-6">
-          <FaPhone className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10" />
-          <input
-            type="number"
-            placeholder="Phone Number"
-            id="phonenumber"
-            className="w-full px-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#2D8C72] text-black bg-white"
-            required
-            value={formData.phonenumber}
-            onChange={handleInputChange}
-          />
-          {errors.phonenumber && <p className="text-red-500 text-sm mt-1">{errors.phonenumber}</p>}
+      <div className="transition-all duration-300">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-white mb-2">Account Details</h2>
+          <p className="text-white/70 text-sm">Set up your account credentials</p>
         </div>
         
-        <div className="flex justify-between">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="block text-white/90 text-sm font-medium">Username *</label>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#2D8C72] to-[#246d59] rounded-lg blur opacity-0 group-focus-within:opacity-20 transition-opacity duration-300"></div>
+              <div className="relative flex items-center">
+                <FaUser className="absolute left-4 text-white/60 group-focus-within:text-[#2D8C72] transition-colors duration-300" />
+                <input
+                  type="text"
+                  placeholder="Choose a username"
+                  id="username"
+                  className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:border-[#2D8C72] focus:bg-white/15 transition-all duration-300"
+                  required
+                  value={formData.username}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+            {errors.username && <p className="text-red-300 text-sm mt-1">{errors.username}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-white/90 text-sm font-medium">Email Address *</label>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#2D8C72] to-[#246d59] rounded-lg blur opacity-0 group-focus-within:opacity-20 transition-opacity duration-300"></div>
+              <div className="relative flex items-center">
+                <FaEnvelope className="absolute left-4 text-white/60 group-focus-within:text-[#2D8C72] transition-colors duration-300" />
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  id="email"
+                  className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:border-[#2D8C72] focus:bg-white/15 transition-all duration-300"
+                  required
+                  value={formData.email}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+            {errors.email && <p className="text-red-300 text-sm mt-1">{errors.email}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-white/90 text-sm font-medium">Phone Number *</label>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#2D8C72] to-[#246d59] rounded-lg blur opacity-0 group-focus-within:opacity-20 transition-opacity duration-300"></div>
+              <div className="relative flex items-center">
+                <FaPhone className="absolute left-4 text-white/60 group-focus-within:text-[#2D8C72] transition-colors duration-300" />
+                <input
+                  type="tel"
+                  placeholder="Enter your phone number"
+                  id="phonenumber"
+                  className="w-full pl-12 pr-4 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:border-[#2D8C72] focus:bg-white/15 transition-all duration-300"
+                  required
+                  value={formData.phonenumber}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+            {errors.phonenumber && <p className="text-red-300 text-sm mt-1">{errors.phonenumber}</p>}
+          </div>
+        </div>
+        
+        <div className="flex justify-between mt-8">
           <button
             type="button"
-            className="bg-gray-400 text-white font-medium p-3 rounded-lg hover:bg-gray-500 transition duration-300 flex items-center"
             onClick={prevStep}
+            className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-8 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center group"
           >
-            <FaArrowLeft />
+            <FaArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
+            <span>Previous</span>
           </button>
           <button
             type="button"
-            className="bg-[#2D8C72] text-white font-medium p-3 rounded-lg hover:bg-[#246d59] transition duration-300 flex items-center"
             onClick={nextStep}
+            className="bg-gradient-to-r from-[#2D8C72] to-[#246d59] text-white font-semibold px-8 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center group"
           >
-            <FaArrowRight />
+            <span>Next Step</span>
+            <FaArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
           </button>
         </div>
       </div>
@@ -286,78 +344,118 @@ function Signup() {
 
   const renderPasswordStep = () => {
     return (
-      <div className={`rounded-lg shadow-lg p-2 mb-6 transition-all duration-300 ${animation} ${direction}`}>
-        <h2 className="text-xl font-semibold text-white mb-4 text-center">Set Password</h2>
+      <div className="transition-all duration-300">
+        <div className="text-center mb-6">
+          <h2 className="text-2xl font-bold text-white mb-2">Set Password</h2>
+          <p className="text-white/70 text-sm">Create a secure password for your account</p>
+        </div>
         
-        <div className="relative mb-4">
-          <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10" />
-          <input
-            type={passwordVisible ? "text" : "password"}
-            placeholder="Password"
-            id="password"
-            className="w-full px-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#2D8C72] text-black bg-white"
-            required
-            value={formData.password}
-            onChange={handleInputChange}
-          />
-          <button
-            type="button"
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 focus:outline-none z-10"
-            onClick={() => togglePasswordVisibility("password")}
-          >
-            {passwordVisible ? <FaEyeSlash /> : <FaEye />}
-          </button>
-          {errors.password && <p className="text-red-500 text-sm mt-1">{errors.password}</p>}
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <label className="block text-white/90 text-sm font-medium">Password *</label>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#2D8C72] to-[#246d59] rounded-lg blur opacity-0 group-focus-within:opacity-20 transition-opacity duration-300"></div>
+              <div className="relative flex items-center">
+                <FaLock className="absolute left-4 text-white/60 group-focus-within:text-[#2D8C72] transition-colors duration-300" />
+                <input
+                  type={passwordVisible ? "text" : "password"}
+                  placeholder="Create a strong password"
+                  id="password"
+                  className="w-full pl-12 pr-12 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:border-[#2D8C72] focus:bg-white/15 transition-all duration-300"
+                  required
+                  value={formData.password}
+                  onChange={handleInputChange}
+                />
+                <button
+                  type="button"
+                  className="absolute right-4 text-white/60 hover:text-white transition-colors duration-300 focus:outline-none"
+                  onClick={() => togglePasswordVisibility("password")}
+                >
+                  {passwordVisible ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+            </div>
+            {errors.password && <p className="text-red-300 text-sm mt-1">{errors.password}</p>}
+          </div>
+
+          <div className="space-y-2">
+            <label className="block text-white/90 text-sm font-medium">Confirm Password *</label>
+            <div className="relative group">
+              <div className="absolute inset-0 bg-gradient-to-r from-[#2D8C72] to-[#246d59] rounded-lg blur opacity-0 group-focus-within:opacity-20 transition-opacity duration-300"></div>
+              <div className="relative flex items-center">
+                <FaLock className="absolute left-4 text-white/60 group-focus-within:text-[#2D8C72] transition-colors duration-300" />
+                <input
+                  type={confirmPasswordVisible ? "text" : "password"}
+                  placeholder="Confirm your password"
+                  id="confirmPassword"
+                  className="w-full pl-12 pr-12 py-4 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:border-[#2D8C72] focus:bg-white/15 transition-all duration-300"
+                  required
+                  value={formData.confirmPassword}
+                  onChange={handleInputChange}
+                />
+                <button
+                  type="button"
+                  className="absolute right-4 text-white/60 hover:text-white transition-colors duration-300 focus:outline-none"
+                  onClick={() => togglePasswordVisibility("confirmPassword")}
+                >
+                  {confirmPasswordVisible ? <FaEyeSlash /> : <FaEye />}
+                </button>
+              </div>
+            </div>
+            {errors.confirmPassword && <p className="text-red-300 text-sm mt-1">{errors.confirmPassword}</p>}
+          </div>
+
+          <div className="flex items-center mt-6">
+            <label className="flex items-center cursor-pointer group">
+              <div className="relative">
+                <input 
+                  type="checkbox" 
+                  className="sr-only peer"
+                />
+                <div className="w-5 h-5 border-2 border-white/40 rounded peer-checked:bg-[#2D8C72] peer-checked:border-[#2D8C72] transition-all duration-300 flex items-center justify-center">
+                  <svg className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100 transition-opacity duration-300" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                  </svg>
+                </div>
+              </div>
+              <span className="ml-3 text-white/80 text-sm group-hover:text-white transition-colors duration-300">
+                I agree to the terms and conditions
+              </span>
+            </label>
+          </div>
         </div>
 
-        <div className="relative mb-4">
-          <FaLock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500 z-10" />
-          <input
-            type={confirmPasswordVisible ? "text" : "password"}
-            placeholder="Confirm Password"
-            id="confirmPassword"
-            className="w-full px-10 py-3 border border-gray-300 rounded-lg focus:outline-none focus:border-[#2D8C72] text-black bg-white"
-            required
-            value={formData.confirmPassword}
-            onChange={handleInputChange}
-          />
-          <button
-            type="button"
-            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 focus:outline-none z-10"
-            onClick={() => togglePasswordVisibility("confirmPassword")}
-          >
-            {confirmPasswordVisible ? <FaEyeSlash /> : <FaEye />}
-          </button>
-          {errors.confirmPassword && <p className="text-red-500 text-sm mt-1">{errors.confirmPassword}</p>}
-        </div>
-
-        <div className="flex items-center mb-6">
-          <input
-            type="checkbox"
-            id="rememberMe"
-            className="form-checkbox h-5 w-5 text-blue-600 rounded focus:ring-blue-500 border-none"
-          />
-          <label htmlFor="rememberMe" className="ml-2 text-white hover:text-gray-400 cursor-pointer">
-            Remember me
-          </label>
-        </div>
-
-        {error && <div className="mb-4 text-red-500 text-center">{error}</div>}
+        {error && (
+          <div className="mt-6 p-4 bg-red-500/20 border border-red-500/30 rounded-lg">
+            <p className="text-red-200 text-sm text-center">{error}</p>
+          </div>
+        )}
         
-        <div className="flex justify-between">
+        <div className="flex justify-between mt-8">
           <button
             type="button"
-            className="bg-gray-400 text-white font-medium p-3 rounded-lg hover:bg-gray-500 transition duration-300 flex items-center"
             onClick={prevStep}
+            className="bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold px-8 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center group"
           >
-            <FaArrowLeft />
+            <FaArrowLeft className="mr-2 group-hover:-translate-x-1 transition-transform duration-300" />
+            <span>Previous</span>
           </button>
           <button
             type="submit"
-            className="bg-[#2D8C72] text-white font-medium py-2 px-6 rounded-lg hover:bg-[#246d59] transition duration-300"
-            disabled={loading}
+            disabled={loading || isSubmitting}
+            className="bg-gradient-to-r from-[#2D8C72] to-[#246d59] text-white font-semibold px-8 py-4 rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center group"
           >
-            {loading ? "Signing up..." : "Signup"}
+            {loading || isSubmitting ? (
+              <>
+                <FaSpinner className="w-5 h-5 mr-2 animate-spin" />
+                Creating Account...
+              </>
+            ) : (
+              <>
+                <span>Create Account</span>
+                <FaCheck className="ml-2" />
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -366,148 +464,86 @@ function Signup() {
 
   return (
     <div
-      className="bg-cover bg-center bg-no-repeat bg-fixed min-h-screen"
+      className="bg-cover bg-center bg-no-repeat bg-fixed min-h-screen relative overflow-hidden"
       style={{
-        backgroundImage: `linear-gradient(rgba(18, 121, 155, 0.89), rgba(18, 101, 180, 0.89)), url(${a})`,
+        backgroundImage: `linear-gradient(135deg, rgba(18, 121, 155, 0.95), rgba(18, 101, 180, 0.95)), url(${a})`,
       }}
     >
-      <div className="absolute inset-0 bg-black opacity-50"></div>
+      {/* Animated background elements */}
+      <div className="absolute inset-0">
+        <div className="absolute top-20 left-20 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-20 w-96 h-96 bg-white/5 rounded-full blur-3xl animate-pulse delay-1000"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-white/5 rounded-full blur-2xl animate-pulse delay-500"></div>
+      </div>
+
       <div className="relative z-10 flex items-center justify-center min-h-screen py-10 px-4">
-        <div className="max-w-lg w-full">
-          <div className="flex items-center justify-center mb-4">
-            <img src={b} alt="Logo" className="w-24 h-auto" />
+        <div className="w-full max-w-lg">
+          {/* Logo and Header */}
+          <div className="text-center mb-8">
+            <div className="flex justify-center mb-6">
+              <div className="relative">
+                <img src={b} alt="Logo" className="w-20 h-auto drop-shadow-lg" />
+                <div className="absolute inset-0 bg-white/20 rounded-full blur-xl"></div>
+              </div>
+            </div>
+            <h1 className="text-3xl font-bold text-white mb-2 tracking-tight">
+              Join as {formData.identity || "User"}
+            </h1>
+            <p className="text-white/80 text-sm">
+              Create your account in just a few steps
+            </p>
           </div>
-          <h1 className="text-2xl font-bold text-white text-center mb-2">Signup as {formData.identity}</h1>
           
+          {/* Step Indicator */}
           {renderStepIndicator()}
           
-          <form className="w-full relative overflow-hidden" onSubmit={handleSubmit}>
-            {currentStep === 1 && renderNameStep()}
-            {currentStep === 2 && renderDetailsStep()}
-            {currentStep === 3 && renderPasswordStep()}
-          </form>
+          {/* Main Form Card */}
+          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
+            <form onSubmit={handleSubmit} className="w-full relative overflow-hidden">
+              {currentStep === 1 && renderNameStep()}
+              {currentStep === 2 && renderDetailsStep()}
+              {currentStep === 3 && renderPasswordStep()}
+            </form>
 
-          {currentStep === 3 && (
-            <>
-              <div className="flex items-center my-6 animate-fade-in">
-                <div className="flex-grow border-t border-gray-500"></div>
-                <span className="mx-4 text-white text-sm">or continue with</span>
-                <div className="flex-grow border-t border-gray-500"></div>
-              </div>
+            {/* Google Sign Up - Only show on last step */}
+            {currentStep === 3 && (
+              <>
+                <div className="flex items-center my-8">
+                  <div className="flex-1 border-t border-white/20"></div>
+                  <span className="px-4 text-white/60 text-sm">or continue with</span>
+                  <div className="flex-1 border-t border-white/20"></div>
+                </div>
 
-              <div className="rounded-lg shadow-lg p-4 animate-fade-in">
                 <button
-                  className="flex items-center w-full justify-center bg-[#2D8C72] text-white py-3 px-4 rounded-lg hover:bg-[#246d59] transition duration-300"
+                  className="w-full bg-white/10 hover:bg-white/15 border border-white/20 text-white font-medium py-4 rounded-lg transition-all duration-300 transform hover:scale-[1.02] flex items-center justify-center group"
                   onClick={handleGoogleAuth}
                   disabled={googleLoading}
                 >
-                  <FcGoogle className="w-6 h-6 mr-2" /> Sign up with Google
+                  <FcGoogle className="w-5 h-5 mr-3" />
+                  <span className="group-hover:text-white/90 transition-colors duration-300">
+                    {googleLoading ? "Signing up..." : "Sign up with Google"}
+                  </span>
                 </button>
-              </div>
-            </>
-          )}
+              </>
+            )}
 
-          <p className="text-center mt-6 text-white">
-            Already have an account?{" "}
-            <Link to="/login" className="text-green-300 hover:text-blue-200 hover:underline font-medium">
-              Login
-            </Link>
-          </p>
+            {/* Login Link */}
+            <div className="mt-8 text-center">
+              <p className="text-white/80 text-sm">
+                Already have an account?{" "}
+                <Link 
+                  to="/login" 
+                  className="text-[#2D8C72] hover:text-[#246d59] font-semibold transition-colors duration-300 hover:underline"
+                >
+                  Sign in
+                </Link>
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   );
-}
-
-// CSS for animations
-const styles = `
-@keyframes slideOutToLeft {
-  0% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-}
-
-@keyframes slideOutToRight {
-  0% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  100% {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-}
-
-@keyframes slideInFromRight {
-  0% {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slideInFromLeft {
-  0% {
-    transform: translateX(-100%);
-    opacity: 0;
-  }
-  100% {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.slide-in.next {
-  animation: slideInFromRight 0.3s forwards;
-}
-
-.slide-in.prev {
-  animation: slideInFromLeft 0.3s forwards;
-}
-
-.slide-out.next {
-  animation: slideOutToLeft 0.3s forwards;
-}
-
-.slide-out.prev {
-  animation: slideOutToRight 0.3s forwards;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-.animate-fade-in {
-  animation: fadeIn 0.5s ease-in;
-}
-
-/* Add some smooth transitioning to all elements */
-.transition-all {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 300ms;
-}
-`;
-
-// Add the styles to the document
-if (typeof document !== 'undefined') {
-  const styleSheet = document.createElement("style");
-  styleSheet.type = "text/css";
-  styleSheet.innerText = styles;
-  document.head.appendChild(styleSheet);
 }
 
 export default Signup;

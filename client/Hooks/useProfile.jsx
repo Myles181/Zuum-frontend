@@ -3,6 +3,9 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL; // Ensure this is set in .env
 
+// Configure axios to use cookies like AuthContext
+axios.defaults.withCredentials = true;
+
 // Custom hook for fetching and updating user profile
 const useProfile = () => {
   // State variables for fetching profile
@@ -19,14 +22,8 @@ const useProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const token = localStorage.getItem("authToken");
-        console.log("Token:", token); // Debugging: Log the token
-
-        const response = await axios.get(`${API_URL}/user/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        // Use cookies instead of localStorage token
+        const response = await axios.get(`${API_URL}/user/profile`);
 
         // Check if the response status is OK (200)
         if (response.status === 200) {
@@ -70,6 +67,20 @@ const useProfile = () => {
     fetchProfile(); // Call the fetch function
   }, []); // Empty dependency array ensures this runs once on component mount
 
+  // Function to refresh profile (for compatibility with UsePreLoader)
+  const refreshProfile = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/user/profile`);
+      if (response.status === 200) {
+        setProfile(response.data);
+        return { profile: response.data };
+      }
+    } catch (err) {
+      console.error("Error refreshing profile:", err);
+      throw err;
+    }
+  };
+
   // Function to update profile
   const updateProfile = async (formData) => {
     setUpdateLoading(true); // Start loading
@@ -77,12 +88,9 @@ const useProfile = () => {
     setUpdateSuccess(false); // Reset success state
 
     try {
-      const token = localStorage.getItem("authToken");
-
-      // Make the PUT request to the API endpoint
+      // Use cookies instead of localStorage token
       const response = await axios.put(`${API_URL}/user/profile`, formData, {
         headers: {
-          Authorization: `Bearer ${token}`,
           "Content-Type": "multipart/form-data", // Ensure proper content type for file uploads
         },
       });
@@ -136,6 +144,7 @@ const useProfile = () => {
     updateLoading, // Loading state for updating profile
     updateError, // Error state for updating profile
     updateSuccess, // Success state for updating profile
+    refreshProfile, // Function to refresh profile
   };
 };
 
@@ -155,12 +164,8 @@ export const useUserProfile = (userId = null) => {
       setLoading(true);
       setError(null);
       try {
-        const token = localStorage.getItem("authToken");
-        const response = await axios.get(`${API_URL}/user/profile/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        // Use cookies instead of localStorage token
+        const response = await axios.get(`${API_URL}/user/profile/${userId}`);
 
         setProfile(response.data);
       } catch (err) {
@@ -206,19 +211,13 @@ export const useFollowUser = () => {
     setMessage(null);
 
     try {
-      const token = localStorage.getItem("authToken"); // Retrieve the authentication token
-
-      if (!token) {
-        throw new Error("Authentication token not found. Please log in.");
-      }
-
+      // Use cookies instead of localStorage token
       // Make the POST request to the API endpoint
       const response = await axios.post(
         `${API_URL}/user/follow`,
         { profileId, follow },
         {
           headers: {
-            Authorization: `Bearer ${token}`, // Include the auth token
             "Content-Type": "application/json",
           },
         }

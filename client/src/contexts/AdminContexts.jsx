@@ -11,28 +11,31 @@ const AdminContext = createContext();
 export const AdminProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Changed to false initially
   const [error, setError] = useState(null);
 
   const checkAdminAuth = async () => {
+    setLoading(true);
     try {
       const response = await axios.get(`${API_URL}/admin/users`, {
         withCredentials: true,
         params: { limit: 1 }
       });
       setIsAuthenticated(true);
+      return true;
     } catch (err) {
       setIsAuthenticated(false);
       setAdmin(null);
+      return false;
     } finally {
       setLoading(false);
     }
-    return isAuthenticated;
   };
 
-  useEffect(() => {
-    checkAdminAuth();
-  }, []);
+  // Remove the automatic auth check on mount
+  // useEffect(() => {
+  //   checkAdminAuth();
+  // }, []);
 
   const login = async (credentials) => {
     setLoading(true);

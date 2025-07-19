@@ -1,21 +1,11 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from './AuthContexts';
 import Spinner from '../components/Spinner';
 
 const ProtectedRoute = () => {
-  const { isAuthenticated, loading, profile, checkAuth } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   const location = useLocation();
-
-  useEffect(() => {
-    // Additional verification on protected route mount
-    const verifyAuth = async () => {
-      if (!loading) {
-        await checkAuth();
-      }
-    };
-    verifyAuth();
-  }, [checkAuth, loading]);
 
   if (loading) {
     return (

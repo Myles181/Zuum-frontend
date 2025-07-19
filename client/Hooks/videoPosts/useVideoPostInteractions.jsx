@@ -20,8 +20,7 @@ export const useCreateVideoComment = () => {
     setCommentData(null);
 
     try {
-      const token = localStorage.getItem('authToken');
-      // Cast postId to string per API schema requirements
+      // Use cookies for authentication (matches app's auth pattern)
       const payload = {
         post_id: String(postId),
         comment: trimmedComment,
@@ -34,8 +33,8 @@ export const useCreateVideoComment = () => {
         `${API_URL}/video/comment/create`,
         payload,
         {
+          withCredentials: true, // Use cookies for authentication
           headers: {
-            Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
           },
         }
@@ -86,14 +85,6 @@ export const useCreateVideoComment = () => {
   };
 };
 
-
-
-
-
-
-
-
-
 export const useVideoReaction = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -105,11 +96,7 @@ export const useVideoReaction = () => {
     setSuccess(false);
 
     try {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        throw new Error("Authentication required");
-      }
-
+      // Use cookies for authentication (matches app's auth pattern)
       const payload = {
         post_id: String(postId),
         like: Boolean(like),
@@ -121,8 +108,8 @@ export const useVideoReaction = () => {
         `${API_URL}/video/react`,
         payload,
         {
+          withCredentials: true, // Use cookies for authentication
           headers: {
-            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         }

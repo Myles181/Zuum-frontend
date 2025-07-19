@@ -2,11 +2,17 @@ import React, { useState, useRef, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { Heart, Play, Pause, MessageCircle } from "lucide-react";
 import { useFetchBeats } from "../../../../Hooks/beats/useBeats";
+import useProfile from "../../../../Hooks/useProfile";
 import Navbar from "../../profile/NavBar";
 import BottomNav from "../BottomNav";
+import a from "../../../assets/icons/Mask group1.svg";
 
 export default function UserBeatsPage() {
   const { userId } = useParams();
+  const { profile: authProfile } = useProfile();
+
+  // Debug: Log the profile structure
+  console.log("Auth Profile:", authProfile);
 
   const {
     loading: beatsLoading,
@@ -33,16 +39,16 @@ export default function UserBeatsPage() {
   }
 
   return (
-    <div className="max-w-md mx-auto min-h-screen bg-gray-50">
-      <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">
+    <div className="w-full max-w-md mx-auto min-h-screen bg-gray-50">
+      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6 text-center text-gray-800 px-4">
         My Beats
       </h1>
 
       {userBeats.length === 0 ? (
-        <p className="text-center text-gray-600">You have no beats yet.</p>
+        <p className="text-center text-gray-600 px-4">You have no beats yet.</p>
       ) : (
         // Full-page scroll-snap container
-        <div className="overflow-y-auto snap-y snap-mandatory h-screen">
+        <div className="overflow-y-auto snap-y snap-mandatory h-screen w-full">
           {userBeats.map((beat) => (
             <BeatItem key={beat.id} beat={beat} />
           ))}
@@ -57,6 +63,11 @@ function BeatItem({ beat }) {
   const [timeLeft, setTimeLeft] = useState(10);
   const audioRef = useRef(null);
   const timerRef = useRef(null);
+  const { profile: authProfile } = useProfile();
+
+  // Debug: Log the profile structure
+  console.log("BeatItem Auth Profile:", authProfile);
+  console.log("Available properties:", Object.keys(authProfile || {}));
 
   const formattedDate = new Date(beat.created_at).toLocaleDateString("en-US", {
     year: "numeric",
@@ -92,7 +103,7 @@ function BeatItem({ beat }) {
 
   return (
     // Full-page snap boundary with vertical margin
-    <div className="snap-start my-13 h-screen overflow-hidden shadow-lg bg-white ">
+    <div className="snap-start h-screen overflow-hidden shadow-lg bg-white w-full">
       <Navbar name="Beats" />
       <audio
         ref={audioRef}
@@ -115,23 +126,23 @@ function BeatItem({ beat }) {
         />
         <div className="absolute inset-0 bg-black/70" />
 
-        <div className="relative z-10 p-6 flex flex-col h-full">
+        <div className="relative z-10 p-4 sm:p-6 flex flex-col h-full">
           <div className="flex justify-between items-start">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 sm:space-x-3">
               <img
-                src={beat.image}
+                src={authProfile?.image || authProfile?.profile_picture || a}
                 alt="Profile"
-                className="w-10 h-10 rounded-full object-cover border-2 border-white border-opacity-30"
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover border-2 border-white border-opacity-30"
               />
               <div>
-                <h4 className="font-medium text-white drop-shadow-md">{beat.username}</h4>
+                <h4 className="font-medium text-white drop-shadow-md text-sm sm:text-base">{beat.username}</h4>
                 <p className="text-xs text-white text-opacity-80 drop-shadow-md">{formattedDate}</p>
               </div>
             </div>
           </div>
 
-          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-6 my-8">
-            <div className="w-48 h-48 mx-auto rounded-xl overflow-hidden shadow-lg border-2 border-white/30">
+          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-4 sm:space-y-6 my-4 sm:my-8">
+            <div className="w-32 h-32 sm:w-48 sm:h-48 mx-auto rounded-xl overflow-hidden shadow-lg border-2 border-white/30">
               <img
                 src={beat.cover_photo}
                 alt="Music Cover"
@@ -139,56 +150,55 @@ function BeatItem({ beat }) {
               />
             </div>
 
-            <div className="text-white drop-shadow-md">
-              <h2 className="text-2xl font-bold mb-1">{beat.caption}</h2>
-              <p className="text-white/80">{beat.description}</p>
+            <div className="text-white drop-shadow-md px-2">
+              <h2 className="text-lg sm:text-2xl font-bold mb-1">{beat.caption}</h2>
+              <p className="text-white/80 text-sm sm:text-base">{beat.description}</p>
             </div>
 
             <button
               onClick={togglePlayPause}
-              className="bg-[#2D8C72] px-6 py-2 rounded-full flex items-center space-x-2 hover:bg-opacity-90 transition shadow-lg"
+              className="bg-[#2D8C72] px-4 sm:px-6 py-2 sm:py-2 rounded-full flex items-center space-x-2 hover:bg-opacity-90 transition shadow-lg text-sm sm:text-base"
             >
               {isPlaying ? (
                 <>
-                  <Pause className="text-white" size={18} />
+                  <Pause className="text-white" size={16} />
                   <span className="text-white">Pause ({timeLeft}s)</span>
                 </>
               ) : (
                 <>
-                  <Play className="text-white" size={18} />
+                  <Play className="text-white" size={16} />
                   <span className="text-white">Play 10s Preview</span>
                 </>
               )}
             </button>
 
-            <div className="grid grid-cols-3 gap-4 w-full">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 w-full px-2">
               {[
                 { label: "Price", value: `₦${beat.amount}` },
-                { label: "Supply", value: beat.total_supply },
                 { label: "Buyers", value: beat.total_buyers },
               ].map((item) => (
                 <div
                   key={item.label}
-                  className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg p-3 text-center shadow-md"
+                  className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-lg p-2 sm:p-3 text-center shadow-md"
                 >
                   <p className="text-white/80 text-xs">{item.label}</p>
-                  <p className="text-white font-bold drop-shadow-sm">{item.value}</p>
+                  <p className="text-white font-bold drop-shadow-sm text-sm sm:text-base">{item.value}</p>
                 </div>
               ))}
             </div>
           </div>
 
-          <div className="flex justify-between text-white text-opacity-80 text-sm">
+          <div className="flex justify-between text-white text-opacity-80 text-sm mb-16 sm:mb-20 px-2">
             <div className="flex items-center space-x-2 drop-shadow-md">
-              <Heart size={18} />
-              <span>{beat.likes}</span>
+              <Heart size={16} />
+              <span className="text-xs sm:text-sm">{beat.likes}</span>
             </div>
-            <button className="flex items-center mb-23 px-4 py-2 rounded-full bg-[#2D8C72] text-white text-sm shadow-md">
+            <button className="flex items-center px-4 sm:px-6 py-2 sm:py-3 rounded-full bg-[#2D8C72] text-white text-sm sm:text-base font-semibold shadow-lg hover:bg-[#256b58] hover:scale-105 transform transition-all duration-200 animate-pulse">
               View Beat
             </button>
             <div className="flex items-center space-x-2 drop-shadow-md">
-              <MessageCircle size={18} />
-              <span>{beat.comments.length}</span>
+              <MessageCircle size={16} />
+              <span className="text-xs sm:text-sm">{beat.comments.length}</span>
             </div>
           </div>
         </div>

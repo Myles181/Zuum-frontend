@@ -14,7 +14,6 @@ const UploadBeats = () => {
   const [formData, setFormData] = useState({
     caption: '',
     description: '',
-    total_supply: 100,
     amount: 999
   });
 
@@ -34,7 +33,7 @@ const UploadBeats = () => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
-      [name]: name === 'total_supply' ? parseInt(value) : name === 'amount' ? parseFloat(value) : value
+      [name]: name === 'amount' ? parseFloat(value) : value
     });
   };
   
@@ -135,7 +134,6 @@ const UploadBeats = () => {
       const submitData = new FormData();
       submitData.append('caption', formData.caption);
       submitData.append('description', formData.description);
-      submitData.append('total_supply', formData.total_supply);
       submitData.append('amount', formData.amount);
       submitData.append('cover_photo', coverPhoto);
       submitData.append('audio_upload', audioFile);
@@ -154,7 +152,6 @@ const UploadBeats = () => {
       setFormData({
         caption: '',
         description: '',
-        total_supply: 100,
         amount: 999
       });
       setCoverPhoto(null);
@@ -230,31 +227,11 @@ const UploadBeats = () => {
             )}
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Total Supply
-              </label>
-              <input
-                type="number"
-                name="total_supply"
-                value={formData.total_supply}
-                onChange={handleInputChange}
-                min="1"
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
-                style={{ 
-                  boxShadow: `0 0 0 1px transparent`,
-                  outline: 'none',
-                  '--tw-ring-color': tealColor,
-                }}
-              />
-            </div>
-            
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Price
-              </label>
-              <div className="relative">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Price
+            </label>
+            <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <span className="text-gray-500">₦</span>
                 </div>
@@ -274,7 +251,6 @@ const UploadBeats = () => {
                 />
               </div>
             </div>
-          </div>
           
           <div>
             <p className="block text-sm font-medium text-gray-700 mb-2">Cover Photo</p>

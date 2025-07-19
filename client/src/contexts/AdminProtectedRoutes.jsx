@@ -7,13 +7,16 @@ const AdminProtectedRoute = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const verifyAuth = async () => {
-      const isAuth = await checkAdminAuth();
-      if (!isAuth && !loading) {
-        navigate('/adlog');
-      }
-    };
-    verifyAuth();
+    // Only check admin auth if not already authenticated and not loading
+    if (!isAuthenticated && !loading) {
+      const verifyAuth = async () => {
+        const isAuth = await checkAdminAuth();
+        if (!isAuth) {
+          navigate('/adlog');
+        }
+      };
+      verifyAuth();
+    }
   }, [isAuthenticated, loading, navigate, checkAdminAuth]);
 
   if (loading) {

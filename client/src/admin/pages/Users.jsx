@@ -7,7 +7,9 @@ import {
   ChevronRight,
   Check,
   Search,
-  AlertCircle
+  AlertCircle,
+  Menu,
+  Filter
 } from 'lucide-react';
 import AdminSidebar from '../components/Sidebar';
 import { useAdmins } from '../hooks/useUsers';
@@ -27,8 +29,10 @@ const AdminUsersPage = () => {
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [userToDeactivate, setUserToDeactivate] = useState(null);
   
-  // Search state
+  // Search and filter states
   const [searchTerm, setSearchTerm] = useState('');
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [statusFilter, setStatusFilter] = useState('all'); // 'all', 'active', 'deactivated'
   
   // Use our custom hook for API operations
   const { 
@@ -44,8 +48,10 @@ const AdminUsersPage = () => {
 
   // Fetch users on page change
   useEffect(() => {
-    fetchUsers(currentPage);
-  }, [currentPage]);
+    if (currentPage > 1) {
+      fetchUsers(currentPage);
+    }
+  }, [currentPage, fetchUsers]);
 
   // Handle view user details
   const handleViewUser = (user) => {
@@ -81,16 +87,22 @@ const AdminUsersPage = () => {
     }
   };
   
-  // Filter users based on search term
+  // Filter users based on search term and status filter
   const filteredUsers = users.filter(user => {
     const searchLower = searchTerm.toLowerCase();
-    return (
+    const matchesSearch = (
       user.username?.toLowerCase().includes(searchLower) ||
       user.email?.toLowerCase().includes(searchLower) ||
       user.firstname?.toLowerCase().includes(searchLower) ||
       user.lastname?.toLowerCase().includes(searchLower) ||
       user.id?.toString().includes(searchLower)
     );
+    
+    const matchesStatus = statusFilter === 'all' || 
+      (statusFilter === 'active' && !user.deactivated) ||
+      (statusFilter === 'deactivated' && user.deactivated);
+    
+    return matchesSearch && matchesStatus;
   });
 
   const handlePageChange = (pageId) => {
@@ -113,25 +125,67 @@ const AdminUsersPage = () => {
       <div className={`flex-1 flex flex-col transition-all duration-300 ${
         isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'
       }`}>
+        {/* Mobile Header */}
+        <div className="lg:hidden bg-white shadow-sm border-b border-gray-200 px-4 py-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+              >
+                <Menu size={20} />
+              </button>
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900">User Management</h1>
+                <p className="text-xs text-gray-500">Manage user accounts</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowMobileSearch(!showMobileSearch)}
+              className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+            >
+              <Search size={20} />
+            </button>
+          </div>
+          
+          {/* Mobile Search Bar */}
+          {showMobileSearch && (
+            <div className="mt-3">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Search className="h-4 w-4 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg text-sm bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63]"
+                  placeholder="Search users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+        </div>
+
         {/* Content Area */}
-        <div className="flex-1 overflow-auto">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-16 lg:pt-8">
-            {/* Header section */}
-            <div className="mb-8">
+        <div className="flex-1 w-auto">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8 pt-8">
+            {/* Desktop Header */}
+            <div className="hidden lg:block mb-8">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                 <div className="mb-4 md:mb-0">
                   <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
                   <p className="mt-2 text-gray-600">Manage and monitor user accounts across the platform</p>
                 </div>
                 
-                {/* Search bar */}
+                {/* Desktop Search bar */}
                 <div className="relative w-full md:w-64 lg:w-80">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Search className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
                     type="text"
-                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] sm:text-sm transition duration-150 ease-in-out"
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] sm:text-sm transition duration-150"
                     placeholder="Search users..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -140,8 +194,24 @@ const AdminUsersPage = () => {
               </div>
             </div>
 
+            {/* Mobile Filter */}
+            <div className="lg:hidden mb-4">
+              <div className="flex items-center space-x-2">
+                <Filter size={16} className="text-gray-500" />
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="flex-1 py-2 border border-gray-300 rounded-lg text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63]"
+                >
+                  <option value="all">All Users</option>
+                  <option value="active">Active Only</option>
+                  <option value="deactivated">Deactivated Only</option>
+                </select>
+              </div>
+            </div>
+
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6 mb-8">
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <div className="flex items-center">
                   <div className="flex-shrink-0">
@@ -229,7 +299,8 @@ const AdminUsersPage = () => {
             
             {/* Main content */}
             <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
-              <div className="overflow-x-auto">
+              {/* Desktop Table */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="min-w-full divide-y divide-gray-200">
                   <thead className="bg-gray-50">
                     <tr>
@@ -327,11 +398,83 @@ const AdminUsersPage = () => {
                   </tbody>
                 </table>
               </div>
+
+              {/* Mobile Cards */}
+              <div className="lg:hidden">
+                {isLoading ? (
+                  <div className="p-6 text-center">
+                    <div className="flex justify-center items-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2d7a63]"></div>
+                      <span className="ml-3 text-gray-600">Loading users...</span>
+                    </div>
+                  </div>
+                ) : filteredUsers.length > 0 ? (
+                  <div className="divide-y divide-gray-200">
+                    {filteredUsers.map((user) => (
+                      <div 
+                        key={user.id} 
+                        className={`p-4 ${user.deactivated ? "bg-red-50 hover:bg-gray-50" : ""} transition duration-150`}
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center">
+                            <div className="flex-shrink-0 h-10 w-10 bg-[#2d7a63] bg-opacity-10 rounded-full flex items-center justify-center">
+                              <User className="h-5 w-5 text-[#2d7a63]" />
+                            </div>
+                            <div className="ml-3">
+                              <div className="text-sm font-medium text-gray-900">{user.username}</div>
+                              <div className="text-xs text-gray-500">ID: {user.id}</div>
+                            </div>
+                          </div>
+                          <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                            ${user.deactivated 
+                              ? 'bg-red-100 text-red-800' 
+                              : 'bg-green-100 text-green-800'}`}
+                          >
+                            {user.deactivated ? 'Deactivated' : 'Active'}
+                          </span>
+                        </div>
+                        
+                        <div className="space-y-1 mb-3">
+                          <div className="text-xs text-gray-500">
+                            <span className="font-medium">Email:</span> {user.email}
+                          </div>
+                          <div className="text-xs text-gray-500">
+                            <span className="font-medium">Name:</span> {user.firstname} {user.lastname}
+                          </div>
+                        </div>
+                        
+                        <div className="flex space-x-2">
+                          <button
+                            onClick={() => handleViewUser(user)}
+                            className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-[#2d7a63] text-sm font-medium rounded-md text-[#2d7a63] bg-white hover:bg-[#245a4f] hover:text-white transition duration-150"
+                          >
+                            <Eye size={14} className="mr-1" /> 
+                            View
+                          </button>
+                          {!user.deactivated && (
+                            <button
+                              onClick={() => handleDeactivateClick(user)}
+                              className="flex-1 inline-flex items-center justify-center px-3 py-2 border border-red-600 text-sm font-medium rounded-md text-red-600 bg-white hover:bg-red-600 hover:text-white transition duration-150"
+                            >
+                              <X size={14} className="mr-1" /> 
+                              Deactivate
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-6 text-center text-sm text-gray-500">
+                    {searchTerm ? 'No users found matching your search' : 'No users found'}
+                  </div>
+                )}
+              </div>
               
               {/* Pagination controls */}
               {users.length > 0 && !searchTerm && (
                 <div className="px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200">
-                  <div className="text-sm text-gray-700 mb-4 sm:mb-0">
+                  <div className="text-sm text-gray-700 mb-4 sm:mb-0 text-center sm:text-left">
                     Showing page <span className="font-medium">{pagination.currentPage}</span> of{' '}
                     <span className="font-medium">{pagination.totalPages}</span> (Total:{' '}
                     <span className="font-medium">{pagination.total}</span> users)
@@ -340,23 +483,23 @@ const AdminUsersPage = () => {
                     <button
                       onClick={goToPrevPage}
                       disabled={pagination.currentPage === 1}
-                      className={`inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md 
+                      className={`inline-flex items-center px-3 lg:px-4 py-2 border border-gray-300 text-sm font-medium rounded-md 
                         ${pagination.currentPage === 1 
                           ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                           : 'bg-white text-gray-700 hover:bg-gray-50'}`}
                     >
                       <ChevronLeft size={16} className="mr-1" />
-                      Previous
+                      <span className="hidden sm:inline">Previous</span>
                     </button>
                     <button
                       onClick={goToNextPage}
                       disabled={pagination.currentPage === pagination.totalPages}
-                      className={`inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md 
+                      className={`inline-flex items-center px-3 lg:px-4 py-2 border border-gray-300 text-sm font-medium rounded-md 
                         ${pagination.currentPage === pagination.totalPages 
                           ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
                           : 'bg-white text-gray-700 hover:bg-gray-50'}`}
                     >
-                      Next
+                      <span className="hidden sm:inline">Next</span>
                       <ChevronRight size={16} className="ml-1" />
                     </button>
                   </div>
@@ -371,8 +514,8 @@ const AdminUsersPage = () => {
       {isViewModalOpen && selectedUser && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">User Details</h2>
+            <div className="flex justify-between items-center p-4 lg:p-6 border-b border-gray-200">
+              <h2 className="text-lg lg:text-xl font-bold text-gray-900">User Details</h2>
               <button 
                 onClick={() => setIsViewModalOpen(false)}
                 className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2d7a63] p-1"
@@ -381,21 +524,21 @@ const AdminUsersPage = () => {
               </button>
             </div>
             
-            <div className="p-6 space-y-6">
-              <div className="flex flex-col items-center mb-6">
-                <div className="h-20 w-20 bg-[#2d7a63] bg-opacity-10 rounded-full flex items-center justify-center">
-                  <User className="h-10 w-10 text-[#2d7a63]" />
+            <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
+              <div className="flex flex-col items-center mb-4 lg:mb-6">
+                <div className="h-16 w-16 lg:h-20 lg:w-20 bg-[#2d7a63] bg-opacity-10 rounded-full flex items-center justify-center">
+                  <User className="h-8 w-8 lg:h-10 lg:w-10 text-[#2d7a63]" />
                 </div>
-                <h3 className="mt-4 text-lg font-medium text-gray-900">{selectedUser.username}</h3>
-                <p className={`mt-1 text-sm ${selectedUser.deactivated ? "text-red-600" : "text-green-600"}`}>
+                <h3 className="mt-3 lg:mt-4 text-base lg:text-lg font-medium text-gray-900">{selectedUser.username}</h3>
+                <p className={`mt-1 text-xs lg:text-sm ${selectedUser.deactivated ? "text-red-600" : "text-green-600"}`}>
                   {selectedUser.deactivated ? 'Deactivated' : 'Active'}
                 </p>
               </div>
               
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+              <div className="grid grid-cols-1 gap-4 lg:gap-6 sm:grid-cols-2">
                 <div>
                   <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Email</h4>
-                  <p className="mt-1 text-sm text-gray-900">{selectedUser.email}</p>
+                  <p className="mt-1 text-sm text-gray-900 break-all">{selectedUser.email}</p>
                 </div>
                 
                 <div>
@@ -427,10 +570,10 @@ const AdminUsersPage = () => {
               </div>
             </div>
             
-            <div className="p-6 border-t border-gray-200 flex justify-end">
+            <div className="p-4 lg:p-6 border-t border-gray-200 flex justify-end">
               <button
                 onClick={() => setIsViewModalOpen(false)}
-                className="px-4 py-2 bg-[#2d7a63] text-white rounded-md hover:bg-[#245a4f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2d7a63] transition duration-150"
+                className="w-full sm:w-auto px-4 py-2 bg-[#2d7a63] text-white rounded-md hover:bg-[#245a4f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2d7a63] transition duration-150"
               >
                 Close
               </button>
@@ -443,8 +586,8 @@ const AdminUsersPage = () => {
       {isConfirmModalOpen && userToDeactivate && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
-            <div className="flex justify-between items-center p-6 border-b border-gray-200">
-              <h2 className="text-xl font-bold text-gray-900">Confirm Deactivation</h2>
+            <div className="flex justify-between items-center p-4 lg:p-6 border-b border-gray-200">
+              <h2 className="text-lg lg:text-xl font-bold text-gray-900">Confirm Deactivation</h2>
               <button 
                 onClick={() => setIsConfirmModalOpen(false)}
                 className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2d7a63] p-1"
@@ -453,10 +596,10 @@ const AdminUsersPage = () => {
               </button>
             </div>
             
-            <div className="p-6">
-              <div className="flex items-center mb-6">
-                <div className="h-10 w-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
-                  <AlertCircle className="h-5 w-5 text-red-600" />
+            <div className="p-4 lg:p-6">
+              <div className="flex items-start mb-4 lg:mb-6">
+                <div className="h-8 w-8 lg:h-10 lg:w-10 bg-red-100 rounded-full flex items-center justify-center flex-shrink-0">
+                  <AlertCircle className="h-4 w-4 lg:h-5 w-5 text-red-600" />
                 </div>
                 <p className="ml-3 text-sm text-gray-600">
                   Are you sure you want to deactivate <span className="font-semibold">{userToDeactivate.username}</span>? 
@@ -465,16 +608,16 @@ const AdminUsersPage = () => {
               </div>
             </div>
             
-            <div className="p-6 border-t border-gray-200 flex justify-end space-x-3">
+            <div className="p-4 lg:p-6 border-t border-gray-200 flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0">
               <button
                 onClick={() => setIsConfirmModalOpen(false)}
-                className="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2d7a63] transition duration-150"
+                className="w-full sm:w-auto px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2d7a63] transition duration-150"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeactivateConfirm}
-                className="px-4 py-2 bg-red-600 border border-transparent rounded-md text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150"
+                className="w-full sm:w-auto px-4 bg-red-600 border border-transparent rounded-md text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition duration-150"
               >
                 Deactivate
               </button>

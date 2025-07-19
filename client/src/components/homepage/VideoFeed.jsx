@@ -14,6 +14,9 @@ const VideoFeed = ({profile}) => {
   const containerRef = useRef(null);
   const loadObserver = useRef(null);
   const scrollObserver = useRef(null);
+  const videoRefs = useRef(new Map()); // Use Map for better ref management
+  const currentVideoRef = useRef(null); // Track currently playing video
+  const manuallyPausedRef = useRef(new Set()); // Track manually paused videos
   const { loading, error, posts, pagination } = useVideoPosts(page, limit);
 
   // Load posts
@@ -44,26 +47,37 @@ const VideoFeed = ({profile}) => {
     [loading, pagination.hasNext]
   );
 
-  // Track current visible slide
+  // Improved intersection observer for scroll detection
   useEffect(() => {
     if (!containerRef.current || allPosts.length === 0) return;
+    
+    // Disconnect previous observer
+    if (scrollObserver.current) {
+      scrollObserver.current.disconnect();
+    }
     
     const options = {
       root: containerRef.current,
       rootMargin: "0px",
-      threshold: 0.6,
+      threshold: 0.7, // Increased threshold for better detection
     };
 
     scrollObserver.current = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
-          setCurrentIndex(Number(entry.target.dataset.index));
+          const newIndex = Number(entry.target.dataset.index);
+          console.log(`Video post ${newIndex} is now visible`);
+          setCurrentIndex(newIndex);
+          // Clear manual pause state when switching to a new post
+          manuallyPausedRef.current.clear();
         }
       });
     }, options);
 
     const slides = containerRef.current.querySelectorAll(".snap-slide");
-    slides.forEach((slide) => scrollObserver.current.observe(slide));
+    slides.forEach((slide) => {
+      scrollObserver.current.observe(slide);
+    });
 
     return () => {
       if (scrollObserver.current) {
@@ -71,6 +85,66 @@ const VideoFeed = ({profile}) => {
       }
     };
   }, [allPosts]);
+
+  // Improved video playback control
+  useEffect(() => {
+    console.log(`Video playback control: currentIndex = ${currentIndex}, total videos = ${allPosts.length}`);
+    
+    // ALWAYS stop all videos first when currentIndex changes
+    videoRefs.current.forEach((videoEl, idx) => {
+      if (videoEl) {
+        console.log(`Stopping video at index ${idx} (currentIndex changed to ${currentIndex})`);
+        videoEl.pause();
+        videoEl.currentTime = 0;
+      }
+    });
+
+    // Clear current video ref since we stopped everything
+    currentVideoRef.current = null;
+
+    // Play current video automatically (unless manually paused)
+    const currentVideo = videoRefs.current.get(currentIndex);
+    if (currentVideo && !manuallyPausedRef.current.has(currentIndex)) {
+      console.log(`Auto-playing video at index ${currentIndex}`);
+      currentVideoRef.current = currentVideo;
+      currentVideo.play().catch((e) => {
+        console.warn(`Failed to auto-play video at index ${currentIndex}:`, e);
+      });
+    } else if (currentVideo && manuallyPausedRef.current.has(currentIndex)) {
+      console.log(`Video at index ${currentIndex} is manually paused - not auto-playing`);
+      currentVideoRef.current = currentVideo;
+    } else {
+      console.log(`No video element found for index ${currentIndex}`);
+      currentVideoRef.current = null;
+    }
+  }, [currentIndex, allPosts.length]);
+
+  // Debug logging
+  useEffect(() => {
+    console.log(`Current video index: ${currentIndex}, Total videos: ${allPosts.length}`);
+  }, [currentIndex, allPosts.length]);
+
+  // Improved video ref setter
+  const setVideoRef = useCallback((idx, el) => {
+    if (el) {
+      videoRefs.current.set(idx, el);
+      console.log(`Video ref set for index ${idx}`);
+    } else {
+      videoRefs.current.delete(idx);
+      console.log(`Video ref removed for index ${idx}`);
+    }
+  }, []);
+
+  // Handle manual pause state from VideoPlayer
+  const handleManualPause = useCallback((idx, isPaused) => {
+    if (isPaused) {
+      manuallyPausedRef.current.add(idx);
+      console.log(`Video ${idx} manually paused`);
+    } else {
+      manuallyPausedRef.current.delete(idx);
+      console.log(`Video ${idx} manually resumed`);
+    }
+  }, []);
 
   // Cleanup
   useEffect(() => {
@@ -85,11 +159,11 @@ const VideoFeed = ({profile}) => {
   }
 
   return (
-    <div className="flex justify-center w-full h-screen bg-black">
-      {/* Container with phone-like dimensions on larger screens */}
+    <div className="flex justify-center w-full h-full bg-black">
+      {/* Container with responsive dimensions */}
       <div
         ref={containerRef}
-        className="h-full w-full md:w-[414px] md:h-[736px] md:my-4 overflow-y-scroll snap-y snap-mandatory bg-black relative"
+        className="feed-container h-full w-full sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl mx-auto overflow-y-scroll snap-y snap-mandatory bg-black relative"
         style={{ 
           overscrollBehavior: "none",
           scrollBehavior: "smooth",
@@ -97,6 +171,7 @@ const VideoFeed = ({profile}) => {
           scrollbarWidth: "none",
           msOverflowStyle: "none",
           maxWidth: "100%", // Ensure it doesn't exceed screen width on mobile
+          height: "100vh", // Force full viewport height
         }}
       >
         {/* Hide scrollbar for Chrome/Safari */}
@@ -120,12 +195,14 @@ const VideoFeed = ({profile}) => {
                 isCurrent={index === currentIndex}
                 defaultThumbnail={c}
                 profileId={profile?.id}
+                setVideoRef={(el) => setVideoRef(index, el)}
+                onManualPause={(isPaused) => handleManualPause(index, isPaused)}
               />
             </div>
           ))
         ) : (
           <div className="h-full w-full flex items-center justify-center snap-start">
-            <p className="text-white">No videos available</p>
+            <p className="text-white text-sm sm:text-base">No videos available</p>
           </div>
         )}
 

@@ -21,11 +21,32 @@ export const AuthProvider = ({ children }) => {
       setProfile(response.data);
       return true;
     } catch (err) {
-      setProfile(null);
-      setPaymentDetails(null);
-      return false;
+      console.error('Auth check failed:', err);
+      
+      // Only clear profile on specific authentication errors
+      if (err.response) {
+        if (err.response.status === 401) {       // Unauthorized - clear profile
+          setProfile(null);
+          setPaymentDetails(null);
+          return false;
+        } else if (err.response.status === 403) {      // Forbidden - clear profile
+          setProfile(null);
+          setPaymentDetails(null);
+          return false;
+        }
+        // For other server errors (500, 502 etc.), don't clear profile
+        // This prevents logout on temporary server issues
+        return !!profile; // Return current auth state
+      } else if (err.request) {
+        // Network error - don't clear profile, return current state
+        console.warn('Network error during auth check, keeping current state');
+        return !!profile;
+      } else {   // Other errors - don't clear profile
+        console.warn('Other error during auth check, keeping current state');
+        return !!profile;
+      }
     }
-  }, []);
+  }, [profile]);
 
   // Payment functions
   const fetchPaymentDetails = useCallback(async () => {
@@ -99,12 +120,17 @@ export const AuthProvider = ({ children }) => {
   // Initial authentication check
   useEffect(() => {
     const initAuth = async () => {
-      const isAuthenticated = await checkAuth();
-      if (isAuthenticated) {
-        await fetchPaymentDetails();
+      try {
+        const isAuthenticated = await checkAuth();
+        if (isAuthenticated) {
+          await fetchPaymentDetails();
+        }
+      } catch (err) {
+        console.error('Initial auth check failed:', err);
+      } finally {
+        setInitialCheckDone(true);
+        setLoading(false);
       }
-      setInitialCheckDone(true);
-      setLoading(false);
     };
     
     if (!initialCheckDone) {

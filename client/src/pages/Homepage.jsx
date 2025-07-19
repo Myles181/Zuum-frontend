@@ -27,19 +27,25 @@ function Homepage({details, profile}) {
   };
 
   return (
-    <div>
+    <div className="min-h-screen bg-black relative flex flex-col">
+      {/* Navbar - fixed at top */}
       <Navbar
         toggleSidebar={toggleSidebar}
         activeTab={activeTab}
         handleTabClick={handleTabClick}
       />
+      
+      {/* Sidebar - slides in from left */}
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
-      {/* Conditionally render AudioFeed or VideoFeed based on activeTab */}
-      {activeTab === 'audio' ? <AudioFeed profile={profile}  /> : <VideoFeed profile={profile} />}
+      {/* Main content area - flex to fill remaining space */}
+      <div className="flex-1 pt-16"> {/* Use flex-1 to fill remaining space */}
+        {/* Conditionally render AudioFeed or VideoFeed based on activeTab */}
+        {activeTab === 'audio' ? <AudioFeed profile={profile}  /> : <VideoFeed profile={profile} />}
+      </div>
       
-
+      {/* Bottom Navigation - fixed at bottom */}
       <BottomNav />
       
       {/* Subscription Popup - only shown when showSubscriptionPopup is true */}

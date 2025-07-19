@@ -99,7 +99,7 @@ const AppRoutes = () => {
 
     // Only show popup if not on subscribe page
     if (!profile.subscription_status) {
-      if (location.pathname === '/subscribe' || '/home') {
+      if (location.pathname === '/subscribe' || location.pathname === '/home') {
         setShowSubscription(false);
       } else {
         setShowSubscription(true);

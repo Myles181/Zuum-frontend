@@ -1,13 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 axios.defaults.baseURL = API_URL;
 axios.defaults.withCredentials = true; // Enable cookie authentication
-
-
-
-
 
 /**
  * Custom hook for handling admin-related API operations
@@ -27,16 +23,20 @@ export const useAdmins = () => {
   /**
    * Fetch all users with pagination
    */
-  const fetchUsers = async (page = 1) => {
+  const fetchUsers = useCallback(async (page = 1) => {
+    console.log('Fetching users for page:', page);
     setIsLoading(true);
     setError(null);
     
     try {
+      console.log('Making API call to /admin/users');
       const response = await axios.get('/admin/users', {
         params: { page },
         withCredentials: true,
         headers: { 'Content-Type': 'application/json' }
       });
+      
+      console.log('API response:', response);
       
       if (response.status === 200) {
         setUsers(response.data.users || response.data);
@@ -51,16 +51,17 @@ export const useAdmins = () => {
         }
       }
     } catch (err) {
+      console.error('Error fetching users:', err);
       handleApiError(err);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   /**
    * Handle API errors with appropriate messages
    */
-  const handleApiError = (err) => {
+  const handleApiError = useCallback((err) => {
     if (axios.isAxiosError(err)) {
       if (err.response) {
         switch (err.response.status) {
@@ -76,12 +77,12 @@ export const useAdmins = () => {
     } else {
       setError('An unexpected error occurred');
     }
-  };
+  }, []);
 
   /**
    * Deactivate a user
    */
-  const deactivateUser = async (userId) => {
+  const deactivateUser = useCallback(async (userId) => {
     setIsLoading(true);
     try {
       const response = await axios.post(
@@ -111,12 +112,17 @@ export const useAdmins = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [fetchUsers, pagination.currentPage, handleApiError]);
 
   /**
    * Reset any API errors
    */
-  const resetError = () => setError(null);
+  const resetError = useCallback(() => setError(null), []);
+
+  // Initial fetch when hook is first used
+  useEffect(() => {
+    fetchUsers(1);
+  }, [fetchUsers]);
 
   return { 
     users, 

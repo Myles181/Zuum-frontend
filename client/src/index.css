@@ -1,5 +1,44 @@
 @import "tailwindcss";
 
+/* Reset body and html to ensure proper viewport height */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+/* Custom responsive breakpoints */
+@media (min-width: 475px) {
+  .xs\:block {
+    display: block;
+  }
+}
+
+@media (max-width: 474px) {
+  .xs\:block {
+    display: none;
+  }
+}
+
+/* Snap slide fixes to eliminate gaps */
+.snap-slide {
+  min-height: 100%;
+  height: 100%;
+  flex-shrink: 0;
+}
+
+.snap-y {
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+}
+
+/* Ensure full height for feed containers */
+.feed-container {
+  height: 100%;
+  min-height: 100%;
+}
+
 /* Loading Screen Styling */
 .loading-screen {
     position: fixed;
@@ -50,8 +89,6 @@
     margin-top: 50px;
 }
 
-
-
 /* Fade-In Animation */
 .fade-in {
     opacity: 0;
@@ -63,3 +100,228 @@
     opacity: 1 !important;
     transform: translateY(0) !important;
   }
+
+/* Enhanced Auth Page Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+/* Form Input Focus Effects */
+.input-focus-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.input-focus-effect::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s;
+}
+
+.input-focus-effect:focus-within::before {
+  left: 100%;
+}
+
+/* Button Hover Effects */
+.btn-hover-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-hover-effect::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.btn-hover-effect:hover::before {
+  width: 300px;
+  height: 300px;
+}
+
+/* Loading Spinner */
+.spinner {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Step Indicator Animations */
+.step-indicator {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.step-indicator:hover {
+  transform: scale(1.1);
+}
+
+/* Card Hover Effects */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+}
+
+/* Text Gradient Effect */
+.text-gradient {
+  background: linear-gradient(135deg, #2D8C72, #246d59);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Glass Morphism Effect */
+.glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Floating Animation for Background Elements */
+.float-animation {
+  animation: float 6s ease-in-out infinite;
+}
+
+.float-animation-delay-1 {
+  animation-delay: 1s;
+}
+
+.float-animation-delay-2 {
+  animation-delay: 2s;
+}
+
+/* Enhanced Responsive Styles */
+.pulse-glow {
+  animation: pulse-glow 2s ease-in-out infinite;
+}
+
+.shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  background-size: 200px 100%;
+  animation: shimmer 2s infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Focus Styles */
+.focus-visible:focus {
+  outline: 2px solid #2D8C72;
+  outline-offset: 2px;
+}
+
+/* Enhanced Mobile Responsiveness */
+@media (max-width: 768px) {
+  .mobile-optimized {
+    padding: 0.75rem;
+  }
+
+  .mobile-optimized input {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+}
+
+/* Tablet Optimizations */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .tablet-optimized {
+    max-width: 90%;
+    margin: 0 auto;
+  }
+}
+
+/* Large Screen Optimizations */
+@media (min-width: 1024px) {
+  .desktop-optimized {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+  .auto-dark {
+    background-color: #1a1a1a;
+    color: #ffffff;
+  }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+  .high-contrast {
+    border: 2px solid;
+    background-color: #000000;
+    color: #ffffff;
+  }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

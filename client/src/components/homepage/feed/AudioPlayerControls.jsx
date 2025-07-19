@@ -40,7 +40,7 @@ const AudioPlayerControls = ({
       )}
       
       {/* bottom progress bar */}
-      <div className="absolute bottom-13 left-0 w-full h-1 bg-gray-600 z-20">
+      <div className="absolute bottom-8 sm:bottom-10 left-0 w-full h-1 bg-gray-600 z-20">
         <div
           className="h-full bg-white"
           style={{

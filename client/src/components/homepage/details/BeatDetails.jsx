@@ -117,10 +117,6 @@ const BeatDetails = React.memo(() => {
     navigate(`/profile/${beat.post.profile_id}`);
   };
 
-  const availableSupply = beat
-    ? beat.post.total_supply - (beat.post.total_buyers || 0)
-    : 0;
-
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-900/90 flex justify-center items-center">
@@ -238,16 +234,7 @@ const BeatDetails = React.memo(() => {
       <div className="relative z-10 -mt-16 px-4 pb-24">
         <div className="max-w-4xl mx-auto bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
           {/* Stats Ribbon with Social Actions */}
-          <div className="grid grid-cols-4 gap-4 p-4 bg-gray-50 border-b border-gray-200">
-            {/* Available Supply */}
-            <div className="flex items-center space-x-2">
-              <Package className="h-5 w-5 text-amber-500" />
-              <div>
-                <p className="text-xs text-gray-500">Available</p>
-                <p className="font-medium">{availableSupply}/{beat.post.total_supply}</p>
-              </div>
-            </div>
-            
+          <div className="grid grid-cols-3 gap-4 p-4 bg-gray-50 border-b border-gray-200">
             {/* Duration */}
             <div className="flex items-center space-x-2">
               <Clock className="h-5 w-5 text-purple-500" />

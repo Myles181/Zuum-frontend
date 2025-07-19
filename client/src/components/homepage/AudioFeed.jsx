@@ -22,7 +22,9 @@ const AudioFeed = ({ profile }) => {
   const loadObserver = useRef(null);
   const iconTimeout = useRef(null);
   const scrollObserver = useRef(null);
-  const audioRefs = useRef([]);
+  const audioRefs = useRef(new Map()); // Use Map for better ref management
+  const currentAudioRef = useRef(null); // Track currently playing audio
+  const manuallyPausedRef = useRef(new Set()); // Track manually paused audio
 
   const {
     loading: postsLoading,
@@ -97,46 +99,108 @@ const AudioFeed = ({ profile }) => {
     [postsLoading, beatsLoading, postsPagination.hasNext, beatsPagination.hasNext]
   );
 
+  // Improved intersection observer for scroll detection
   useEffect(() => {
     if (!containerRef.current || !combinedContent.length) return;
+
+    // Disconnect previous observer
+    if (scrollObserver.current) {
+      scrollObserver.current.disconnect();
+    }
 
     scrollObserver.current = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            setCurrentIndex(Number(entry.target.dataset.index));
+            const newIndex = Number(entry.target.dataset.index);
+            console.log(`Audio post ${newIndex} is now visible`);
+            setCurrentIndex(newIndex);
+            // Clear manual pause state when switching to a new post
+            manuallyPausedRef.current.clear();
           }
         });
       },
-      { root: containerRef.current, threshold: 0.6 }
+      { 
+        root: containerRef.current, 
+        threshold: 0.7, // Increased threshold for better detection
+        rootMargin: "0px"
+      }
     );
 
     const slides = containerRef.current.querySelectorAll(".snap-slide");
-    slides.forEach((slide) => scrollObserver.current.observe(slide));
+    slides.forEach((slide) => {
+      scrollObserver.current.observe(slide);
+    });
 
-    return () => scrollObserver.current?.disconnect();
+    return () => {
+      if (scrollObserver.current) {
+        scrollObserver.current.disconnect();
+      }
+    };
   }, [combinedContent]);
 
+  // Improved audio playback control
   useEffect(() => {
+    console.log(`Audio playback control: currentIndex = ${currentIndex}, total posts = ${combinedContent.length}`);
+    
+    // ALWAYS stop all audio first when currentIndex changes
     audioRefs.current.forEach((audioEl, idx) => {
-      if (!audioEl) return;
-      if (idx === currentIndex) {
-        audioEl.play().catch((e) => console.warn("Playback failed", e));
-      } else {
+      if (audioEl) {
+        console.log(`Stopping audio at index ${idx} (currentIndex changed to ${currentIndex})`);
         audioEl.pause();
         audioEl.currentTime = 0;
       }
     });
-  }, [currentIndex, combinedContent]);
+
+    // Clear current audio ref since we stopped everything
+    currentAudioRef.current = null;
+
+    // Play current audio automatically (unless manually paused)
+    const currentAudio = audioRefs.current.get(currentIndex);
+    if (currentAudio && !manuallyPausedRef.current.has(currentIndex)) {
+      console.log(`Auto-playing audio at index ${currentIndex}`);
+      currentAudioRef.current = currentAudio;
+      currentAudio.play().catch((e) => {
+        console.warn(`Failed to auto-play audio at index ${currentIndex}:`, e);
+      });
+    } else if (currentAudio && manuallyPausedRef.current.has(currentIndex)) {
+      console.log(`Audio at index ${currentIndex} is manually paused - not auto-playing`);
+      currentAudioRef.current = currentAudio;
+    } else {
+      console.log(`No audio element found for index ${currentIndex}`);
+      currentAudioRef.current = null;
+    }
+  }, [currentIndex, combinedContent.length]);
+
+  // Debug logging
+  useEffect(() => {
+    console.log(`Current audio index: ${currentIndex}, Total posts: ${combinedContent.length}`);
+  }, [currentIndex, combinedContent.length]);
 
   const handleTap = useCallback((idx) => {
-    const audio = audioRefs.current[idx];
+    const audio = audioRefs.current.get(idx);
     if (!audio) return;
 
     if (audio.paused) {
-      audio.play().catch((e) => console.warn("Playback error", e));
+      // If this is not the current audio, stop all others first
+      if (idx !== currentIndex) {
+        audioRefs.current.forEach((otherAudio, otherIdx) => {
+          if (otherIdx !== idx && otherAudio) {
+            otherAudio.pause();
+            otherAudio.currentTime = 0;
+          }
+        });
+        setCurrentIndex(idx);
+        manuallyPausedRef.current.clear(); // Clear manual pause when switching
+      }
+      
+      // Remove from manually paused set and play
+      manuallyPausedRef.current.delete(idx);
+      audio.play().catch((e) => console.warn("Manual play error", e));
       setTapIconType("pause");
     } else {
+      // Add to manually paused set and pause
+      manuallyPausedRef.current.add(idx);
       audio.pause();
       setTapIconType("play");
     }
@@ -144,7 +208,7 @@ const AudioFeed = ({ profile }) => {
     setShowTapIcon(true);
     clearTimeout(iconTimeout.current);
     iconTimeout.current = setTimeout(() => setShowTapIcon(false), 800);
-  }, []);
+  }, [currentIndex]);
 
   const handleTimeUpdate = useCallback(
     (idx, e) => {
@@ -160,16 +224,27 @@ const AudioFeed = ({ profile }) => {
     [currentIndex]
   );
 
+  // Improved audio ref setter
+  const setAudioRef = useCallback((idx, el) => {
+    if (el) {
+      audioRefs.current.set(idx, el);
+      console.log(`Audio ref set for index ${idx}`);
+    } else {
+      audioRefs.current.delete(idx);
+      console.log(`Audio ref removed for index ${idx}`);
+    }
+  }, []);
+
   if (postsError || beatsError) {
     return <p className="text-red-500 text-center">{postsError || beatsError}</p>;
   }
 
   return (
-    <div className="flex justify-center w-full h-screen bg-black">
-      {/* Container with phone-like dimensions on larger screens */}
+    <div className="flex justify-center w-full h-full bg-black">
+      {/* Container with responsive dimensions */}
       <div
         ref={containerRef}
-        className="h-full w-full md:w-[414px] md:h-[736px] md:my-4 overflow-y-scroll snap-y snap-mandatory bg-black relative"
+        className="feed-container h-full w-full sm:max-w-md md:max-w-lg lg:max-w-xl xl:max-w-2xl mx-auto overflow-y-scroll snap-y snap-mandatory bg-black relative"
         style={{ 
           overscrollBehavior: "none",
           scrollBehavior: "smooth",
@@ -177,6 +252,7 @@ const AudioFeed = ({ profile }) => {
           scrollbarWidth: "none",
           msOverflowStyle: "none",
           maxWidth: "100%", // Ensure it doesn't exceed screen width on mobile
+          height: "100vh", // Force full viewport height
         }}
       >
         {/* Hide scrollbar for Chrome/Safari */}
@@ -203,7 +279,7 @@ const AudioFeed = ({ profile }) => {
                 duration={duration}
                 showTapIcon={showTapIcon && idx === currentIndex}
                 tapIconType={tapIconType}
-                setAudioRef={(el) => (audioRefs.current[idx] = el)}
+                setAudioRef={(el) => setAudioRef(idx, el)}
                 onTimeUpdate={(e) => handleTimeUpdate(idx, e)}
                 onLoadedMetadata={(e) => handleLoadedMetadata(idx, e)}
                 isLocked={content.type === "beat"}
@@ -213,7 +289,7 @@ const AudioFeed = ({ profile }) => {
           ))
         ) : (
           <div className="h-full w-full flex items-center justify-center snap-start">
-            <p className="text-white">No audio available</p>
+            <p className="text-white text-sm sm:text-base">No audio available</p>
           </div>
         )}
 
