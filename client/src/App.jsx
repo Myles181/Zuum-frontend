@@ -28,6 +28,7 @@ import { initializeSocket } from './socket';
 import FollowersListPage from './components/homepage/FollowingList ';
 import SubscriptionPage from './components/subscription/Account';
 import SubscriptionDetails from './components/subscription/SubDetails';
+import ZuumNews from './pages/ZuumNews';
 
 import LockedMusicPlayer from './components/homepage/sale/Locked';
 import PurchaseFeed from './components/homepage/sale/Purchase';
@@ -155,8 +156,8 @@ const AppRoutes = () => {
          <Route path="/req" element={<PromotionRequirementsForm />} />
         <Route path="/shared-audio/:shareId" element={<SharedAudioPage />} />
         <Route path="/videos/:id" element={<VideoViewerPage />} />
-                <Route path="/user/promotions" element={<UserPromotions />} />
-
+        <Route path="/user/promotions" element={<UserPromotions />} />
+        <Route path="/zuum-news" element={<ZuumNews />} />
       </Routes>
     </>
   );
