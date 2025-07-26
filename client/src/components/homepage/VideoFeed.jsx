@@ -171,7 +171,7 @@ const VideoFeed = ({profile}) => {
           scrollbarWidth: "none",
           msOverflowStyle: "none",
           maxWidth: "100%", // Ensure it doesn't exceed screen width on mobile
-          height: "100vh", // Force full viewport height
+          height: "calc(100vh - 64px)", // Account for navbar height
         }}
       >
         {/* Hide scrollbar for Chrome/Safari */}

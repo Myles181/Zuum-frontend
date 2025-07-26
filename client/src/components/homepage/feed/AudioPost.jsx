@@ -99,7 +99,7 @@ const AudioPost = React.forwardRef(({
         {/* Beat content */}
         <div className="relative z-10 w-full h-full flex flex-col items-center  justify-center p-6 text-center">
           {/* Promotional badge */}
-          <div className="absolute top-6 left-6 flex items-center mt-10 bg-yellow-500/90 text-black px-3 py-1 rounded-full text-xs font-bold">
+          <div className="absolute top- left-4 flex items-center mt-10 bg-yellow-500/90 text-black px-3 py-1 rounded-full text-xs font-bold">
             <MdCampaign className="mr-1" />
             PROMOTIONAL BEAT
           </div>
@@ -194,7 +194,7 @@ const AudioPost = React.forwardRef(({
       {/* Main content */}
       <div className="relative z-10 w-full h-full">
         {/* Top bar */}
-        <div className="absolute top-13 sm:top-12 left-0 right-0 p-4 z-30 flex justify-between items-center">
+        <div className="absolute top-8 sm:top-4 left-0 right-0 p-4 z-30 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <FaMusic className="text-white text-xl" />
             <span className="text-white font-semibold text-sm">
@@ -222,7 +222,7 @@ const AudioPost = React.forwardRef(({
         </div>
         
         {/* Bottom actions */}
-        <div className="absolute bottom-20 sm:bottom-24 left-0 right-0 p-4 z-10 flex justify-between items-end">
+        <div className="absolute bottom-32 sm:bottom-36 left-0 right-0 p-4 z-10 flex justify-between items-end">
           <div className="flex-1 flex items-center space-x-3">
             <div 
               className="flex items-center space-x-3 flex-1"

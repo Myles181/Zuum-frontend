@@ -41,7 +41,7 @@ function Homepage({details, profile}) {
       <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
 
       {/* Main content area - flex to fill remaining space */}
-      <div className="flex-1 pt-16"> {/* Use flex-1 to fill remaining space */}
+      <div className="flex-1"> {/* Use flex-1 to fill remaining space */}
         {/* Conditionally render AudioFeed or VideoFeed based on activeTab */}
         {activeTab === 'audio' ? <AudioFeed profile={profile}  /> : <VideoFeed profile={profile} />}
       </div>

@@ -195,8 +195,8 @@ const VideoPlayer = ({ post, index, isCurrent, defaultThumbnail, profileId, setV
         </div>
       )}
 
-      {/* Status indicator - moved even higher up with fade effect */}
-      <div className={`absolute bottom-28 sm:bottom-32 left-0 right-0 flex items-center justify-center z-30 transition-opacity duration-500 ${showStatus ? 'opacity-100' : 'opacity-30'}`}>
+      {/* Status indicator - centered */}
+      <div className={`absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex items-center justify-center z-30 transition-opacity duration-500 ${showStatus ? 'opacity-100' : 'opacity-30'}`}>
         <div className="flex items-center space-x-2 bg-black/40 backdrop-blur-sm px-4 py-2 rounded-full">
           <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`} />
           <span className="text-white/90 text-sm font-medium">
