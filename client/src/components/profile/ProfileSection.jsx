@@ -65,7 +65,10 @@ const ProfileSection = ({ profile }) => {
   };
 
   return (
-    <div className="profile-container relative bg-gray-50">
+    <div 
+      className="profile-container relative"
+      style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+    >
       {/* Background Image with Dashboard Icon */}
       <div className="profile-background h-64 overflow-hidden rounded-t-lg relative">
         <img
@@ -75,7 +78,16 @@ const ProfileSection = ({ profile }) => {
         />
         <Link
           to="/dashboard"
-          className="absolute top-4 right-4 bg-white/90 p-2 rounded-full shadow-lg hover:bg-white transition-all"
+          className="absolute top-4 right-4 p-2 rounded-full shadow-lg transition-all"
+          style={{ 
+            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = 'rgba(255, 255, 255, 1)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.9)';
+          }}
           title="Go to Dashboard"
         >
           <FiBarChart className="w-5 h-5 text-[#008066]" />
@@ -90,7 +102,8 @@ const ProfileSection = ({ profile }) => {
           <img
             src={mergedProfile.image || d}
             alt="Profile"
-            className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
+            className="w-32 h-32 rounded-full border-4 shadow-lg object-cover"
+            style={{ borderColor: 'var(--color-bg-primary)' }}
           />
           {mergedProfile.is_admin && (
             <span className="absolute bottom-1 right-1 bg-[#008066] text-white text-xs px-3 py-1 rounded-full">
@@ -104,7 +117,10 @@ const ProfileSection = ({ profile }) => {
       <div className="stats-container flex flex-col items-center mt-20 w-full px-5 text-center">
         <h2 className="text-2xl font-bold text-[#008066]">{mergedProfile.username}</h2>
         <p className="text-gray-500 capitalize">{mergedProfile.identity}</p>
-        <p className="text-sm text-gray-600 mt-1">
+        <p 
+          className="text-sm mt-1"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
           {mergedProfile.firstname} {mergedProfile.middlename} {mergedProfile.lastname}
         </p>
       </div>
@@ -116,7 +132,12 @@ const ProfileSection = ({ profile }) => {
               <span className="text-lg font-bold text-[#008066]">
                 {index === 0 ? mergedProfile.followers_list.length || 0 : mergedProfile.following_list.length || 0}
               </span>
-              <p className="text-gray-600 text-sm">{item}</p>
+              <p 
+                className="text-sm"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                {item}
+              </p>
             </div>
           ))}
         </div>
@@ -125,7 +146,16 @@ const ProfileSection = ({ profile }) => {
       {/* Profile Action Buttons */}
       <div className="buttons flex justify-center mb-6 w-full gap-4 px-8">
         <Link to="/editprofile" className="flex-1">
-          <button className="w-full bg-white border border-[#008066] text-[#008066] px-6 py-2 rounded-lg hover:bg-gray-50 transition shadow-sm font-medium flex items-center justify-center">
+          <button 
+          className="w-full border border-[#008066] text-[#008066] px-6 py-2 rounded-lg transition shadow-sm font-medium flex items-center justify-center"
+          style={{ backgroundColor: 'var(--color-bg-primary)' }}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = 'var(--color-bg-primary)';
+          }}
+        >
             <FiEdit className="mr-2" /> Edit
           </button>
         </Link>
@@ -134,7 +164,16 @@ const ProfileSection = ({ profile }) => {
           <FiShare2 className="mr-2" /> Share
         </button>
         <Link to="/dashboard" className="flex-1">
-          <button className="w-full bg-white border border-[#008066] text-[#008066] px-3 py-3 rounded-lg hover:bg-gray-50 transition shadow-sm font-medium flex items-center justify-center">
+          <button 
+          className="w-full border border-[#008066] text-[#008066] px-3 py-3 rounded-lg transition shadow-sm font-medium flex items-center justify-center"
+          style={{ backgroundColor: 'var(--color-bg-primary)' }}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = 'var(--color-bg-primary)';
+          }}
+        >
             <FiBarChart className="mr-2" /> 
           </button>
         </Link>
@@ -149,9 +188,17 @@ const ProfileSection = ({ profile }) => {
 
       {/* Bio */}
       <div className="bio-container mt-4 px-8">
-        <div className="bg-white p-4 rounded-lg shadow-sm">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Bio</h3>
-          <p className="text-gray-700">
+        <div 
+          className="p-4 rounded-lg shadow-sm"
+          style={{ backgroundColor: 'var(--color-bg-primary)' }}
+        >
+          <h3 
+            className="text-sm font-medium mb-2"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            Bio
+          </h3>
+          <p style={{ color: 'var(--color-text-primary)' }}>
             {mergedProfile.bio || "No bio provided"}
           </p>
         </div>
@@ -160,16 +207,24 @@ const ProfileSection = ({ profile }) => {
       {/* Stats and Contact in Flex Row */}
       <div className="flex flex-col md:flex-row justify-between px-8 mt-6 gap-4">
         {/* Contact Information */}
-        <div className="contact-info flex-1 bg-white p-4 rounded-lg shadow-sm">
-          <h3 className="text-sm font-medium text-gray-500 mb-2">Contact Info</h3>
+        <div 
+          className="contact-info flex-1 p-4 rounded-lg shadow-sm"
+          style={{ backgroundColor: 'var(--color-bg-primary)' }}
+        >
+          <h3 
+            className="text-sm font-medium mb-2"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            Contact Info
+          </h3>
           <div className="space-y-2">
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm">
               <FiMail className="mr-2 text-[#008066]" />
-              <span>{mergedProfile.email || "N/A"}</span>
+              <span style={{ color: 'var(--color-text-secondary)' }}>{mergedProfile.email || "N/A"}</span>
             </div>
-            <div className="flex items-center text-sm text-gray-600">
+            <div className="flex items-center text-sm">
               <FiPhone className="mr-2 text-[#008066]" />
-              <span>{mergedProfile.phonenumber || "N/A"}</span>
+              <span style={{ color: 'var(--color-text-secondary)' }}>{mergedProfile.phonenumber || "N/A"}</span>
             </div>
           </div>
         </div>
@@ -177,22 +232,31 @@ const ProfileSection = ({ profile }) => {
 
       {/* Additional Info */}
       <div className="flex flex-col md:flex-row justify-between px-8 mt-4 gap-4 mb-6">
-        <div className="flex-1 bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center text-sm text-gray-600">
+        <div 
+          className="flex-1 p-4 rounded-lg shadow-sm"
+          style={{ backgroundColor: 'var(--color-bg-primary)' }}
+        >
+          <div className="flex items-center text-sm">
             <FiCalendar className="mr-2 text-[#008066]" />
-            <span>Joined: {formatDate(mergedProfile.created_at)}</span>
+            <span style={{ color: 'var(--color-text-secondary)' }}>Joined: {formatDate(mergedProfile.created_at)}</span>
           </div>
         </div>
-        <div className="flex-1 bg-white p-4 rounded-lg shadow-sm">
-          <div className="flex items-center text-sm text-gray-600">
+        <div 
+          className="flex-1 p-4 rounded-lg shadow-sm"
+          style={{ backgroundColor: 'var(--color-bg-primary)' }}
+        >
+          <div className="flex items-center text-sm">
             <FiCreditCard className="mr-2 text-[#008066]" />
-            <span>Subscription: {mergedProfile.subscription_status || "None"}</span>
+            <span style={{ color: 'var(--color-text-secondary)' }}>Subscription: {mergedProfile.subscription_status || "None"}</span>
           </div>
         </div>
       </div>
 
       {/* Tab Section */}
-      <div className="tab-section pt-4 w-full bg-white rounded-b-lg">
+      <div 
+        className="tab-section pt-4 w-full rounded-b-lg"
+        style={{ backgroundColor: 'var(--color-bg-primary)' }}
+      >
         <div className="tab-buttons flex justify-center gap-8 border-b border-gray-200">
           {tabs.map((tab) => (
             <button

@@ -53,7 +53,10 @@ const Search = () => {
   };
 
   return (
-    <div className="container max-w-480 mx-auto h-screen flex flex-col bg-white shadow-lg">
+    <div 
+      className="container max-w-480 mx-auto h-screen flex flex-col shadow-lg"
+      style={{ backgroundColor: 'var(--color-bg-primary)' }}
+    >
       {/* Search Header */}
       <div className="search-header flex items-center px-4 py-2 border-b border-gray-200">
         <button className="back-button" onClick={() => window.history.back()}>

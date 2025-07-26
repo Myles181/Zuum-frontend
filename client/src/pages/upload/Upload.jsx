@@ -16,16 +16,31 @@ const UploadPage = ({ profile }) => {
       <Navbar name="Upload" toggleSidebar={toggleSidebar} />
 
       <div className="bg-gray-100 flex items-center justify-center mt-10 mb-10">
-        <div className="container bg-white w-full md:w-2/3 overflow-hidden rounded-lg shadow-lg">
+        <div 
+      className="container w-full md:w-2/3 overflow-hidden rounded-lg shadow-lg"
+      style={{ backgroundColor: 'var(--color-bg-primary)' }}
+    >
           <div className="content flex-1 p-10 text-center flex flex-col justify-center items-center">
-            <div className="title text-2xl md:text-3xl lg:text-4xl font-medium text-gray-700 mb-10">
+            <div 
+              className="title text-2xl md:text-3xl lg:text-4xl font-medium mb-10"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
               Choose the track you'd like to upload!<br />
               What would you like to share with us today?
             </div>
 
             <div className="upload-options grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-900 mx-auto">
               {/* Upload Music/Beat */}
-              <div className="upload-option group flex flex-col items-center bg-white border-2 border-gray-200 rounded-xl p-8 text-center cursor-pointer transform transition-all duration-500 ease-out hover:scale-110 hover:-translate-y-4 hover:shadow-2xl hover:border-green-400 active:scale-95 hover:bg-gray-50">
+              <div 
+                className="upload-option group flex flex-col items-center border-2 border-gray-200 rounded-xl p-8 text-center cursor-pointer transform transition-all duration-500 ease-out hover:scale-110 hover:-translate-y-4 hover:shadow-2xl hover:border-green-400 active:scale-95"
+                style={{ backgroundColor: 'var(--color-bg-primary)' }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                }}
+              >
                 <div className="option-icon-wrapper mb-4 transform transition-transform duration-500 group-hover:scale-125">
                   <svg className="option-icon w-12 h-12 text-green-500" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M9 18V5L21 3V16" stroke="#2a9d8f" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -41,7 +56,16 @@ const UploadPage = ({ profile }) => {
               </div>
 
               {/* Upload a short video */}
-              <div className="upload-option group flex flex-col items-center bg-white border-2 border-gray-200 rounded-xl p-8 text-center cursor-pointer transform transition-all duration-500 ease-out hover:scale-110 hover:-translate-y-4 hover:shadow-2xl hover:border-green-400 active:scale-95 hover:bg-gray-50">
+              <div 
+                className="upload-option group flex flex-col items-center border-2 border-gray-200 rounded-xl p-8 text-center cursor-pointer transform transition-all duration-500 ease-out hover:scale-110 hover:-translate-y-4 hover:shadow-2xl hover:border-green-400 active:scale-95"
+                style={{ backgroundColor: 'var(--color-bg-primary)' }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                }}
+              >
                 <div className="option-icon-wrapper mb-4 transform transition-transform duration-500 group-hover:scale-125">
                   <svg className="option-icon w-12 h-12 text-green-800" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <rect x="2" y="4" width="20" height="16" rx="2" stroke="#2a9d8f" strokeWidth="2"/>
@@ -57,7 +81,16 @@ const UploadPage = ({ profile }) => {
 
               {/* Upload beat for sale - only for producers */}
               {(profile?.identity === 'producer' || profile?.identity === 'dev') && (
-                <div className="upload-option group flex flex-col items-center bg-white border-2 border-gray-200 rounded-xl p-8 text-center cursor-pointer transform transition-all duration-500 ease-out hover:scale-110 hover:-translate-y-4 hover:shadow-2xl hover:border-green-400 active:scale-95 hover:bg-gray-50">
+                <div 
+                  className="upload-option group flex flex-col items-center border-2 border-gray-200 rounded-xl p-8 text-center cursor-pointer transform transition-all duration-500 ease-out hover:scale-110 hover:-translate-y-4 hover:shadow-2xl hover:border-green-400 active:scale-95"
+                  style={{ backgroundColor: 'var(--color-bg-primary)' }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                  }}
+                >
                   <div className="option-icon-wrapper mb-4 transform transition-transform duration-500 group-hover:scale-125">
                     <svg className="option-icon w-12 h-12 text-green-800" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                       <path d="M12 2V6" stroke="#2a9d8f" strokeWidth="2" strokeLinecap="round"/>

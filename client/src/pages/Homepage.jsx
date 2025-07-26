@@ -7,16 +7,14 @@ import BottomNav from '../components/homepage/BottomNav';
 import AudioFeed from '../components/homepage/AudioFeed';
 import VideoFeed from '../components/homepage/VideoFeed';
 
-import { FiX, FiCheckCircle } from 'react-icons/fi';
-import { FaCheckCircle } from 'react-icons/fa';
-import SubscriptionPopup from '../components/subscription/Popup';
 import useProfile from '../../Hooks/useProfile';
+import { useDarkMode } from '../contexts/DarkModeContext';
 
 function Homepage({details, profile}) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('audio');
   const { profile: authProfile, loading: authLoading } = useProfile();
-  const [showSubscriptionPopup, setShowSubscriptionPopup] = useState(true); // Control popup visibility
+  const { isDarkMode } = useDarkMode();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
@@ -27,7 +25,10 @@ function Homepage({details, profile}) {
   };
 
   return (
-    <div className="min-h-screen bg-black relative flex flex-col">
+    <div 
+      className="min-h-screen relative flex flex-col"
+      style={{ backgroundColor: isDarkMode ? '#ffffff' : '#000000' }}
+    >
       {/* Navbar - fixed at top */}
       <Navbar
         toggleSidebar={toggleSidebar}
@@ -47,11 +48,6 @@ function Homepage({details, profile}) {
       
       {/* Bottom Navigation - fixed at bottom */}
       <BottomNav />
-      
-      {/* Subscription Popup - only shown when showSubscriptionPopup is true */}
-      {showSubscriptionPopup && (
-        <SubscriptionPopup onClose={() => setShowSubscriptionPopup(false)} details={details}  />
-      )}
     </div>
   );
 }

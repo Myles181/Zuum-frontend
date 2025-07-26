@@ -1,11 +1,59 @@
 @import "tailwindcss";
 
+/* Dark mode configuration for Tailwind CSS v4 */
+@theme {
+  --color-primary-50: #f0fdf4;
+  --color-primary-100: #dcfce7;
+  --color-primary-200: #bbf7d0;
+  --color-primary-300: #86efac;
+  --color-primary-400: #4ade80;
+  --color-primary-500: #22c55e;
+  --color-primary-600: #16a34a;
+  --color-primary-700: #15803d;
+  --color-primary-800: #166534;
+  --color-primary-900: #14532d;
+}
+
+/* Dark mode styles using Tailwind CSS v4 approach */
+@layer base {
+  :root {
+    --color-bg-primary: #111827;
+    --color-bg-secondary: #1f2937;
+    --color-bg-tertiary: #374151;
+    --color-text-primary: #f9fafb;
+    --color-text-secondary: #d1d5db;
+    --color-border: #4b5563;
+  }
+
+  .dark {
+    --color-bg-primary: #ffffff;
+    --color-bg-secondary: #f9fafb;
+    --color-bg-tertiary: #f3f4f6;
+    --color-text-primary: #111827;
+    --color-text-secondary: #6b7280;
+    --color-border: #e5e7eb;
+  }
+}
+
+@import "./styles/darkMode.css";
+
 /* Reset body and html to ensure proper viewport height */
 html, body {
   margin: 0;
   padding: 0;
   height: 100%;
   overflow-x: hidden;
+}
+
+/* Dark mode transitions */
+* {
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+/* Dark mode body background */
+body {
+  background-color: var(--color-bg-primary);
+  color: var(--color-text-primary);
 }
 
 /* Custom responsive breakpoints */

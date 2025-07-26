@@ -46,7 +46,10 @@ export const Jet = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white my-13">
+    <div 
+      className="min-h-screen my-13"
+      style={{ backgroundColor: 'var(--color-bg-primary)' }}
+    >
       <Navbar name="Creator Hub" />
       <header className="pt-12 pb-6 px-4 text-center">
         <div className="inline-block mb-4">
@@ -54,10 +57,10 @@ export const Jet = () => {
             <Music size={32} className="text-white" />
           </div>
         </div>
-        <h1 className="text-4xl font-bold mb-3 text-[#1c6350]">
+        <h1 className="text-4xl font-bold mb-3 text-[#1c6350] dark:text-[#2d8c72]">
           Music Creator Hub
         </h1>
-        <p className="text-lg text-gray-600 max-w-lg mx-auto">
+        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-lg mx-auto">
           Take your music to the next level - choose how you want to share your sound with the world
         </p>
       </header>
@@ -90,7 +93,8 @@ export const Jet = () => {
             <div className="flex justify-between items-start mb-6">
               <div className="flex items-center space-x-4">
                 <motion.div 
-                  className="p-4 bg-white rounded-xl text-[#1c6350]"
+                  className="p-4 rounded-xl text-[#1c6350]"
+            style={{ backgroundColor: 'var(--color-bg-primary)' }}
                   variants={bounceVariants}
                 >
                   <Rocket size={32} />
@@ -127,7 +131,16 @@ export const Jet = () => {
             </div>
             
             <motion.button 
-              className="mt-4 py-3 px-6 bg-white text-[#1c6350] rounded-lg font-bold text-lg flex items-center justify-center space-x-2 group-hover:bg-[#f0f0f0] transition-colors"
+              className="mt-4 py-3 px-6 text-[#1c6350] rounded-lg font-bold text-lg flex items-center justify-center space-x-2 transition-colors"
+            style={{ 
+              backgroundColor: 'var(--color-bg-primary)',
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'var(--color-bg-primary)';
+            }}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -141,7 +154,8 @@ export const Jet = () => {
         <div className="grid md:grid-cols-2 gap-8">
           {/* Promotion Option */}
           <motion.div 
-            className="bg-white rounded-xl p-8 border-2 border-[#1c6350] shadow-lg shadow-[#1c6350]/10 hover:shadow-xl hover:shadow-[#1c6350]/20 transition-all cursor-pointer"
+            className="rounded-xl p-8 border-2 border-[#1c6350] shadow-lg shadow-[#1c6350]/10 hover:shadow-xl hover:shadow-[#1c6350]/20 transition-all cursor-pointer"
+            style={{ backgroundColor: 'var(--color-bg-primary)' }}
             onClick={() => handleOptionSelect('promotion')}
             whileHover={{ y: -5 }}
           >
@@ -152,24 +166,30 @@ export const Jet = () => {
               <ChevronRight className="text-[#1c6350]" size={28} />
             </div>
             <h2 className="text-2xl font-bold mb-4 text-[#1c6350]">In-App Promotion</h2>
-            <p className="text-gray-600 mb-6 text-lg">
+            <p 
+              className="mb-6 text-lg"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
               Amplify your music within our platform. Get featured in playlists, gain exposure to our community of listeners, and build your audience.
             </p>
             <div className="space-y-4">
-              <div className="flex items-center text-gray-700">
+              <div className="flex items-center">
                 <CheckCircle size={18} className="text-[#1c6350] mr-3" />
-                <span className="text-base">Featured in app playlists</span>
+                <span className="text-base" style={{ color: 'var(--color-text-primary)' }}>Featured in app playlists</span>
               </div>
-              <div className="flex items-center text-gray-700">
+              <div className="flex items-center">
                 <CheckCircle size={18} className="text-[#1c6350] mr-3" />
-                <span className="text-base">Spotlight on discover page</span>
+                <span className="text-base" style={{ color: 'var(--color-text-primary)' }}>Spotlight on discover page</span>
               </div>
-              <div className="flex items-center text-gray-700">
+              <div className="flex items-center">
                 <CheckCircle size={18} className="text-[#1c6350] mr-3" />
-                <span className="text-base">Targeted user recommendations</span>
+                <span className="text-base" style={{ color: 'var(--color-text-primary)' }}>Targeted user recommendations</span>
               </div>
             </div>
-            <div className="mt-8 pt-6 border-t border-gray-200">
+            <div 
+              className="mt-8 pt-6 border-t"
+              style={{ borderTopColor: 'var(--color-border)' }}
+            >
               <button className="w-full py-3 px-4 bg-[#1c6350] text-white rounded-lg font-medium text-lg flex items-center justify-center hover:bg-[#15503f] transition-colors">
                 <span>Promote Your Music</span>
                 <ChevronRight size={20} className="ml-2" />
@@ -179,7 +199,8 @@ export const Jet = () => {
 
           {/* Distribution Option */}
           <motion.div 
-            className="bg-white rounded-xl p-8 border-2 border-[#1c6350] shadow-lg shadow-[#1c6350]/10 hover:shadow-xl hover:shadow-[#1c6350]/20 transition-all cursor-pointer"
+            className="rounded-xl p-8 border-2 border-[#1c6350] shadow-lg shadow-[#1c6350]/10 hover:shadow-xl hover:shadow-[#1c6350]/20 transition-all cursor-pointer"
+            style={{ backgroundColor: 'var(--color-bg-primary)' }}
             onClick={() => handleOptionSelect('distribution')}
             whileHover={{ y: -5 }}
           >
@@ -190,24 +211,30 @@ export const Jet = () => {
               <ChevronRight className="text-[#1c6350]" size={28} />
             </div>
             <h2 className="text-2xl font-bold mb-4 text-[#1c6350]">Global Distribution</h2>
-            <p className="text-gray-600 mb-6 text-lg">
+            <p 
+              className="mb-6 text-lg"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
               Share your music across all major streaming platforms. Reach millions of potential listeners worldwide and maximize your revenue.
             </p>
             <div className="space-y-4">
-              <div className="flex items-center text-gray-700">
+              <div className="flex items-center">
                 <CheckCircle size={18} className="text-[#1c6350] mr-3" />
-                <span className="text-base">Release to 150+ platforms</span>
+                <span className="text-base" style={{ color: 'var(--color-text-primary)' }}>Release to 150+ platforms</span>
               </div>
-              <div className="flex items-center text-gray-700">
+              <div className="flex items-center">
                 <CheckCircle size={18} className="text-[#1c6350] mr-3" />
-                <span className="text-base">Royalty collection</span>
+                <span className="text-base" style={{ color: 'var(--color-text-primary)' }}>Royalty collection</span>
               </div>
-              <div className="flex items-center text-gray-700">
+              <div className="flex items-center">
                 <CheckCircle size={18} className="text-[#1c6350] mr-3" />
-                <span className="text-base">Release scheduling</span>
+                <span className="text-base" style={{ color: 'var(--color-text-primary)' }}>Release scheduling</span>
               </div>
             </div>
-            <div className="mt-8 pt-6 border-t border-gray-200">
+            <div 
+              className="mt-8 pt-6 border-t"
+              style={{ borderTopColor: 'var(--color-border)' }}
+            >
               <button className="w-full py-3 px-4 bg-[#1c6350] text-white rounded-lg font-medium text-lg flex items-center justify-center hover:bg-[#15503f] transition-colors">
                 <span>Distribute Your Music</span>
                 <ChevronRight size={20} className="ml-2" />
@@ -216,7 +243,10 @@ export const Jet = () => {
           </motion.div>
         </div>
 
-        <div className="mt-12 text-center text-gray-500">
+        <div 
+          className="mt-12 text-center"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
           <p>Need help deciding? <a href="#" className="text-[#1c6350] font-medium hover:underline">Contact our support team</a></p>
         </div>
       </main>

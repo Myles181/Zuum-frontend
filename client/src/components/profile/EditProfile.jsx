@@ -140,11 +140,17 @@ const EditProfilePage = ({profile}) => {
   }
 
   return (
-    <div className="bg-gray-100 min-h-screen ">
+    <div 
+      className="min-h-screen"
+      style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+    >
       <div className="max-w-5xl mx-auto">
         {/* Cover + Profile */}
         <div className="relative">
-          <div className="h-60 bg-white overflow-hidden">
+          <div 
+            className="h-60 overflow-hidden"
+            style={{ backgroundColor: 'var(--color-bg-primary)' }}
+          >
             {previewCoverImage ? (
               <img
                 src={previewCoverImage}
@@ -157,7 +163,13 @@ const EditProfilePage = ({profile}) => {
           </div>
           <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2">
             <div className="relative">
-              <div className="w-40 h-40 rounded-full border-4 border-white overflow-hidden bg-white">
+              <div 
+                className="w-40 h-40 rounded-full border-4 overflow-hidden"
+                style={{ 
+                  borderColor: 'var(--color-bg-primary)',
+                  backgroundColor: 'var(--color-bg-primary)'
+                }}
+              >
                 {previewImage ? (
                   <img
                     src={previewImage}
@@ -190,7 +202,14 @@ const EditProfilePage = ({profile}) => {
           </div>
           <label
             htmlFor="cover_image"
-            className="absolute bottom-4 right-4 bg-white px-4 py-2 rounded-md shadow cursor-pointer hover:bg-gray-50 transition flex items-center gap-2"
+            className="absolute bottom-4 right-4 px-4 py-2 rounded-md shadow cursor-pointer transition flex items-center gap-2"
+            style={{ backgroundColor: 'var(--color-bg-primary)' }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'var(--color-bg-primary)';
+            }}
           >
             <FaCamera />
           </label>
@@ -205,11 +224,17 @@ const EditProfilePage = ({profile}) => {
         </div>
 
         {/* Form */}
-        <div className="mt-24 bg-white rounded-lg shadow-md p-6">
+        <div 
+          className="mt-24 rounded-lg shadow-md p-6"
+          style={{ backgroundColor: 'var(--color-bg-primary)' }}
+        >
           <form onSubmit={handleSubmit}>
             {/* Basic Info */}
             <div className="border-b border-gray-200 pb-4 mb-6">
-              <h2 className="text-xl font-semibold text-gray-800">
+              <h2 
+                className="text-xl font-semibold"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Basic Info
               </h2>
             </div>
@@ -218,7 +243,8 @@ const EditProfilePage = ({profile}) => {
               <div>
                 <label
                   htmlFor="firstname"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: 'var(--color-text-primary)' }}
                 >
                   First Name
                 </label>

@@ -15,18 +15,28 @@ const Navbar = ({
   const displayName = name.length > 8 ? name.substring(0, 10) + "..." : name;
 
   return (
-  <div className="navbar bg-white/80 backdrop-blur-md shadow-md flex items-center justify-between px-4 py-3 fixed top-0 left-0 w-full z-50">
+      <div 
+        className="navbar backdrop-blur-md shadow-md flex items-center justify-between px-4 py-3 fixed top-0 left-0 w-full z-50"
+        style={{ 
+          backgroundColor: 'var(--color-bg-primary)',
+          opacity: 0.9
+        }}
+      >
 
       {/* Left Section */}
       <div className="nav-left">
         {isMessagePage || isDashboardPage ? (
           <FiChevronLeft
-            className="w-6 h-6 cursor-pointer text-gray-700"
+            className="w-6 h-6 cursor-pointer"
+            style={{ color: 'var(--color-text-primary)' }}
             onClick={goBack}
           />
         ) : (
           <Link to="/jet">
-            <MdRocketLaunch className="w-6 h-6 text-gray-700" />
+            <MdRocketLaunch 
+              className="w-6 h-6" 
+              style={{ color: 'var(--color-text-primary)' }}
+            />
           </Link>
         )}
       </div>
@@ -50,10 +60,16 @@ const Navbar = ({
         {!(isDashboardPage || isMessagePage) && (
           <>
             <Link to="/search">
-              <FiSearch className="w-6 h-6 text-gray-700" />
+              <FiSearch 
+                className="w-6 h-6" 
+                style={{ color: 'var(--color-text-primary)' }}
+              />
             </Link>
             <Link to="/settings">
-              <FiSettings className="w-6 h-6 text-gray-700" />
+              <FiSettings 
+                className="w-6 h-6" 
+                style={{ color: 'var(--color-text-primary)' }}
+              />
             </Link>
           </>
         )}

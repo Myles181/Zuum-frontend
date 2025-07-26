@@ -14,10 +14,21 @@ const VideoPlayer = ({ post, index, isCurrent, defaultThumbnail, profileId, setV
   const [showPlayButton, setShowPlayButton] = useState(false);
   const [isVideoLoading, setIsVideoLoading] = useState(true);
   const [isManuallyPaused, setIsManuallyPaused] = useState(false); // Track manual pause state
+  const [showStatus, setShowStatus] = useState(true);
 
   // Thumbnail state
   const [thumbnail, setThumbnail] = useState(null);
   const playButtonTimeout = useRef(null);
+
+  // Handle status visibility with fade-out effect
+  useEffect(() => {
+    // Always show status initially, then fade out after 2 seconds regardless of state
+    setShowStatus(true);
+    const timer = setTimeout(() => {
+      setShowStatus(false);
+    }, 2000);
+    return () => clearTimeout(timer);
+  }, [isPlaying]); // Trigger when isPlaying changes (play/pause state changes)
 
   // Set video ref for feed control
   useEffect(() => {
@@ -140,14 +151,23 @@ const VideoPlayer = ({ post, index, isCurrent, defaultThumbnail, profileId, setV
       {/* Loading overlay: black bg with thumbnail (if any) */}
       {isVideoLoading && (
         <>
-          <div className="absolute inset-0 bg-black z-20" />
+          <div className="absolute inset-0 bg-black z-30" />
           {thumbnail && (
             <img
               src={thumbnail}
               alt="video thumbnail"
-              className="absolute inset-0 w-full h-full object-cover z-20"
+              className="absolute inset-0 w-full h-full object-cover z-30"
             />
           )}
+          {/* Loading indicator */}
+          <div className="absolute inset-0 flex items-center justify-center z-40">
+            <div className="bg-black/60 backdrop-blur-sm px-6 py-3 rounded-full">
+              <div className="flex items-center space-x-3">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+                <span className="text-white font-medium">Loading...</span>
+              </div>
+            </div>
+          </div>
         </>
       )}
 
@@ -168,25 +188,51 @@ const VideoPlayer = ({ post, index, isCurrent, defaultThumbnail, profileId, setV
 
       {/* Play/Pause button overlay */}
       {showPlayButton && isCurrent && (
-        <div className="absolute inset-0 flex items-center justify-center z-30">
+        <div className="absolute inset-0 flex items-center justify-center z-50">
           <div className="bg-black/70 rounded-full p-5 cursor-pointer">
             {isPlaying ? <FaPause className="text-white text-4xl" /> : <FaPlay className="text-white text-4xl" />}
           </div>
         </div>
       )}
 
-      {/* Animated progress bar */}
-      <div className="absolute bottom-8 sm:bottom-10 left-0 right-0 h-1 bg-gray-400 z-20">
-        <div
-          className="h-full bg-[#2D8C72] transition-all duration-300 ease-out"
-          style={{ width: `${progress}%` }}
-        />
-        {isVideoLoading && (
-          <div className="absolute top-0 left-0 h-full bg-[#2D8C72]/70" style={{
-            width: '30%',
-            animation: 'loadingBar 0.5s infinite ease-in-out',
-          }}/>
-        )}
+      {/* Status indicator - moved even higher up with fade effect */}
+      <div className={`absolute bottom-40 sm:bottom-44 left-0 right-0 flex items-center justify-center z-30 transition-opacity duration-500 ${showStatus ? 'opacity-100' : 'opacity-30'}`}>
+        <div className="flex items-center space-x-2 bg-black/40 backdrop-blur-sm px-4 py-2 rounded-full">
+          <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`} />
+          <span className="text-white/90 text-sm font-medium">
+            {isPlaying ? 'Playing' : 'Paused'}
+          </span>
+        </div>
+      </div>
+
+      {/* Animated progress bar - moved even higher up */}
+      <div className="absolute bottom-28 sm:bottom-32 left-0 right-0 px-4 z-20">
+        <div className="relative w-full h-4 bg-black/40 backdrop-blur-md rounded-full border border-white/20 shadow-2xl overflow-hidden">
+          {/* Background track */}
+          <div className="relative h-full w-full bg-gradient-to-r from-gray-800/70 to-gray-700/70 rounded-full">
+            {/* Progress bar */}
+            <div
+              className="h-full bg-gradient-to-r from-[#2D8C72] to-green-500 rounded-full transition-all duration-300 ease-out shadow-lg"
+              style={{ width: `${progress}%` }}
+            >
+              {/* Animated shimmer effect */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-pulse rounded-full" />
+              
+              {/* Progress indicator dot */}
+              <div className="absolute right-0 top-1/2 transform -translate-y-1/2 translate-x-1/2 w-5 h-5 bg-white rounded-full shadow-lg border-2 border-[#2D8C72] animate-pulse">
+                <div className="absolute inset-0 bg-white rounded-full animate-ping opacity-75" />
+              </div>
+            </div>
+            
+            {/* Loading animation overlay */}
+            {isVideoLoading && (
+              <div className="absolute top-0 left-0 h-full bg-[#2D8C72]/70 rounded-full" style={{
+                width: '30%',
+                animation: 'loadingBar 0.5s infinite ease-in-out',
+              }}/>
+            )}
+          </div>
+        </div>
       </div>
 
       <style jsx>{`

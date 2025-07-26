@@ -56,22 +56,23 @@ import { UserPromotions } from './pages/UserPromotions';
 import DistributionRequestsPage from './admin/pages/Distribution';
 import AdminBeatPurchasesPage from './admin/pages/Beats';
 import AdminPromotionsPage from './admin/pages/promotion';
+import { DarkModeProvider } from './contexts/DarkModeContext';
 
 const CustomLoader = () => (
-  <div className="fixed inset-0 flex items-center justify-center bg-white">
+  <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-gray-900">
     <div className="text-center">
       <div className="w-16 h-16 border-4 border-[#2D8C72] border-t-transparent rounded-full animate-spin mx-auto"></div>
-      <p className="mt-4 text-gray-600">Loading your experience...</p>
+      <p className="mt-4 text-gray-600 dark:text-gray-300">Loading your experience...</p>
     </div>
   </div>
 );
 
 const AuthErrorDisplay = ({ errorMessage }) => (
-  <div className="fixed inset-0 flex items-center justify-center bg-white p-4">
+  <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-gray-900 p-4">
     <div className="text-center max-w-md">
       <div className="text-red-500 text-5xl mb-4">⚠️</div>
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">Authentication Error</h2>
-      <p className="text-gray-600 mb-6">{errorMessage}</p>
+      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">Authentication Error</h2>
+      <p className="text-gray-600 dark:text-gray-300 mb-6">{errorMessage}</p>
       <button onClick={() => window.location.reload()} className="bg-[#2D8C72] text-white px-6 py-2 rounded-lg font-medium">
         Try Again
       </button>
@@ -80,8 +81,8 @@ const AuthErrorDisplay = ({ errorMessage }) => (
 );
 
 const PaymentErrorToast = () => (
-  <div className="bg-amber-50 border-l-4 border-amber-500 p-4 fixed top-4 right-4 z-50 max-w-md shadow-lg">
-    <p className="text-sm text-amber-700">
+  <div className="bg-amber-50 dark:bg-amber-900/20 border-l-4 border-amber-500 p-4 fixed top-4 right-4 z-50 max-w-md shadow-lg">
+    <p className="text-sm text-amber-700 dark:text-amber-300">
       Payment information couldn't be loaded. Some features may be limited.
     </p>
   </div>
@@ -90,22 +91,12 @@ const PaymentErrorToast = () => (
 // Component handling protected routes and popups
 const AppRoutes = () => {
   const { profile, paymentDetails, loading, error } = useAuth();
-  const [showSubscription, setShowSubscription] = useState(false);
   const location = useLocation();
 
   useEffect(() => {
     if (!profile) return; // wait for profile
     console.log(profile);
     
-
-    // Only show popup if not on subscribe page
-    if (!profile.subscription_status) {
-      if (location.pathname === '/subscribe' || location.pathname === '/home') {
-        setShowSubscription(false);
-      } else {
-        setShowSubscription(true);
-      }
-    }
 
     // Initialize socket once
     if (profile.id) {
@@ -119,7 +110,6 @@ const AppRoutes = () => {
   return (
     <>
       {paymentDetails === null && <PaymentErrorToast />}
-      {showSubscription && <SubscriptionPopup details={paymentDetails} onClose={() => setShowSubscription(false)} />}
 
       <Routes>
         {/* Subscription page should not trigger the popup */}
@@ -164,44 +154,46 @@ const AppRoutes = () => {
 };
 
 const App = () => (
-  <AlertProvider>
-    <AuthProvider>
-      {/* <SocketContextProvider> */}
-      <AdminProvider>
-      <Router>
-        <Routes>
-          {/* Public Routes */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/start" element={<GetStarted />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/forgot" element={<ForgotPassword />} />
-          <Route path="/reset" element={<ResetPassword />} />
-          <Route path="/verify" element={<VerifyOTP />} />
-          <Route path="/adlog" element={<AdminLogin />} />
-            <Route path="/adsin" element={<AdminSignup />} />
-             <Route path="/adver" element={<VerifyEmailForm />} />
-             
-          {/* Protected Routes */}
-          <Route element={<ProtectedRoute />}>
-            <Route path="/*" element={<AppRoutes />} />
-          </Route>
-
-              {/* Admin Protected Routes - Must come before the wildcard */}
-            <Route element={<AdminProtectedRoute />}>
-              <Route path="/admin/*" element={<AdminDashboard />} />
-              <Route path="/users" element={<AdminDashboard />} />
-              <Route path="/distribution" element={<DistributionRequestsPage />} />
-              <Route path="/beat" element={<AdminBeatPurchasesPage />} />
-              <Route path="/promotion" element={<AdminPromotionsPage />} />
-
+  <DarkModeProvider>
+    <AlertProvider>
+      <AuthProvider>
+        {/* <SocketContextProvider> */}
+        <AdminProvider>
+        <Router>
+          <Routes>
+            {/* Public Routes */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/start" element={<GetStarted />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/forgot" element={<ForgotPassword />} />
+            <Route path="/reset" element={<ResetPassword />} />
+            <Route path="/verify" element={<VerifyOTP />} />
+            <Route path="/adlog" element={<AdminLogin />} />
+              <Route path="/adsin" element={<AdminSignup />} />
+               <Route path="/adver" element={<VerifyEmailForm />} />
+               
+            {/* Protected Routes */}
+            <Route element={<ProtectedRoute />}>
+              <Route path="/*" element={<AppRoutes />} />
             </Route>
-        </Routes>
-      </Router>
-      </AdminProvider>
-      {/* </SocketContextProvider> */}
-    </AuthProvider>
-  </AlertProvider>
+
+                {/* Admin Protected Routes - Must come before the wildcard */}
+              <Route element={<AdminProtectedRoute />}>
+                <Route path="/admin/*" element={<AdminDashboard />} />
+                <Route path="/users" element={<AdminDashboard />} />
+                <Route path="/distribution" element={<DistributionRequestsPage />} />
+                <Route path="/beat" element={<AdminBeatPurchasesPage />} />
+                <Route path="/promotion" element={<AdminPromotionsPage />} />
+
+              </Route>
+          </Routes>
+        </Router>
+        </AdminProvider>
+        {/* </SocketContextProvider> */}
+      </AuthProvider>
+    </AlertProvider>
+  </DarkModeProvider>
 );
 
 export default App;

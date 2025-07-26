@@ -16,7 +16,10 @@ const Chat = () => {
   };
 
   return (
-    <div className="bg-white min-h-screen">
+    <div 
+    className="min-h-screen"
+    style={{ backgroundColor: 'var(--color-bg-primary)' }}
+  >
       <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <div className="relative z-10">
         <Navbar name="Messages" toggleSidebar={toggleSidebar} />

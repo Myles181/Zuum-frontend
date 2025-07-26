@@ -133,11 +133,12 @@ const PromotionPage = () => {
               <motion.div
                 key={item.id}
                 whileHover={{ scale: 1.01 }}
-                className={`bg-white rounded-xl shadow-sm overflow-hidden border ${
+                className={`rounded-xl shadow-sm overflow-hidden border ${
                   selectedContent?.id === item.id 
                     ? 'border-[#2D8C72] ring-1 ring-[#2D8C72]' 
                     : 'border-gray-200'
                 }`}
+                style={{ backgroundColor: 'var(--color-bg-primary)' }}
               >
                 <div className="flex">
                   <div 
@@ -161,7 +162,10 @@ const PromotionPage = () => {
                     <div className="flex justify-between">
                       <div>
                         <h3 className="font-medium">{item.title}</h3>
-                        <p className="text-sm text-gray-500 capitalize">
+                        <p 
+                          className="text-sm capitalize"
+                          style={{ color: 'var(--color-text-secondary)' }}
+                        >
                           {item.type} • {item.duration || '--:--'}
                         </p>
                       </div>
@@ -179,7 +183,10 @@ const PromotionPage = () => {
                     </div>
                     
                     <div className="mt-3 flex justify-between items-center">
-                      <span className="text-sm text-gray-500">
+                      <span 
+                        className="text-sm"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
                         {item.plays_count?.toLocaleString() || '0'} plays
                       </span>
                       <span className="font-medium">

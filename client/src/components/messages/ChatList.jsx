@@ -44,7 +44,13 @@ const ChatListPage = () => {
 
   if (error) {
     return (
-      <div className="max-w-2xl mx-auto bg-white rounded-lg shadow p-4 text-red-500">
+      <div 
+        className="max-w-2xl mx-auto rounded-lg shadow p-4"
+        style={{ 
+          backgroundColor: 'var(--color-bg-primary)',
+          color: '#ef4444'
+        }}
+      >
         Error: {error}
       </div>
     );
@@ -55,16 +61,32 @@ const ChatListPage = () => {
   const userId = profile?.id ?? "Unknown"; // Fallback to avoid null
 
   return (
-    <div className="max-w-2xl mx-auto mt-15 bg-white rounded-lg shadow">
+    <div 
+      className="max-w-2xl mx-auto mt-15 rounded-lg shadow"
+      style={{ backgroundColor: 'var(--color-bg-primary)' }}
+    >
       <Overlay isOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
       <Navbar name="Messages" toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
       <Sidebar isOpen={sidebarOpen} toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
-      <div className="divide-y divide-gray-200">
+      <div 
+        className="divide-y"
+        style={{ borderTopColor: 'var(--color-border)' }}
+      >
         {rooms.length > 0 ? (
           rooms.map((room) => (
             <div
               key={room.room_id}
-              className="p-4 hover:bg-gray-50 cursor-pointer flex items-center"
+              className="p-4 cursor-pointer flex items-center"
+              style={{
+                borderBottomColor: 'var(--color-border)',
+                backgroundColor: 'var(--color-bg-primary)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'var(--color-bg-primary)';
+              }}
               onClick={() =>
                 navigate(`/chat/${room.room_id}`, {
                   state: { roomId: room.room_id, otherUserId: room.recipient_id, userId, otherUsername: room.recipient_profile_username , otherProfilePicture: room.recipient_profile_image
@@ -79,7 +101,10 @@ const ChatListPage = () => {
               />
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between items-center">
-                  <h3 className="font-medium text-gray-900 truncate">
+                  <h3 
+                    className="font-medium truncate"
+                    style={{ color: 'var(--color-text-primary)' }}
+                  >
                     {room.recipient_profile_username || "Unknown User"}
                   </h3>
                  
@@ -89,7 +114,10 @@ const ChatListPage = () => {
             </div>
           ))
         ) : (
-          <div className="p-8 text-center text-gray-500">
+          <div 
+            className="p-8 text-center"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
             You don't have any conversations yet
           </div>
         )}

@@ -458,15 +458,32 @@ const Distribution = () => {
   }
 
   return (
-    <div className="h-full bg-gray-50 md:py-12 my-13 ">
+    <div 
+      className="h-full md:py-12 my-13"
+      style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+    >
     <Navbar  name='distribution'/>
-      <div className="max-w-3xl mx-auto bg-white rounded-xl md:rounded-2xl shadow-lg overflow-hidden">
-        <div className="bg-gradient-to-r from-[#247a63]/20 to-white p-4 md:p-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-gray-800 flex items-center">
+      <div 
+        className="max-w-3xl mx-auto rounded-xl md:rounded-2xl shadow-lg overflow-hidden"
+        style={{ backgroundColor: 'var(--color-bg-primary)' }}
+      >
+        <div 
+          className="p-4 md:p-8"
+          style={{ 
+            background: `linear-gradient(to right, rgba(36, 122, 99, 0.2), var(--color-bg-primary))`
+          }}
+        >
+          <h1 
+            className="text-2xl md:text-3xl font-bold flex items-center"
+            style={{ color: 'var(--color-text-primary)' }}
+          >
             <Music className="mr-3 md:mr-4 text-[#247a63]" size={24} />
             Music Distribution
           </h1>
-          <p className="text-gray-600 mt-1 md:mt-2 text-sm md:text-base">
+          <p 
+            className="mt-1 md:mt-2 text-sm md:text-base"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
             Submit your music to major streaming platforms
           </p>
         </div>

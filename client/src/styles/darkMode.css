@@ -1,0 +1,325 @@
+/* Dark Mode Additional Styles */
+
+/* Card and container backgrounds */
+.card {
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+/* Input fields */
+input, textarea, select {
+  background-color: var(--color-bg-primary);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-primary);
+}
+
+input:focus, textarea:focus, select:focus {
+  border-color: #3b82f6;
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+/* Buttons */
+.btn-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+}
+
+.btn-secondary {
+  background-color: var(--color-bg-tertiary);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover {
+  background-color: var(--color-bg-secondary);
+}
+
+/* Modal backgrounds */
+.modal-backdrop {
+  @apply bg-black/50 dark:bg-black/70;
+}
+
+.modal-content {
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700;
+}
+
+/* Dropdown menus */
+.dropdown-menu {
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-lg;
+}
+
+.dropdown-item {
+  @apply text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700;
+}
+
+/* Tables */
+table {
+  @apply bg-white dark:bg-gray-800;
+}
+
+th {
+  @apply bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-gray-100;
+}
+
+td {
+  @apply border-gray-200 dark:border-gray-700 text-gray-900 dark:text-gray-100;
+}
+
+/* Form labels */
+label {
+  @apply text-gray-700 dark:text-gray-200;
+}
+
+/* Placeholder text */
+::placeholder {
+  @apply text-gray-500 dark:text-gray-400;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  @apply w-2;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-gray-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-gray-600 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-gray-400 dark:bg-gray-500;
+}
+
+/* Code blocks */
+code {
+  @apply bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200;
+}
+
+pre {
+  @apply bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200;
+}
+
+/* Links */
+a {
+  @apply text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300;
+}
+
+/* Dividers */
+hr {
+  @apply border-gray-200 dark:border-gray-700;
+}
+
+/* Badges */
+.badge {
+  @apply bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200;
+}
+
+.badge-success {
+  @apply bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300;
+}
+
+.badge-warning {
+  @apply bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300;
+}
+
+.badge-error {
+  @apply bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300;
+}
+
+/* Tooltips */
+.tooltip {
+  @apply bg-gray-900 dark:bg-gray-700 text-white dark:text-gray-100;
+}
+
+/* Loading spinners */
+.spinner {
+  @apply border-gray-300 dark:border-gray-600 border-t-blue-600 dark:border-t-blue-400;
+}
+
+/* Overlay backgrounds */
+.overlay {
+  @apply bg-black/50 dark:bg-black/70;
+}
+
+/* Sidebar specific */
+.sidebar-item {
+  @apply text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700;
+}
+
+.sidebar-item.active {
+  @apply bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300;
+}
+
+/* Navigation specific */
+.nav-item {
+  @apply text-gray-700 dark:text-gray-200 hover:text-gray-900 dark:hover:text-gray-100;
+}
+
+.nav-item.active {
+  @apply text-blue-600 dark:text-blue-400;
+}
+
+/* Footer */
+footer {
+  @apply bg-gray-50 dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700;
+}
+
+/* Audio/Video player controls */
+.player-controls {
+  @apply bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm;
+}
+
+/* Music cards */
+.music-card {
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:shadow-lg dark:hover:shadow-gray-900/20;
+}
+
+/* Profile sections */
+.profile-section {
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700;
+}
+
+/* Settings panels */
+.settings-panel {
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700;
+}
+
+/* Notification badges */
+.notification-badge {
+  @apply bg-red-500 dark:bg-red-400 text-white;
+}
+
+/* Search results */
+.search-result {
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700;
+}
+
+/* Upload areas */
+.upload-area {
+  @apply border-2 border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700;
+}
+
+.upload-area:hover {
+  @apply border-gray-400 dark:border-gray-500 bg-gray-100 dark:bg-gray-600;
+}
+
+/* Progress bars */
+.progress-bar {
+  @apply bg-gray-200 dark:bg-gray-700;
+}
+
+.progress-fill {
+  @apply bg-blue-600 dark:bg-blue-500;
+}
+
+/* Toggle switches */
+.toggle-switch {
+  @apply bg-gray-200 dark:bg-gray-700;
+}
+
+.toggle-switch.active {
+  @apply bg-blue-600 dark:bg-blue-500;
+}
+
+/* Rating stars */
+.star {
+  @apply text-gray-300 dark:text-gray-600;
+}
+
+.star.filled {
+  @apply text-yellow-400 dark:text-yellow-500;
+}
+
+/* Social media icons */
+.social-icon {
+  @apply text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200;
+}
+
+/* Status indicators */
+.status-online {
+  @apply bg-green-500 dark:bg-green-400;
+}
+
+.status-offline {
+  @apply bg-gray-400 dark:bg-gray-500;
+}
+
+.status-away {
+  @apply bg-yellow-500 dark:bg-yellow-400;
+}
+
+/* Chat bubbles */
+.chat-bubble {
+  @apply bg-blue-500 dark:bg-blue-600 text-white;
+}
+
+.chat-bubble.own {
+  @apply bg-gray-200 dark:bg-gray-700 text-gray-900 dark:text-gray-100;
+}
+
+/* Timeline items */
+.timeline-item {
+  @apply border-l border-gray-200 dark:border-gray-700;
+}
+
+.timeline-dot {
+  @apply bg-blue-500 dark:bg-blue-400;
+}
+
+/* Calendar */
+.calendar {
+  @apply bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700;
+}
+
+.calendar-header {
+  @apply bg-gray-50 dark:bg-gray-700;
+}
+
+.calendar-day {
+  @apply text-gray-900 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-700;
+}
+
+.calendar-day.today {
+  @apply bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300;
+}
+
+.calendar-day.selected {
+  @apply bg-blue-600 dark:bg-blue-500 text-white;
+}
+
+/* File upload */
+.file-upload {
+  @apply border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700;
+}
+
+.file-upload:hover {
+  @apply border-gray-400 dark:border-gray-500;
+}
+
+/* Error states */
+.error-state {
+  @apply bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-800 dark:text-red-200;
+}
+
+/* Success states */
+.success-state {
+  @apply bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 text-green-800 dark:text-green-200;
+}
+
+/* Warning states */
+.warning-state {
+  @apply bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 text-yellow-800 dark:text-yellow-200;
+}
+
+/* Info states */
+.info-state {
+  @apply bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-800 dark:text-blue-200;
+} 

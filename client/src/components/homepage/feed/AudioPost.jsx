@@ -222,7 +222,7 @@ const AudioPost = React.forwardRef(({
         </div>
         
         {/* Bottom actions */}
-        <div className="absolute bottom-32 sm:bottom-36 left-0 right-0 p-4 z-30 flex justify-between items-end">
+        <div className="absolute bottom-32 sm:bottom-36 left-0 right-0 p-4 z-10 flex justify-between items-end">
           <div className="flex-1 flex items-center space-x-3">
             <div 
               className="flex items-center space-x-3 flex-1"

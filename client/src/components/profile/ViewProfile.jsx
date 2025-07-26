@@ -125,15 +125,19 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
         <img
           src={mergedProfile.image}
           alt="Profile"
-          className="w-24 h-24 rounded-full border-4 border-white shadow-lg"
+          className="w-24 h-24 rounded-full border-4 shadow-lg"
+          style={{ borderColor: 'var(--color-bg-primary)' }}
         />
       </div>
 
       {/* Stats */}
       <div className="stats-container flex flex-col items-center mt-16 px-5 text-center">
         <h2 className="text-2xl text-[#008066]">{mergedProfile.username}</h2>
-        <p className="text-gray-500">{mergedProfile.identity}</p>
-        <div className="stats flex justify-around w-full max-w-md mt-4 gap-5 text-gray-500">
+        <p style={{ color: 'var(--color-text-secondary)' }}>{mergedProfile.identity}</p>
+        <div 
+          className="stats flex justify-around w-full max-w-md mt-4 gap-5"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
           <div>
             <p>Followers</p>
             <span className="text-[#008066] font-bold">{followersCount}</span>
@@ -148,7 +152,10 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
       </div>
 
       {/* Bio */}
-      <p className="bio text-gray-700 text-center px-5 mt-5">
+      <p 
+        className="bio text-center px-5 mt-5"
+        style={{ color: 'var(--color-text-primary)' }}
+      >
         {mergedProfile.bio}
       </p>
 
@@ -188,7 +195,10 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
       {roomError && <p className="text-red-500 text-center mt-3">{roomError}</p>}
 
       {/* Tabs */}
-      <div className="tab-section pt-4 w-full bg-white rounded-b-lg">
+      <div 
+        className="tab-section pt-4 w-full rounded-b-lg"
+        style={{ backgroundColor: 'var(--color-bg-primary)' }}
+      >
         <div className="tab-buttons flex justify-center gap-8 border-b border-gray-200">
           {tabs.map((tab) => (
             <button
