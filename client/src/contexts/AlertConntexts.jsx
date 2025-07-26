@@ -1,5 +1,6 @@
 import React, { createContext, useState, useEffect, useContext, useCallback, useMemo } from 'react';
 import { FiX, FiCheckCircle, FiInfo, FiAlertTriangle, FiBell } from 'react-icons/fi';
+import { useDarkMode } from './DarkModeContext';
 
 // -- Popup UI --
 const AlertPopup = React.memo(({ alerts, onClose }) => {
@@ -16,6 +17,7 @@ const AlertPopup = React.memo(({ alerts, onClose }) => {
 
 const AlertItem = React.memo(({ alert, onClose }) => {
   const [isVisible, setIsVisible] = useState(true);
+  const { isDarkMode } = useDarkMode();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -30,8 +32,10 @@ const AlertItem = React.memo(({ alert, onClose }) => {
 
   return (
     <div
-      className={`pointer-events-auto mb-2 flex items-center gap-3 rounded-full bg-white px-5 py-3 animate-fade-in`}
+      className={`pointer-events-auto mb-2 flex items-center gap-3 rounded-full px-5 py-3 animate-fade-in`}
       style={{
+        backgroundColor: 'var(--color-bg-secondary)',
+        color: 'var(--color-text-primary)',
         boxShadow:
           alert.type === 'success'
             ? '0 0 20px rgba(52,211,153,0.6)'
@@ -48,13 +52,14 @@ const AlertItem = React.memo(({ alert, onClose }) => {
         warning: <FiBell className="text-amber-500" />,
         error: <FiAlertTriangle className="text-red-500" />
       }[alert.type]}
-      <span className="text-sm flex-1">{alert.message}</span>
+      <span className="text-sm flex-1" style={{ color: 'var(--color-text-primary)' }}>{alert.message}</span>
       <button 
         onClick={() => {
           setIsVisible(false);
           onClose(alert.id);
         }} 
         className="opacity-70 hover:opacity-100"
+        style={{ color: 'var(--color-text-primary)' }}
       >
         <FiX />
       </button>

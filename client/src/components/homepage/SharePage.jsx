@@ -91,7 +91,7 @@ const SharedAudioPage = () => {
       {/* Main content */}
       <div className="relative z-10 w-full h-full flex flex-col">
         {/* Header */}
-        <div className="absolute top-0 left-0 right-0 p-4 z-30 flex justify-between items-center">
+        <div className="absolute top-8 sm:top-12 left-0 right-0 p-4 z-30 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <button 
               onClick={() => navigate(-1)} 

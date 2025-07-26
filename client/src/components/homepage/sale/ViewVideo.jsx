@@ -125,7 +125,7 @@ const VideoViewerPage = () => {
       </div>
       
       {/* Header */}
-      <div className="absolute top-0 left-0 right-0 p-4 z-20 flex justify-between items-center">
+      <div className="absolute top-8 sm:top-12 left-0 right-0 p-4 z-20 flex justify-between items-center">
         <button 
           onClick={() => navigate(-1)} 
           className="bg-black/50 p-2 rounded-full"

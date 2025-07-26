@@ -1,5 +1,6 @@
 import React from 'react';
 import { FiImage, FiMusic, FiX } from 'react-icons/fi';
+import { useDarkMode } from '../../contexts/DarkModeContext';
 
 const FileUploadSection = ({
   previewImage,
@@ -13,13 +14,27 @@ const FileUploadSection = ({
   fileInputRef,
   audioInputRef
 }) => {
+  const { isDarkMode } = useDarkMode();
+
   return (
     <div className="grid md:grid-cols-2 gap-6">
       {/* Cover Photo Upload */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Cover Photo</label>
+        <label 
+          className="block text-sm font-medium"
+          style={{ color: 'var(--color-text-primary)' }}
+        >
+          Cover Photo
+        </label>
         <div 
-          className={`aspect-square bg-gray-50 border border-gray-200 rounded-lg flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all hover:bg-gray-100 ${previewImage ? 'p-0' : 'p-6'} ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
+          className={`aspect-square border rounded-lg flex flex-col items-center justify-center cursor-pointer overflow-hidden transition-all ${previewImage ? 'p-0' : 'p-6'} ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
+          style={{ 
+            backgroundColor: 'var(--color-bg-primary)',
+            borderColor: 'var(--color-border)',
+            '&:hover': {
+              backgroundColor: isDarkMode ? 'var(--color-bg-tertiary)' : '#f3f4f6'
+            }
+          }}
           onClick={() => !loading && triggerFileInput('image')}
         >
           {previewImage ? (
@@ -49,11 +64,27 @@ const FileUploadSection = ({
             </div>
           ) : (
             <>
-              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-                <FiImage className="w-6 h-6 text-gray-400" />
+              <div 
+                className="w-16 h-16 rounded-full flex items-center justify-center mb-3"
+                style={{ backgroundColor: 'var(--color-bg-tertiary)' }}
+              >
+                <FiImage 
+                  className="w-6 h-6" 
+                  style={{ color: 'var(--color-text-secondary)' }}
+                />
               </div>
-              <p className="text-gray-800 font-medium">Choose cover photo</p>
-              <p className="text-gray-500 text-sm mt-1">JPG, PNG or GIF</p>
+              <p 
+                className="font-medium"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
+                Choose cover photo
+              </p>
+              <p 
+                className="text-sm mt-1"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                JPG, PNG or GIF
+              </p>
             </>
           )}
           <input
@@ -70,26 +101,57 @@ const FileUploadSection = ({
       
       {/* Audio File Upload */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Audio File</label>
+        <label 
+          className="block text-sm font-medium"
+          style={{ color: 'var(--color-text-primary)' }}
+        >
+          Audio File
+        </label>
         <div 
-          className={`w-full  bg-gray-50 border ${errors.audio_upload ? 'border-rose-300' : 'border-gray-200'} rounded-lg flex flex-col items-center justify-center cursor-pointer hover:bg-gray-100 transition-all p-6 ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
+          className={`w-full border rounded-lg flex flex-col items-center justify-center cursor-pointer transition-all p-6 ${loading ? 'opacity-60 cursor-not-allowed' : ''}`}
+          style={{ 
+            backgroundColor: 'var(--color-bg-primary)',
+            borderColor: errors.audio_upload ? '#fca5a5' : 'var(--color-border)',
+            '&:hover': {
+              backgroundColor: isDarkMode ? 'var(--color-bg-tertiary)' : '#f3f4f6'
+            }
+          }}
           onClick={() => !loading && triggerFileInput('audio')}
         >
-          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-3">
-            <FiMusic className="w-6 h-6 text-gray-400" />
+          <div 
+            className="w-16 h-16 rounded-full flex items-center justify-center mb-3"
+            style={{ backgroundColor: 'var(--color-bg-tertiary)' }}
+          >
+            <FiMusic 
+              className="w-6 h-6" 
+              style={{ color: 'var(--color-text-secondary)' }}
+            />
           </div>
           
           {formData.audio_upload ? (
             <>
               <p className="text-emerald-700 font-medium">File selected</p>
-              <p className="text-gray-500 text-sm mt-1 text-center truncate max-w-full">
+              <p 
+                className="text-sm mt-1 text-center truncate max-w-full"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
                 {formData.audio_upload.name}
               </p>
             </>
           ) : (
             <>
-              <p className="text-gray-800 font-medium">Choose audio file</p>
-              <p className="text-gray-500 text-sm mt-1">MP3, WAV, FLAC or AAC</p>
+              <p 
+                className="font-medium"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
+                Choose audio file
+              </p>
+              <p 
+                className="text-sm mt-1"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                MP3, WAV, FLAC or AAC
+              </p>
             </>
           )}
           <input

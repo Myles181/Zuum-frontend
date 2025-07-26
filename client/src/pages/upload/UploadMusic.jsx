@@ -9,6 +9,7 @@ import Overlay from '../../components/homepage/Overlay';
 import BottomNav from '../../components/homepage/BottomNav';
 import { useNavigate } from 'react-router-dom';
 import { useAlerts } from '../../contexts/AlertConntexts';
+import { useDarkMode } from '../../contexts/DarkModeContext';
 
 
 const MusicUploadForm = () => {
@@ -33,6 +34,7 @@ const MusicUploadForm = () => {
   
   const { showSuccess, showError, showInfo, showWarning } = useAlerts();
   const { createAudioPost, loading, error, success } = useCreateAudioPost();
+  const { isDarkMode } = useDarkMode();
 
   useEffect(() => {
     if (success) {
@@ -167,24 +169,44 @@ const MusicUploadForm = () => {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
   return (
-    <div className="min-h-screen bg-gray-50 mb-13">
+    <div 
+      className="min-h-screen mb-13"
+      style={{ backgroundColor: 'var(--color-bg-primary)' }}
+    >
       <Navbar name={"Upload Beats"} toggleSidebar={toggleSidebar} />
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       
-      <div className="max-w-3xl mx-auto bg-white rounded-xl shadow-sm overflow-hidden">
+      <div 
+        className="max-w-3xl mx-auto rounded-xl shadow-sm overflow-hidden"
+        style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+      >
         {/* Debug Info Panel - Optional, can be removed in production */}
         {process.env.NODE_ENV === 'development' && (
-          <div className="p-4 bg-gray-100 border-b border-gray-200">
+          <div 
+            className="p-4 border-b"
+            style={{ 
+              backgroundColor: 'var(--color-bg-tertiary)',
+              borderColor: 'var(--color-border)'
+            }}
+          >
             <details>
-              <summary className="font-medium text-gray-700 cursor-pointer">Debug Information</summary>
-              <div className="mt-2 p-3 bg-gray-50 rounded text-xs overflow-auto max-h-40">
-                <div><strong>Loading:</strong> {loading ? 'true' : 'false'}</div>
-                <div><strong>Success:</strong> {success ? 'true' : 'false'}</div>
-                <div><strong>Error:</strong> {error ? error : 'null'}</div>
-                <div><strong>API URL:</strong> {import.meta.env.VITE_API_URL || 'Not defined'}</div>
-                <div><strong>Auth Token:</strong> {localStorage.getItem('authToken') ? 'Exists' : 'Missing'}</div>
-                <div><strong>Files:</strong> 
+              <summary 
+                className="font-medium cursor-pointer"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
+                Debug Information
+              </summary>
+              <div 
+                className="mt-2 p-3 rounded text-xs overflow-auto max-h-40"
+                style={{ backgroundColor: 'var(--color-bg-primary)' }}
+              >
+                <div style={{ color: 'var(--color-text-primary)' }}><strong>Loading:</strong> {loading ? 'true' : 'false'}</div>
+                <div style={{ color: 'var(--color-text-primary)' }}><strong>Success:</strong> {success ? 'true' : 'false'}</div>
+                <div style={{ color: 'var(--color-text-primary)' }}><strong>Error:</strong> {error ? error : 'null'}</div>
+                <div style={{ color: 'var(--color-text-primary)' }}><strong>API URL:</strong> {import.meta.env.VITE_API_URL || 'Not defined'}</div>
+                <div style={{ color: 'var(--color-text-primary)' }}><strong>Auth Token:</strong> {localStorage.getItem('authToken') ? 'Exists' : 'Missing'}</div>
+                <div style={{ color: 'var(--color-text-primary)' }}><strong>Files:</strong> 
                   Cover: {formData.cover_photo ? `${formData.cover_photo.name} (${formData.cover_photo.size} bytes)` : 'None'}, 
                   Audio: {formData.audio_upload ? `${formData.audio_upload.name} (${formData.audio_upload.size} bytes)` : 'None'}
                 </div>
@@ -196,13 +218,23 @@ const MusicUploadForm = () => {
         <form onSubmit={handleSubmit} className="p-6 space-y-8">
           {/* Caption */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Caption</label>
+            <label 
+              className="block text-sm font-medium"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              Caption
+            </label>
             <input
               type="text"
               name="caption"
               value={formData.caption}
               onChange={handleChange}
-              className="w-full p-3 rounded-lg bg-gray-50 border border-gray-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+              className="w-full p-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+              style={{ 
+                backgroundColor: 'var(--color-bg-primary)',
+                borderColor: 'var(--color-border)',
+                color: 'var(--color-text-primary)'
+              }}
               placeholder="Describe your audio..."
               disabled={loading}
             />
@@ -211,7 +243,12 @@ const MusicUploadForm = () => {
           
           {/* Type Selection */}
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Type</label>
+            <label 
+              className="block text-sm font-medium"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              Type
+            </label>
             <div className="flex gap-4">
               <label className="relative flex items-center gap-2 cursor-pointer">
                 <input
@@ -223,10 +260,22 @@ const MusicUploadForm = () => {
                   className="sr-only"
                   disabled={loading}
                 />
-                <span className={`h-5 w-5 rounded-full border ${formData.type === 'music' ? 'bg-emerald-600 border-emerald-600' : 'bg-white border-gray-300'} flex items-center justify-center transition-colors`}>
+                <span className={`h-5 w-5 rounded-full border flex items-center justify-center transition-colors ${
+                  formData.type === 'music' 
+                    ? 'bg-emerald-600 border-emerald-600' 
+                    : 'border-gray-300 dark:border-gray-600'
+                }`} style={{ 
+                  backgroundColor: formData.type === 'music' ? '#059669' : 'var(--color-bg-primary)'
+                }}>
                   {formData.type === 'music' && <span className="h-2 w-2 rounded-full bg-white"></span>}
                 </span>
-                <span className={`${formData.type === 'music' ? 'text-emerald-800 font-medium' : 'text-gray-600'}`}>Music</span>
+                <span style={{ 
+                  color: formData.type === 'music' 
+                    ? '#065f46' 
+                    : 'var(--color-text-secondary)'
+                }} className={formData.type === 'music' ? 'font-medium' : ''}>
+                  Music
+                </span>
               </label>
               
               <label className="relative flex items-center gap-2 cursor-pointer">
@@ -239,10 +288,22 @@ const MusicUploadForm = () => {
                   className="sr-only"
                   disabled={loading}
                 />
-                <span className={`h-5 w-5 rounded-full border ${formData.type === 'beat' ? 'bg-emerald-600 border-emerald-600' : 'bg-white border-gray-300'} flex items-center justify-center transition-colors`}>
+                <span className={`h-5 w-5 rounded-full border flex items-center justify-center transition-colors ${
+                  formData.type === 'beat' 
+                    ? 'bg-emerald-600 border-emerald-600' 
+                    : 'border-gray-300 dark:border-gray-600'
+                }`} style={{ 
+                  backgroundColor: formData.type === 'beat' ? '#059669' : 'var(--color-bg-primary)'
+                }}>
                   {formData.type === 'beat' && <span className="h-2 w-2 rounded-full bg-white"></span>}
                 </span>
-                <span className={`${formData.type === 'beat' ? 'text-emerald-800 font-medium' : 'text-gray-600'}`}>Beat</span>
+                <span style={{ 
+                  color: formData.type === 'beat' 
+                    ? '#065f46' 
+                    : 'var(--color-text-secondary)'
+                }} className={formData.type === 'beat' ? 'font-medium' : ''}>
+                  Beat
+                </span>
               </label>
             </div>
           </div>

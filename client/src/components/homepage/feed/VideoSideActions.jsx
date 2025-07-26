@@ -20,7 +20,7 @@ const VideoSideActions = ({ post, data, profileId }) => {
   console.log('Video comments:', data?.comments);
 
   return (
-    <div className="absolute bottom-32 sm:bottom-36 left-0 right-0 p-4 z-30 flex justify-between items-end">
+    <div className="absolute bottom-20 sm:bottom-24 left-0 right-0 p-4 z-30 flex justify-between items-end">
       {/* Profile Section */}
       <div 
         className="flex-1 flex items-center space-x-3"  

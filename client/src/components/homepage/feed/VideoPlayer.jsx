@@ -196,7 +196,7 @@ const VideoPlayer = ({ post, index, isCurrent, defaultThumbnail, profileId, setV
       )}
 
       {/* Status indicator - moved even higher up with fade effect */}
-      <div className={`absolute bottom-40 sm:bottom-44 left-0 right-0 flex items-center justify-center z-30 transition-opacity duration-500 ${showStatus ? 'opacity-100' : 'opacity-30'}`}>
+      <div className={`absolute bottom-28 sm:bottom-32 left-0 right-0 flex items-center justify-center z-30 transition-opacity duration-500 ${showStatus ? 'opacity-100' : 'opacity-30'}`}>
         <div className="flex items-center space-x-2 bg-black/40 backdrop-blur-sm px-4 py-2 rounded-full">
           <div className={`w-2 h-2 rounded-full ${isPlaying ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`} />
           <span className="text-white/90 text-sm font-medium">
@@ -206,7 +206,7 @@ const VideoPlayer = ({ post, index, isCurrent, defaultThumbnail, profileId, setV
       </div>
 
       {/* Animated progress bar - moved even higher up */}
-      <div className="absolute bottom-28 sm:bottom-32 left-0 right-0 px-4 z-20">
+      <div className="absolute bottom-16 sm:bottom-20 left-0 right-0 px-4 z-20">
         <div className="relative w-full h-4 bg-black/40 backdrop-blur-md rounded-full border border-white/20 shadow-2xl overflow-hidden">
           {/* Background track */}
           <div className="relative h-full w-full bg-gradient-to-r from-gray-800/70 to-gray-700/70 rounded-full">

@@ -7,7 +7,7 @@ import Overlay from '../../components/homepage/Overlay';
 import BottomNav from '../../components/homepage/BottomNav';
 import { useNavigate } from 'react-router-dom';
 import { useAlerts } from '../../contexts/AlertConntexts';
-
+import { useDarkMode } from '../../contexts/DarkModeContext';
 
 const UploadBeats = () => {
   const { createBeatPost, loading, error, success } = useCreateBeatPost();
@@ -28,6 +28,7 @@ const UploadBeats = () => {
   
   // Get alert functions from context
   const { showSuccess, showError, showInfo, showWarning } = useAlerts();
+  const { isDarkMode } = useDarkMode();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -172,15 +173,24 @@ const UploadBeats = () => {
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   
   return (
-    <div className="min-h-screen bg-gray-50 my-13">
+    <div 
+      className="min-h-screen my-13"
+      style={{ backgroundColor: 'var(--color-bg-primary)' }}
+    >
       <Navbar name={"Upload Beats"} toggleSidebar={toggleSidebar} />
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       
-      <div className="max-w-2xl mx-auto bg-white overflow-hidden">
+      <div 
+        className="max-w-2xl mx-auto overflow-hidden rounded-lg shadow-lg"
+        style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+      >
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label 
+              className="block text-sm font-medium mb-1"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
               Beat Title
             </label>
             <input
@@ -189,12 +199,14 @@ const UploadBeats = () => {
               value={formData.caption}
               onChange={handleInputChange}
               className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
-                submitAttempted && !formData.caption ? 'border-red-500' : 'border-gray-300'
+                submitAttempted && !formData.caption ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
               }`}
               style={{ 
                 boxShadow: `0 0 0 1px transparent`,
                 outline: 'none',
                 '--tw-ring-color': tealColor,
+                backgroundColor: 'var(--color-bg-primary)',
+                color: 'var(--color-text-primary)'
               }}
               placeholder="Give your beat a catchy title"
             />
@@ -204,7 +216,10 @@ const UploadBeats = () => {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label 
+              className="block text-sm font-medium mb-1"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
               Description
             </label>
             <textarea
@@ -213,12 +228,14 @@ const UploadBeats = () => {
               onChange={handleInputChange}
               rows="3"
               className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
-                submitAttempted && !formData.description ? 'border-red-500' : 'border-gray-300'
+                submitAttempted && !formData.description ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
               }`}
               style={{ 
                 boxShadow: `0 0 0 1px transparent`,
                 outline: 'none',
                 '--tw-ring-color': tealColor,
+                backgroundColor: 'var(--color-bg-primary)',
+                color: 'var(--color-text-primary)'
               }}
               placeholder="Describe your beat, mention genre, mood, or inspiration"
             ></textarea>
@@ -228,12 +245,15 @@ const UploadBeats = () => {
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
+            <label 
+              className="block text-sm font-medium mb-1"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
               Price
             </label>
             <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span className="text-gray-500">₦</span>
+                  <span style={{ color: 'var(--color-text-secondary)' }}>₦</span>
                 </div>
                 <input
                   type="number"
@@ -242,27 +262,40 @@ const UploadBeats = () => {
                   onChange={handleInputChange}
                   min="0.01"
                   step="0.01"
-                  className="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:border-transparent"
+                  className="w-full pl-7 pr-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent border-gray-300 dark:border-gray-600"
                   style={{ 
                     boxShadow: `0 0 0 1px transparent`,
                     outline: 'none',
                     '--tw-ring-color': tealColor,
+                    backgroundColor: 'var(--color-bg-primary)',
+                    color: 'var(--color-text-primary)'
                   }}
                 />
               </div>
             </div>
           
           <div>
-            <p className="block text-sm font-medium text-gray-700 mb-2">Cover Photo</p>
+            <p 
+              className="block text-sm font-medium mb-2"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              Cover Photo
+            </p>
             {!coverPhoto ? (
               <div 
-                className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 ${
-                  submitAttempted && !coverPhoto ? 'border-red-400' : 'border-gray-300'
+                className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer transition-colors ${
+                  submitAttempted && !coverPhoto ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'
                 }`}
+                style={{ 
+                  backgroundColor: 'var(--color-bg-primary)',
+                  '&:hover': {
+                    backgroundColor: isDarkMode ? 'var(--color-bg-tertiary)' : '#f9fafb'
+                  }
+                }}
                 onClick={() => document.getElementById('cover-upload').click()}
               >
-                <Upload className="h-10 w-10 text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500">Click to upload cover photo</p>
+                <Upload className="h-10 w-10 mb-2" style={{ color: 'var(--color-text-secondary)' }} />
+                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Click to upload cover photo</p>
                 <input
                   id="cover-upload"
                   type="file"
@@ -293,16 +326,27 @@ const UploadBeats = () => {
           </div>
           
           <div>
-            <p className="block text-sm font-medium text-gray-700 mb-2">Audio File</p>
+            <p 
+              className="block text-sm font-medium mb-2"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              Audio File
+            </p>
             {!audioFile ? (
               <div 
-                className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 ${
-                  submitAttempted && !audioFile ? 'border-red-400' : 'border-gray-300'
+                className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer transition-colors ${
+                  submitAttempted && !audioFile ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'
                 }`}
+                style={{ 
+                  backgroundColor: 'var(--color-bg-primary)',
+                  '&:hover': {
+                    backgroundColor: isDarkMode ? 'var(--color-bg-tertiary)' : '#f9fafb'
+                  }
+                }}
                 onClick={() => document.getElementById('audio-upload').click()}
               >
-                <Music className="h-10 w-10 text-gray-400 mb-2" />
-                <p className="text-sm text-gray-500">Click to upload audio file</p>
+                <Music className="h-10 w-10 mb-2" style={{ color: 'var(--color-text-secondary)' }} />
+                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Click to upload audio file</p>
                 <input
                   id="audio-upload"
                   type="file"
@@ -312,7 +356,13 @@ const UploadBeats = () => {
                 />
               </div>
             ) : (
-              <div className="border border-gray-200 rounded-lg p-4 flex items-center justify-between">
+              <div 
+                className="border rounded-lg p-4 flex items-center justify-between"
+                style={{ 
+                  borderColor: 'var(--color-border)',
+                  backgroundColor: 'var(--color-bg-primary)'
+                }}
+              >
                 <div className="flex items-center overflow-hidden">
                   <button
                     type="button"
@@ -331,7 +381,7 @@ const UploadBeats = () => {
                       </div>
                     )}
                   </button>
-                  <span className="truncate text-sm">{audioFile.name}</span>
+                  <span className="truncate text-sm" style={{ color: 'var(--color-text-primary)' }}>{audioFile.name}</span>
                   {audioFile && (
                     <audio ref={audioRef} src={URL.createObjectURL(audioFile)} onEnded={() => setIsPlaying(false)} />
                   )}
@@ -339,7 +389,8 @@ const UploadBeats = () => {
                 <button
                   type="button"
                   onClick={removeAudioFile}
-                  className="ml-2 text-gray-400 hover:text-gray-600 flex-shrink-0"
+                  className="ml-2 hover:text-gray-600 flex-shrink-0"
+                  style={{ color: 'var(--color-text-secondary)' }}
                 >
                   <X className="h-5 w-5" />
                 </button>

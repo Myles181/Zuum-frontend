@@ -194,7 +194,7 @@ const AudioPost = React.forwardRef(({
       {/* Main content */}
       <div className="relative z-10 w-full h-full">
         {/* Top bar */}
-        <div className="absolute top-0 left-0 right-0 p-4 z-30 flex justify-between items-center">
+        <div className="absolute top-13 sm:top-12 left-0 right-0 p-4 z-30 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <FaMusic className="text-white text-xl" />
             <span className="text-white font-semibold text-sm">
@@ -222,7 +222,7 @@ const AudioPost = React.forwardRef(({
         </div>
         
         {/* Bottom actions */}
-        <div className="absolute bottom-32 sm:bottom-36 left-0 right-0 p-4 z-10 flex justify-between items-end">
+        <div className="absolute bottom-20 sm:bottom-24 left-0 right-0 p-4 z-10 flex justify-between items-end">
           <div className="flex-1 flex items-center space-x-3">
             <div 
               className="flex items-center space-x-3 flex-1"
