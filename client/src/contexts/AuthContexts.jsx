@@ -14,9 +14,40 @@ export const AuthProvider = ({ children }) => {
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
 
+  // Detect iOS Safari
+  const isIOSSafari = () => {
+    const ua = navigator.userAgent;
+    return /iPad|iPhone|iPod/.test(ua) && /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
+  };
+
+  // Enhanced cookie handling for iOS Safari
+  const getCookie = (name) => {
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
+    return null;
+  };
+
+  // Set cookie with iOS Safari compatibility
+  const setCookie = (name, value, days = 7) => {
+    const expires = new Date();
+    expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+    const cookieString = `${name}=${value}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+    document.cookie = cookieString;
+  };
+
   // Main authentication check - fetches profile
   const checkAuth = useCallback(async () => {
     try {
+      // For iOS Safari, try to get token from cookie first
+      if (isIOSSafari()) {
+        const token = getCookie('token');
+        if (token) {
+          // Set Authorization header for iOS Safari
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        }
+      }
+
       const response = await axios.get('/user/profile');
       setProfile(response.data);
       return true;
@@ -66,16 +97,28 @@ export const AuthProvider = ({ children }) => {
     setError(null);
     try {
       // 1. Send login request
-      await axios.post('/auth/login', credentials);
+      const response = await axios.post('/auth/login', credentials);
       
-      // 2. Verify auth by fetching profile
+      // 2. Handle iOS Safari cookie storage
+      if (isIOSSafari()) {
+        // Check if token is in response headers or cookies
+        const token = response.data?.token || getCookie('token');
+        if (token) {
+          // Store token in localStorage as backup for iOS Safari
+          localStorage.setItem('auth_token', token);
+          // Set Authorization header
+          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        }
+      }
+      
+      // 3. Verify auth by fetching profile
       const isAuthenticated = await checkAuth();
       
       if (!isAuthenticated) {
         throw new Error('Login succeeded but authentication failed');
       }
 
-      // 3. Fetch payment details after successful auth
+      // 4. Fetch payment details after successful auth
       await fetchPaymentDetails();
     } catch (err) {
       console.error('Login error:', err);
@@ -114,6 +157,11 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setProfile(null);
       setPaymentDetails(null);
+      // Clear stored token for iOS Safari
+      if (isIOSSafari()) {
+        localStorage.removeItem('auth_token');
+        delete axios.defaults.headers.common['Authorization'];
+      }
     }
   };
 
@@ -121,6 +169,14 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        // For iOS Safari, try to restore token from localStorage
+        if (isIOSSafari()) {
+          const storedToken = localStorage.getItem('auth_token');
+          if (storedToken) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+          }
+        }
+
         const isAuthenticated = await checkAuth();
         if (isAuthenticated) {
           await fetchPaymentDetails();

@@ -7,6 +7,12 @@ import axios from "axios";
 // Get the API base URL
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Detect iOS Safari
+const isIOSSafari = () => {
+  const ua = navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(ua) && /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
+};
+
 // Custom hook for user login using cookies with debug logs
 // Custom hook for user login using cookies with debug logs
 export const useLogin = () => {
@@ -24,6 +30,7 @@ export const useLogin = () => {
 
    const login = async (credentials) => {
     console.debug("[useLogin] Starting login with credentials:", credentials);
+    console.debug("[useLogin] iOS Safari detected:", isIOSSafari());
     setLoading(true);
     setError(null);
     setSuccess(false);
@@ -36,12 +43,33 @@ export const useLogin = () => {
       console.debug("[useLogin] Received response:", response);
       if (response.status === 200) {
         console.debug("[useLogin] Login successful, checking cookies...");
-        const cookieToken = getCookie("token"); // Assuming token is in 'token' cookie
-        if (cookieToken) {
-          console.debug("[useLogin] Token extracted from cookie:", cookieToken);
-          setToken(cookieToken); // Optional: use it in context/localStorage
+        
+        // Handle iOS Safari specifically
+        if (isIOSSafari()) {
+          console.debug("[useLogin] iOS Safari detected, handling token storage");
+          const cookieToken = getCookie("token");
+          const responseToken = response.data?.token;
+          const token = responseToken || cookieToken;
+          
+          if (token) {
+            console.debug("[useLogin] Token found for iOS Safari:", token);
+            setToken(token);
+            // Store in localStorage as backup for iOS Safari
+            localStorage.setItem('auth_token', token);
+            // Set Authorization header for subsequent requests
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          } else {
+            console.warn("[useLogin] No token found for iOS Safari");
+          }
         } else {
-          console.warn("[useLogin] Token not found in cookies.");
+          // Regular cookie handling for other browsers
+          const cookieToken = getCookie("token");
+          if (cookieToken) {
+            console.debug("[useLogin] Token extracted from cookie:", cookieToken);
+            setToken(cookieToken);
+          } else {
+            console.warn("[useLogin] Token not found in cookies.");
+          }
         }
         setSuccess(true);
       }
