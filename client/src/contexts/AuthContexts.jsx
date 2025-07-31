@@ -45,14 +45,15 @@ export const AuthProvider = ({ children }) => {
   // Main authentication check - fetches profile
   const checkAuth = useCallback(async () => {
     try {
-      // For iOS devices, try to get token from cookie first
-      if (isIOSDevice()) {
-        const token = getCookie('token');
-        if (token) {
-          // Set Authorization header for iOS devices
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+              // For iOS devices, try to get token from cookie first
+        if (isIOSDevice()) {
+          const token = getCookie('token');
+          if (token) {
+            // Ensure cookie is set for iOS devices
+            setCookie('token', token, 7);
+            delete axios.defaults.headers.common['Authorization'];
+          }
         }
-      }
 
       const response = await axios.get('/user/profile');
       setProfile(response.data);
@@ -153,8 +154,10 @@ export const AuthProvider = ({ children }) => {
           console.debug('[AuthContext] Token found for iOS device:', token);
           // Store token in localStorage as backup for iOS devices
           localStorage.setItem('auth_token', token);
-          // Set Authorization header
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          // Set token as cookie instead of Authorization header
+          setCookie('token', token, 7);
+          // Remove Authorization header since backend expects cookies
+          delete axios.defaults.headers.common['Authorization'];
         } else {
           console.warn('[AuthContext] No token found in any source for iOS device');
           // Try to extract token from response body if it exists
@@ -166,7 +169,8 @@ export const AuthProvider = ({ children }) => {
               if (response.data[field]) {
                 console.debug('[AuthContext] Found token in field:', field, response.data[field]);
                 localStorage.setItem('auth_token', response.data[field]);
-                axios.defaults.headers.common['Authorization'] = `Bearer ${response.data[field]}`;
+                setCookie('token', response.data[field], 7);
+                delete axios.defaults.headers.common['Authorization'];
                 break;
               }
             }
@@ -220,11 +224,13 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setProfile(null);
       setPaymentDetails(null);
-      // Clear stored token for iOS devices
-      if (isIOSDevice()) {
-        localStorage.removeItem('auth_token');
-        delete axios.defaults.headers.common['Authorization'];
-      }
+              // Clear stored token for iOS devices
+        if (isIOSDevice()) {
+          localStorage.removeItem('auth_token');
+          delete axios.defaults.headers.common['Authorization'];
+          // Clear the cookie
+          setCookie('token', '', -1); // Expire the cookie
+        }
     }
   };
 
@@ -236,7 +242,8 @@ export const AuthProvider = ({ children }) => {
         if (isIOSDevice()) {
           const storedToken = localStorage.getItem('auth_token');
           if (storedToken) {
-            axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+            setCookie('token', storedToken, 7);
+            delete axios.defaults.headers.common['Authorization'];
           }
         }
 
