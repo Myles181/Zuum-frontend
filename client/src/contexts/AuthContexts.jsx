@@ -104,6 +104,23 @@ export const AuthProvider = ({ children }) => {
     try {
       // 1. Send login request
       const response = await axios.post('/auth/login', credentials);
+      
+      // Debug logging for production
+      const debugInfo = {
+        status: response.status,
+        hasData: !!response.data,
+        dataKeys: response.data ? Object.keys(response.data) : [],
+        hasHeaders: !!response.headers,
+        headerKeys: response.headers ? Object.keys(response.headers) : [],
+        hasCookies: !!getCookie('token'),
+        isIOS: isIOSDevice()
+      };
+      
+      // Show debug info in production (remove this after debugging)
+      if (isIOSDevice()) {
+        alert(`Debug Info: ${JSON.stringify(debugInfo, null, 2)}`);
+      }
+      
       console.debug('[AuthContext] Login response:', response);
       console.debug('[AuthContext] Response headers:', response.headers);
       console.debug('[AuthContext] Response data:', response.data);
