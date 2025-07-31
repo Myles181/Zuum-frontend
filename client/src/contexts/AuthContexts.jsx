@@ -135,6 +135,35 @@ export const AuthProvider = ({ children }) => {
         alert(`FULL RESPONSE DATA:\n${JSON.stringify(fullResponseData, null, 2)}`);
       }
       
+      // Debug cookie setting
+      if (isIOSDevice() && response.data?.token) {
+        console.debug('[AuthContext] Setting cookie for iOS device');
+        console.debug('[AuthContext] Token to set:', response.data.token);
+        console.debug('[AuthContext] Current cookies before setting:', document.cookie);
+        
+        // Try multiple cookie setting approaches for iOS
+        try {
+          // Approach 1: Basic cookie
+          setCookie('token', response.data.token, 7);
+          console.debug('[AuthContext] Cookie set with basic approach');
+          
+          // Approach 2: Manual cookie setting with iOS-compatible attributes
+          const expires = new Date();
+          expires.setTime(expires.getTime() + (7 * 24 * 60 * 60 * 1000));
+          document.cookie = `token=${response.data.token}; expires=${expires.toUTCString()}; path=/; SameSite=Lax`;
+          console.debug('[AuthContext] Cookie set with manual approach');
+          
+          // Approach 3: Try without SameSite for iOS
+          document.cookie = `token=${response.data.token}; expires=${expires.toUTCString()}; path=/`;
+          console.debug('[AuthContext] Cookie set without SameSite');
+          
+        } catch (err) {
+          console.error('[AuthContext] Error setting cookie:', err);
+        }
+        
+        console.debug('[AuthContext] Current cookies after setting:', document.cookie);
+      }
+      
       console.debug('[AuthContext] Login response:', response);
       console.debug('[AuthContext] Response headers:', response.headers);
       console.debug('[AuthContext] Response data:', response.data);
@@ -182,6 +211,50 @@ export const AuthProvider = ({ children }) => {
       const isAuthenticated = await checkAuth();
       
       if (!isAuthenticated) {
+        // WORKAROUND: Try direct profile fetch since server should have set auth cookies
+        console.debug('[AuthContext] Auth check failed, trying direct profile fetch with server cookies');
+        try {
+          // Make a fresh request that should include the cookies set by the server
+          const profileResponse = await axios.get('/user/profile', {
+            withCredentials: true // Ensure cookies are sent
+          });
+          if (profileResponse.data) {
+            console.debug('[AuthContext] Direct profile fetch succeeded - server cookies worked');
+            setProfile(profileResponse.data);
+            // If this worked, the server must have set auth cookies properly
+            await fetchPaymentDetails();
+            return; // Success, don't throw error
+          }
+        } catch (profileErr) {
+          console.debug('[AuthContext] Direct profile fetch also failed:', profileErr);
+          
+          // Try one more approach - make request with explicit cookie
+          if (isIOSDevice() && response.data?.token) {
+            console.debug('[AuthContext] Trying request with explicit cookie header');
+            try {
+              const profileResponse2 = await axios.get('/user/profile', {
+                headers: {
+                  'Cookie': `token=${response.data.token}`
+                },
+                withCredentials: true
+              });
+              if (profileResponse2.data) {
+                console.debug('[AuthContext] Profile fetch with explicit cookie succeeded');
+                setProfile(profileResponse2.data);
+                await fetchPaymentDetails();
+                return;
+              }
+            } catch (explicitErr) {
+              console.debug('[AuthContext] Explicit cookie approach also failed:', explicitErr);
+            }
+          }
+          
+          // Show error to user about iOS cookie issue
+          if (isIOSDevice()) {
+            alert('iOS Cookie Issue: The server sets authentication cookies, but iOS has restrictions. Please try using Safari or contact support.');
+          }
+        }
+        
         throw new Error('Login succeeded but authentication failed');
       }
 
