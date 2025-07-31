@@ -13,6 +13,12 @@ const isIOSSafari = () => {
   return /iPad|iPhone|iPod/.test(ua) && /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
 };
 
+// Detect iOS devices (including Chrome iOS)
+const isIOSDevice = () => {
+  const ua = navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(ua);
+};
+
 // Custom hook for user login using cookies with debug logs
 // Custom hook for user login using cookies with debug logs
 export const useLogin = () => {
@@ -30,7 +36,7 @@ export const useLogin = () => {
 
    const login = async (credentials) => {
     console.debug("[useLogin] Starting login with credentials:", credentials);
-    console.debug("[useLogin] iOS Safari detected:", isIOSSafari());
+    console.debug("[useLogin] iOS device detected:", isIOSDevice());
     setLoading(true);
     setError(null);
     setSuccess(false);
@@ -41,25 +47,46 @@ export const useLogin = () => {
         credentials
       );
       console.debug("[useLogin] Received response:", response);
+      console.debug("[useLogin] Response headers:", response.headers);
+      console.debug("[useLogin] Response data:", response.data);
+      
       if (response.status === 200) {
         console.debug("[useLogin] Login successful, checking cookies...");
         
-        // Handle iOS Safari specifically
-        if (isIOSSafari()) {
-          console.debug("[useLogin] iOS Safari detected, handling token storage");
+        // Handle iOS devices specifically
+        if (isIOSDevice()) {
+          console.debug("[useLogin] iOS device detected, handling token storage");
           const cookieToken = getCookie("token");
           const responseToken = response.data?.token;
-          const token = responseToken || cookieToken;
+          const headerToken = response.headers['authorization'] || response.headers['Authorization'];
+          const token = responseToken || cookieToken || headerToken?.replace('Bearer ', '');
+          
+          console.debug("[useLogin] Token sources - cookie:", cookieToken, 'response:', responseToken, 'header:', headerToken);
           
           if (token) {
-            console.debug("[useLogin] Token found for iOS Safari:", token);
+            console.debug("[useLogin] Token found for iOS device:", token);
             setToken(token);
-            // Store in localStorage as backup for iOS Safari
+            // Store in localStorage as backup for iOS devices
             localStorage.setItem('auth_token', token);
             // Set Authorization header for subsequent requests
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
           } else {
-            console.warn("[useLogin] No token found for iOS Safari");
+            console.warn("[useLogin] No token found for iOS device");
+            // Try to extract token from response body if it exists
+            if (response.data && typeof response.data === 'object') {
+              console.debug("[useLogin] Response data keys:", Object.keys(response.data));
+              // Look for common token field names
+              const possibleTokenFields = ['token', 'access_token', 'auth_token', 'jwt', 'accessToken'];
+              for (const field of possibleTokenFields) {
+                if (response.data[field]) {
+                  console.debug("[useLogin] Found token in field:", field, response.data[field]);
+                  setToken(response.data[field]);
+                  localStorage.setItem('auth_token', response.data[field]);
+                  axios.defaults.headers.common['Authorization'] = `Bearer ${response.data[field]}`;
+                  break;
+                }
+              }
+            }
           }
         } else {
           // Regular cookie handling for other browsers

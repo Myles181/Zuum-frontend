@@ -20,6 +20,12 @@ export const AuthProvider = ({ children }) => {
     return /iPad|iPhone|iPod/.test(ua) && /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|mercury/.test(ua);
   };
 
+  // Detect iOS devices (including Chrome iOS)
+  const isIOSDevice = () => {
+    const ua = navigator.userAgent;
+    return /iPad|iPhone|iPod/.test(ua);
+  };
+
   // Enhanced cookie handling for iOS Safari
   const getCookie = (name) => {
     const value = `; ${document.cookie}`;
@@ -39,11 +45,11 @@ export const AuthProvider = ({ children }) => {
   // Main authentication check - fetches profile
   const checkAuth = useCallback(async () => {
     try {
-      // For iOS Safari, try to get token from cookie first
-      if (isIOSSafari()) {
+      // For iOS devices, try to get token from cookie first
+      if (isIOSDevice()) {
         const token = getCookie('token');
         if (token) {
-          // Set Authorization header for iOS Safari
+          // Set Authorization header for iOS devices
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
         }
       }
@@ -98,16 +104,43 @@ export const AuthProvider = ({ children }) => {
     try {
       // 1. Send login request
       const response = await axios.post('/auth/login', credentials);
+      console.debug('[AuthContext] Login response:', response);
+      console.debug('[AuthContext] Response headers:', response.headers);
+      console.debug('[AuthContext] Response data:', response.data);
       
-      // 2. Handle iOS Safari cookie storage
-      if (isIOSSafari()) {
-        // Check if token is in response headers or cookies
-        const token = response.data?.token || getCookie('token');
+      // 2. Handle iOS device cookie storage
+      if (isIOSDevice()) {
+        console.debug('[AuthContext] iOS device detected, handling token storage');
+        // Check multiple sources for token
+        const cookieToken = getCookie('token');
+        const responseToken = response.data?.token;
+        const headerToken = response.headers['authorization'] || response.headers['Authorization'];
+        const token = responseToken || cookieToken || headerToken?.replace('Bearer ', '');
+        
+        console.debug('[AuthContext] Token sources - cookie:', cookieToken, 'response:', responseToken, 'header:', headerToken);
+        
         if (token) {
-          // Store token in localStorage as backup for iOS Safari
+          console.debug('[AuthContext] Token found for iOS device:', token);
+          // Store token in localStorage as backup for iOS devices
           localStorage.setItem('auth_token', token);
           // Set Authorization header
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        } else {
+          console.warn('[AuthContext] No token found in any source for iOS device');
+          // Try to extract token from response body if it exists
+          if (response.data && typeof response.data === 'object') {
+            console.debug('[AuthContext] Response data keys:', Object.keys(response.data));
+            // Look for common token field names
+            const possibleTokenFields = ['token', 'access_token', 'auth_token', 'jwt', 'accessToken'];
+            for (const field of possibleTokenFields) {
+              if (response.data[field]) {
+                console.debug('[AuthContext] Found token in field:', field, response.data[field]);
+                localStorage.setItem('auth_token', response.data[field]);
+                axios.defaults.headers.common['Authorization'] = `Bearer ${response.data[field]}`;
+                break;
+              }
+            }
+          }
         }
       }
       
@@ -157,8 +190,8 @@ export const AuthProvider = ({ children }) => {
     } finally {
       setProfile(null);
       setPaymentDetails(null);
-      // Clear stored token for iOS Safari
-      if (isIOSSafari()) {
+      // Clear stored token for iOS devices
+      if (isIOSDevice()) {
         localStorage.removeItem('auth_token');
         delete axios.defaults.headers.common['Authorization'];
       }
@@ -169,8 +202,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const initAuth = async () => {
       try {
-        // For iOS Safari, try to restore token from localStorage
-        if (isIOSSafari()) {
+        // For iOS devices, try to restore token from localStorage
+        if (isIOSDevice()) {
           const storedToken = localStorage.getItem('auth_token');
           if (storedToken) {
             axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
