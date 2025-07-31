@@ -45,21 +45,34 @@ export const AuthProvider = ({ children }) => {
   // Main authentication check - fetches profile
   const checkAuth = useCallback(async () => {
     try {
-              // For iOS devices, try to get token from cookie first
-        if (isIOSDevice()) {
-          const token = getCookie('token');
-          if (token) {
-            // Ensure cookie is set for iOS devices
-            setCookie('token', token, 7);
-            delete axios.defaults.headers.common['Authorization'];
-          }
+      // Debug: Show what we're sending to profile endpoint
+      console.debug('[AuthContext] Checking auth - cookies:', document.cookie);
+      console.debug('[AuthContext] Checking auth - localStorage token:', localStorage.getItem('auth_token'));
+      
+      if (isIOSDevice()) {
+        alert(`Checking auth. Cookies: ${document.cookie ? 'Yes' : 'No'}. LocalStorage token: ${localStorage.getItem('auth_token') ? 'Yes' : 'No'}`);
+      }
+      
+      // For iOS devices, try to get token from cookie first
+      if (isIOSDevice()) {
+        const token = getCookie('token');
+        if (token) {
+          // Ensure cookie is set for iOS devices
+          setCookie('token', token, 7);
+          delete axios.defaults.headers.common['Authorization'];
         }
+      }
 
       const response = await axios.get('/user/profile');
       setProfile(response.data);
       return true;
     } catch (err) {
       console.error('Auth check failed:', err);
+      
+      // Debug: Show what error we got
+      if (isIOSDevice()) {
+        alert(`Auth check failed. Status: ${err.response?.status}. Message: ${err.response?.data?.message || err.message}`);
+      }
       
       // Only clear profile on specific authentication errors
       if (err.response) {
@@ -103,8 +116,29 @@ export const AuthProvider = ({ children }) => {
     setLoading(true);
     setError(null);
     try {
+      // Debug: Show what credentials are being sent
+      console.debug('[AuthContext] Login attempt with credentials:', {
+        email: credentials.email,
+        hasPassword: !!credentials.password
+      });
+      
+      if (isIOSDevice()) {
+        alert(`Attempting login with email: ${credentials.email}`);
+      }
+      
       // 1. Send login request
       const response = await axios.post('/auth/login', credentials);
+      
+      // Debug: Show login response
+      console.debug('[AuthContext] Login response received:', {
+        status: response.status,
+        hasData: !!response.data,
+        dataKeys: response.data ? Object.keys(response.data) : []
+      });
+      
+      if (isIOSDevice()) {
+        alert(`Login response received. Status: ${response.status}. Has token: ${!!response.data?.token}`);
+      }
       
       // Debug logging for production
       const debugInfo = {
