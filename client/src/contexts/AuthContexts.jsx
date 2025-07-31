@@ -121,6 +121,19 @@ export const AuthProvider = ({ children }) => {
         alert(`Debug Info: ${JSON.stringify(debugInfo, null, 2)}`);
       }
       
+      // Show complete response data for debugging
+      if (isIOSDevice()) {
+        const fullResponseData = {
+          status: response.status,
+          statusText: response.statusText,
+          headers: response.headers,
+          data: response.data,
+          cookies: document.cookie,
+          localStorage: localStorage.getItem('auth_token')
+        };
+        alert(`FULL RESPONSE DATA:\n${JSON.stringify(fullResponseData, null, 2)}`);
+      }
+      
       console.debug('[AuthContext] Login response:', response);
       console.debug('[AuthContext] Response headers:', response.headers);
       console.debug('[AuthContext] Response data:', response.data);
