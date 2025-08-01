@@ -6,6 +6,12 @@ const API_URL = import.meta.env.VITE_API_URL; // Ensure this is set in .env
 // Configure axios to use cookies like AuthContext
 axios.defaults.withCredentials = true;
 
+// Detect iOS devices (including Chrome iOS)
+const isIOSDevice = () => {
+  const ua = navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(ua);
+};
+
 // Custom hook for fetching and updating user profile
 const useProfile = () => {
   // State variables for fetching profile
@@ -22,16 +28,16 @@ const useProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // Get token from localStorage for iOS devices
-        const token = localStorage.getItem('auth_token');
-        
-        // Set up request headers
-        const headers = {};
-        if (token) {
-          headers['Authorization'] = `Bearer ${token}`;
+        // For iOS devices, try to get token from localStorage as backup
+        let headers = {};
+        if (isIOSDevice()) {
+          const token = localStorage.getItem('auth_token');
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
         }
         
-        // Use cookies instead of localStorage token
+        // Use cookies for authentication (primary method)
         const response = await axios.get(`${API_URL}/user/profile`, {
           headers: headers,
           withCredentials: true // Ensure cookies are sent
@@ -40,7 +46,6 @@ const useProfile = () => {
         // Check if the response status is OK (200)
         if (response.status === 200) {
           setProfile(response.data); // Set the profile data in state
-
         } else {
           // Handle specific HTTP errors
           if (response.status === 401) {
@@ -82,13 +87,13 @@ const useProfile = () => {
   // Function to refresh profile (for compatibility with UsePreLoader)
   const refreshProfile = async () => {
     try {
-      // Get token from localStorage for iOS devices
-      const token = localStorage.getItem('auth_token');
-      
-      // Set up request headers
-      const headers = {};
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+      // For iOS devices, try to get token from localStorage as backup
+      let headers = {};
+      if (isIOSDevice()) {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
       }
       
       const response = await axios.get(`${API_URL}/user/profile`, {
@@ -112,11 +117,21 @@ const useProfile = () => {
     setUpdateSuccess(false); // Reset success state
 
     try {
-      // Use cookies instead of localStorage token
+      // For iOS devices, try to get token from localStorage as backup
+      let headers = {
+        "Content-Type": "multipart/form-data", // Ensure proper content type for file uploads
+      };
+      if (isIOSDevice()) {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+      }
+
+      // Use cookies for authentication (primary method)
       const response = await axios.put(`${API_URL}/user/profile`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data", // Ensure proper content type for file uploads
-        },
+        headers: headers,
+        withCredentials: true // Ensure cookies are sent
       });
 
       // Check if the response status is OK (200)
@@ -188,8 +203,20 @@ export const useUserProfile = (userId = null) => {
       setLoading(true);
       setError(null);
       try {
-        // Use cookies instead of localStorage token
-        const response = await axios.get(`${API_URL}/user/profile/${userId}`);
+        // For iOS devices, try to get token from localStorage as backup
+        let headers = {};
+        if (isIOSDevice()) {
+          const token = localStorage.getItem('auth_token');
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
+        }
+
+        // Use cookies for authentication (primary method)
+        const response = await axios.get(`${API_URL}/user/profile/${userId}`, {
+          headers: headers,
+          withCredentials: true // Ensure cookies are sent
+        });
 
         setProfile(response.data);
       } catch (err) {
@@ -235,15 +262,24 @@ export const useFollowUser = () => {
     setMessage(null);
 
     try {
-      // Use cookies instead of localStorage token
-      // Make the POST request to the API endpoint
+      // For iOS devices, try to get token from localStorage as backup
+      let headers = {
+        "Content-Type": "application/json",
+      };
+      if (isIOSDevice()) {
+        const token = localStorage.getItem('auth_token');
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+      }
+
+      // Use cookies for authentication (primary method)
       const response = await axios.post(
         `${API_URL}/user/follow`,
         { profileId, follow },
         {
-          headers: {
-            "Content-Type": "application/json",
-          },
+          headers: headers,
+          withCredentials: true // Ensure cookies are sent
         }
       );
 

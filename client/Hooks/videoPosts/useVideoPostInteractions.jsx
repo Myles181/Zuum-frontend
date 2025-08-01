@@ -3,12 +3,21 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Detect iOS devices (including Chrome iOS)
+const isIOSDevice = () => {
+  const ua = navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(ua);
+};
+
 // Utility function to get authenticated headers
 const getAuthHeaders = () => {
   const headers = {};
-  const token = localStorage.getItem('auth_token');
-  if (token) {
-    headers['Authorization'] = `Bearer ${token}`;
+  // For iOS devices, try to get token from localStorage as backup
+  if (isIOSDevice()) {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
   }
   return headers;
 };
