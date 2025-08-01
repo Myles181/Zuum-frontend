@@ -1,7 +1,17 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import axios from "axios";
 
-const API_URL = import.meta.env.VITE_API_URL; // Ensure this is correctly set in your environment
+const API_URL = import.meta.env.VITE_API_URL;
+
+// Utility function to get authenticated headers
+const getAuthHeaders = () => {
+  const headers = {};
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
 
 const useNotifications = () => {
   const [notifications, setNotifications] = useState([]); // Stores the list of notifications
@@ -17,9 +27,12 @@ const useNotifications = () => {
         const token = localStorage.getItem('authToken'); // Retrieve the authentication token
 
         // Make the GET request to the API endpoint
-        const response = await axios.get(`${API_URL}/notifications`, {
-          headers: {
-            Authorization: `Bearer ${token}`, // Include the auth token
+              const response = await axios.get(`${API_URL}/notifications`, {
+        headers: {
+          ...getAuthHeaders(),
+        },
+        withCredentials: true,
+      });
           },
         });
 

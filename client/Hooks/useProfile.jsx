@@ -22,8 +22,20 @@ const useProfile = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
+        // Get token from localStorage for iOS devices
+        const token = localStorage.getItem('auth_token');
+        
+        // Set up request headers
+        const headers = {};
+        if (token) {
+          headers['Authorization'] = `Bearer ${token}`;
+        }
+        
         // Use cookies instead of localStorage token
-        const response = await axios.get(`${API_URL}/user/profile`);
+        const response = await axios.get(`${API_URL}/user/profile`, {
+          headers: headers,
+          withCredentials: true // Ensure cookies are sent
+        });
 
         // Check if the response status is OK (200)
         if (response.status === 200) {
@@ -70,7 +82,19 @@ const useProfile = () => {
   // Function to refresh profile (for compatibility with UsePreLoader)
   const refreshProfile = async () => {
     try {
-      const response = await axios.get(`${API_URL}/user/profile`);
+      // Get token from localStorage for iOS devices
+      const token = localStorage.getItem('auth_token');
+      
+      // Set up request headers
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
+      const response = await axios.get(`${API_URL}/user/profile`, {
+        headers: headers,
+        withCredentials: true // Ensure cookies are sent
+      });
       if (response.status === 200) {
         setProfile(response.data);
         return { profile: response.data };

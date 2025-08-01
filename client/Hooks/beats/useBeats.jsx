@@ -1,9 +1,19 @@
-import { useCallback, useEffect, useState } from 'react';
-import axios from 'axios';
+import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 axios.defaults.baseURL = API_URL;
 axios.defaults.withCredentials = true; // Enable cookie authentication
+
+// Utility function to get authenticated headers
+const getAuthHeaders = () => {
+  const headers = {};
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
 
 // Hook for creating a new beat post with cookies
 export const useCreateBeatPost = () => {
@@ -21,7 +31,9 @@ export const useCreateBeatPost = () => {
       const response = await axios.post('/beat/create', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          ...getAuthHeaders(),
         },
+        withCredentials: true,
         onUploadProgress: (progressEvent) => {
           const percent = Math.round((progressEvent.loaded * 100) / progressEvent.total);
           console.debug(`[useCreateBeatPost] Upload progress: ${percent}%`);
@@ -95,7 +107,9 @@ export const useFetchBeats = ({
 
     try {
       const response = await axios.get('/beat', {
-        params: { page, limit }
+        params: { page, limit },
+        headers: getAuthHeaders(),
+        withCredentials: true,
       });
 
       console.debug('[useFetchBeats] response.data:', response.data);

@@ -1,7 +1,18 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
+
+// Utility function to get authenticated headers
+const getAuthHeaders = () => {
+  const headers = {};
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
+
 axios.defaults.baseURL = API_URL;
 axios.defaults.withCredentials = true; // Enable cookie authentication
 
@@ -37,7 +48,10 @@ export const useUserPosts = () => {
       setLoading(prev => ({ ...prev, beats: true }));
       setError(prev => ({ ...prev, beats: null }));
       
-      const response = await axios.get('/beat/user-posts');
+      const response = await axios.get('/beat/user-posts', {
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      });
 
       // Handle both array and object response formats
       let beatsData = Array.isArray(response.data) ? response.data : 
@@ -66,7 +80,10 @@ export const useUserPosts = () => {
       setLoading(prev => ({ ...prev, videos: true }));
       setError(prev => ({ ...prev, videos: null }));
       
-      const response = await axios.get('/video/user');
+      const response = await axios.get('/video/user', {
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      });
 
       let videoPosts = Array.isArray(response.data) ? response.data : 
                       response.data.posts || response.data.data || [];
@@ -94,7 +111,10 @@ export const useUserPosts = () => {
       setLoading(prev => ({ ...prev, audios: true }));
       setError(prev => ({ ...prev, audios: null }));
       
-      const response = await axios.get('/audio/user');
+      const response = await axios.get('/audio/user', {
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      });
 
       let audioPosts = Array.isArray(response.data) ? response.data : 
                       response.data.posts || response.data.data || [];
@@ -240,7 +260,10 @@ export const usePromotePost = () => {
 
     try {
       console.log('[usePromotePost] Sending request to /payment/promote');
-      const response = await axios.post('/payment/promote', payload);
+      const response = await axios.post('/payment/promote', payload, {
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      });
 
       console.log('[usePromotePost] Promotion successful:', response.data);
       setSuccess(true);
@@ -380,7 +403,10 @@ export const useDistributionRequest = () => {
       // ... [previous form data construction code] ...
 
       console.log('Submitting to /user/distribution-request');
-      const response = await axios.post('/user/distribution-request', submitData);
+      const response = await axios.post('/user/distribution-request', submitData, {
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      });
 
       if (response.data.message === "Music Distribution request successful") {
         console.log('Distribution successful:', response.data);
@@ -495,7 +521,10 @@ export const usePackages = () => {
       setLoading(true);
       setError(null);
       
-      const response = await axios.get('/packages');
+      const response = await axios.get('/packages', {
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      });
 
       // Handle both array and object response formats
       let packagesData = Array.isArray(response.data) ? response.data : 
@@ -580,9 +609,13 @@ export const useMassPromotion = () => {
           throw new Error('Unsupported category');
       }
 
-      const response = await axios.post('/promotions/mass', postData, {
+            const response = await axios.post('/promotions/mass', postData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          ...getAuthHeaders(),
+        },
+        withCredentials: true,
+      });
           // Cookies will be sent automatically if withCredentials is true
         },
         withCredentials: true // This ensures cookies are included
@@ -643,6 +676,9 @@ export const useUserPromotions = () => {
       setError(null);
       
       const response = await axios.get('/packages/myPromotions', {
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      });
         params: {
           limit: pagination.limit,
           offset: pagination.offset,

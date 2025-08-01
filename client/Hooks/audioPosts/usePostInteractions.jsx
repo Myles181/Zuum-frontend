@@ -3,6 +3,16 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Utility function to get authenticated headers
+const getAuthHeaders = () => {
+  const headers = {};
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
+
 /**
  * Custom hook to create a comment on an audio post.
  * Handles casting, detailed error reporting, and stores response data.
@@ -20,7 +30,6 @@ export const useCreateComment = () => {
     setCommentData(null);
 
     try {
-      const token = localStorage.getItem('authToken');
       // Cast postId to string per API schema requirements
       const payload = {
         post_id: String(postId),
@@ -35,9 +44,10 @@ export const useCreateComment = () => {
         payload,
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            ...getAuthHeaders(),
             'Content-Type': 'application/json',
           },
+          withCredentials: true,
         }
       );
 
@@ -99,10 +109,7 @@ export const useCreateComment = () => {
       setSuccess(false); // Reset success state
   
       try {
-        const token = localStorage.getItem('authToken'); // Retrieve the authentication token
-  
-      
-        const payload = {
+                const payload = {
           post_id: String(postId), 
           like: Boolean(like),     
           unlike: Boolean(unlike) 
@@ -115,9 +122,10 @@ export const useCreateComment = () => {
           payload,
           {
             headers: {
-              Authorization: `Bearer ${token}`,
+              ...getAuthHeaders(),
               'Content-Type': 'application/json',
             },
+            withCredentials: true,
           }
         );
   

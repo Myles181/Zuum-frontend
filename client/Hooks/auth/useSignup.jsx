@@ -3,6 +3,16 @@ import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Utility function to get authenticated headers
+const getAuthHeaders = () => {
+  const headers = {};
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
+
 // Custom hook for user signup
 const useSignup = () => {
   const [loading, setLoading] = useState(false); // Tracks loading state
@@ -22,7 +32,11 @@ const useSignup = () => {
       // Make a POST request to the API
       const response = await axios.post(
         `${API_URL}/auth/signup`, // Replace with your actual signup endpoint
-        { firstname, lastname, middlename, phonenumber, username, email, password, identity }
+        { firstname, lastname, middlename, phonenumber, username, email, password, identity },
+        {
+          headers: getAuthHeaders(),
+          withCredentials: true,
+        }
       );
 
       // Check the response status
@@ -75,7 +89,11 @@ const useVerifyEmail = () => {
       // Make a POST request to the API
       const response = await axios.post(
         `${API_URL}/auth/verify-email`, // Replace with your actual email verification endpoint
-        { email, otp }
+        { email, otp },
+        {
+          headers: getAuthHeaders(),
+          withCredentials: true,
+        }
       );
 
       // Check the response status
@@ -121,7 +139,11 @@ const useResendOtp = () => {
       // Make a POST request to the API
       const response = await axios.post(
         `${API_URL}/auth/resend-otp`, // Replace with your actual resend OTP endpoint
-        { email }
+        { email },
+        {
+          headers: getAuthHeaders(),
+          withCredentials: true,
+        }
       );
 
       // Check the response status

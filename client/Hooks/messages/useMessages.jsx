@@ -6,6 +6,16 @@ import { getSocket } from '../../src/socket';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Utility function to get authenticated headers
+const getAuthHeaders = () => {
+  const headers = {};
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
+
 // ---------------------
 // Get Room ID Hook
 // ---------------------
@@ -20,15 +30,15 @@ export const useGetRoomId = () => {
     setRoomId(null);
 
     try {
-      const token = localStorage.getItem('authToken');
       const response = await axios.post(
         `${API_URL}/user/get-room-id`,
         { profileId_1: profileId1, profileId_2: profileId2 },
         {
           headers: {
-            Authorization: `Bearer ${token}`,
+            ...getAuthHeaders(),
             'Content-Type': 'application/json',
           },
+          withCredentials: true,
         }
       );
 
@@ -82,11 +92,9 @@ export const useGetRooms = () => {
     setLoading(true);
     setError(null);
     try {
-      const token = localStorage.getItem("authToken");
       const response = await axios.get(`${API_URL}/user/get-rooms`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: getAuthHeaders(),
+        withCredentials: true,
       });
 
       if (response.status === 200) {

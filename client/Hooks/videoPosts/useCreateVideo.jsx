@@ -1,7 +1,17 @@
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
+
+// Utility function to get authenticated headers
+const getAuthHeaders = () => {
+  const headers = {};
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
 
 // export const useCreateVideoPost = () => {
 //   const [loading, setLoading] = useState(false); // Track if the request is in progress
@@ -90,9 +100,10 @@ export const useCreateVideoPost = () => {
       // Send the request to create a video post
       const response = await axios.post(`${API_URL}/video/create`, formData, {
         headers: {
-          Authorization: `Bearer ${token}`, // Include the auth token
+          ...getAuthHeaders(),
           "Content-Type": "multipart/form-data", // Set content type for file upload
         },
+        withCredentials: true,
       });
 
       // Check if the request was successful
@@ -222,14 +233,21 @@ export const useVideoPosts = (page = 1, limit = 10, videoId = null, userId = nul
         let response;
 
         if (videoId) {
-          response = await axios.get(`/video/${videoId}`);
+          response = await axios.get(`/video/${videoId}`, {
+          headers: getAuthHeaders(),
+          withCredentials: true,
+        });
         } else if (userId) {
           response = await axios.get(`/video/user/${userId}`, {
-            params: { page, limit }
+            params: { page, limit },
+            headers: getAuthHeaders(),
+            withCredentials: true,
           });
         } else {
           response = await axios.get('/video', {
-            params: { page, limit }
+            params: { page, limit },
+            headers: getAuthHeaders(),
+            withCredentials: true,
           });
         }
 
@@ -299,7 +317,9 @@ export const useGetVideoPost = (postId) => {
     try {
       // Use cookies for authentication (matches app's auth pattern)
       const response = await axios.get(`${API_URL}/video/${postId}`, {
-        withCredentials: true, // Use cookies for authentication
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      });
       });
       
       if (response.status === 200) {
@@ -357,6 +377,9 @@ export const useCreateVideoComment = () => {
       const response = await axios.post('/video/comment/create', {
         post_id: postId,
         comment: comment,
+      }, {
+        headers: getAuthHeaders(),
+        withCredentials: true,
       });
 
       if (response.status === 201) {
@@ -411,7 +434,10 @@ export const useUserVideoPosts = () => {
     setError(null);
 
     try {
-      const response = await axios.get('/video/user');
+      const response = await axios.get('/video/user', {
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      });
       if (response.status === 200) {
         setPosts(response.data.posts);
       }

@@ -1,9 +1,17 @@
-import { useState, useEffect } from 'react';
-import axios from 'axios';
+import { useState, useEffect, useCallback } from "react";
+import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
-axios.defaults.baseURL = API_URL;
-axios.defaults.withCredentials = true; // Enable cookie authentication
+
+// Utility function to get authenticated headers
+const getAuthHeaders = () => {
+  const headers = {};
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
 
 // Hook for creating a new audio post with cookies
 export const useCreateAudioPost = () => {
@@ -20,7 +28,9 @@ export const useCreateAudioPost = () => {
       const response = await axios.post('/audio/create', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
+          ...getAuthHeaders(),
         },
+        withCredentials: true,
       });
 
       if (response.status === 201) {
@@ -75,15 +85,22 @@ const useAudioPosts = (page = 1, limit = 10, postId = null, userId = null) => {
         let response;
 
         if (postId) {
-          response = await axios.get(`/audio/${postId}`);
+          response = await axios.get(`/audio/${postId}`, {
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      });
         } else if (userId) {
-          response = await axios.get(`/audio/user/${userId}`, {
-            params: { page, limit },
-          });
+                      response = await axios.get(`/audio/user/${userId}`, {
+              params: { page, limit },
+              headers: getAuthHeaders(),
+              withCredentials: true,
+            });
         } else {
-          response = await axios.get('/audio/', {
-            params: { page, limit },
-          });
+                      response = await axios.get('/audio/', {
+              params: { page, limit },
+              headers: getAuthHeaders(),
+              withCredentials: true,
+            });
         }
 
         if (response.status === 200) {
@@ -144,7 +161,10 @@ export const useGetAudioPost = (postId) => {
     setError(null);
 
     try {
-      const response = await axios.get(`/audio/${postId}`);
+      const response = await axios.get(`/audio/${postId}`, {
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      });
 
       if (response.status === 200) {
         setData(response.data.post);
@@ -194,7 +214,10 @@ export const useGetUserAudioPosts = () => {
 
     try {
       // Cookie will be automatically included via axios defaults
-      const response = await axios.get('/audio/user');
+      const response = await axios.get('/audio/user', {
+        headers: getAuthHeaders(),
+        withCredentials: true,
+      });
 
       if (response.status === 200) {
         setData(response.data.posts);
@@ -248,7 +271,9 @@ export const useDeleteAudioPost = () => {
     try {
       // Cookie will be automatically included via axios defaults
       const response = await axios.delete('/audio/del', {
-        data: { post_id: postId }
+        data: { post_id: postId },
+        headers: getAuthHeaders(),
+        withCredentials: true,
       });
 
       if (response.status === 200) {

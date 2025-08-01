@@ -42,6 +42,16 @@ export const AuthProvider = ({ children }) => {
     document.cookie = cookieString;
   };
 
+  // Utility function to get authenticated headers for API requests
+  const getAuthHeaders = () => {
+    const headers = {};
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
   // Main authentication check - fetches profile
   const checkAuth = useCallback(async () => {
     try {
@@ -53,17 +63,28 @@ export const AuthProvider = ({ children }) => {
         alert(`Checking auth. Cookies: ${document.cookie ? 'Yes' : 'No'}. LocalStorage token: ${localStorage.getItem('auth_token') ? 'Yes' : 'No'}`);
       }
       
+      // Get token from localStorage for iOS devices
+      const token = localStorage.getItem('auth_token');
+      
+      // Set up request headers
+      const headers = {};
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+      
       // For iOS devices, try to get token from cookie first
       if (isIOSDevice()) {
-        const token = getCookie('token');
-        if (token) {
+        const cookieToken = getCookie('token');
+        if (cookieToken) {
           // Ensure cookie is set for iOS devices
-          setCookie('token', token, 7);
-          delete axios.defaults.headers.common['Authorization'];
+          setCookie('token', cookieToken, 7);
         }
       }
 
-      const response = await axios.get('/user/profile');
+      const response = await axios.get('/user/profile', {
+        headers: headers,
+        withCredentials: true // Ensure cookies are sent
+      });
       setProfile(response.data);
       return true;
     } catch (err) {
@@ -72,6 +93,41 @@ export const AuthProvider = ({ children }) => {
       // Debug: Show what error we got
       if (isIOSDevice()) {
         alert(`Auth check failed. Status: ${err.response?.status}. Message: ${err.response?.data?.message || err.message}`);
+      }
+      
+      // Debug: Show what we're actually sending
+      console.debug('[AuthContext] Profile request details:', {
+        cookies: document.cookie,
+        localStorageToken: localStorage.getItem('auth_token'),
+        axiosHeaders: axios.defaults.headers.common,
+        withCredentials: axios.defaults.withCredentials
+      });
+      
+      if (isIOSDevice()) {
+        alert(`Request details - Cookies: "${document.cookie}". Auth header: "${axios.defaults.headers.common['Authorization'] || 'None'}"`);
+        
+        // Try manual Authorization header approach
+        const storedToken = localStorage.getItem('auth_token');
+        if (storedToken) {
+          alert(`Trying manual Authorization header with token: ${storedToken.substring(0, 20)}...`);
+          
+          // Try profile request with manual Authorization header
+          try {
+            const manualResponse = await axios.get('/user/profile', {
+              headers: {
+                'Authorization': `Bearer ${storedToken}`
+              }
+            });
+            
+            if (manualResponse.data) {
+              alert('Manual Authorization header worked!');
+              setProfile(manualResponse.data);
+              return true;
+            }
+          } catch (manualErr) {
+            alert(`Manual Authorization failed: ${manualErr.response?.status} - ${manualErr.response?.data?.message || manualErr.message}`);
+          }
+        }
       }
       
       // Only clear profile on specific authentication errors

@@ -3,6 +3,16 @@ import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+// Utility function to get authenticated headers
+const getAuthHeaders = () => {
+  const headers = {};
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
+
 /**
  * Custom hook to create a comment on an audio post.
  * Handles casting, detailed error reporting, and stores response data.
@@ -36,6 +46,7 @@ export const useCreateVideoComment = () => {
           withCredentials: true, // Use cookies for authentication
           headers: {
             'Content-Type': 'application/json',
+            ...getAuthHeaders(),
           },
         }
       );
@@ -111,6 +122,7 @@ export const useVideoReaction = () => {
           withCredentials: true, // Use cookies for authentication
           headers: {
             "Content-Type": "application/json",
+            ...getAuthHeaders(),
           },
         }
       );

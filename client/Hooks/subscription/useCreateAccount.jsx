@@ -1,7 +1,17 @@
-import { useCallback, useState } from 'react';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import axios from "axios";
 
 const API_URL = import.meta.env.VITE_API_URL;
+
+// Utility function to get authenticated headers
+const getAuthHeaders = () => {
+  const headers = {};
+  const token = localStorage.getItem('auth_token');
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
 
 // Configure axios to use cookies like AuthContext
 axios.defaults.withCredentials = true;
@@ -27,7 +37,9 @@ const useDepositAccount = () => {
       const response = await axios.get(url, {
         headers: {
           Accept: 'application/json',
+          ...getAuthHeaders(),
         },
+        withCredentials: true,
       });
 
       console.debug('[useDepositAccount] Full response:', response);
@@ -113,8 +125,11 @@ export const useSubscriptionPayment = () => {
       // Use cookies instead of localStorage token
       const response = await axios.get(`${API_URL}/payment/subscription`, {
         headers: {
-          Accept: 'application/json'
-        }
+          Accept: 'application/json',
+          ...getAuthHeaders(),
+        },
+        withCredentials: true,
+      });
       });
 
       if (response.status === 200 && response.data?.status) {
@@ -202,8 +217,11 @@ export const usePaymentAccount = () => {
       // Use cookies instead of localStorage token
       const response = await axios.get(`${API_URL}/payment/create`, {
         headers: {
-          Accept: 'application/json'
-        }
+          Accept: 'application/json',
+          ...getAuthHeaders(),
+        },
+        withCredentials: true,
+      });
       });
 
       console.log('API Response:', response.data); // Debug log
@@ -302,7 +320,10 @@ export const useWithdrawal = () => {
     try {
       const response = await axios.post(url, withdrawalRequest, {
         headers: {
-          Authorization: `Bearer ${token}`,
+          ...getAuthHeaders(),
+        },
+        withCredentials: true,
+      });
           'Content-Type': 'application/json',
           Accept: 'application/json',
         },
