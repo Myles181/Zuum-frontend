@@ -329,7 +329,6 @@ export const useGetVideoPost = (postId) => {
         headers: getAuthHeaders(),
         withCredentials: true,
       });
-      });
       
       if (response.status === 200) {
         setData(response.data.post || response.data);

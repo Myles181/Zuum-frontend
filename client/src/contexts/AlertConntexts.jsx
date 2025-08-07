@@ -115,7 +115,6 @@ export const AlertProvider = ({ children }) => {
   return (
     <AlertContext.Provider value={alertActions}>
       {children}
-      <AlertPopup alerts={alerts} onClose={removeAlert} />
     </AlertContext.Provider>
   );
 };

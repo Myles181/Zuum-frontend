@@ -16,19 +16,19 @@ const Options = ({
   const handleTagPeople = () => {
     setShowTagModal(true);
     // In a real app, you would open a modal or dropdown to select people to tag
-    alert('Open a modal to tag people');
+    console.log('Open a modal to tag people');
   };
 
-  const handleTogglePrivacy = () => {
+  const handlePrivacy = () => {
     setShowPrivacyModal(true);
     // In a real app, you would open a modal or dropdown to select privacy settings
-    alert('Open a modal to toggle privacy');
+    console.log('Open a modal to toggle privacy');
   };
 
-  const handleAddLocation = () => {
+  const handleLocation = () => {
     setShowLocationModal(true);
     // In a real app, you would open a modal or dropdown to add a location
-    alert('Open a modal to add location');
+    console.log('Open a modal to add location');
   };
 
   return (
@@ -48,7 +48,7 @@ const Options = ({
       {/* Privacy Option */}
       <div
         className="option-row flex justify-between items-center py-4 border-b border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
-        onClick={handleTogglePrivacy}
+        onClick={handlePrivacy}
       >
         <div className="option-left flex items-center gap-2">
           <FaGlobe className="w-6 h-6 text-green-800" />
@@ -60,7 +60,7 @@ const Options = ({
       {/* Add Location Option */}
       <div
         className="option-row flex justify-between items-center pt-4 cursor-pointer hover:bg-gray-50 transition-colors"
-        onClick={handleAddLocation}
+        onClick={handleLocation}
       >
         <div className="option-left flex items-center gap-2">
           <FaMapMarkerAlt className="w-6 h-6 text-green-800" />

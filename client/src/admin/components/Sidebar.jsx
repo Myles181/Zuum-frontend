@@ -46,15 +46,8 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
     }
   ];
 
-  const handleNavigation = (pageId) => {
-    
+  const handlePageChange = (pageId) => {
     onPageChange(pageId);
-    navigate(`/${pageId}`);
-
-
-    console.log(pageId);
-    
-    setIsMobileMenuOpen(false);
   };
 
   const SidebarContent = ({ isMobile = false }) => (
@@ -99,7 +92,7 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
             return (
               <button
                 key={item.id}
-                onClick={() => handleNavigation(item.id)}
+                onClick={() => handlePageChange(item.id)}
                 className={`w-full flex items-center px-3 py-3 rounded-lg text-left transition-all duration-200 group ${
                   isActive
                     ? 'bg-[#2d7a63] text-white shadow-lg'

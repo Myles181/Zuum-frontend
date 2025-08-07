@@ -18,15 +18,63 @@ const VerifyOTP = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+    
     if (!email || !otp) {
-      alert("Please enter both email and OTP.");
+      setError("Please enter both email and OTP.");
       return;
     }
 
-    setIsSubmitting(true);
-    await verifyEmail(email, otp);
-    setIsSubmitting(false);
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.post(`${API_URL}/auth/verify-email`, {
+        email,
+        otp
+      });
+
+      if (response.status === 200) {
+        setSuccess(true);
+        setTimeout(() => {
+          navigate('/login');
+        }, 2000);
+      }
+    } catch (err) {
+      if (err.response) {
+        setError(err.response.data?.message || 'Verification failed');
+      } else {
+        setError('Network error - please try again');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResendOTP = async () => {
+    if (!email) {
+      setError("Please enter your email address.");
+      return;
+    }
+
+    setResendLoading(true);
+    setError(null);
+
+    try {
+      const response = await axios.post(`${API_URL}/auth/resend-otp`, { email });
+      
+      if (response.status === 200) {
+        setSuccess(true);
+        setMessage('OTP resent successfully!');
+      }
+    } catch (err) {
+      if (err.response) {
+        setError(err.response.data?.message || 'Failed to resend OTP');
+      } else {
+        setError('Network error - please try again');
+      }
+    } finally {
+      setResendLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -34,15 +82,6 @@ const VerifyOTP = () => {
       navigate("/login");
     }
   }, [verifySuccess, navigate]);
-
-  const handleResendOtp = async () => {
-    if (!email) {
-      alert("Please enter your email address.");
-      return;
-    }
-
-    await resendOtp(email);
-  };
 
   useEffect(() => {
     const handleScroll = () => {

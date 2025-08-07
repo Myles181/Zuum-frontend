@@ -59,10 +59,6 @@ export const AuthProvider = ({ children }) => {
       console.debug('[AuthContext] Checking auth - cookies:', document.cookie);
       console.debug('[AuthContext] Checking auth - localStorage token:', localStorage.getItem('auth_token'));
       
-      if (isIOSDevice()) {
-        alert(`Checking auth. Cookies: ${document.cookie ? 'Yes' : 'No'}. LocalStorage token: ${localStorage.getItem('auth_token') ? 'Yes' : 'No'}`);
-      }
-      
       // Get token from localStorage for iOS devices
       const token = localStorage.getItem('auth_token');
       
@@ -91,9 +87,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Auth check failed:', err);
       
       // Debug: Show what error we got
-      if (isIOSDevice()) {
-        alert(`Auth check failed. Status: ${err.response?.status}. Message: ${err.response?.data?.message || err.message}`);
-      }
+      console.debug('[AuthContext] Auth check failed:', err);
       
       // Debug: Show what we're actually sending
       console.debug('[AuthContext] Profile request details:', {
@@ -104,12 +98,10 @@ export const AuthProvider = ({ children }) => {
       });
       
       if (isIOSDevice()) {
-        alert(`Request details - Cookies: "${document.cookie}". Auth header: "${axios.defaults.headers.common['Authorization'] || 'None'}"`);
-        
         // Try manual Authorization header approach
         const storedToken = localStorage.getItem('auth_token');
         if (storedToken) {
-          alert(`Trying manual Authorization header with token: ${storedToken.substring(0, 20)}...`);
+          console.debug('[AuthContext] Trying manual Authorization header with token');
           
           // Try profile request with manual Authorization header
           try {
@@ -120,40 +112,36 @@ export const AuthProvider = ({ children }) => {
             });
             
             if (manualResponse.data) {
-              alert('Manual Authorization header worked!');
+              console.debug('[AuthContext] Manual Authorization header worked!');
               setProfile(manualResponse.data);
               return true;
             }
           } catch (manualErr) {
-            alert(`Manual Authorization failed: ${manualErr.response?.status} - ${manualErr.response?.data?.message || manualErr.message}`);
+            console.error('[AuthContext] Manual Authorization failed:', manualErr);
           }
         }
       }
       
-      // Only clear profile on specific authentication errors
       if (err.response) {
-        if (err.response.status === 401) {       // Unauthorized - clear profile
-          setProfile(null);
-          setPaymentDetails(null);
-          return false;
-        } else if (err.response.status === 403) {      // Forbidden - clear profile
-          setProfile(null);
-          setPaymentDetails(null);
-          return false;
+        // The request was made and the server responded with a status code
+        if (err.response.status === 401) {
+          setError("Unauthorized: Invalid or missing token");
+        } else if (err.response.status === 404) {
+          setError("Profile not found");
+        } else {
+          setError("An unexpected error occurred");
         }
-        // For other server errors (500, 502 etc.), don't clear profile
-        // This prevents logout on temporary server issues
-        return !!profile; // Return current auth state
       } else if (err.request) {
-        // Network error - don't clear profile, return current state
-        console.warn('Network error during auth check, keeping current state');
-        return !!profile;
-      } else {   // Other errors - don't clear profile
-        console.warn('Other error during auth check, keeping current state');
-        return !!profile;
+        // The request was made but no response was received
+        setError("Network error: No response from server");
+      } else {
+        // Something happened in setting up the request
+        setError("Failed to fetch profile: " + err.message);
       }
+    } finally {
+      setLoading(false); // Mark loading as complete
     }
-  }, [profile]);
+  }, []);
 
   // Payment functions
   const fetchPaymentDetails = useCallback(async () => {
@@ -171,16 +159,9 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     setLoading(true);
     setError(null);
+    
     try {
-      // Debug: Show what credentials are being sent
-      console.debug('[AuthContext] Login attempt with credentials:', {
-        email: credentials.email,
-        hasPassword: !!credentials.password
-      });
-      
-      if (isIOSDevice()) {
-        alert(`Attempting login with email: ${credentials.email}`);
-      }
+      console.debug('[AuthContext] Attempting login with email:', credentials.email);
       
       // 1. Send login request
       const response = await axios.post('/auth/login', credentials);
@@ -191,10 +172,6 @@ export const AuthProvider = ({ children }) => {
         hasData: !!response.data,
         dataKeys: response.data ? Object.keys(response.data) : []
       });
-      
-      if (isIOSDevice()) {
-        alert(`Login response received. Status: ${response.status}. Has token: ${!!response.data?.token}`);
-      }
       
       // Debug logging for production
       const debugInfo = {
@@ -207,23 +184,7 @@ export const AuthProvider = ({ children }) => {
         isIOS: isIOSDevice()
       };
       
-      // Show debug info in production (remove this after debugging)
-      if (isIOSDevice()) {
-        alert(`Debug Info: ${JSON.stringify(debugInfo, null, 2)}`);
-      }
-      
-      // Show complete response data for debugging
-      if (isIOSDevice()) {
-        const fullResponseData = {
-          status: response.status,
-          statusText: response.statusText,
-          headers: response.headers,
-          data: response.data,
-          cookies: document.cookie,
-          localStorage: localStorage.getItem('auth_token')
-        };
-        alert(`FULL RESPONSE DATA:\n${JSON.stringify(fullResponseData, null, 2)}`);
-      }
+      console.debug('[AuthContext] Debug Info:', debugInfo);
       
       // Debug cookie setting
       if (isIOSDevice() && response.data?.token) {
@@ -279,101 +240,51 @@ export const AuthProvider = ({ children }) => {
           delete axios.defaults.headers.common['Authorization'];
         } else {
           console.warn('[AuthContext] No token found in any source for iOS device');
-          // Try to extract token from response body if it exists
-          if (response.data && typeof response.data === 'object') {
-            console.debug('[AuthContext] Response data keys:', Object.keys(response.data));
-            // Look for common token field names
-            const possibleTokenFields = ['token', 'access_token', 'auth_token', 'jwt', 'accessToken'];
-            for (const field of possibleTokenFields) {
-              if (response.data[field]) {
-                console.debug('[AuthContext] Found token in field:', field, response.data[field]);
-                localStorage.setItem('auth_token', response.data[field]);
-                setCookie('token', response.data[field], 7);
-                delete axios.defaults.headers.common['Authorization'];
-                break;
-              }
-            }
-          }
-        }
-      }
-      
-      // 3. Verify auth by fetching profile
-      const isAuthenticated = await checkAuth();
-      
-      if (!isAuthenticated) {
-        // WORKAROUND: Try direct profile fetch since server should have set auth cookies
-        console.debug('[AuthContext] Auth check failed, trying direct profile fetch with server cookies');
-        try {
-          // Make a fresh request that should include the cookies set by the server
-          const profileResponse = await axios.get('/user/profile', {
-            withCredentials: true // Ensure cookies are sent
-          });
-          if (profileResponse.data) {
-            console.debug('[AuthContext] Direct profile fetch succeeded - server cookies worked');
-            setProfile(profileResponse.data);
-            // If this worked, the server must have set auth cookies properly
-            await fetchPaymentDetails();
-            return; // Success, don't throw error
-          }
-        } catch (profileErr) {
-          console.debug('[AuthContext] Direct profile fetch also failed:', profileErr);
-          
-          // Try one more approach - make request with explicit cookie
-          if (isIOSDevice() && response.data?.token) {
-            console.debug('[AuthContext] Trying request with explicit cookie header');
-            try {
-              const profileResponse2 = await axios.get('/user/profile', {
-                headers: {
-                  'Cookie': `token=${response.data.token}`
-                },
-                withCredentials: true
-              });
-              if (profileResponse2.data) {
-                console.debug('[AuthContext] Profile fetch with explicit cookie succeeded');
-                setProfile(profileResponse2.data);
-                await fetchPaymentDetails();
-                return;
-              }
-            } catch (explicitErr) {
-              console.debug('[AuthContext] Explicit cookie approach also failed:', explicitErr);
-            }
-          }
-          
-          // Show error to user about iOS cookie issue
-          if (isIOSDevice()) {
-            alert('iOS Cookie Issue: The server sets authentication cookies, but iOS has restrictions. Please try using Safari or contact support.');
-          }
-        }
-        
-        throw new Error('Login succeeded but authentication failed');
-      }
-
-      // 4. Fetch payment details after successful auth
-      await fetchPaymentDetails();
-    } catch (err) {
-      console.error('Login error:', err);
-      // setError(err.response?.data?.message || err.message);
-      setProfile(null);
-      setPaymentDetails(null);
-      if (err.response) {
-        console.debug("[useLogin] Response status:", err.response.status);
-        const { status, data } = err.response;
-        console.debug("[useLogin] Response data:", data);
-        if (status === 400) {
-          setError("Validation errors. Please check your input.");
-        } else if (status === 401) {
-          setError("Invalid credentials. Please check your email and password.");
-        } else if (status === 406) {
-          setError("Email is not verified. Please verify your email first.");
-        } else if (status === 500) {
-          setError("Server error. Please try again later.");
-        } else {
-          setError("An unexpected error occurred.");
         }
       } else {
-        console.debug("[useLogin] No response from server, network error:", err.message);
-        setError("Network error. Please check your internet connection.");
+        // Non-iOS devices: Use standard cookie approach
+        console.debug('[AuthContext] Non-iOS device, using standard cookie approach');
+        if (response.data?.token) {
+          localStorage.setItem('auth_token', response.data.token);
+          setCookie('token', response.data.token, 7);
+        }
       }
+      
+      // 3. Check authentication status
+      const authSuccess = await checkAuth();
+      
+      if (authSuccess) {
+        console.debug('[AuthContext] Login successful, user authenticated');
+        return true;
+      } else {
+        console.error('[AuthContext] Login failed - authentication check failed');
+        setError('Login failed - please try again');
+        return false;
+      }
+      
+    } catch (err) {
+      console.error('[AuthContext] Login error:', err);
+      
+      if (err.response) {
+        // The request was made and the server responded with a status code
+        if (err.response.status === 401) {
+          setError('Invalid email or password');
+        } else if (err.response.status === 404) {
+          setError('User not found');
+        } else if (err.response.status === 500) {
+          setError('Server error - please try again later');
+        } else {
+          setError(err.response.data?.message || 'Login failed');
+        }
+      } else if (err.request) {
+        // The request was made but no response was received
+        setError('Network error - please check your connection');
+      } else {
+        // Something happened in setting up the request
+        setError('Login failed: ' + err.message);
+      }
+      
+      return false;
     } finally {
       setLoading(false);
     }

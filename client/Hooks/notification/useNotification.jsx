@@ -36,13 +36,11 @@ const useNotifications = () => {
         const token = localStorage.getItem('authToken'); // Retrieve the authentication token
 
         // Make the GET request to the API endpoint
-              const response = await axios.get(`${API_URL}/notifications`, {
-        headers: {
-          ...getAuthHeaders(),
-        },
-        withCredentials: true,
-      });
+        const response = await axios.get(`${API_URL}/notifications`, {
+          headers: {
+            ...getAuthHeaders(),
           },
+          withCredentials: true,
         });
 
         // Handle successful response (status code 200)

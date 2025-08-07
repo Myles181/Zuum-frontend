@@ -87,7 +87,7 @@ const LockedMusicPlayer = ({ post }) => {
   };
 
   const handleBuyClick = () => {
-    alert(`Purchased "${post.caption}" for $${post.price}`);
+    // Removed alert popup
   };
 
   useEffect(() => {

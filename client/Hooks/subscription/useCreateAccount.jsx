@@ -139,7 +139,6 @@ export const useSubscriptionPayment = () => {
         },
         withCredentials: true,
       });
-      });
 
       if (response.status === 200 && response.data?.status) {
         setPaymentDetails(response.data);
@@ -230,7 +229,6 @@ export const usePaymentAccount = () => {
           ...getAuthHeaders(),
         },
         withCredentials: true,
-      });
       });
 
       console.log('API Response:', response.data); // Debug log
@@ -329,13 +327,11 @@ export const useWithdrawal = () => {
     try {
       const response = await axios.post(url, withdrawalRequest, {
         headers: {
+          'Content-Type': 'application/json',
+          Accept: 'application/json',
           ...getAuthHeaders(),
         },
         withCredentials: true,
-      });
-          'Content-Type': 'application/json',
-          Accept: 'application/json',
-        },
       });
 
       console.debug('[useWithdrawal] Full response:', response);

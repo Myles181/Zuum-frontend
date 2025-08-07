@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { 
   Newspaper, Tv, Radio, Globe, ListMusic, Youtube, 
   Clock, CheckCircle, XCircle, AlertCircle, ChevronDown,
-  ChevronUp, Filter, Loader2, ChevronRight, ChevronLeft
+  ChevronUp, Filter, Loader2, ChevronRight, ChevronLeft,
+  Eye, X, User
 } from 'lucide-react';
 import { useUserPromotions } from '../../Hooks/search/useAllPost';
 import BottomNav from '../components/homepage/BottomNav';
@@ -15,7 +16,15 @@ export const UserPromotions = () => {
     status: ''
   });
   const [showFilters, setShowFilters] = useState(false);
+  const [selectedPromotion, setSelectedPromotion] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const { promotions, loading, error, pagination, refetch, loadMore, setLimit } = useUserPromotions();
+
+  // Handle view promotion details
+  const handleViewPromotion = (promotion) => {
+    setSelectedPromotion(promotion);
+    setIsViewModalOpen(true);
+  };
 
   const getCategoryIcon = (category) => {
     switch(category) {
@@ -33,6 +42,8 @@ export const UserPromotions = () => {
         return <Globe className="w-4 h-4 text-[#1a5f4b]" />;
       case 'youtube':
         return <Youtube className="w-4 h-4 text-[#1a5f4b]" />;
+      case 'tiktok':
+        return <Globe className="w-4 h-4 text-[#1a5f4b]" />;
       default:
         return <Newspaper className="w-4 h-4 text-[#1a5f4b]" />;
     }
@@ -83,13 +94,16 @@ export const UserPromotions = () => {
   };
 
   const applyFilters = () => {
-    refetch(filters);
+    refetch({
+      category_type: filters.category,
+      status: filters.status
+    });
     setShowFilters(false);
   };
 
   const resetFilters = () => {
     setFilters({ category: '', status: '' });
-    refetch({ category: '', status: '' });
+    refetch({ category_type: '', status: '' });
     setShowFilters(false);
   };
 
@@ -129,9 +143,9 @@ export const UserPromotions = () => {
                 <option value="tv">TV</option>
                 <option value="radio">Radio</option>
                 <option value="chart">Chart</option>
-                <option value="digital">Digital</option>
                 <option value="playlist">Playlist</option>
                 <option value="youtube">YouTube</option>
+                <option value="tiktok">TikTok</option>
               </select>
             </div>
             <div>
@@ -191,24 +205,25 @@ export const UserPromotions = () => {
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {promotions.map((promo) => (
-                    <tr key={promo.id} className="hover:bg-gray-50 transition-colors">
+                  {promotions.map((promo, index) => (
+                    <tr key={`${promo.id}-${index}`} className="hover:bg-gray-50 transition-colors">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="flex items-center">
                           <div className="flex-shrink-0 h-10 w-10 rounded-full bg-[#1a5f4b]/10 flex items-center justify-center">
-                            {getCategoryIcon(promo.category)}
+                            {getCategoryIcon(promo.category_type)}
                           </div>
                           <div className="ml-4">
-                            <div className="text-sm font-medium text-gray-900">{promo.title || 'Untitled Promotion'}</div>
-                            <div className="text-sm text-gray-500">{promo.package_name}</div>
+                            <div className="text-sm font-medium text-gray-900">{promo.title || promo.name || 'Untitled Promotion'}</div>
+                            <div className="text-sm text-gray-500">{promo.name}</div>
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm text-gray-900 capitalize">{promo.category}</div>
+                        <div className="text-sm text-gray-900 capitalize">{promo.category_type}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         {getStatusBadge(promo.status)}
@@ -217,6 +232,15 @@ export const UserPromotions = () => {
                         <div className="text-sm text-gray-500">
                           {new Date(promo.created_at).toLocaleDateString()}
                         </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <button
+                          onClick={() => handleViewPromotion(promo)}
+                          className="inline-flex items-center text-[#1a5f4b] hover:text-[#0f3d2e] transition duration-150"
+                        >
+                          <Eye size={16} className="mr-1" /> 
+                          <span className="hidden sm:inline">View Details</span>
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -228,7 +252,7 @@ export const UserPromotions = () => {
             <div className="px-6 py-4 bg-gray-50 flex items-center justify-between border-t border-gray-200">
               <div className="flex-1 flex justify-between items-center gap-4">
                 <button
-                  onClick={() => setPagination(prev => ({ ...prev, offset: Math.max(0, prev.offset - prev.limit) }))}
+                  onClick={() => loadMore(pagination.offset - pagination.limit)}
                   disabled={pagination.offset === 0}
                   className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -256,7 +280,7 @@ export const UserPromotions = () => {
                 </select>
 
                 <button
-                  onClick={() => setPagination(prev => ({ ...prev, offset: prev.offset + prev.limit }))}
+                  onClick={() => loadMore(pagination.offset + pagination.limit)}
                   disabled={pagination.offset + pagination.limit >= pagination.total}
                   className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -268,6 +292,178 @@ export const UserPromotions = () => {
           </>
         )}
       </div>
+      
+      {/* View Promotion Modal */}
+      {isViewModalOpen && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center p-6 border-b border-gray-200">
+              <h2 className="text-xl font-bold text-gray-900">Promotion Details</h2>
+              <button 
+                onClick={() => setIsViewModalOpen(false)}
+                className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#1a5f4b] p-1"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            <div className="p-6 space-y-6">
+              {selectedPromotion ? (
+                <>
+                  <div className="flex flex-col items-center mb-6">
+                    <div className="h-20 w-20 bg-[#1a5f4b] bg-opacity-10 rounded-full flex items-center justify-center">
+                      {getCategoryIcon(selectedPromotion.category_type)}
+                    </div>
+                    <h3 className="mt-4 text-lg font-medium text-gray-900">{selectedPromotion.title || selectedPromotion.name || 'Untitled Promotion'}</h3>
+                    <p className="mt-1 text-sm text-gray-500">{selectedPromotion.name}</p>
+                    <span className={`mt-2 px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                      selectedPromotion.status === 'active' ? 'bg-green-100 text-green-800' :
+                      selectedPromotion.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
+                      selectedPromotion.status === 'completed' ? 'bg-blue-100 text-blue-800' :
+                      'bg-red-100 text-red-800'
+                    }`}>
+                      {selectedPromotion.status?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Unknown'}
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                    <div>
+                      <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Promotion ID</h4>
+                      <p className="mt-1 text-sm text-black font-medium">{selectedPromotion.id}</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Category</h4>
+                      <p className="mt-1 text-sm text-black font-medium">{selectedPromotion.category_type?.replace(/\b\w/g, c => c.toUpperCase()) || 'N/A'}</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Package</h4>
+                      <p className="mt-1 text-sm text-black font-medium">{selectedPromotion.name || 'N/A'}</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</h4>
+                      <p className="mt-1 text-sm text-black font-medium">{selectedPromotion.status?.replace(/\b\w/g, c => c.toUpperCase()) || 'N/A'}</p>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</h4>
+                      <p className="mt-1 text-sm text-black font-medium">{new Date(selectedPromotion.created_at).toLocaleString()}</p>
+                    </div>
+                    
+                    {selectedPromotion.start_date && (
+                      <div>
+                        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</h4>
+                        <p className="mt-1 text-sm text-black font-medium">{new Date(selectedPromotion.start_date).toLocaleString()}</p>
+                      </div>
+                    )}
+                    
+                    {selectedPromotion.end_date && (
+                      <div>
+                        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">End Date</h4>
+                        <p className="mt-1 text-sm text-black font-medium">{new Date(selectedPromotion.end_date).toLocaleString()}</p>
+                      </div>
+                    )}
+                    
+                    {selectedPromotion.price && (
+                      <div>
+                        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Price</h4>
+                        <p className="mt-1 text-sm text-black font-medium">₦{selectedPromotion.price.toLocaleString()}</p>
+                      </div>
+                    )}
+                    
+                    {selectedPromotion.package_id && (
+                      <div>
+                        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Package ID</h4>
+                        <p className="mt-1 text-sm text-black font-medium">{selectedPromotion.package_id}</p>
+                      </div>
+                    )}
+                    
+                    {selectedPromotion.description && (
+                      <div>
+                        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Description</h4>
+                        <p className="mt-1 text-sm text-black">{selectedPromotion.description}</p>
+                      </div>
+                    )}
+                    
+                    {selectedPromotion.body && (
+                      <div>
+                        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Content</h4>
+                        <p className="mt-1 text-sm text-black">{selectedPromotion.body}</p>
+                      </div>
+                    )}
+                    
+                    {selectedPromotion.image && (
+                      <div>
+                        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Image</h4>
+                        <img 
+                          src={selectedPromotion.image} 
+                          alt="Promotion" 
+                          className="mt-1 w-20 h-20 object-cover rounded"
+                        />
+                      </div>
+                    )}
+                    
+                    {selectedPromotion.video && (
+                      <div>
+                        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Video</h4>
+                        <video 
+                          src={selectedPromotion.video} 
+                          controls 
+                          className="mt-1 w-full max-w-xs rounded"
+                        />
+                      </div>
+                    )}
+                    
+                    {selectedPromotion.song_link && (
+                      <div>
+                        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Song Link</h4>
+                        <a 
+                          href={selectedPromotion.song_link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="mt-1 text-sm text-blue-600 hover:text-blue-800 break-all"
+                        >
+                          {selectedPromotion.song_link}
+                        </a>
+                      </div>
+                    )}
+                    
+                    {selectedPromotion.video_link && (
+                      <div>
+                        <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Video Link</h4>
+                        <a 
+                          href={selectedPromotion.video_link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="mt-1 text-sm text-blue-600 hover:text-blue-800 break-all"
+                        >
+                          {selectedPromotion.video_link}
+                        </a>
+                      </div>
+                    )}
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">No promotion selected</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="p-6 border-t border-gray-200 flex justify-end">
+              <button
+                onClick={() => setIsViewModalOpen(false)}
+                className="px-4 py-2 bg-[#1a5f4b] text-white rounded-md hover:bg-[#0f3d2e] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#1a5f4b] transition duration-150"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <BottomNav activeTab="home" />
     </div>
   );

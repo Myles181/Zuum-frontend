@@ -374,141 +374,7 @@ export const usePromotePost = () => {
  * Hook for submitting music distribution requests with specific error handling
  * @returns {Object} Distribution functions and state
  */
-export const useDistributionRequest = () => {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
-  const [responseData, setResponseData] = useState(null);
 
-  /**
-   * Submit a distribution request with enhanced error handling
-   * @param {Object} formData - Complete distribution form data
-   * @returns {Promise<Object>} Response data
-   */
-  const submitDistributionRequest = async (formData) => {
-    console.groupCollapsed('[Distribution] Submission Started');
-    console.log('Form data:', formData);
-    setLoading(true);
-    setError(null);
-    setSuccess(false);
-    setResponseData(null);
-
-    try {
-      // Validate required files before submission
-      if (!formData.coverArt) {
-        throw { code: 'MISSING_COVER', message: 'Cover art is required' };
-      }
-
-      if (formData.releaseType === 'single' && !formData.audioFile) {
-        throw { code: 'MISSING_AUDIO', message: 'Audio file is required for singles' };
-      }
-
-      if (formData.releaseType === 'album' && formData.tracks.some(t => !t.audioFile)) {
-        throw { code: 'MISSING_TRACKS', message: 'All album tracks require audio files' };
-      }
-
-      const submitData = new FormData();
-      // Build form data (same as before)
-      // ... [previous form data construction code] ...
-
-      console.log('Submitting to /user/distribution-request');
-      const response = await axios.post('/user/distribution-request', submitData, {
-        headers: getAuthHeaders(),
-        withCredentials: true,
-      });
-
-      if (response.data.message === "Music Distribution request successful") {
-        console.log('Distribution successful:', response.data);
-        setSuccess(true);
-        setResponseData(response.data);
-        return response.data;
-      } else {
-        throw { 
-          code: 'UNEXPECTED_RESPONSE', 
-          message: 'Received unexpected success response',
-          response 
-        };
-      }
-
-    } catch (err) {
-      let errorMessage = 'Submission failed';
-      let errorCode = 'UNKNOWN_ERROR';
-
-      // Handle axios errors
-      if (err.response) {
-        console.error('Server responded with error:', err.response.data);
-        
-        switch (err.response.status) {
-          case 400:
-            errorMessage = err.response.data.message || 'Required fields missing';
-            errorCode = 'VALIDATION_ERROR';
-            break;
-            
-          case 406:
-            errorMessage = err.response.data.message || 'Invalid file format or metadata';
-            errorCode = 'INVALID_FORMAT';
-            
-            // Special handling for specific 406 messages
-            if (err.response.data.message.includes('MP3')) {
-              errorCode = 'INVALID_AUDIO_FORMAT';
-            } else if (err.response.data.message.includes('cover photo')) {
-              errorCode = 'INVALID_COVER_FORMAT';
-            }
-            break;
-            
-          case 409:
-            errorMessage = 'Insufficient funds for distribution';
-            errorCode = 'INSUFFICIENT_FUNDS';
-            break;
-            
-          case 500:
-            errorMessage = err.response.data.error || 'Internal server error';
-            errorCode = 'SERVER_ERROR';
-            break;
-            
-          default:
-            errorMessage = `Error ${err.response.status}: ${err.response.data.message || 'Unknown error'}`;
-        }
-      } 
-      // Handle network errors
-      else if (err.request) {
-        errorMessage = 'Network error: Could not connect to server';
-        errorCode = 'NETWORK_ERROR';
-        console.error('No response received:', err.request);
-      } 
-      // Handle custom validation errors
-      else if (err.code) {
-        errorMessage = err.message;
-        errorCode = err.code;
-      }
-      // Handle all other errors
-      else {
-        errorMessage = err.message || 'Unknown error occurred';
-        console.error('Unexpected error:', err);
-      }
-
-      setError({ message: errorMessage, code: errorCode });
-      throw { code: errorCode, message: errorMessage, originalError: err };
-      
-    } finally {
-      setLoading(false);
-      console.groupEnd();
-    }
-  };
-
-  return {
-    submitDistributionRequest,
-    loading,
-    error,
-    success,
-    responseData,
-    reset: () => {
-      setError(null);
-      setSuccess(false);
-      setResponseData(null);
-    }
-  };
-};
 
 
 
@@ -618,16 +484,12 @@ export const useMassPromotion = () => {
           throw new Error('Unsupported category');
       }
 
-            const response = await axios.post('/promotions/mass', postData, {
+      const response = await axios.post('/promotions/mass', postData, {
         headers: {
           'Content-Type': 'multipart/form-data',
           ...getAuthHeaders(),
         },
         withCredentials: true,
-      });
-          // Cookies will be sent automatically if withCredentials is true
-        },
-        withCredentials: true // This ensures cookies are included
       });
 
       setData(response.data);
@@ -686,8 +548,6 @@ export const useUserPromotions = () => {
       
       const response = await axios.get('/packages/myPromotions', {
         headers: getAuthHeaders(),
-        withCredentials: true,
-      });
         params: {
           limit: pagination.limit,
           offset: pagination.offset,
@@ -696,10 +556,14 @@ export const useUserPromotions = () => {
         withCredentials: true
       });
 
-      setPromotions(response.data.data || []);
+      // Handle the actual API response structure
+      const promotionsData = response.data.results || [];
+      const total = response.data.total || 0;
+      
+      setPromotions(promotionsData);
       setPagination(prev => ({
         ...prev,
-        total: response.data.total || 0
+        total: total
       }));
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'Failed to fetch promotions');
@@ -712,13 +576,17 @@ export const useUserPromotions = () => {
     fetchPromotions(params);
   };
 
-  const loadMore = () => {
-    if (pagination.offset + pagination.limit < pagination.total) {
+  const loadMore = (newOffset) => {
+    if (newOffset !== undefined) {
+      setPagination(prev => ({
+        ...prev,
+        offset: newOffset
+      }));
+    } else if (pagination.offset + pagination.limit < pagination.total) {
       setPagination(prev => ({
         ...prev,
         offset: prev.offset + prev.limit
       }));
-      fetchPromotions();
     }
   };
 
@@ -736,3 +604,4 @@ export const useUserPromotions = () => {
     setLimit: (limit) => setPagination(prev => ({ ...prev, limit, offset: 0 }))
   };
 };
+

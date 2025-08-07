@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { 
-  Megaphone, 
+  User, 
   Eye, 
   X, 
   ChevronLeft, 
@@ -8,104 +9,34 @@ import {
   Check,
   Search,
   AlertCircle,
-  Edit
+  Edit,
+  Menu,
+  Filter,
+  TrendingUp,
+  Calendar
 } from 'lucide-react';
 import AdminSidebar from '../components/Sidebar';
+import { usePromotions } from '../hooks/usePromotions';
 
-// Mock hook for demonstration - replace with your actual API hook
-const usePromotions = () => {
-  const [promotions, setPromotions] = useState([
-    {
-      id: 'PROM001',
-      title: 'Summer Chart Boost',
-      category: 'chart',
-      status: 'active',
-      customer_name: 'John Doe',
-      customer_email: 'john@example.com',
-      budget: 499.99,
-      created_at: '2024-06-15T10:30:00Z',
-      start_date: '2024-06-16T00:00:00Z',
-      end_date: '2024-07-16T23:59:59Z'
-    },
-    {
-      id: 'PROM002',
-      title: 'TikTok Viral Campaign',
-      category: 'tiktok',
-      status: 'pending',
-      customer_name: 'Jane Smith',
-      customer_email: 'jane@example.com',
-      budget: 299.99,
-      created_at: '2024-06-14T15:45:00Z',
-      start_date: '2024-06-17T00:00:00Z',
-      end_date: '2024-07-01T23:59:59Z'
-    },
-    {
-      id: 'PROM003',
-      title: 'Radio Airplay',
-      category: 'radio',
-      status: 'completed',
-      customer_name: 'Mike Johnson',
-      customer_email: 'mike@example.com',
-      budget: 999.99,
-      created_at: '2024-06-13T09:15:00Z',
-      start_date: '2024-06-01T00:00:00Z',
-      end_date: '2024-06-10T23:59:59Z'
-    }
-  ]);
+const AdminPromotionsPage = () => {
+  const navigate = useNavigate();
+  // Sidebar state
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  
+  // Search and filter states
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [categoryFilter, setCategoryFilter] = useState('all');
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+  
+  // Modal states
+  const [selectedPromotion, setSelectedPromotion] = useState(null);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [newStatus, setNewStatus] = useState('');
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [updateSuccess, setUpdateSuccess] = useState(false);
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    totalPages: 1,
-    total: 3,
-    limit: 10,
-    offset: 0
-  });
-
-  const fetchPromotions = async (page = 1, statusFilter = null, categoryFilter = null) => {
-    setIsLoading(true);
-    try {
-      // Simulate API call to /api/admin/promotions
-      const offset = (page - 1) * pagination.limit;
-      let filtered = promotions;
-      if (statusFilter && statusFilter !== 'all') {
-        filtered = filtered.filter(p => p.status === statusFilter);
-      }
-      if (categoryFilter && categoryFilter !== 'all') {
-        filtered = filtered.filter(p => p.category === categoryFilter);
-      }
-      setPagination(prev => ({ ...prev, currentPage: page, offset, total: filtered.length }));
-      setIsLoading(false);
-    } catch (err) {
-      setError('Failed to fetch promotions');
-      setIsLoading(false);
-    }
-  };
-
-  const updatePromotionStatus = async (promotionId, category, status) => {
-    setIsLoading(true);
-    try {
-      // Simulate API call to PUT /api/admin/promotions
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      setPromotions(prev => prev.map(p => 
-        p.id === promotionId ? { ...p, category, status } : p
-      ));
-      setUpdateSuccess(true);
-      setTimeout(() => setUpdateSuccess(false), 3000);
-      setIsLoading(false);
-      return true;
-    } catch (err) {
-      setError('Failed to update promotion status');
-      setIsLoading(false);
-      return false;
-    }
-  };
-
-  const resetError = () => setError(null);
-
-  return {
+  // Use the real API hook
+  const {
     promotions,
     isLoading,
     error,
@@ -114,44 +45,30 @@ const usePromotions = () => {
     fetchPromotions,
     updatePromotionStatus,
     resetError
-  };
-};
-
-const AdminPromotionsPage = () => {
-  // Sidebar state
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  // Modal states
-  const [selectedPromotion, setSelectedPromotion] = useState(null);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [promotionToUpdate, setPromotionToUpdate] = useState(null);
-
-  // Search and filter states
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
-  const [categoryFilter, setCategoryFilter] = useState('all');
-
-  // Update form states
-  const [newStatus, setNewStatus] = useState('');
-  const [newCategory, setNewCategory] = useState('');
-
-  const { 
-    promotions, 
-    isLoading, 
-    error, 
-    pagination, 
-    updateSuccess,
-    fetchPromotions,
-    updatePromotionStatus,
-    resetError 
   } = usePromotions();
 
-  // Fetch promotions on page or filter change
-  useEffect(() => {
-    fetchPromotions(currentPage, statusFilter, categoryFilter);
-  }, [currentPage, statusFilter, categoryFilter]);
+  // Filter promotions based on search term and filters
+  const filteredPromotions = Array.isArray(promotions) ? promotions.filter(promotion => {
+    const matchesSearch = searchTerm === '' || 
+      promotion.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      promotion.customer_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      promotion.customer_email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      promotion.id?.toString().includes(searchTerm);
+    
+    const matchesStatusFilter = statusFilter === 'all' || promotion.status === statusFilter;
+    const matchesCategoryFilter = categoryFilter === 'all' || promotion.category === categoryFilter;
+    
+    return matchesSearch && matchesStatusFilter && matchesCategoryFilter;
+  }) : [];
+
+  // Calculate stats from real data
+  const totalPromotions = Array.isArray(promotions) ? promotions.length : 0;
+  const activePromotions = Array.isArray(promotions) ? promotions.filter(p => p.status === 'active').length : 0;
+  const pendingPromotions = Array.isArray(promotions) ? promotions.filter(p => p.status === 'pending').length : 0;
+
+  console.log('Raw promotions data:', promotions);
+  console.log('Filtered promotions:', filteredPromotions);
+  console.log('Total promotions:', totalPromotions);
 
   // Handle view promotion details
   const handleViewPromotion = (promotion) => {
@@ -159,74 +76,91 @@ const AdminPromotionsPage = () => {
     setIsViewModalOpen(true);
   };
 
-  // Handle update modal
+  // Handle update promotion status
   const handleUpdateClick = (promotion) => {
-    setPromotionToUpdate(promotion);
+    setSelectedPromotion(promotion);
     setNewStatus(promotion.status);
-    setNewCategory(promotion.category);
     setIsUpdateModalOpen(true);
   };
 
-  // Handle status update
+  // Handle status update submission
   const handleUpdateSubmit = async () => {
-    if (!promotionToUpdate || !newStatus || !newCategory) return;
-    
+    if (!selectedPromotion || !newStatus) {
+      return;
+    }
+
     const success = await updatePromotionStatus(
-      promotionToUpdate.id,
-      newCategory,
+      selectedPromotion.id,
+      selectedPromotion.category,
       newStatus
     );
-    
+
     if (success) {
       setIsUpdateModalOpen(false);
+      setSelectedPromotion(null);
+      setNewStatus('');
     }
   };
 
   // Pagination handlers
   const goToNextPage = () => {
     if (pagination.currentPage < pagination.totalPages) {
-      setCurrentPage(prev => prev + 1);
+      fetchPromotions(
+        statusFilter === 'all' ? null : statusFilter,
+        categoryFilter === 'all' ? null : categoryFilter,
+        10,
+        pagination.currentPage * 10
+      );
     }
   };
 
   const goToPrevPage = () => {
     if (pagination.currentPage > 1) {
-      setCurrentPage(prev => prev - 1);
+      fetchPromotions(
+        statusFilter === 'all' ? null : statusFilter,
+        categoryFilter === 'all' ? null : categoryFilter,
+        10,
+        (pagination.currentPage - 2) * 10
+      );
     }
   };
 
-  // Filter promotions based on search term
-  const filteredPromotions = promotions.filter(promotion => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      promotion.id?.toLowerCase().includes(searchLower) ||
-      promotion.title?.toLowerCase().includes(searchLower) ||
-      promotion.customer_name?.toLowerCase().includes(searchLower) ||
-      promotion.customer_email?.toLowerCase().includes(searchLower)
-    );
-  });
-
-  const handlePageChange = (pageId) => {
-    console.log('Navigate to:', pageId);
-  };
-
-  // Stats calculations
-  const totalPromotions = promotions.length;
-  const activePromotions = promotions.filter(p => p.status === 'active').length;
-  const pendingPromotions = promotions.filter(p => p.status === 'pending').length;
-
-  // Available filter options from API spec
+  // Status and category options
   const statusOptions = [
     'all', 'active', 'pending', 'expired', 'deleted', 'success', 'failed', 
     'cancelled', 'completed', 'incomplete', 'incomplete_expired', 'incomplete_cancelled'
   ];
+
   const categoryOptions = [
     'all', 'national', 'international', 'tv', 'radio', 'chart', 
     'digital', 'playlist', 'tiktok', 'youtube'
   ];
 
+  console.log('Raw promotions data:', promotions);
+  console.log('Filtered promotions:', filteredPromotions);
+  console.log('Total promotions:', totalPromotions);
+
+  const handlePageChange = (pageId) => {
+    switch (pageId) {
+      case 'users':
+        navigate('/users');
+        break;
+      case 'distribution':
+        navigate('/distribution');
+        break;
+      case 'beat':
+        navigate('/beat');
+        break;
+      case 'promotion':
+        navigate('/promotion');
+        break;
+      default:
+        console.log('Unknown page:', pageId);
+    }
+  };
+
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <AdminSidebar
         currentPage="promotion"
@@ -239,11 +173,79 @@ const AdminPromotionsPage = () => {
       <div className={`flex-1 flex flex-col transition-all duration-300 ${
         isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-72'
       }`}>
+        {/* Mobile Header */}
+        <div className="lg:hidden bg-white shadow-sm border-b border-gray-200 px-4 py-4 sticky top-0 z-10">
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+                className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200"
+              >
+                <Menu size={22} />
+              </button>
+              <div>
+                <h1 className="text-xl font-bold text-gray-900">Promotions</h1>
+                <p className="text-sm text-gray-500">Manage promotions</p>
+              </div>
+            </div>
+            <button
+              onClick={() => setShowMobileSearch(!showMobileSearch)}
+              className="p-2 rounded-lg text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-colors duration-200"
+            >
+              <Search size={22} />
+            </button>
+          </div>
+          
+          {/* Mobile Search Bar */}
+          {showMobileSearch && (
+            <div className="mb-3">
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                  <Search className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl text-base bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] transition-all duration-200"
+                  placeholder="Search promotions..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* Mobile Filters */}
+          <div className="flex items-center space-x-3">
+            <Filter size={18} className="text-gray-500" />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="flex-1 py-3 px-4 border border-gray-300 rounded-xl text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] transition-all duration-200"
+            >
+              <option value="all">All Statuses</option>
+              <option value="active">Active</option>
+              <option value="pending">Pending</option>
+              <option value="expired">Expired</option>
+            </select>
+            <select
+              value={categoryFilter}
+              onChange={(e) => setCategoryFilter(e.target.value)}
+              className="flex-1 py-3 px-4 border border-gray-300 rounded-xl text-base bg-white focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] transition-all duration-200"
+            >
+              <option value="all">All Categories</option>
+              <option value="national">National</option>
+              <option value="international">International</option>
+              <option value="tv">TV</option>
+              <option value="radio">Radio</option>
+            </select>
+          </div>
+        </div>
+
         {/* Content Area */}
-        <div className="flex-1 overflow-auto">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pt-16 lg:pt-8">
-            {/* Header section */}
-            <div className="mb-8">
+        <div className="flex-1 overflow-hidden">
+          <div className="h-full flex flex-col">
+            {/* Desktop Header */}
+            <div className="hidden lg:block mb-8 px-6 pt-6">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                 <div className="mb-4 md:mb-0">
                   <h1 className="text-3xl font-bold text-gray-900">Promotion Management</h1>
@@ -270,8 +272,8 @@ const AdminPromotionsPage = () => {
                     onChange={(e) => setStatusFilter(e.target.value)}
                     className="block w-full sm:w-auto px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] transition duration-150 ease-in-out"
                   >
-                    {statusOptions.map(status => (
-                      <option key={status} value={status}>{status === 'all' ? 'All Statuses' : status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>
+                    {statusOptions.filter(s => s !== 'all').map(status => (
+                      <option key={status} value={status}>{status?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || status}</option>
                     ))}
                   </select>
                   
@@ -289,45 +291,47 @@ const AdminPromotionsPage = () => {
             </div>
 
             {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <Megaphone className="w-5 h-5 text-blue-600" />
+            <div className="px-4 lg:px-6 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
+                <div className="bg-gray-50 rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <User size={24} className="text-blue-600" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Total Promotions</p>
-                    <p className="text-2xl font-bold text-gray-900">{totalPromotions}</p>
+                    <div className="ml-3 lg:ml-4">
+                      <p className="text-sm font-medium text-gray-700">Total Promotions</p>
+                      <p className="text-xl lg:text-2xl font-bold text-gray-900">{totalPromotions}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                      <Check className="w-5 h-5 text-green-600" />
+                <div className="bg-gray-50 rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <TrendingUp size={24} className="text-green-600" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Active Promotions</p>
-                    <p className="text-2xl font-bold text-gray-900">{activePromotions}</p>
+                    <div className="ml-3 lg:ml-4">
+                      <p className="text-sm font-medium text-gray-700">Active Promotions</p>
+                      <p className="text-xl lg:text-2xl font-bold text-gray-900">{activePromotions}</p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <div className="w-8 h-8 bg-yellow-100 rounded-lg flex items-center justify-center">
-                      <AlertCircle className="w-5 h-5 text-yellow-600" />
+                <div className="bg-gray-50 rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                        <Calendar size={24} className="text-yellow-600" />
+                      </div>
                     </div>
-                  </div>
-                  <div className="ml-4">
-                    <p className="text-sm font-medium text-gray-600">Pending Promotions</p>
-                    <p className="text-2xl font-bold text-gray-900">{pendingPromotions}</p>
+                    <div className="ml-3 lg:ml-4">
+                      <p className="text-sm font-medium text-gray-700">Pending Promotions</p>
+                      <p className="text-xl lg:text-2xl font-bold text-gray-900">{pendingPromotions}</p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -335,21 +339,23 @@ const AdminPromotionsPage = () => {
             
             {/* Error notification */}
             {error && (
-              <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-6 rounded-md shadow-sm">
+              <div className="mx-4 lg:mx-6 mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded-lg shadow-sm">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <AlertCircle className="h-5 w-5 text-red-500" />
+                    <AlertCircle size={20} className="text-red-500" />
                   </div>
-                  <div className="ml-3">
+                  <div className="ml-3 flex-1">
                     <p className="text-sm text-red-700">{error}</p>
                   </div>
                   <div className="ml-auto pl-3">
-                    <button
-                      onClick={resetError}
-                      className="inline-flex rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
+                    <div className="-mx-1.5 -my-1.5">
+                      <button
+                        onClick={resetError}
+                        className="inline-flex rounded-md p-1.5 text-red-500 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -357,10 +363,10 @@ const AdminPromotionsPage = () => {
             
             {/* Success notification */}
             {updateSuccess && (
-              <div className="fixed top-4 right-4 bg-green-50 border-l-4 border-green-500 p-4 rounded-md shadow-lg z-50 animate-fade-in-out">
+              <div className="fixed top-4 right-4 bg-green-50 border-l-4 border-green-500 p-4 rounded-lg shadow-lg z-50 animate-fade-in-out">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <Check className="h-5 w-5 text-green-500" />
+                    <Check size={20} className="text-green-500" />
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-green-700">Promotion status updated successfully!</p>
@@ -370,143 +376,237 @@ const AdminPromotionsPage = () => {
             )}
             
             {/* Main content */}
-            <div className="bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200">
-              <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Promotion ID
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Promotion & Customer
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                        Category
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                        Budget
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Status
-                      </th>
-                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                        Actions
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    {isLoading ? (
+            <div className="flex-1 overflow-hidden">
+              <div className="h-full bg-gray-50 shadow-sm rounded-lg overflow-hidden border border-gray-200 mx-4 lg:mx-6">
+                {/* Desktop Table */}
+                <div className="hidden lg:block h-full overflow-auto">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-200 sticky top-0">
                       <tr>
-                        <td colSpan="6" className="px-6 py-10 text-center">
-                          <div className="flex justify-center items-center">
-                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2d7a63]"></div>
-                            <span className="ml-3 text-gray-600">Loading promotions...</span>
-                          </div>
-                        </td>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider" style={{color: 'black !important'}}>
+                          Promotion ID
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider" style={{color: 'black !important'}}>
+                          Title
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider hidden md:table-cell" style={{color: 'black !important'}}>
+                          Customer
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider hidden lg:table-cell" style={{color: 'black !important'}}>
+                          Category
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider" style={{color: 'black !important'}}>
+                          Status
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider" style={{color: 'black !important'}}>
+                          Actions
+                        </th>
                       </tr>
-                    ) : filteredPromotions.length > 0 ? (
-                      filteredPromotions.map((promotion) => (
-                        <tr 
-                          key={promotion.id} 
-                          className="hover:bg-gray-50 transition duration-150"
-                        >
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                            {promotion.id}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <div className="flex items-center">
-                              <div className="flex-shrink-0 h-8 w-8 bg-[#2d7a63] bg-opacity-10 rounded-full flex items-center justify-center">
-                                <Megaphone className="h-4 w-4 text-[#2d7a63]" />
-                              </div>
-                              <div className="ml-3">
-                                <div className="text-sm font-medium text-gray-900">{promotion.title}</div>
-                                <div className="text-xs text-gray-400">{promotion.customer_name}</div>
-                              </div>
+                    </thead>
+                    <tbody className="bg-gray-50 divide-y divide-gray-200">
+                      {isLoading ? (
+                        <tr>
+                          <td colSpan="6" className="px-6 py-10 text-center">
+                            <div className="flex justify-center items-center">
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2d7a63]"></div>
+                              <span className="ml-3 text-gray-600">Loading promotions...</span>
                             </div>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">
-                            <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 text-blue-800">
-                              {promotion.category.replace(/\b\w/g, c => c.toUpperCase())}
+                        </tr>
+                      ) : filteredPromotions.length > 0 ? (
+                        <>
+                          <tr className="bg-red-100">
+                            <td colSpan="6" className="px-6 py-4 text-center text-black font-bold">
+                              DEBUG: Table is rendering with {filteredPromotions.length} promotions
+                            </td>
+                          </tr>
+                          {filteredPromotions.map((promotion, index) => {
+                          console.log('Rendering promotion:', promotion);
+                          console.log('Available fields:', Object.keys(promotion));
+                          console.log('promotion.id:', promotion.id);
+                          console.log('promotion.title:', promotion.title);
+                          console.log('promotion.customer_name:', promotion.customer_name);
+                          console.log('promotion.category:', promotion.category);
+                          console.log('promotion.status:', promotion.status);
+                          return (
+                          <tr 
+                            key={`${promotion.id}-${index}`} 
+                            className="hover:bg-gray-50 transition duration-150"
+                          >
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-black font-medium" style={{color: 'black !important'}}>
+                                {promotion.id || 'NO ID'}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <div className="flex items-center">
+                                <div className="flex-shrink-0 h-8 w-8 bg-[#2d7a63] bg-opacity-10 rounded-full flex items-center justify-center">
+                                  <User size={16} className="text-[#2d7a63]" />
+                                </div>
+                                <div className="ml-3">
+                                    <div className="text-sm font-medium text-black" style={{color: 'black !important'}}>{promotion.title || promotion.name || 'NO TITLE'}</div>
+                                </div>
+                              </div>
+                            </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-black font-medium hidden md:table-cell" style={{color: 'black !important'}}>
+                                {promotion.customer_name || promotion.user_name || promotion.user?.name || 'NO CUSTOMER'}
+                            </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm text-black font-medium hidden lg:table-cell">
+                              <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
+                                  {promotion.category_type || promotion.category || 'NO CATEGORY'}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                              <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                ${promotion.status === 'active' 
+                                  ? 'bg-green-100 text-green-800' 
+                                  : promotion.status === 'pending'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-red-100 text-red-800'}`}
+                              >
+                                {promotion.status}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                              <button
+                                onClick={() => handleViewPromotion(promotion)}
+                                className="inline-flex items-center text-[#2d7a63] hover:text-[#245a4f] mr-4 transition duration-150"
+                              >
+                                <Eye size={16} className="mr-1" /> 
+                                <span className="hidden sm:inline">View</span>
+                              </button>
+                              <button
+                                onClick={() => handleUpdateClick(promotion)}
+                                className="inline-flex items-center text-blue-600 hover:text-blue-900 transition duration-150"
+                              >
+                                <Edit size={16} className="mr-1" /> 
+                                <span className="hidden sm:inline">Update</span>
+                              </button>
+                            </td>
+                          </tr>
+                          );
+                        })}
+                        </>
+                      ) : (
+                        <tr>
+                          <td colSpan="6" className="px-6 py-8 text-center text-sm text-gray-500">
+                            {searchTerm ? 'No promotions found matching your search' : 'No promotions found'}
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="lg:hidden h-full overflow-auto">
+                  {isLoading ? (
+                    <div className="p-6 text-center">
+                      <div className="flex justify-center items-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2d7a63]"></div>
+                        <span className="ml-3 text-gray-600">Loading promotions...</span>
+                      </div>
+                    </div>
+                  ) : filteredPromotions.length > 0 ? (
+                    <div className="divide-y divide-gray-200">
+                      {filteredPromotions.map((promotion, index) => (
+                        <div 
+                          key={`${promotion.id}-${index}`} 
+                          className="p-4 transition duration-150"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center">
+                              <div className="flex-shrink-0 h-12 w-12 bg-[#2d7a63] bg-opacity-10 rounded-full flex items-center justify-center">
+                                <User size={24} className="text-[#2d7a63]" />
+                              </div>
+                              <div className="ml-3">
+                                <div className="text-base font-semibold text-black">{promotion.title || promotion.name}</div>
+                                <div className="text-sm text-black font-medium">ID: {promotion.id}</div>
+                              </div>
+                            </div>
+                            <span className={`px-3 py-1 inline-flex text-sm leading-5 font-semibold rounded-full 
+                              ${promotion.status === 'active' 
+                                ? 'bg-green-100 text-green-800' 
+                                : promotion.status === 'pending'
+                                ? 'bg-yellow-100 text-yellow-800'
+                                : 'bg-red-100 text-red-800'}`}
+                            >
+                              {promotion.status}
                             </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
-                            ${promotion.budget}
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap">
-                            <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                              promotion.status === 'active' ? 'bg-green-100 text-green-800' :
-                              promotion.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                              promotion.status === 'completed' ? 'bg-blue-100 text-blue-800' :
-                              'bg-red-100 text-red-800'
-                            }`}>
-                              {promotion.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          </div>
+                          
+                          <div className="space-y-2 mb-4">
+                            <div className="text-sm text-black font-medium">
+                              <span className="font-medium">Customer:</span> {promotion.customer_name || promotion.user_name || promotion.user?.name || 'NO CUSTOMER'}
+                            </div>
+                            <div className="text-sm text-black font-medium">
+                              <span className="font-medium">Category:</span> {promotion.category_type || promotion.category || 'NO CATEGORY'}
+                            </div>
+                            <div className="text-sm text-black font-medium">
+                              <span className="font-medium">Email:</span> {promotion.customer_email || promotion.user_email || promotion.user?.email || 'NO EMAIL'}
+                            </div>
+                          </div>
+                          
+                          <div className="flex space-x-3">
                             <button
                               onClick={() => handleViewPromotion(promotion)}
-                              className="inline-flex items-center text-[#2d7a63] hover:text-[#245a4f] mr-4 transition duration-150"
+                              className="flex-1 inline-flex items-center justify-center px-4 py-3 border border-[#2d7a63] text-sm font-medium rounded-lg text-[#2d7a63] bg-white hover:bg-[#245a4f] hover:text-white transition duration-150 shadow-sm"
                             >
-                              <Eye size={16} className="mr-1" /> 
-                              <span className="hidden sm:inline">View</span>
+                              <Eye size={16} className="mr-2" /> 
+                              View Details
                             </button>
                             <button
                               onClick={() => handleUpdateClick(promotion)}
-                              className="inline-flex items-center text-blue-600 hover:text-blue-900 transition duration-150"
+                              className="flex-1 inline-flex items-center justify-center px-4 py-3 border border-blue-600 text-sm font-medium rounded-lg text-blue-600 bg-white hover:bg-blue-600 hover:text-white transition duration-150 shadow-sm"
                             >
-                              <Edit size={16} className="mr-1" /> 
-                              <span className="hidden sm:inline">Update</span>
+                              <Edit size={16} className="mr-2" /> 
+                              Update Status
                             </button>
-                          </td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan="6" className="px-6 py-8 text-center text-sm text-gray-500">
-                          {searchTerm ? 'No promotions found matching your search' : 'No promotions found'}
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              
-              {/* Pagination controls */}
-              {promotions.length > 0 && !searchTerm && (
-                <div className="px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200">
-                  <div className="text-sm text-gray-700 mb-4 sm:mb-0">
-                    Showing page <span className="font-medium">{pagination.currentPage}</span> of{' '}
-                    <span className="font-medium">{pagination.totalPages}</span> (Total:{' '}
-                    <span className="font-medium">{pagination.total}</span> promotions)
-                  </div>
-                  <div className="flex space-x-2">
-                    <button
-                      onClick={goToPrevPage}
-                      disabled={pagination.currentPage === 1}
-                      className={`inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md 
-                        ${pagination.currentPage === 1 
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                          : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                    >
-                      <ChevronLeft size={16} className="mr-1" />
-                      Previous
-                    </button>
-                    <button
-                      onClick={goToNextPage}
-                      disabled={pagination.currentPage === pagination.totalPages}
-                      className={`inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md 
-                        ${pagination.currentPage === pagination.totalPages 
-                          ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                          : 'bg-white text-gray-700 hover:bg-gray-50'}`}
-                    >
-                      Next
-                      <ChevronRight size={16} className="ml-1" />
-                    </button>
-                  </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-6 text-center text-sm text-gray-500">
+                      {searchTerm ? 'No promotions found matching your search' : 'No promotions found'}
+                    </div>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
+            
+            {/* Pagination controls */}
+            {promotions.length > 0 && !searchTerm && (
+              <div className="px-4 lg:px-6 py-4 flex flex-col sm:flex-row items-center justify-between border-t border-gray-200 bg-white">
+                <div className="text-sm text-gray-700 mb-4 sm:mb-0 text-center sm:text-left">
+                  Showing page <span className="font-medium">{pagination.currentPage}</span> of{' '}
+                  <span className="font-medium">{pagination.totalPages}</span> (Total:{' '}
+                  <span className="font-medium">{pagination.total}</span> promotions)
+                </div>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={goToPrevPage}
+                    disabled={pagination.currentPage === 1}
+                    className={`inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg 
+                      ${pagination.currentPage === 1 
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                        : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm'}`}
+                  >
+                    <ChevronLeft size={18} className="mr-1" />
+                    <span className="hidden sm:inline">Previous</span>
+                  </button>
+                  <button
+                    onClick={goToNextPage}
+                    disabled={pagination.currentPage === pagination.totalPages}
+                    className={`inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-lg 
+                      ${pagination.currentPage === pagination.totalPages 
+                        ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
+                        : 'bg-white text-gray-700 hover:bg-gray-50 shadow-sm'}`}
+                  >
+                    <span className="hidden sm:inline">Next</span>
+                    <ChevronRight size={18} className="ml-1" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -528,7 +628,7 @@ const AdminPromotionsPage = () => {
             <div className="p-6 space-y-6">
               <div className="flex flex-col items-center mb-6">
                 <div className="h-20 w-20 bg-[#2d7a63] bg-opacity-10 rounded-full flex items-center justify-center">
-                  <Megaphone className="h-10 w-10 text-[#2d7a63]" />
+                  <User size={40} className="text-[#2d7a63]" />
                 </div>
                 <h3 className="mt-4 text-lg font-medium text-gray-900">{selectedPromotion.title}</h3>
                 <p className="mt-1 text-sm text-gray-500">by {selectedPromotion.customer_name}</p>
@@ -538,49 +638,49 @@ const AdminPromotionsPage = () => {
                   selectedPromotion.status === 'completed' ? 'bg-blue-100 text-blue-800' :
                   'bg-red-100 text-red-800'
                 }`}>
-                  {selectedPromotion.status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}
+                  {selectedPromotion.status?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || 'Unknown'}
                 </span>
               </div>
               
               <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                 <div>
                   <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Promotion ID</h4>
-                  <p className="mt-1 text-sm text-gray-900">{selectedPromotion.id}</p>
+                  <p className="mt-1 text-sm text-black font-medium">{selectedPromotion.id}</p>
                 </div>
                 
                 <div>
                   <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Category</h4>
-                  <p className="mt-1 text-sm text-gray-900">{selectedPromotion.category.replace(/\b\w/g, c => c.toUpperCase())}</p>
+                  <p className="mt-1 text-sm text-black font-medium">{selectedPromotion.category?.replace(/\b\w/g, c => c.toUpperCase()) || 'N/A'}</p>
                 </div>
                 
                 <div>
                   <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</h4>
-                  <p className="mt-1 text-sm text-gray-900">{selectedPromotion.customer_name}</p>
+                  <p className="mt-1 text-sm text-black font-medium">{selectedPromotion.customer_name}</p>
                 </div>
                 
                 <div>
                   <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Email</h4>
-                  <p className="mt-1 text-sm text-gray-900">{selectedPromotion.customer_email}</p>
+                  <p className="mt-1 text-sm text-black font-medium">{selectedPromotion.customer_email}</p>
                 </div>
                 
                 <div>
                   <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Budget</h4>
-                  <p className="mt-1 text-sm text-gray-900">${selectedPromotion.budget}</p>
+                  <p className="mt-1 text-sm text-black font-medium">${selectedPromotion.budget}</p>
                 </div>
                 
                 <div>
                   <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Created At</h4>
-                  <p className="mt-1 text-sm text-gray-900">{new Date(selectedPromotion.created_at).toLocaleString()}</p>
+                  <p className="mt-1 text-sm text-black font-medium">{new Date(selectedPromotion.created_at).toLocaleString()}</p>
                 </div>
                 
                 <div>
                   <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</h4>
-                  <p className="mt-1 text-sm text-gray-900">{new Date(selectedPromotion.start_date).toLocaleString()}</p>
+                  <p className="mt-1 text-sm text-black font-medium">{new Date(selectedPromotion.start_date).toLocaleString()}</p>
                 </div>
                 
                 <div>
                   <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">End Date</h4>
-                  <p className="mt-1 text-sm text-gray-900">{new Date(selectedPromotion.end_date).toLocaleString()}</p>
+                  <p className="mt-1 text-sm text-black font-medium">{new Date(selectedPromotion.end_date).toLocaleString()}</p>
                 </div>
               </div>
             </div>
@@ -598,7 +698,7 @@ const AdminPromotionsPage = () => {
       )}
       
       {/* Update Status Modal */}
-      {isUpdateModalOpen && promotionToUpdate && (
+      {isUpdateModalOpen && selectedPromotion && (
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-md w-full">
             <div className="flex justify-between items-center p-6 border-b border-gray-200">
@@ -615,12 +715,12 @@ const AdminPromotionsPage = () => {
               <div className="mb-6">
                 <div className="flex items-center mb-4">
                   <div className="h-10 w-10 bg-[#2d7a63] bg-opacity-10 rounded-full flex items-center justify-center flex-shrink-0">
-                    <Megaphone className="h-5 w-5 text-[#2d7a63]" />
+                    <User size={20} className="text-[#2d7a63]" />
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-gray-900">{promotionToUpdate.title}</p>
-                    <p className="text-sm text-gray-500">by {promotionToUpdate.customer_name}</p>
-                    <p className="text-xs text-gray-400">Promotion ID: {promotionToUpdate.id}</p>
+                    <p className="text-sm font-medium text-gray-900">{selectedPromotion.title}</p>
+                    <p className="text-sm text-gray-500">by {selectedPromotion.customer_name}</p>
+                    <p className="text-xs text-gray-400">Promotion ID: {selectedPromotion.id}</p>
                   </div>
                 </div>
               </div>
@@ -636,7 +736,7 @@ const AdminPromotionsPage = () => {
                     className="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] transition duration-150 ease-in-out"
                   >
                     {statusOptions.filter(s => s !== 'all').map(status => (
-                      <option key={status} value={status}>{status.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</option>
+                      <option key={status} value={status}>{status?.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase()) || status}</option>
                     ))}
                   </select>
                 </div>
@@ -646,12 +746,15 @@ const AdminPromotionsPage = () => {
                     Category
                   </label>
                   <select
-                    value={newCategory}
-                    onChange={(e) => setNewCategory(e.target.value)}
+                    value={selectedPromotion.category} // Use selectedPromotion.category for the new category
+                    onChange={(e) => {
+                      const newCategory = e.target.value;
+                      setSelectedPromotion(prev => prev ? { ...prev, category: newCategory } : null);
+                    }}
                     className="block w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] transition duration-150 ease-in-out"
                   >
                     {categoryOptions.filter(c => c !== 'all').map(category => (
-                      <option key={category} value={category}>{category.replace(/\b\w/g, c => c.toUpperCase())}</option>
+                      <option key={category} value={category}>{category?.replace(/\b\w/g, c => c.toUpperCase()) || category}</option>
                     ))}
                   </select>
                 </div>

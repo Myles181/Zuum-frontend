@@ -24,35 +24,25 @@ export const useAdmins = () => {
    * Fetch all users with pagination
    */
   const fetchUsers = useCallback(async (page = 1) => {
-    console.log('Fetching users for page:', page);
     setIsLoading(true);
     setError(null);
-    
+
     try {
-      console.log('Making API call to /admin/users');
-      const response = await axios.get('/admin/users', {
-        params: { page },
+      const response = await axios.get(`${API_URL}/admin/users`, {
         withCredentials: true,
-        headers: { 'Content-Type': 'application/json' }
+        params: { page, limit: 10 }
       });
-      
-      console.log('API response:', response);
-      
+
       if (response.status === 200) {
-        setUsers(response.data.users || response.data);
-        
-        // Set pagination if available in response
-        if (response.data.currentPage && response.data.total && response.data.totalPages) {
-          setPagination({
-            currentPage: response.data.currentPage,
-            total: response.data.total,
-            totalPages: response.data.totalPages
-          });
-        }
+        setUsers(response.data.users || []);
+        setPagination(response.data.pagination || {});
       }
     } catch (err) {
-      console.error('Error fetching users:', err);
-      handleApiError(err);
+      if (err.response) {
+        setError(err.response.data?.message || 'Failed to fetch users');
+      } else {
+        setError('Network error - please try again');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -119,10 +109,10 @@ export const useAdmins = () => {
    */
   const resetError = useCallback(() => setError(null), []);
 
-  // Initial fetch when hook is first used
+  // Initial fetch when hook is first used - only run once
   useEffect(() => {
     fetchUsers(1);
-  }, [fetchUsers]);
+  }, []); // Empty dependency array - only run on mount
 
   return { 
     users, 

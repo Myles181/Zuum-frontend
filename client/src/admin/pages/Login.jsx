@@ -22,7 +22,6 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e) => {
       e.preventDefault();
-      console.debug("[Login] handleSubmit with", { email, username, password });
       const credentials = { email, username, password };
       await login(credentials);
     };
