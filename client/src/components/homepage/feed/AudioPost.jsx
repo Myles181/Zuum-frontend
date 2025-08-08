@@ -99,7 +99,7 @@ const AudioPost = React.forwardRef(({
         {/* Beat content */}
         <div className="relative z-10 w-full h-full flex flex-col items-center  justify-center p-6 text-center">
           {/* Promotional badge */}
-          <div className="absolute top- left-4 flex items-center mt-10 bg-yellow-500/90 text-black px-3 py-1 rounded-full text-xs font-bold">
+          <div className="absolute top-10 left-4 flex items-center mt-10 bg-yellow-500/90 text-black px-3 py-1 rounded-full text-xs font-bold">
             <MdCampaign className="mr-1" />
             PROMOTIONAL BEAT
           </div>
@@ -132,7 +132,7 @@ const AudioPost = React.forwardRef(({
                 </span>
               </div>
               <button 
-                onClick={handlePurchaseClick}
+                // onClick={handlePurchaseClick}
                 className="w-full bg-gradient-to-r from-yellow-500 to-yellow-600 text-black font-bold py-3 px-6 rounded-lg flex items-center justify-center hover:opacity-90 transition-opacity"
               >
                 <FaShoppingCart className="mr-2" />
@@ -195,7 +195,7 @@ const AudioPost = React.forwardRef(({
       <div className="relative z-10 w-full h-full">
         {/* Top bar */}
         <div className="absolute top-8 sm:top-4 left-0 right-0 p-4 z-30 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
+          {/* <div className="flex items-center space-x-2">
             <FaMusic className="text-white text-xl" />
             <span className="text-white font-semibold text-sm">
               {contentInfo.artist}
@@ -203,13 +203,13 @@ const AudioPost = React.forwardRef(({
             <span className={`text-xs px-2 py-0.5 rounded-full text-white ${contentInfo.badgeColor}`}>
               {contentInfo.badgeText}
             </span>
-          </div>
-          <img
+          </div> */}
+          {/* <img
             src={b}
             className="w-6 h-6 cursor-pointer"
             alt="Options"
             onClick={(e) => e.stopPropagation()}
-          />
+          /> */}
         </div>
         
         {/* Cover image - fills entire space */}
