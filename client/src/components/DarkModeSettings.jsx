@@ -35,21 +35,21 @@ const DarkModeSettings = () => {
       const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       setDarkMode(systemPrefersDark);
     } else {
+      localStorage.setItem('darkMode', optionId === 'dark');
       setDarkMode(optionId === 'dark');
     }
   };
 
   return (
     <div 
-      className="p-6 rounded-lg shadow-sm"
+      className="p-6 rounded-lg backdrop-blur-lg border"
       style={{
-        backgroundColor: 'var(--color-bg-primary)',
-        border: '1px solid var(--color-border)'
+        backgroundColor: 'rgba(255, 255, 255, 0.2)',
+        borderColor: 'rgba(255, 255, 255, 0.1)'
       }}
     >
       <h3 
-        className="text-lg font-semibold mb-4"
-        style={{ color: 'var(--color-text-primary)' }}
+        className="text-lg font-semibold mb-4 text-white"
       >
         Appearance
       </h3>
@@ -63,45 +63,47 @@ const DarkModeSettings = () => {
               onClick={() => handleOptionSelect(option.id)}
               className={`w-full p-4 rounded-lg border transition-all duration-200 flex items-center space-x-3 ${
                 option.active
-                  ? 'border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-blue-900/20'
-                  : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                  ? 'border-green-500 bg-green-500/20 backdrop-blur-sm'
+                  : 'border-white/10 hover:border-white/20 bg-white/5 hover:bg-white/10'
               }`}
             >
               <div className={`p-2 rounded-lg ${
                 option.active
-                  ? 'bg-blue-100 dark:bg-blue-800 text-blue-600 dark:text-blue-400'
-                  : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
+                  ? 'bg-green-500/30 text-white'
+                  : 'bg-white/10 text-white/80'
               }`}>
                 <Icon className="w-5 h-5" />
               </div>
               
               <div className="flex-1 text-left">
                 <div className={`font-medium ${
-                  option.active
-                    ? 'text-blue-900 dark:text-blue-100'
-                    : 'text-gray-900 dark:text-gray-100'
+                  option.active ? 'text-white' : 'text-white/90'
                 }`}>
                   {option.label}
                 </div>
                 <div className={`text-sm ${
-                  option.active
-                    ? 'text-blue-700 dark:text-blue-300'
-                    : 'text-gray-500 dark:text-gray-400'
+                  option.active ? 'text-white/80' : 'text-white/70'
                 }`}>
                   {option.description}
                 </div>
               </div>
               
               {option.active && (
-                <div className="w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full"></div>
+                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
               )}
             </button>
           );
         })}
       </div>
       
-      <div className="mt-6 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-        <p className="text-sm text-gray-600 dark:text-gray-300">
+      <div 
+        className="mt-6 p-4 rounded-lg backdrop-blur-sm"
+        style={{
+          backgroundColor: 'rgba(0, 0, 0, 0.2)',
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}
+      >
+        <p className="text-sm text-white/80">
           Your preference will be saved and applied across all pages. 
           The system default option will automatically switch between light and dark mode based on your device settings.
         </p>
@@ -110,4 +112,4 @@ const DarkModeSettings = () => {
   );
 };
 
-export default DarkModeSettings; 
+export default DarkModeSettings;
