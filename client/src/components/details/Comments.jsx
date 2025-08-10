@@ -102,10 +102,14 @@ const CommentModal = ({ comments: initialComments, postId }) => {
           e.stopPropagation();
           setIsModalOpen(true);
         }}
-        className="flex flex-col items-center text-white rounded-full"
+        className="flex flex-col items-center rounded-full"
+        style={{ color: 'var(--color-text-primary)' }}
         aria-label="View comments"
       >
-        <div className="rounded-full p-2 hover:bg-white/10 transition-colors">
+        <div 
+          className="rounded-full p-2 transition-colors"
+          style={{ '&:hover': { backgroundColor: 'var(--color-bg-secondary)' } }}
+        >
           <FaComment className="text-xl" />
         </div>
         <span className="text-sm">{comments.length}</span>
@@ -116,7 +120,8 @@ const CommentModal = ({ comments: initialComments, postId }) => {
           <div className="fixed inset-0 z-50">
             {/* Backdrop */}
             <motion.div
-              className="absolute inset-0 bg-black/50"
+              className="absolute inset-0"
+              style={{ backgroundColor: 'var(--color-backdrop)' }}
               onClick={() => setIsModalOpen(false)}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -126,8 +131,12 @@ const CommentModal = ({ comments: initialComments, postId }) => {
 
             {/* Modal Panel */}
             <motion.div
-              className="absolute bottom-0 left-0 right-0 bg-white rounded-t-3xl overflow-hidden flex flex-col"
-              style={{ height: '70vh' }}
+              className="absolute bottom-0 left-0 right-0 rounded-t-3xl overflow-hidden flex flex-col"
+              style={{ 
+                height: '70vh',
+                backgroundColor: 'var(--color-bg-primary)',
+                border: '1px solid var(--color-border)'
+              }}
               onClick={e => e.stopPropagation()} // Stop backdrop click
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
@@ -135,11 +144,23 @@ const CommentModal = ({ comments: initialComments, postId }) => {
               transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             >
               {/* Header */}
-              <div className="px-4 py-3 border-b border-gray-200 flex justify-between items-center">
-                <h3 className="font-bold text-lg">{comments.length} comments</h3>
+              <div 
+                className="px-4 py-3 flex justify-between items-center"
+                style={{ 
+                  borderBottom: '1px solid var(--color-border)',
+                  backgroundColor: 'var(--color-bg-secondary)'
+                }}
+              >
+                <h3 
+                  className="font-bold text-lg"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
+                  {comments.length} comments
+                </h3>
                 <button
                   onClick={() => setIsModalOpen(false)}
-                  className="text-gray-500 p-2 hover:text-gray-700"
+                  className="p-2"
+                  style={{ color: 'var(--color-text-secondary)' }}
                   aria-label="Close comments"
                 >
                   <FaTimes className="text-xl" />
@@ -165,30 +186,65 @@ const CommentModal = ({ comments: initialComments, postId }) => {
                           onError={e => e.target.src = '/default-profile.jpg'}
                         />
                         <div className="flex-1 min-w-0">
-                          <div className={`bg-gray-100 rounded-2xl p-3 ${comment.isFailed ? 'border border-red-300' : ''}`}>
+                          <div 
+                            className={`rounded-2xl p-3 ${comment.isFailed ? 'border border-red-300' : ''}`}
+                            style={{ 
+                              backgroundColor: 'var(--color-bg-secondary)',
+                              borderColor: comment.isFailed ? 'var(--color-error)' : 'transparent'
+                            }}
+                          >
                             <div className="flex justify-between items-start">
-                              <p className="font-semibold text-sm">{comment.username}</p>
+                              <p 
+                                className="font-semibold text-sm"
+                                style={{ color: 'var(--color-text-primary)' }}
+                              >
+                                {comment.username}
+                              </p>
                               {comment.isFailed && (
-                                <span className="text-xs text-red-500 ml-2">Failed to send</span>
+                                <span 
+                                  className="text-xs ml-2"
+                                  style={{ color: 'var(--color-error)' }}
+                                >
+                                  Failed to send
+                                </span>
                               )}
                             </div>
-                            <p className="text-gray-800 mt-1 break-words">{comment.comment}</p>
+                            <p 
+                              className="mt-1 break-words"
+                              style={{ color: 'var(--color-text-primary)' }}
+                            >
+                              {comment.comment}
+                            </p>
                           </div>
-                          <div className="flex items-center mt-1 ml-2 gap-4 text-xs text-gray-500">
+                          <div 
+                            className="flex items-center mt-1 ml-2 gap-4 text-xs"
+                            style={{ color: 'var(--color-text-secondary)' }}
+                          >
                             <span>{formatDate(comment.created_at)}</span>
                           </div>
                         </div>
                       </motion.div>
                     ))
                   ) : (
-                    <div className="text-center py-10 text-gray-500">No comments yet. Be the first to comment!</div>
+                    <div 
+                      className="text-center py-10"
+                      style={{ color: 'var(--color-text-secondary)' }}
+                    >
+                      No comments yet. Be the first to comment!
+                    </div>
                   )}
                   <div ref={commentsEndRef} />
                 </div>
               </div>
 
               {/* Input Field */}
-              <div className="p-3 border-t border-gray-200 bg-white mb-10">
+              <div 
+                className="p-3 mb-10"
+                style={{ 
+                  borderTop: '1px solid var(--color-border)',
+                  backgroundColor: 'var(--color-bg-primary)'
+                }}
+              >
                 <form onSubmit={handleSubmitComment} className="flex items-center gap-2">
                   <img
                     src={profile?.image || '/default-profile.jpg'}
@@ -202,14 +258,24 @@ const CommentModal = ({ comments: initialComments, postId }) => {
                       value={newComment}
                       onChange={e => setNewComment(e.target.value)}
                       placeholder="Add a comment..."
-                      className="w-full py-2 px-4 bg-gray-100 rounded-full focus:outline-none focus:ring-2 focus:ring-[#2D8C72]"
+                      className="w-full py-2 px-4 rounded-full focus:outline-none focus:ring-2"
+                      style={{
+                        backgroundColor: 'var(--color-bg-secondary)',
+                        color: 'var(--color-text-primary)',
+                        border: '1px solid var(--color-border)',
+                        '&:focus': {
+                          ringColor: 'var(--color-primary)'
+                        }
+                      }}
                       disabled={isLoading}
                       aria-label="Comment input"
                     />
                     <button
                       type="submit"
                       disabled={!newComment.trim() || isLoading}
-                      className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${newComment.trim() ? 'text-[#2D8C72]' : 'text-gray-400'}`}
+                      className={`absolute right-2 top-1/2 transform -translate-y-1/2 ${
+                        newComment.trim() ? 'text-[#008066]' : 'text-gray-400'
+                      }`}
                       aria-label="Submit comment"
                     >
                       <FaPaperPlane />
@@ -220,7 +286,8 @@ const CommentModal = ({ comments: initialComments, postId }) => {
                   <motion.div
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
-                    className="text-red-500 text-sm mt-2 text-center"
+                    className="text-sm mt-2 text-center"
+                    style={{ color: 'var(--color-error)' }}
                   >
                     {error}
                   </motion.div>

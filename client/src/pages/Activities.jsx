@@ -160,9 +160,12 @@ const ActivityPage = () => {
             </h2>
             <Link 
               to="/zuum-news"
-              className="text-sm font-medium bg-[#2D8C72] text-white px-4 py-2 rounded-full hover:bg-[#256b58] transition duration-200"
+              className="text-sm font-medium bg-[#2D8C72] px-4 py-2 rounded-full hover:bg-[#256b58] transition duration-200"
             >
-              Zuum News 
+              <span className='text-white '>
+                  Zuum News 
+              </span>
+              
             </Link>
           </div>
           

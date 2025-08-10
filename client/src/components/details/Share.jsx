@@ -92,24 +92,40 @@ const ShareModal = ({ isOpen, onClose, url, title, postId }) => {
               damping: 25,
               stiffness: 300
             }}
-            className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl bg-white shadow-2xl max-h-[85vh] overflow-hidden"
+            className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl shadow-2xl max-h-[85vh] overflow-hidden"
+            style={{ 
+              backgroundColor: 'var(--color-bg-primary)',
+              border: '1px solid var(--color-border)'
+            }}
             onClick={e => e.stopPropagation()} // prevent backdrop click
           >
             {/* Drag handle indicator */}
             <div className="flex justify-center py-2">
-              <div className="w-12 h-1 bg-gray-200 rounded-full"></div>
+              <div 
+                className="w-12 h-1 rounded-full"
+                style={{ backgroundColor: 'var(--color-border)' }}
+              ></div>
             </div>
 
             <div className="p-6">
               {/* Header */}
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Share this track</h3>
+                <h3 
+                  className="text-xl font-bold"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
+                  Share this track
+                </h3>
                 <button
                   onClick={onClose}
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  className="p-2 rounded-full transition-colors"
+                  style={{ 
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    color: 'var(--color-text-secondary)'
+                  }}
                   aria-label="Close share modal"
                 >
-                  <FaTimes className="text-gray-500" size={18} />
+                  <FaTimes size={18} />
                 </button>
               </div>
 
@@ -123,27 +139,63 @@ const ShareModal = ({ isOpen, onClose, url, title, postId }) => {
                     className="flex flex-col items-center group"
                     aria-label={`Share to ${platform.name}`}
                   >
-                    <div className="w-14 h-14 flex items-center justify-center bg-gray-50 rounded-xl mb-2 group-hover:bg-gray-100 transition-colors">
+                    <div 
+                      className="w-14 h-14 flex items-center justify-center rounded-xl mb-2 transition-colors"
+                      style={{ 
+                        backgroundColor: 'var(--color-bg-secondary)',
+                        '&:hover': {
+                          backgroundColor: 'var(--color-bg-tertiary)'
+                        }
+                      }}
+                    >
                       {platform.icon}
                     </div>
-                    <span className="text-xs text-gray-600 font-medium">{platform.name}</span>
+                    <span 
+                      className="text-xs font-medium"
+                      style={{ color: 'var(--color-text-secondary)' }}
+                    >
+                      {platform.name}
+                    </span>
                   </motion.button>
                 ))}
               </div>
 
               {/* Link section */}
-              <div className="bg-gray-50 rounded-xl p-4 mb-6">
-                <p className="text-sm text-gray-500 mb-2">Share link</p>
+              <div 
+                className="rounded-xl p-4 mb-6"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)'
+                }}
+              >
+                <p 
+                  className="text-sm mb-2"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
+                  Share link
+                </p>
                 <div className="flex items-center">
                   <input
                     type="text"
                     value={shareableLink}
                     readOnly
-                    className="flex-1 bg-white border border-gray-200 rounded-l-lg px-4 py-2 text-sm text-gray-700 truncate focus:outline-none"
+                    className="flex-1 px-4 py-2 text-sm truncate focus:outline-none rounded-l-lg"
+                    style={{ 
+                      backgroundColor: 'var(--color-bg-primary)',
+                      border: '1px solid var(--color-border)',
+                      color: 'var(--color-text-primary)'
+                    }}
                   />
                   <button
                     onClick={copyToClipboard}
-                    className="bg-[#2D8C72] text-white px-4 py-2 rounded-r-lg text-sm font-medium hover:bg-gray-700 transition-colors"
+                    className="px-4 py-2 rounded-r-lg text-sm font-medium transition-colors"
+                    style={{ 
+                      backgroundColor: 'var(--color-primary)',
+                      color: 'white',
+                      '&:hover': {
+                        backgroundColor: 'var(--color-primary-dark)'
+                      }
+                    }}
                   >
                     {copySuccess ? 'Copied!' : 'Copy'}
                   </button>
@@ -152,7 +204,12 @@ const ShareModal = ({ isOpen, onClose, url, title, postId }) => {
 
               {/* Direct share section */}
               <div>
-                <h4 className="text-sm font-semibold text-gray-700 mb-4">Send directly to</h4>
+                <h4 
+                  className="text-sm font-semibold mb-4"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
+                  Send directly to
+                </h4>
                 <div className="flex space-x-4 overflow-x-auto pb-2 scrollbar-hide">
                   {[1, 2, 3, 4, 5].map((user) => (
                     <motion.button
@@ -164,12 +221,25 @@ const ShareModal = ({ isOpen, onClose, url, title, postId }) => {
                         onClose();
                       }}
                     >
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 mb-2 overflow-hidden">
-                        <div className="w-full h-full flex items-center justify-center text-white font-medium">
+                      <div 
+                        className="w-12 h-12 rounded-full mb-2 overflow-hidden"
+                        style={{ 
+                          background: 'linear-gradient(to bottom right, var(--color-primary), var(--color-primary-light))'
+                        }}
+                      >
+                        <div 
+                          className="w-full h-full flex items-center justify-center font-medium"
+                          style={{ color: 'white' }}
+                        >
                           U{user}
                         </div>
                       </div>
-                      <span className="text-xs text-gray-600">User {user}</span>
+                      <span 
+                        className="text-xs"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
+                        User {user}
+                      </span>
                     </motion.button>
                   ))}
                 </div>
