@@ -71,26 +71,26 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
       case 'print':
       case 'national':
       case 'international':
-        return <Newspaper className="w-5 h-5 text-[#1a5f4b]" />;
+        return <Newspaper className="w-5 h-5 text-[#008066]" />;
       case 'tv':
-        return <Tv className="w-5 h-5 text-[#1a5f4b]" />;
+        return <Tv className="w-5 h-5 text-[#008066]" />;
       case 'radio':
-        return <Radio className="w-5 h-5 text-[#1a5f4b]" />;
+        return <Radio className="w-5 h-5 text-[#008066]" />;
       case 'chart':
       case 'playlist':
-        return <ListMusic className="w-5 h-5 text-[#1a5f4b]" />;
+        return <ListMusic className="w-5 h-5 text-[#008066]" />;
       case 'digital':
-        return <Globe className="w-5 h-5 text-[#1a5f4b]" />;
+        return <Globe className="w-5 h-5 text-[#008066]" />;
       case 'youtube':
         return <Youtube className="w-5 h-5 text-[#FF0000]" />;
       case 'tiktok':
         return (
-          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="#000000">
+          <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
             <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
           </svg>
         );
       default:
-        return <TrendingUp className="w-5 h-5 text-[#1a5f4b]" />;
+        return <TrendingUp className="w-5 h-5 text-[#008066]" />;
     }
   };
 
@@ -114,11 +114,11 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
         };
       default:
         return {
-          bgFrom: 'from-[#1a5f4b]',
-          bgTo: 'to-[#2d7a63]',
-          text: 'text-[#1a5f4b]',
-          hover: 'hover:bg-[#0f3d2e]',
-          focusRing: 'focus:ring-[#1a5f4b]/20 focus:border-[#1a5f4b]'
+          bgFrom: 'from-[#008066]',
+          bgTo: 'to-[#006e58]',
+          text: 'text-[#008066]',
+          hover: 'hover:bg-[#006e58]',
+          focusRing: 'focus:ring-[#008066]/20 focus:border-[#008066]'
         };
     }
   };
@@ -133,7 +133,10 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
         return (
           <div className="space-y-6">
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Title <span className="text-red-500">*</span>
               </label>
               <input
@@ -141,13 +144,21 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a5f4b]/20 focus:border-[#1a5f4b] smooth-transition placeholder-gray-400"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] smooth-transition placeholder-gray-400"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)'
+                }}
                 placeholder="Enter your promotion title"
                 required
               />
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Content <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -155,13 +166,21 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 value={formData.body}
                 onChange={handleChange}
                 rows={4}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a5f4b]/20 focus:border-[#1a5f4b] smooth-transition placeholder-gray-400 resize-none"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] smooth-transition placeholder-gray-400 resize-none"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)'
+                }}
                 placeholder="Write your promotion content here..."
                 required
               />
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Image <span className="text-red-500">*</span>
               </label>
               <FileUpload 
@@ -173,7 +192,10 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
             </div>
             {(category === 'print' || category === 'international') && (
               <div className="group">
-                <label className="block text-sm font-semibold text-gray-800 mb-2">
+                <label 
+                  className="block text-sm font-semibold mb-2"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
                   Description
                 </label>
                 <textarea
@@ -181,7 +203,12 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                   value={formData.description}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a5f4b]/20 focus:border-[#1a5f4b] transition-all duration-200 placeholder-gray-400 resize-none"
+                  className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] transition-all duration-200 placeholder-gray-400 resize-none"
+                  style={{ 
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    border: '1px solid var(--color-border)',
+                    color: 'var(--color-text-primary)'
+                  }}
                   placeholder="Add a brief description (optional)"
                 />
               </div>
@@ -193,7 +220,10 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
         return (
           <div className="space-y-6">
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Title <span className="text-red-500">*</span>
               </label>
               <input
@@ -201,13 +231,21 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a5f4b]/20 focus:border-[#1a5f4b] transition-all duration-200 placeholder-gray-400"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] transition-all duration-200 placeholder-gray-400"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)'
+                }}
                 placeholder="Enter TV promotion title"
                 required
               />
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Biography <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -215,13 +253,21 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 value={formData.biography}
                 onChange={handleChange}
                 rows={4}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a5f4b]/20 focus:border-[#1a5f4b] transition-all duration-200 placeholder-gray-400 resize-none"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] transition-all duration-200 placeholder-gray-400 resize-none"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)'
+                }}
                 placeholder="Tell us about yourself or your story..."
                 required
               />
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 HD Video <span className="text-red-500">*</span>
               </label>
               <FileUpload 
@@ -240,7 +286,10 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
         return (
           <div className="space-y-6">
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Song Link <span className="text-red-500">*</span>
               </label>
               <input
@@ -249,10 +298,20 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 value={formData.song_link}
                 onChange={handleChange}
                 placeholder="https://example.com/song.mp3"
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a5f4b]/20 focus:border-[#1a5f4b] transition-all duration-200 placeholder-gray-400"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] transition-all duration-200 placeholder-gray-400"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)'
+                }}
                 required
               />
-              <p className="text-xs text-gray-500 mt-2">Provide a direct link to your song file</p>
+              <p 
+                className="text-xs mt-2"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Provide a direct link to your song file
+              </p>
             </div>
           </div>
         );
@@ -261,7 +320,10 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
         return (
           <div className="space-y-6">
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Artist Name <span className="text-red-500">*</span>
               </label>
               <input
@@ -269,13 +331,21 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 name="artist_name"
                 value={formData.artist_name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a5f4b]/20 focus:border-[#1a5f4b] transition-all duration-200 placeholder-gray-400"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] transition-all duration-200 placeholder-gray-400"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)'
+                }}
                 placeholder="Enter your artist name"
                 required
               />
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Biography <span className="text-red-500">*</span>
               </label>
               <textarea
@@ -283,13 +353,21 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 value={formData.biography}
                 onChange={handleChange}
                 rows={4}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1a5f4b]/20 focus:border-[#1a5f4b] transition-all duration-200 placeholder-gray-400 resize-none"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] transition-all duration-200 placeholder-gray-400 resize-none"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)'
+                }}
                 placeholder="Share your artistic journey and background..."
                 required
               />
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Artist Photo <span className="text-red-500">*</span>
               </label>
               <FileUpload 
@@ -306,7 +384,10 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
         return (
           <div className="space-y-5">
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 YouTube Video Link <span className="text-red-500">*</span>
               </label>
               <input
@@ -315,13 +396,26 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 value={formData.video_link}
                 onChange={handleChange}
                 placeholder="https://youtube.com/watch?v=..."
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 placeholder-gray-400"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 placeholder-gray-400"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)'
+                }}
                 required
               />
-              <p className="text-xs text-gray-500 mt-2">Paste the full YouTube video URL</p>
+              <p 
+                className="text-xs mt-2"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Paste the full YouTube video URL
+              </p>
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Video Title <span className="text-red-500">*</span>
               </label>
               <input
@@ -329,13 +423,21 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 placeholder-gray-400"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 placeholder-gray-400"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)'
+                }}
                 placeholder="Enter your video title"
                 required
               />
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Description
               </label>
               <textarea
@@ -343,7 +445,12 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 value={formData.description}
                 onChange={handleChange}
                 rows={4}
-                className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 placeholder-gray-400 resize-none"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500 transition-all duration-200 placeholder-gray-400 resize-none"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)'
+                }}
                 placeholder="Add a description for your video..."
               />
             </div>
@@ -354,7 +461,10 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
         return (
           <div className="space-y-6">
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 TikTok Video Link <span className="text-red-500">*</span>
               </label>
               <input
@@ -363,13 +473,26 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 value={formData.video_link}
                 onChange={handleChange}
                 placeholder="https://tiktok.com/@username/video/..."
-                className={`w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none ${colors.focusRing} transition-all duration-200 placeholder-gray-400`}
+                className={`w-full px-4 py-3 rounded-xl focus:outline-none ${colors.focusRing} transition-all duration-200 placeholder-gray-400`}
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)'
+                }}
                 required
               />
-              <p className="text-xs text-gray-500 mt-2">Paste the full TikTok video URL</p>
+              <p 
+                className="text-xs mt-2"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Paste the full TikTok video URL
+              </p>
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Video Title <span className="text-red-500">*</span>
               </label>
               <input
@@ -377,13 +500,21 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none ${colors.focusRing} transition-all duration-200 placeholder-gray-400`}
+                className={`w-full px-4 py-3 rounded-xl focus:outline-none ${colors.focusRing} transition-all duration-200 placeholder-gray-400`}
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)'
+                }}
                 placeholder="Enter your catchy title"
                 required
               />
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Description
               </label>
               <textarea
@@ -391,12 +522,20 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 value={formData.description}
                 onChange={handleChange}
                 rows={3}
-                className={`w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none ${colors.focusRing} transition-all duration-200 placeholder-gray-400 resize-none`}
+                className={`w-full px-4 py-3 rounded-xl focus:outline-none ${colors.focusRing} transition-all duration-200 placeholder-gray-400 resize-none`}
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)'
+                }}
                 placeholder="Add a description for your TikTok..."
               />
             </div>
             <div className="group">
-              <label className="block text-sm font-semibold text-gray-800 mb-2">
+              <label 
+                className="block text-sm font-semibold mb-2"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Hashtags
               </label>
               <input
@@ -404,22 +543,42 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 name="hashtags"
                 value={formData.hashtags}
                 onChange={handleChange}
-                className={`w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none ${colors.focusRing} transition-all duration-200 placeholder-gray-400`}
+                className={`w-full px-4 py-3 rounded-xl focus:outline-none ${colors.focusRing} transition-all duration-200 placeholder-gray-400`}
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)',
+                  color: 'var(--color-text-primary)'
+                }}
                 placeholder="#viral #trending #fyp"
               />
-              <p className="text-xs text-gray-500 mt-2">Separate with spaces, include the # symbol</p>
+              <p 
+                className="text-xs mt-2"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                Separate with spaces, include the # symbol
+              </p>
             </div>
-           
           </div>
         );
 
       default:
         return (
           <div className="text-center py-12">
-            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <TrendingUp className="w-8 h-8 text-gray-400" />
+            <div 
+              className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+              style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+            >
+              <TrendingUp 
+                className="w-8 h-8" 
+                style={{ color: 'var(--color-text-secondary)' }}
+              />
             </div>
-            <p className="text-gray-500 font-medium">Form not available for this category</p>
+            <p 
+              className="font-medium"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              Form not available for this category
+            </p>
           </div>
         );
     }
@@ -432,7 +591,13 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
         onClick={onClose}
       />
       
-      <div className="relative w-full max-w-2xl bg-white rounded-t-3xl shadow-2xl max-h-[75vh] overflow-hidden animate-slide-up">
+      <div 
+        className="relative w-full max-w-2xl rounded-t-3xl shadow-2xl max-h-[75vh] overflow-hidden animate-slide-up"
+        style={{ 
+          backgroundColor: 'var(--color-bg-primary)',
+          border: '1px solid var(--color-border)'
+        }}
+      >
         <div className={`relative bg-gradient-to-r ${colors.bgFrom} ${colors.bgTo} px-6 py-2`}>
           <div className="absolute top-3 left-1/2 transform -translate-x-1/2">
             <div className="w-12 h-1 bg-white/30 rounded-full"></div>
@@ -467,20 +632,44 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
               {renderFormFields()}
               
               {error && (
-                <div className="p-4 bg-red-50 border border-red-200 rounded-xl">
+                <div 
+                  className="p-4 rounded-xl"
+                  style={{ 
+                    backgroundColor: 'var(--color-error-bg)',
+                    border: '1px solid var(--color-error-border)'
+                  }}
+                >
                   <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-red-500 rounded-full"></div>
-                    <p className="text-red-700 text-sm font-medium">{error}</p>
+                    <div 
+                      className="w-2 h-2 rounded-full"
+                      style={{ backgroundColor: 'var(--color-error)' }}
+                    ></div>
+                    <p 
+                      className="text-sm font-medium"
+                      style={{ color: 'var(--color-error)' }}
+                    >
+                      {error}
+                    </p>
                   </div>
                 </div>
               )}
 
-              <div className="bottom-0 bg-white pt-6 border-t border-gray-100 -mx-6 px-6 -mb-13 pb-8">
+              <div 
+                className="pt-6 -mx-6 px-6 -mb-13 pb-8"
+                style={{ 
+                  borderTop: '1px solid var(--color-border)',
+                  backgroundColor: 'var(--color-bg-primary)'
+                }}
+              >
                 <div className="flex justify-between space-x-3">
                   <button
                     type="button"
                     onClick={onClose}
-                    className="px-6 py-3 text-gray-600 font-semibold bg-gray-200 hover:bg-gray-200 rounded-xl smooth-transition hover:scale-105"
+                    className="px-6 py-3 font-semibold rounded-xl smooth-transition hover:scale-105"
+                    style={{ 
+                      color: 'var(--color-text-secondary)',
+                      backgroundColor: 'var(--color-bg-secondary)'
+                    }}
                   >
                     Cancel
                   </button>
@@ -492,7 +681,9 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                   >
                     {loading ? (
                       <>
-                        <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <div 
+                          className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"
+                        ></div>
                         <span>Submitting...</span>
                       </>
                     ) : (
@@ -512,7 +703,7 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
   );
 };
 
-// FileUpload component remains the same
+// FileUpload component with dark mode support
 const FileUpload = ({ accept, onChange, icon, type }) => {
   const [fileName, setFileName] = useState('');
   const [isDragOver, setIsDragOver] = useState(false);
@@ -552,7 +743,7 @@ const FileUpload = ({ accept, onChange, icon, type }) => {
           ? 'border-current bg-current/5 scale-105' 
           : fileName 
             ? 'border-current bg-current/5' 
-            : 'border-gray-300 hover:border-current hover:bg-gray-50'
+            : 'border-gray-300 hover:border-current hover:bg-gray-50 dark:hover:bg-gray-700'
       }`}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
@@ -560,17 +751,20 @@ const FileUpload = ({ accept, onChange, icon, type }) => {
     >
       <label className="flex flex-col items-center justify-center cursor-pointer">
         <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 smooth-transition ${
-          fileName ? 'bg-current text-white animate-scale-in' : 'bg-gray-100 text-gray-400'
+          fileName ? 'bg-current text-white animate-scale-in' : 'bg-gray-100 dark:bg-gray-700 text-gray-400'
         }`}>
           {fileName ? <Check size={24} /> : icon}
         </div>
         
         <div className="text-center">
-          <p className={`font-semibold ${fileName ? 'text-current' : 'text-gray-700'}`}>
+          <p className={`font-semibold ${fileName ? 'text-current' : 'text-gray-700 dark:text-gray-300'}`}>
             {fileName || `Upload ${type}`}
           </p>
           {!fileName && (
-            <p className="text-xs text-gray-500 mt-1">
+            <p 
+              className="text-xs mt-1"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
               Drag & drop or click to browse
             </p>
           )}

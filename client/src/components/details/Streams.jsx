@@ -40,7 +40,7 @@ const StreamingPlatformsModal = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40 "
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-40"
             onClick={onClose}
           />
           
@@ -54,24 +54,42 @@ const StreamingPlatformsModal = ({
               damping: 25,
               stiffness: 300
             }}
-            className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl bg-white shadow-2xl h-[70vh] overflow-hidden mb-10"
+            className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl shadow-2xl h-[70vh] overflow-hidden mb-10"
+            style={{
+              backgroundColor: 'var(--color-bg-primary)',
+              borderTop: '1px solid var(--color-border)'
+            }}
             onClick={e => e.stopPropagation()} // prevent backdrop click
           >
             {/* Drag handle indicator */}
             <div className="flex justify-center py-2">
-              <div className="w-12 h-1 bg-gray-200 rounded-full"></div>
+              <div 
+                className="w-12 h-1 rounded-full"
+                style={{ backgroundColor: 'var(--color-border)' }}
+              ></div>
             </div>
 
             <div className="p-6">
               {/* Header */}
               <div className="flex justify-between items-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900">Streaming Platforms</h3>
+                <h3 
+                  className="text-xl font-bold"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
+                  Streaming Platforms
+                </h3>
                 <button 
                   onClick={onClose} 
-                  className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                  className="p-2 rounded-full transition-colors"
+                  style={{ 
+                    color: 'var(--color-text-secondary)',
+                    '&:hover': {
+                      backgroundColor: 'var(--color-bg-secondary)'
+                    }
+                  }}
                   aria-label="Close modal"
                 >
-                  <FaTimes className="text-gray-500" size={18} />
+                  <FaTimes size={18} />
                 </button>
               </div>
                
@@ -81,15 +99,23 @@ const StreamingPlatformsModal = ({
                   <motion.div
                     key={platform}
                     whileTap={{ scale: url ? 0.98 : 1 }}
-                    className={`flex items-center justify-between p-4 rounded-xl ${
-                      url ? 'bg-gray-50 hover:bg-gray-100' : 'bg-gray-50/50'
-                    } transition-colors`}
+                    className={`flex items-center justify-between p-4 rounded-xl transition-colors ${
+                      url ? 'hover:bg-gray-100 dark:hover:bg-gray-700' : ''
+                    }`}
+                    style={{
+                      backgroundColor: url 
+                        ? 'var(--color-bg-secondary)' 
+                        : 'var(--color-bg-tertiary)'
+                    }}
                   >
                     <div className="flex items-center space-x-4">
                       <div className="w-10 h-10 flex items-center justify-center">
                         {platformIcons[platform] || <Music size={20} />}
                       </div>
-                      <span className="font-medium text-gray-900">
+                      <span 
+                        className="font-medium"
+                        style={{ color: 'var(--color-text-primary)' }}
+                      >
                         {platformLabels[platform] || platform}
                       </span>
                     </div>
@@ -99,13 +125,17 @@ const StreamingPlatformsModal = ({
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center space-x-1 text-[#2D8C72]"
+                        className="flex items-center space-x-1"
+                        style={{ color: 'var(--color-primary)' }}
                       >
                         <FaCheckCircle />
                         <span className="text-sm font-medium">Available</span>
                       </a>
                     ) : (
-                      <div className="flex items-center space-x-1 text-gray-400">
+                      <div 
+                        className="flex items-center space-x-1"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
                         <FaTimesCircle />
                         <span className="text-sm">Not Available</span>
                       </div>

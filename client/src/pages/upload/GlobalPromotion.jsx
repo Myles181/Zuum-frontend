@@ -4,13 +4,13 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Navbar from '../../components/profile/NavBar';
 import BottomNav from '../../components/homepage/BottomNav';
 import { usePackages } from '../../../Hooks/search/useAllPost';
-import {AllPromotionForms} from '../PromotionForm'; // Import the new component
+import {AllPromotionForms} from '../PromotionForm';
 
 const PromotionPlatforms = () => {
   const [activeTab, setActiveTab] = useState('tiktok');
   const [selectedPlatform, setSelectedPlatform] = useState(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [showFormModal, setShowFormModal] = useState(false); // New state for form modal
+  const [showFormModal, setShowFormModal] = useState(false);
   const { packages, loading, error } = usePackages();
 
   const tabs = [
@@ -41,26 +41,55 @@ const PromotionPlatforms = () => {
 
   const confirmPurchase = () => {
     setShowConfirmation(false);
-    setShowFormModal(true); // Show the form modal instead of navigating
+    setShowFormModal(true);
   };
 
-  if (loading) return <div>Loading packages...</div>;
-  if (error) return <div>Error loading packages</div>
+  if (loading) return (
+    <div 
+      className="min-h-screen my-13 flex items-center justify-center"
+      style={{ backgroundColor: 'var(--color-bg-primary)' }}
+    >
+      <div className="text-center">
+        <div className="w-12 h-12 border-4 border-[#008066] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p style={{ color: 'var(--color-text-primary)' }}>Loading packages...</p>
+      </div>
+    </div>
+  );
+  
+  if (error) return (
+    <div 
+      className="min-h-screen my-13 flex items-center justify-center"
+      style={{ backgroundColor: 'var(--color-bg-primary)' }}
+    >
+      <div className="text-center">
+        <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+          <X className="text-red-600 dark:text-red-300" size={24} />
+        </div>
+        <p style={{ color: 'var(--color-text-primary)' }}>Error loading packages</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className={`min-h-screen my-13 ${
-      activeTab === 'youtube' ? 'bg-red-700 text-white' :
-      activeTab === 'tiktok' ? 'bg-black text-white' :
-      'bg-gray-50'
-    }`}>
+    <div 
+      className="min-h-screen my-13"
+      style={{ 
+        backgroundColor: activeTab === 'tiktok' ? '#000000' : 
+                       activeTab === 'youtube' ? '#FF0000' : 
+                       'var(--color-bg-primary)',
+        color: (activeTab === 'tiktok' || activeTab === 'youtube') ? 'white' : 'var(--color-text-primary)'
+      }}
+    >
       <Navbar name="Global Promotion" />
       
-      {/* Hero Section with dynamic background */}
-      <div className={`py-12 px-4 text-white ${
-        activeTab === 'youtube' ? 'bg-gradient-to-r from-red-900 to-red-700' :
-        activeTab === 'tiktok' ? 'bg-gradient-to-r from-black to-gray-900' :
-        'bg-gradient-to-r from-[#1a5f4b] to-[#2a9d8f]'
-      }`}>
+      {/* Hero Section */}
+      <div 
+        className={`py-12 px-4 text-white ${
+          activeTab === 'youtube' ? 'bg-gradient-to-r from-red-900 to-red-700' :
+          activeTab === 'tiktok' ? 'bg-gradient-to-r from-black to-gray-900' :
+          'bg-gradient-to-r from-[#008066] to-[#00a884]'
+        }`}
+      >
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
             initial={{ scale: 0.9 }}
@@ -101,9 +130,18 @@ const PromotionPlatforms = () => {
       </div>
       
 
-      <main className="container mx-auto px-4 py-8 max-w-6xl">
+      <main 
+        className="container mx-auto px-4 py-8 max-w-6xl"
+        style={{ color: 'var(--color-text-primary)' }}
+      >
         {/* Tab Navigation */}
-        <div className="mb-8 bg-white rounded-xl shadow-sm p-1">
+        <div 
+          className="mb-8 rounded-xl shadow-sm p-1"
+          style={{ 
+            backgroundColor: 'var(--color-bg-secondary)',
+            border: '1px solid var(--color-border)'
+          }}
+        >
           <div className="flex overflow-x-auto scrollbar-hide">
             {tabs.map((tab) => (
               <button
@@ -115,9 +153,12 @@ const PromotionPlatforms = () => {
                       ? 'bg-black text-white'
                       : tab.id === 'youtube'
                       ? 'bg-red-700 text-white'
-                      : 'bg-[#1c6350] text-white'
-                    : 'text-gray-600 hover:bg-gray-100'
+                      : 'bg-[#008066] text-white'
+                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                 }`}
+                style={{
+                  color: activeTab !== tab.id ? 'var(--color-text-primary)' : undefined
+                }}
               >
                 <span className="mr-2">{tab.icon}</span>
                 {tab.label}
@@ -127,15 +168,29 @@ const PromotionPlatforms = () => {
         </div>
 
         {/* Note Box */}
-        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4 mb-8">
+        <div 
+          className="rounded-xl p-4 mb-8"
+          style={{ 
+            backgroundColor: 'var(--color-info-bg)',
+            border: '1px solid var(--color-info-border)'
+          }}
+        >
           <div className="flex items-start">
             <div className="flex-shrink-0 mt-0.5">
-              <svg className="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+              <svg 
+                className="h-5 w-5" 
+                fill="currentColor" 
+                viewBox="0 0 20 20"
+                style={{ color: 'var(--color-info)' }}
+              >
                 <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
               </svg>
             </div>
             <div className="ml-3">
-              <p className="text-sm text-blue-700">
+              <p 
+                className="text-sm"
+                style={{ color: 'var(--color-info-text)' }}
+              >
                 Your content may be adjusted to meet platform standards. You'll have the opportunity to review before publishing.
               </p>
             </div>
@@ -151,11 +206,16 @@ const PromotionPlatforms = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className={`bg-gradient-to-br rounded-xl shadow-lg overflow-hidden border ${
+                className={`rounded-xl shadow-lg overflow-hidden border ${
                   activeTab === 'youtube' 
                     ? 'from-red-900 to-red-800 border-red-100' 
                     : 'from-black to-gray-800 border-gray-100'
                 }`}
+                style={{
+                  background: activeTab === 'youtube' 
+                    ? 'linear-gradient(135deg, #b91c1c, #991b1b)'
+                    : 'linear-gradient(135deg, #000000, #1f2937)'
+                }}
               >
                 <div className={`p-6 backdrop-blur-sm ${
                   activeTab === 'youtube' ? 'bg-red-900/30' : 'bg-black/30'
@@ -217,39 +277,72 @@ const PromotionPlatforms = () => {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100 hover:shadow-md transition-shadow"
+                className="rounded-xl shadow-sm overflow-hidden"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  border: '1px solid var(--color-border)'
+                }}
               >
                 <div className="p-5">
                   <div className="flex justify-between items-start mb-3">
-                    <h3 className="font-semibold text-lg text-gray-800">{platform.name}</h3>
-                    <div className="bg-[#1c6350]/10 text-[#1c6350] text-xs font-medium px-2 py-1 rounded">
+                    <h3 
+                      className="font-semibold text-lg"
+                      style={{ color: 'var(--color-text-primary)' }}
+                    >
+                      {platform.name}
+                    </h3>
+                    <div 
+                      className="text-xs font-medium px-2 py-1 rounded"
+                      style={{ 
+                        backgroundColor: 'var(--color-primary-light)',
+                        color: 'var(--color-primary)'
+                      }}
+                    >
                       {platform.duration || '1 month'}
                     </div>
                   </div>
                   
                   <div className="flex items-end justify-between mb-4">
                     <div>
-                      <span className="text-sm text-gray-500 line-through">
+                      <span 
+                        className="text-sm line-through"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
                         {formatCurrency(platform.price, platform.currency)}
                       </span>
-                      <div className="text-2xl font-bold text-[#1c6350]">
+                      <div 
+                        className="text-2xl font-bold"
+                        style={{ color: 'var(--color-primary)' }}
+                      >
                         {formatCurrency(platform.total, platform.currency)}
                       </div>
                     </div>
                     <button 
                       onClick={() => handleSelectPlatform(platform)}
-                      className="px-4 py-2 bg-[#1c6350] hover:bg-[#15503f] text-white rounded-lg text-sm font-medium transition-colors"
+                      className="px-4 py-2 bg-[#008066] hover:bg-[#006e58] text-white rounded-lg text-sm font-medium transition-colors"
                     >
                       Select
                     </button>
                   </div>
 
                   {platform.features?.length > 0 && (
-                    <div className="pt-3 border-t border-gray-100">
-                      <div className="text-sm text-gray-600 mb-2">Includes:</div>
+                    <div 
+                      className="pt-3"
+                      style={{ borderTop: '1px solid var(--color-border)' }}
+                    >
+                      <div 
+                        className="text-sm mb-2"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
+                        Includes:
+                      </div>
                       <ul className="grid grid-cols-2 gap-2 text-sm">
                         {platform.features.slice(0, 4).map((feature, i) => (
-                          <li key={i} className="flex items-center">
+                          <li 
+                            key={i} 
+                            className="flex items-center"
+                            style={{ color: 'var(--color-text-primary)' }}
+                          >
                             <Check className="h-4 w-4 text-green-500 mr-2" />
                             <span className="truncate">{feature}</span>
                           </li>
@@ -265,12 +358,26 @@ const PromotionPlatforms = () => {
 
         {/* Empty State */}
         {getPackagesByCategory(activeTab)?.length === 0 && (
-          <div className="text-center py-12">
-            <div className="mx-auto h-16 w-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <Newspaper className="text-gray-400" size={24} />
+          <div 
+            className="text-center py-12"
+            style={{ color: 'var(--color-text-primary)' }}
+          >
+            <div 
+              className="mx-auto h-16 w-16 rounded-full flex items-center justify-center mb-4"
+              style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+            >
+              <Newspaper 
+                size={24} 
+                style={{ color: 'var(--color-text-secondary)' }}
+              />
             </div>
-            <h3 className="text-lg font-medium text-gray-900">No packages available</h3>
-            <p className="mt-1 text-sm text-gray-500">There are currently no packages in this category.</p>
+            <h3 className="text-lg font-medium">No packages available</h3>
+            <p 
+              className="mt-1 text-sm"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              There are currently no packages in this category.
+            </p>
           </div>
         )}
       </main>
@@ -283,61 +390,75 @@ const PromotionPlatforms = () => {
               initial={{ opacity: 0, scale: 0.9 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.9 }}
-              className="bg-white rounded-xl shadow-xl max-w-md w-full"
+              className="rounded-xl shadow-xl max-w-md w-full"
+              style={{ 
+                backgroundColor: 'var(--color-bg-primary)',
+                border: '1px solid var(--color-border)'
+              }}
             >
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-lg font-bold text-gray-900">Confirm Selection</h3>
+                  <h3 
+                    className="text-lg font-bold"
+                    style={{ color: 'var(--color-text-primary)' }}
+                  >
+                    Confirm Selection
+                  </h3>
                   <button 
                     onClick={() => setShowConfirmation(false)}
-                    className="text-gray-400 hover:text-gray-500"
+                    style={{ color: 'var(--color-text-secondary)' }}
                   >
                     <X size={20} />
                   </button>
                 </div>
                 
                 <div className="mb-6">
-                  <div className="bg-gray-50 rounded-lg p-4">
+                  <div 
+                    className="rounded-lg p-4"
+                    style={{ 
+                      backgroundColor: 'var(--color-bg-secondary)',
+                      border: '1px solid var(--color-border)'
+                    }}
+                  >
                     <div className="flex justify-between items-center mb-2">
-                      <span className="font-medium">{selectedPlatform.name}</span>
-                      <span className="font-bold text-[#1c6350]">
+                      <span 
+                        className="font-medium"
+                        style={{ color: 'var(--color-text-primary)' }}
+                      >
+                        {selectedPlatform.name}
+                      </span>
+                      <span 
+                        className="font-bold"
+                        style={{ color: 'var(--color-primary)' }}
+                      >
                         {formatCurrency(selectedPlatform.total, selectedPlatform.currency)}
                       </span>
                     </div>
-                    <div className="text-sm text-gray-500">
+                    <div 
+                      className="text-sm"
+                      style={{ color: 'var(--color-text-secondary)' }}
+                    >
                       Includes all fees and taxes
                     </div>
                   </div>
                 </div>
 
-                <div className="mb-6">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Requirements:</h4>
-                  <ul className="text-sm text-gray-600 space-y-1">
-                    <li className="flex items-start">
-                      <Check className="h-4 w-4 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-                      <span>1 featured image (no links)</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="h-4 w-4 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-                      <span>Content may be adjusted for platform</span>
-                    </li>
-                    <li className="flex items-start">
-                      <Check className="h-4 w-4 text-green-500 mt-0.5 mr-2 flex-shrink-0" />
-                      <span>You'll review before publishing</span>
-                    </li>
-                  </ul>
-                </div>
-
+                
                 <div className="flex space-x-3">
                   <button
                     onClick={() => setShowConfirmation(false)}
-                    className="flex-1 py-2.5 px-4 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors"
+                    className="flex-1 py-2.5 px-4 rounded-lg font-medium transition-colors"
+                    style={{ 
+                      border: '1px solid var(--color-border)',
+                      color: 'var(--color-text-secondary)',
+                      backgroundColor: 'var(--color-bg-primary)'
+                    }}
                   >
                     Cancel
                   </button>
                   <button
                     onClick={confirmPurchase}
-                    className="flex-1 py-2.5 px-4 bg-[#1c6350] hover:bg-[#15503f] text-white rounded-lg font-medium transition-colors flex items-center justify-center"
+                    className="flex-1 py-2.5 px-4 bg-[#008066] hover:bg-[#006e58] text-white rounded-lg font-medium transition-colors flex items-center justify-center"
                   >
                     <Check className="h-5 w-5 mr-1.5" />
                     Confirm Purchase
@@ -349,8 +470,7 @@ const PromotionPlatforms = () => {
         )}
       </AnimatePresence>
 
-
-      {/* New Form Modal (Bottom Sheet) */}
+      {/* Form Modal */}
       <AnimatePresence>
         {showFormModal && selectedPlatform && (
           <>
@@ -364,23 +484,28 @@ const PromotionPlatforms = () => {
             />
             
             {/* Bottom Sheet */}
-            
-                      {/* Modal container */}
-                      <motion.div
-                        initial={{ y: "100%", opacity: 0 }}
-                        animate={{ y: 0, opacity: 1 }}
-                        exit={{ y: "100%", opacity: 0 }}
-                        transition={{
-                          type: "spring",
-                          damping: 25,
-                          stiffness: 300
-                        }}
-                        className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl bg-white shadow-2xl max-h-[85vh] overflow-hidden"
-                        onClick={e => e.stopPropagation()} // prevent backdrop click
-                      >
+            <motion.div
+              initial={{ y: "100%", opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: "100%", opacity: 0 }}
+              transition={{
+                type: "spring",
+                damping: 25,
+                stiffness: 300
+              }}
+              className="fixed bottom-0 left-0 right-0 z-50 rounded-t-3xl shadow-2xl max-h-[85vh] overflow-hidden"
+              style={{ 
+                backgroundColor: 'var(--color-bg-primary)',
+                border: '1px solid var(--color-border)'
+              }}
+              onClick={e => e.stopPropagation()}
+            >
               {/* Grab Handle */}
               <div className="flex justify-center pt-3 pb-1">
-                <div className="w-12 h-1.5 bg-gray-300 rounded-full" />
+                <div 
+                  className="w-12 h-1.5 rounded-full"
+                  style={{ backgroundColor: 'var(--color-border)' }}
+                />
               </div>
               
               {/* Form Container */}

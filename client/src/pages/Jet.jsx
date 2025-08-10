@@ -68,10 +68,10 @@ export const Jet = () => {
           <div className="fixed bottom-20 right-6 z-50">
         <Link
           to="/user/promotions"
-          className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-[#1a5f4b] to-[#2d7a63] text-white border-2 border-[#1a5f4b] font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105" 
+          className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-[#1a5f4b] to-[#2d7a63] text-blue-200 border-2 border-[#1a5f4b] font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105" 
         >
-          <List className="w-5 h-5" />
-          <span>My Promotions</span>
+          <List className="w-5 h-5 text-white" />
+          <span className='text-white'>My Promotions</span>
         
         </Link>
       </div>

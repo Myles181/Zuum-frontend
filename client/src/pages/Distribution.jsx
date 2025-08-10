@@ -344,14 +344,27 @@ const Distribution = () => {
   // Render success state
   const renderSuccess = () => (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-4 md:p-8 text-center">
-      <div className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-6 md:mb-8 rounded-full bg-green-50 flex items-center justify-center">
-        <CheckCircle className="w-10 h-10 md:w-12 md:h-12 text-green-600" />
+      <div 
+        className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-6 md:mb-8 rounded-full flex items-center justify-center"
+        style={{ backgroundColor: 'var(--color-bg-tertiary)' }}
+      >
+        <CheckCircle className="w-10 h-10 md:w-12 md:h-12 text-[#008066]" />
       </div>
-      <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-3 md:mb-4">Submission Successful!</h2>
-      <p className="text-gray-600 mb-6 md:mb-8 text-base md:text-lg">Your music has been submitted for distribution.</p>
+      <h2 
+        className="text-2xl md:text-3xl font-bold mb-3 md:mb-4"
+        style={{ color: 'var(--color-text-primary)' }}
+      >
+        Submission Successful!
+      </h2>
+      <p 
+        className="mb-6 md:mb-8 text-base md:text-lg"
+        style={{ color: 'var(--color-text-secondary)' }}
+      >
+        Your music has been submitted for distribution.
+      </p>
       <button
         onClick={handleReset}
-        className="px-6 py-3 bg-[#247a63] text-white rounded-lg hover:bg-[#1c6350] transition-colors text-base md:text-lg font-medium"
+        className="px-6 py-3 bg-[#008066] text-white rounded-lg hover:bg-[#006e58] transition-colors text-base md:text-lg font-medium"
       >
         Submit Another Release
       </button>
@@ -370,12 +383,15 @@ const Distribution = () => {
             <div
               key={step}
               className={`w-2.5 h-2.5 rounded-full transition-all ${
-                currentStep === step ? "bg-[#247a63] w-4 h-4" : currentStep > step ? "bg-[#247a63]/60" : "bg-gray-200"
+                currentStep === step ? "bg-[#008066] w-4 h-4" : currentStep > step ? "bg-[#008066]/60" : "bg-gray-200 dark:bg-gray-600"
               }`}
             ></div>
           ))}
         </div>
-        <div className="text-center md:hidden mb-4 text-sm font-medium text-gray-700">
+        <div 
+          className="text-center md:hidden mb-4 text-sm font-medium"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
           Step {currentStep}:{currentStep === 1 && " Artist Profile"}
           {currentStep === 2 && " Release Information"}
           {currentStep === 3 && " Upload Files"}
@@ -386,9 +402,12 @@ const Distribution = () => {
         {/* Desktop progress indicator (icons) */}
         <div className="hidden md:flex justify-between items-center mb-6 relative">
           {/* Progress line */}
-          <div className="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -translate-y-1/2 z-0"></div>
+          <div 
+            className="absolute top-1/2 left-0 right-0 h-1 -translate-y-1/2 z-0"
+            style={{ backgroundColor: 'var(--color-border)' }}
+          ></div>
           <div
-            className="absolute top-1/2 left-0 h-1 bg-[#247a63] -translate-y-1/2 z-0 transition-all duration-300"
+            className="absolute top-1/2 left-0 h-1 bg-[#008066] -translate-y-1/2 z-0 transition-all duration-300"
             style={{ width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%` }}
           ></div>
 
@@ -398,12 +417,15 @@ const Distribution = () => {
               <div
                 className={`relative flex items-center justify-center w-12 h-12 rounded-full text-sm font-medium transition-all ${
                   currentStep >= step
-                    ? "bg-[#247a63] text-white shadow-md"
-                    : "bg-white border-2 border-gray-200 text-gray-400"
+                    ? "bg-[#008066] text-white shadow-md"
+                    : "bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 text-gray-400"
                 }`}
               >
                 {step}
-                <span className="absolute -bottom-8 text-xs font-medium whitespace-nowrap text-center">
+                <span 
+                  className="absolute -bottom-8 text-xs font-medium whitespace-nowrap text-center"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
                   {step === 1 && "Artist"}
                   {step === 2 && "Release"}
                   {step === 3 && "Files"}
@@ -465,19 +487,23 @@ const Distribution = () => {
     <Navbar  name='distribution'/>
       <div 
         className="max-w-3xl mx-auto rounded-xl md:rounded-2xl shadow-lg overflow-hidden"
-        style={{ backgroundColor: 'var(--color-bg-primary)' }}
+        style={{ 
+          backgroundColor: 'var(--color-bg-primary)',
+          border: '1px solid var(--color-border)'
+        }}
       >
         <div 
           className="p-4 md:p-8"
           style={{ 
-            background: `linear-gradient(to right, rgba(36, 122, 99, 0.2), var(--color-bg-primary))`
+            background: `linear-gradient(to right, rgba(0, 128, 102, 0.2), var(--color-bg-primary))`,
+            borderBottom: '1px solid var(--color-border)'
           }}
         >
           <h1 
             className="text-2xl md:text-3xl font-bold flex items-center"
             style={{ color: 'var(--color-text-primary)' }}
           >
-            <Music className="mr-3 md:mr-4 text-[#247a63]" size={24} />
+            <Music className="mr-3 md:mr-4 text-[#008066]" size={24} />
             Music Distribution
           </h1>
           <p 
@@ -500,7 +526,8 @@ const Distribution = () => {
                   <button
                     type="button"
                     onClick={goToPrevStep}
-                    className="px-4 md:px-6 py-2.5 md:py-3 flex items-center gap-1 md:gap-2 text-gray-700 hover:text-[#247a63] transition-colors text-sm md:text-base"
+                    className="px-4 md:px-6 py-2.5 md:py-3 flex items-center gap-1 md:gap-2 transition-colors text-sm md:text-base"
+                    style={{ color: 'var(--color-text-secondary)' }}
                   >
                     <ChevronLeft size={16} /> Back
                   </button>
@@ -512,7 +539,7 @@ const Distribution = () => {
                   <button
                     type="button"
                     onClick={goToNextStep}
-                    className="px-5 md:px-8 py-2.5 md:py-3 bg-[#247a63] text-white rounded-lg hover:bg-[#1c6350] transition-colors flex items-center gap-1 md:gap-2 shadow-md text-sm md:text-base"
+                    className="px-5 md:px-8 py-2.5 md:py-3 bg-[#008066] text-white rounded-lg hover:bg-[#006e58] transition-colors flex items-center gap-1 md:gap-2 shadow-md text-sm md:text-base"
                   >
                     Next <ChevronRight size={16} />
                   </button>
@@ -520,7 +547,7 @@ const Distribution = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-5 md:px-8 py-2.5 md:py-3 bg-[#247a63] text-white rounded-lg hover:bg-[#1c6350] transition-colors flex items-center gap-1 md:gap-2 shadow-md disabled:opacity-50 disabled:hover:bg-[#247a63] text-sm md:text-base"
+                    className="px-5 md:px-8 py-2.5 md:py-3 bg-[#008066] text-white rounded-lg hover:bg-[#006e58] transition-colors flex items-center gap-1 md:gap-2 shadow-md disabled:opacity-50 disabled:hover:bg-[#008066] text-sm md:text-base"
                   >
                     {loading ? "Submitting..." : "Submit Music"} <Upload size={16} />
                   </button>
