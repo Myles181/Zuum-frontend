@@ -56,6 +56,7 @@ import DistributionRequestsPage from './admin/pages/Distribution';
 import AdminBeatPurchasesPage from './admin/pages/Beats';
 import AdminPromotionsPage from './admin/pages/promotion';
 import { DarkModeProvider } from './contexts/DarkModeContext';
+import ZuumOnboarding from './pages/Onboarding';
 
 const CustomLoader = () => (
   <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-gray-900">
@@ -151,7 +152,7 @@ const App = () => (
         <Router>
           <Routes>
             {/* Public Routes */}
-            <Route path="/" element={<LandingPage />} />
+            <Route path="/" element={<ZuumOnboarding />} />
             <Route path="/start" element={<GetStarted />} />
             <Route path="/signup" element={<Signup />} />
             <Route path="/login" element={<Login />} />
