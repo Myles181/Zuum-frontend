@@ -88,10 +88,13 @@ const useVerifyEmail = () => {
     try {
       // Make a POST request to the API
       const response = await axios.post(
-        `${API_URL}/auth/verify-email`, // Replace with your actual email verification endpoint
+        '/auth/verify-email', // API endpoint
         { email, otp },
         {
-          headers: getAuthHeaders(),
+          headers: {
+            'Content-Type': 'application/json',
+            // Add any additional headers if needed (like authentication tokens)
+          },
           withCredentials: true,
         }
       );
@@ -120,7 +123,20 @@ const useVerifyEmail = () => {
     }
   };
 
-  return { loading, error, success, verifyEmail };
+  // Optional: Reset function to clear states
+  const reset = () => {
+    setLoading(false);
+    setError(null);
+    setSuccess(false);
+  };
+
+  return { 
+    loading, 
+    error, 
+    success, 
+    verifyEmail,
+    reset 
+  };
 };
 
 // Custom hook for resending OTP
