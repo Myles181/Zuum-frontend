@@ -153,7 +153,7 @@ const ZuumSignup = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f3f4f6' }}>
-      <div className="w-full max-w-sm overflow-hidden flex flex-col" style={{ backgroundColor: '#ffffff', borderRadius: '1rem' }}>
+      <div className="w-full max-w-sm overflow-hidden flex flex-col" style={{ backgroundColor: '#ffffff' }}>
         
         {/* Header with Logo */}
         <div className="m-5 absolute z-10 transition-all duration-700 ease-in-out">
