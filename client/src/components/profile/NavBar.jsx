@@ -20,7 +20,7 @@ const Navbar = ({
   return (
       <div 
         className={`navbar backdrop-blur-md shadow-md flex items-center justify-between px-4 py-3 fixed top-0 left-0 w-full z-50 ${
-          isProfilePage ? 'bg-transparent backdrop-blur-none shadow-none' : ''
+          isProfilePage ? 'bg-transparent   ' : ''
         }`}
         style={{ 
           backgroundColor: isProfilePage ? 'transparent' : 'var(--color-bg-primary)',
