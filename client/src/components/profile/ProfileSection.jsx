@@ -97,7 +97,7 @@ const ProfileSection = ({ profile }) => {
       </div>
 
       {/* Profile Image */}
-      <div className="profile-header absolute top-48 ml-6 transform -translate-x-1">
+      <div className="profile-header absolute top-20 ml-6 transform -translate-x-1">
         <div className="relative">
           <img
             src={mergedProfile.image || d}
