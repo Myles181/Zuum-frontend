@@ -128,8 +128,8 @@ const ProfileSection = ({ profile }) => {
         </p>
       </div>
 
-      <div className="stats flex-1 p-4">
-        <div className="flex justify-around gap-4">
+      <div className="stats flex-1 p-2">
+        <div className="flex justify-around">
           {["Followers", "Following"].map((item, index) => (
             <div key={index} className="text-center">
               <span className="text-lg font-bold text-[#008066]">
