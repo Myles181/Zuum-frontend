@@ -102,7 +102,7 @@ const ProfileSection = ({ profile }) => {
           <img
             src={mergedProfile.image || d}
             alt="Profile"
-            className="w-32 h-32 rounded-full border-4 shadow-lg object-cover"
+            className="w-25 h-25 rounded-full border-4 shadow-lg object-cover"
             style={{ borderColor: 'var(--color-bg-primary)' }}
           />
           {mergedProfile.is_admin && (
