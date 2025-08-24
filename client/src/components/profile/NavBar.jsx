@@ -42,7 +42,7 @@ const Navbar = ({
       </div>
 
       {/* Middle Section */}
-      <div className="flex items-center space-x-2 bg-[#2D8C72] px-4 py-1 rounded-full">
+      <div className="flex items-center space-x-2 bg-[#2D8C72] px-4 py-1 ml-8 rounded-full">
         {isMessagePage && profilePicture && (
           <img
             src={profilePicture}
