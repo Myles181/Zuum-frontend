@@ -152,22 +152,17 @@ const ZuumSignup = () => {
   ];
 
   return (
-    <div className="fixed inset-0 bg-gray-100 flex items-center justify-center">
-      <div className="w-full max-w-sm h-screen max-h-screen bg-white shadow-xl overflow-hidden flex flex-col">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center ">
+      <div className="w-full max-w-sm bg-white overflow-hidden flex flex-col">
         
         {/* Header with Logo */}
-        <div className="mx-5 absolute top-[35vh] z-10">
-          <div className={`transition-all duration-500 ease-out ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
-          }`}>
-            <div className="m-5 absolute z-10">
-              <img src={a} className='w-25' alt="Zuum Logo" />
-            </div>
-          </div>
+           <div className="m-5 absolute z-10 transition-all duration-700 ease-in-out">
+        
+            <img src={a} className='w-25' alt="Zuum Logo" />
         </div>
 
-        {/* Image Section - Top Half */}
-        <div className="relative h-[25vh] overflow-hidden">
+        {/* Image Section */}
+        <div className="relative h-65 overflow-hidden ">
           <div 
             className={`w-full h-full bg-cover bg-center bg-no-repeat transition-all duration-700 ease-out ${
               isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
@@ -181,8 +176,8 @@ const ZuumSignup = () => {
           </div>
         </div>
 
-        {/* Content Section - Bottom Half */}
-        <div className="h-1/2 px-6 py-6 flex flex-col justify-between">
+        {/* Content Section */}
+        <div className="flex-1 px-6 py-6 flex flex-col">
           <div className="flex-grow">
             
             {/* Welcome Text */}
@@ -218,7 +213,7 @@ const ZuumSignup = () => {
                         type="text"
                         id="firstname"
                         placeholder="Enter your first name"
-                        className="w-full px-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                        className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
                         value={formData.firstname}
                         onChange={handleInputChange}
                         required
@@ -448,7 +443,7 @@ const ZuumSignup = () => {
           </div>
 
           {/* Login Link */}
-          <div className="text-center mt-4">
+          <div className="text-center mt-6">
             <p className="text-gray-600 text-sm">
               Already have an account?{" "}
               <Link 
