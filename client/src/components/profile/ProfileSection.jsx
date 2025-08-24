@@ -66,19 +66,19 @@ const ProfileSection = ({ profile }) => {
 
   return (
     <div 
-      className="profile-container relative"
+      className=""
       style={{ backgroundColor: 'var(--color-bg-secondary)' }}
     >
       {/* Background Image with Dashboard Icon */}
-      <div className="profile-background h-64 overflow-hidden rounded-t-lg relative">
+      <div className="profile-background h-64 overflow-hidden -top-5 relative">
         <img
           src={mergedProfile.cover_image || c}
           alt="Profile Background"
           className="w-full h-full object-cover"
         />
-        <Link
+        {/* <Link
           to="/dashboard"
-          className="absolute top-4 right-4 p-2 rounded-full shadow-lg transition-all"
+          className="absolute  right-4 p-2 rounded-full shadow-lg transition-all"
           style={{ 
             backgroundColor: 'rgba(255, 255, 255, 0.9)',
           }}
@@ -91,7 +91,7 @@ const ProfileSection = ({ profile }) => {
           title="Go to Dashboard"
         >
           <FiBarChart className="w-5 h-5 text-[#008066]" />
-        </Link>
+        </Link> */}
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
       </div>
