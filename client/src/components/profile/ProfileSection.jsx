@@ -114,10 +114,10 @@ const ProfileSection = ({ profile }) => {
       </div>
 
       {/* User Info */}
-      <div  className="flex justify-between my-5">
+      <div  className="flex flex-col justify-between my-5">
 
   
-      <div className="stats-container flex flex-col items-start  w-full px-5 text-center">
+      <div className="stats-container flex flex-col items-center  w-full px-5 text-center">
         <h2 className="text-2xl font-bold text-[#008066]">{mergedProfile.username}</h2>
         <p className="text-gray-500 capitalize">{mergedProfile.identity}</p>
         <p 
