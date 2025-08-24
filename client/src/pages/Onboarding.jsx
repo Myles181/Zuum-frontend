@@ -5,12 +5,7 @@ import { Link } from 'react-router-dom';
 
 const ZuumOnboarding = () => {
   const [currentStep, setCurrentStep] = useState(0);
-  const [isVisible, setIsVisible] = useState(false);
-  const [direction, setDirection] = useState('next'); // Track animation direction
-
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
+  const [isTransitioning, setIsTransitioning] = useState(false);
 
   const steps = [
     {
@@ -31,111 +26,174 @@ const ZuumOnboarding = () => {
   ];
 
   const nextStep = () => {
-    if (currentStep < steps.length - 1) {
-      setDirection('next');
+    if (currentStep < steps.length - 1 && !isTransitioning) {
+      setIsTransitioning(true);
       setTimeout(() => {
-        setCurrentStep(currentStep + 1);
-      }, 50); // Small delay to allow animation to start
+        setCurrentStep(prev => prev + 1);
+        setTimeout(() => setIsTransitioning(false), 100);
+      }, 300);
     }
   };
 
   const prevStep = () => {
-    if (currentStep > 0) {
-      setDirection('prev');
+    if (currentStep > 0 && !isTransitioning) {
+      setIsTransitioning(true);
       setTimeout(() => {
-        setCurrentStep(currentStep - 1);
-      }, 50);
+        setCurrentStep(prev => prev - 1);
+        setTimeout(() => setIsTransitioning(false), 100);
+      }, 300);
     }
   };
 
   const skipToEnd = () => {
-    setDirection('next');
-    setTimeout(() => {
-      setCurrentStep(steps.length - 1);
-    }, 50);
+    if (currentStep < steps.length - 1 && !isTransitioning) {
+      setIsTransitioning(true);
+      setTimeout(() => {
+        setCurrentStep(steps.length - 1);
+        setTimeout(() => setIsTransitioning(false), 100);
+      }, 300);
+    }
   };
 
   const currentStepData = steps[currentStep];
 
   return (
-    <div className="fixed inset-0 bg-gray-100 flex items-center justify-center">
-      <div className="w-full max-w-sm h-screen max-h-screen bg-white shadow-xl overflow-hidden flex flex-col">
-        {/* Header with Logo */}
-        <div className="m-5 absolute z-10 transition-all duration-700 ease-in-out">
+    <>
+      <style jsx>{`
+        .slide-container {
+          height: 110vh;
+          min-height: 100vh;
+          top: -5vh;
+        }
+        
+        .content-wrapper {
+          height: 105vh;
+          min-height: 100vh;
+          max-height: none;
+        }
+        
+        .image-transition {
+          transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .content-transition {
+          transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .progress-dot {
+          transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .button-hover {
+          transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .fade-slide-enter {
+          opacity: 0;
+          transform: translateX(30px) scale(0.95);
+        }
+        
+        .fade-slide-enter-active {
+          opacity: 1;
+          transform: translateX(0) scale(1);
+        }
+        
+        .fade-slide-exit {
+          opacity: 1;
+          transform: translateX(0) scale(1);
+        }
+        
+        .fade-slide-exit-active {
+          opacity: 0;
+          transform: translateX(-30px) scale(1.05);
+        }
+      `}</style>
+      
+      <div className="fixed inset-0 bg-gray-100 flex items-center justify-center slide-container">
+        <div className="w-full max-w-sm bg-white shadow-xl overflow-hidden flex flex-col content-wrapper">
+          {/* Header with Logo */}
+           <div className="m-5 absolute z-10 transition-all duration-700 ease-in-out">
           <img src={a} className="w-25 transition-transform duration-500 hover:scale-105" alt="Zuum logo" />
         </div>
 
-        {/* Image Section - Top Half */}
-        <div className="relative h-1/2 overflow-hidden">
-          <div 
-            key={`image-${currentStep}`}
-            className={`w-full h-full bg-cover bg-center bg-no-repeat transition-all duration-700 ease-in-out ${
-              isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
-            } ${
-              direction === 'next' ? 'animate-fadeIn' : 'animate-fadeInReverse'
-            }`}
-            style={{ backgroundImage: `url(${currentStepData.image})` }}
-          >
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-white/80"></div>
+          {/* Image Section */}
+          <div className="relative flex-1 overflow-hidden">
+            <div 
+              className={`w-full h-full bg-cover bg-center bg-no-repeat image-transition ${
+                isTransitioning 
+                  ? 'opacity-0 scale-110 blur-sm' 
+                  : 'opacity-100 scale-100 blur-none'
+              }`}
+              style={{ backgroundImage: `url(${currentStepData.image})` }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-white/80"></div>
+            </div>
           </div>
-        </div>
 
-        {/* Content Section - Bottom Half */}
-        <div className="h-1/2 px-6 py-6 flex flex-col justify-between">
-          <div className="flex-grow flex flex-col justify-center">
-            {/* Progress Dots */}
-            <div className="flex justify-center space-x-2 mb-6">
-              {steps.map((_, index) => (
-                <div
-                  key={index}
-                  className={`h-1 rounded-full transition-all duration-500 ease-in-out ${
-                    index === currentStep 
-                      ? 'w-6 bg-gray-800' 
-                      : 'w-1 bg-gray-300'
-                  }`}
-                />
-              ))}
+          {/* Content Section */}
+          <div className="flex-1 px-6 py-8 flex flex-col justify-between">
+            <div className="flex-grow flex flex-col justify-center">
+              {/* Progress Dots */}
+              <div className="flex justify-center space-x-2 mb-8">
+                {steps.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`h-2 rounded-full progress-dot ${
+                      index === currentStep 
+                        ? 'w-8 bg-gradient-to-r from-[#2D8C72] to-[#34A085]' 
+                        : index < currentStep
+                          ? 'w-2 bg-[#2D8C72]/60'
+                          : 'w-2 bg-gray-300'
+                    }`}
+                  />
+                ))}
+              </div>
+
+              {/* Text Content */}
+              <div 
+                className={`text-center mb-8 content-transition ${
+                  isTransitioning 
+                    ? 'opacity-0 translate-y-4' 
+                    : 'opacity-100 translate-y-0'
+                }`}
+              >
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">
+                  {currentStepData.title}
+                </h2>
+                <p className="text-gray-600 text-base leading-relaxed px-2">
+                  {currentStepData.description}
+                </p>
+              </div>
             </div>
 
-            {/* Text Content */}
+            {/* Buttons */}
             <div 
-              key={`text-${currentStep}`}
-              className={`text-center mb-8 transition-all duration-700 ease-in-out ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-              } ${
-                direction === 'next' ? 'animate-slideInUp' : 'animate-slideInDown'
+              className={`space-y-4 content-transition ${
+                isTransitioning 
+                  ? 'opacity-70 translate-y-2' 
+                  : 'opacity-100 translate-y-0'
               }`}
             >
-              <h2 className="text-2xl font-bold text-gray-900 mb-3 leading-tight transition-all duration-500">
-                {currentStepData.title}
-              </h2>
-              <p className="text-gray-600 text-base leading-relaxed px-2 transition-all duration-500 delay-100">
-                {currentStepData.description}
-              </p>
-            </div>
-          </div>
-
-          {/* Buttons */}
-          <div className="space-y-3">
-            {currentStep < steps.length - 1 ? (
-              <>
-                <button
-                  onClick={nextStep}
-                  className="w-full py-3 bg-[#2D8C72] hover:bg-[#248066] text-white rounded-2xl font-semibold text-base transition-all duration-300 ease-out transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg"
-                >
-                  Next
-                </button>
-                <button
-                  onClick={skipToEnd}
-                  className="w-full py-2 text-gray-600 font-medium transition-colors duration-300 hover:text-gray-800 hover:underline"
-                >
-                  Skip
-                </button>
-              </>
-            ) : (
-              <>
-                <Link 
+              {currentStep < steps.length - 1 ? (
+                <>
+                  <button
+                    onClick={nextStep}
+                    disabled={isTransitioning}
+                    className="w-full py-4 bg-gradient-to-r from-[#2D8C72] to-[#34A085] hover:from-[#248066] hover:to-[#2D8C72] text-white rounded-2xl font-semibold text-base button-hover transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Next
+                  </button>
+                  <button
+                    onClick={skipToEnd}
+                    disabled={isTransitioning}
+                    className="w-full py-2 text-gray-600 font-medium button-hover hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    Skip
+                  </button>
+                </>
+              ) : (
+                <>
+                 <Link 
                   to={'/login'} 
                   className="w-full py-3 bg-[#2D8C72] hover:bg-[#248066] text-white rounded-2xl font-semibold text-base transition-all duration-300 ease-out transform hover:scale-[1.02] active:scale-[0.98] shadow-md hover:shadow-lg block text-center"
                 >
@@ -149,44 +207,13 @@ const ZuumOnboarding = () => {
                 >
                   Sign up
                 </Link>
-              </> 
-            )}
+                </> 
+              )}
+            </div>
           </div>
         </div>
       </div>
-
-      {/* Custom CSS for animations */}
-      <style jsx>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: scale(1.05); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes fadeInReverse {
-          from { opacity: 0; transform: scale(0.95); }
-          to { opacity: 1; transform: scale(1); }
-        }
-        @keyframes slideInUp {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes slideInDown {
-          from { opacity: 0; transform: translateY(-20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeIn {
-          animation: fadeIn 0.7s ease-in-out forwards;
-        }
-        .animate-fadeInReverse {
-          animation: fadeInReverse 0.7s ease-in-out forwards;
-        }
-        .animate-slideInUp {
-          animation: slideInUp 0.7s ease-in-out forwards;
-        }
-        .animate-slideInDown {
-          animation: slideInDown 0.7s ease-in-out forwards;
-        }
-      `}</style>
-    </div>
+    </>
   );
 };
 
