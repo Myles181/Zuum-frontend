@@ -109,7 +109,7 @@ const ZuumOnboarding = () => {
         }
       `}</style>
       
-      <div className="min-h-screen inset-0 bg-gray-100 flex  justify-center slide-container">
+      <div className="min-h-screen inset-0 bg-white  flex  justify-center slide-container">
         <div className="w-full max-w-sm bg-white overflow-hidden flex flex-col content-wrapper">
           {/* Header with Logo */}
            <div className="m-5 absolute z-10 transition-all duration-700 ease-in-out">
