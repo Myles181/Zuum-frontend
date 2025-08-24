@@ -218,11 +218,15 @@ const GetStarted = () => {
                 className={`w-full py-3 rounded-2xl font-semibold text-base transition-all duration-300 flex items-center justify-center ${
                   selectedProfile 
                     ? 'bg-[#2D8C72] hover:bg-[#248066] text-white transform hover:scale-[1.02] shadow-md hover:shadow-lg' 
-                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                    : 'bg-gray-300 text-white cursor-not-allowed'
                 }`}
               >
-                Continue
-                <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+                <span className="text-white flex items-center justify-center">
+                    Continue
+                                    <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+
+                </span>
+                
               </Link>
               
               <div className="text-center">
