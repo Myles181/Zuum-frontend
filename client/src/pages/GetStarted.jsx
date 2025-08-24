@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { ArrowRight } from "lucide-react";
 import { Link } from "react-router-dom";
-import { ArrowRight, Play } from "lucide-react";
 
 const GetStarted = () => {
   const [isVisible, setIsVisible] = useState(false);
@@ -10,10 +10,10 @@ const GetStarted = () => {
   useEffect(() => {
     setIsVisible(true);
     
-    // Delay profile animations slightly for a cascading effect
+    // Staggered profile animations for smooth cascading effect
     const timer = setTimeout(() => {
       setProfilesVisible(true);
-    }, 300);
+    }, 400);
     
     return () => clearTimeout(timer);
   }, []);
@@ -54,94 +54,178 @@ const GetStarted = () => {
   ];
 
   return (
-    <div className="fixed inset-0 bg-gray-100 flex items-center justify-center">
-      <div className="w-full max-w-sm h-screen max-h-screen bg-white shadow-xl overflow-hidden flex flex-col">
+    <>
+      <style jsx>{`
+        .slide-container {
+          height: 110vh;
+          min-height: 100vh;
+          top: -5vh;
+        }
         
-        {/* Image Section - Top Half */}
-        <div className="relative h-2/5 overflow-hidden">
-          <div 
-            className={`w-full h-full bg-cover bg-center bg-no-repeat transition-all duration-700 ease-out ${
-              isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
-            }`}
-            style={{ 
-              backgroundImage: `url(https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&h=600&fit=crop&auto=format)`
-            }}
-          >
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-white/80"></div>
-          </div>
-        </div>
-
-        {/* Content Section - Bottom Half */}
-        <div className="flex-1 px-6 py-6 flex flex-col justify-between">
-          <div className="flex-grow flex flex-col justify-center">
-            
-            {/* Welcome Text */}
-            <div className={`text-center mb-6 transition-all duration-600 ease-out ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-            }`}>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
-                Choose Your Profile
-              </h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
-                Select your role to begin your musical journey
-              </p>
+        .content-wrapper {
+          height: 105vh;
+          min-height: 100vh;
+          max-height: none;
+        }
+        
+        .profile-card {
+          transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+          transform-origin: center;
+        }
+        
+        .profile-card-from-left {
+          transform: translateX(-120px) rotate(-8deg) scale(0.8);
+          opacity: 0;
+        }
+        
+        .profile-card-from-right {
+          transform: translateX(120px) rotate(8deg) scale(0.8);
+          opacity: 0;
+        }
+        
+        .profile-card-visible {
+          transform: translateX(0) rotate(0deg) scale(1);
+          opacity: 1;
+        }
+        
+        .profile-card:hover {
+          transform: translateY(-2px) scale(1.02);
+        }
+        
+        .profile-card.selected {
+          transform: translateY(-4px) scale(1.05);
+        }
+        
+        .image-bounce {
+          transition: transform 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .image-bounce:hover {
+          transform: scale(1.1) rotate(5deg);
+        }
+        
+        .checkmark-appear {
+          animation: checkmarkPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        @keyframes checkmarkPop {
+          0% {
+            transform: scale(0) rotate(-180deg);
+            opacity: 0;
+          }
+          70% {
+            transform: scale(1.2) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+          }
+        }
+        
+        .button-disabled {
+          background: linear-gradient(135deg, #e5e7eb, #d1d5db);
+        }
+        
+        .button-enabled {
+          background: linear-gradient(135deg, #2D8C72, #34A085);
+        }
+        
+        .button-enabled:hover {
+          background: linear-gradient(135deg, #248066, #2D8C72);
+          transform: translateY(-1px) scale(1.02);
+          box-shadow: 0 8px 25px rgba(45, 140, 114, 0.3);
+        }
+      `}</style>
+      
+      <div className="fixed inset-0 bg-gray-100 flex items-center justify-center slide-container">
+        <div className="w-full max-w-sm bg-white shadow-xl overflow-hidden flex flex-col content-wrapper">
+          
+          {/* Image Section */}
+          <div className="relative h-2/5 overflow-hidden">
+            <div 
+              className={`w-full h-full bg-cover bg-center bg-no-repeat transition-all duration-700 ease-out ${
+                isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
+              }`}
+              style={{ 
+                backgroundImage: `url(https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&h=600&fit=crop&auto=format)`
+              }}
+            >
+              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-white/80"></div>
             </div>
+          </div>
 
-            {/* Profile Selection Grid */}
-            <div className="grid grid-cols-2 gap-4 mb-6">
-              {profileOptions.map((option, index) => (
-                <div
-                  key={option.id}
-                  className={`relative p-4 bg-white rounded-2xl border-2 transition-all duration-500 ease-out cursor-pointer flex flex-col items-center ${
-                    selectedProfile === option.id 
-                      ? 'border-[#2D8C72] shadow-md scale-[1.03]' 
-                      : 'border-gray-200 hover:border-gray-300'
-                  } ${
-                    profilesVisible 
-                      ? 'opacity-100 translate-x-0 translate-y-0' 
-                      : option.direction === 'left' 
-                        ? 'opacity-0 -translate-x-10' 
-                        : 'opacity-0 translate-x-10'
-                  }`}
-                  style={{ 
-                    transitionDelay: `${index * 100}ms`,
-                    transformOrigin: 'center'
-                  }}
-                  onClick={() => {
-                    setSelectedProfile(option.id);
-                  }}
-                >
-                  {/* Circular Profile Image */}
-                  <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md mb-3 transition-transform duration-300 hover:scale-110">
-                    <img 
-                      src={option.image} 
-                      alt={option.title}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  
-                  <h3 className="font-semibold text-gray-900 text-sm text-center">{option.title}</h3>
-                  <p className="text-xs text-gray-600 text-center mt-1 hidden md:block">{option.description}</p>
-                  
-                  {selectedProfile === option.id && (
-                    <div className="absolute top-2 right-2 w-5 h-5 bg-[#2D8C72] rounded-full flex items-center justify-center transition-all duration-300 scale-100">
-                      <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
+          {/* Content Section */}
+          <div className="flex-1 px-6 py-6 flex flex-col justify-between">
+            <div className="flex-grow flex flex-col justify-center">
+              
+              {/* Welcome Text */}
+              <div className={`text-center mb-6 transition-all duration-600 ease-out ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`}>
+                <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
+                  Choose Your Profile
+                </h2>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  Select your role to begin your musical journey
+                </p>
+              </div>
+
+              {/* Profile Selection Grid */}
+              <div className="grid grid-cols-2 gap-4 mb-6">
+                {profileOptions.map((option, index) => (
+                  <div
+                    key={option.id}
+                    className={`
+                      profile-card relative p-4 bg-white rounded-2xl border-2 cursor-pointer flex flex-col items-center
+                      ${selectedProfile === option.id 
+                        ? 'border-[#2D8C72] shadow-lg selected' 
+                        : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+                      }
+                      ${profilesVisible 
+                        ? 'profile-card-visible' 
+                        : option.direction === 'left' 
+                          ? 'profile-card-from-left' 
+                          : 'profile-card-from-right'
+                      }
+                    `}
+                    style={{ 
+                      transitionDelay: `${index * 150}ms`
+                    }}
+                    onClick={() => {
+                      setSelectedProfile(option.id);
+                    }}
+                  >
+                    {/* Circular Profile Image */}
+                    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white shadow-md mb-3 image-bounce">
+                      <img 
+                        src={option.image} 
+                        alt={option.title}
+                        className="w-full h-full object-cover"
+                      />
                     </div>
-                  )}
-                </div>
-              ))}
+                    
+                    <h3 className="font-semibold text-gray-900 text-sm text-center">{option.title}</h3>
+                    <p className="text-xs text-gray-600 text-center mt-1 hidden md:block">{option.description}</p>
+                    
+                    {selectedProfile === option.id && (
+                      <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#2D8C72] rounded-full flex items-center justify-center checkmark-appear shadow-md">
+                        <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
-          </div>
 
-          {/* Buttons Section */}
-          <div className={`space-y-3 transition-all duration-700 ease-out ${
-            isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-          }`}>
-            
-            <Link
+            {/* Buttons Section */}
+            <div className={`space-y-3 transition-all duration-700 ease-out ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`} style={{ transitionDelay: '600ms' }}>
+              
+               <Link
               to={selectedProfile ? `/signup?identity=${selectedProfile}` : "#"}
               className={`w-full py-3 rounded-2xl font-semibold text-base transition-all duration-300 flex items-center justify-center ${
                 selectedProfile 
@@ -152,55 +236,23 @@ const GetStarted = () => {
               Continue
               <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
             </Link>
-            
-            <div className="text-center">
-              <p className="text-gray-600 text-sm">
-                Already have an account?{" "}
-                <Link 
+              
+              <div className="text-center">
+                <p className="text-gray-600 text-sm">
+                  Already have an account?{" "}
+                  <Link 
                   to="/login" 
                   className="text-[#2D8C72] hover:text-[#248066] font-medium transition-colors duration-300 hover:underline"
                 >
                   Sign in
                 </Link>
-              </p>
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Custom CSS for animations */}
-      <style jsx>{`
-        @keyframes slideInFromLeft {
-          from {
-            opacity: 0;
-            transform: translateX(-30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        @keyframes slideInFromRight {
-          from {
-            opacity: 0;
-            transform: translateX(30px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        
-        .profile-card-left {
-          animation: slideInFromLeft 0.6s ease-out forwards;
-        }
-        
-        .profile-card-right {
-          animation: slideInFromRight 0.6s ease-out forwards;
-        }
-      `}</style>
-    </div>
+    </>
   );
 };
 
