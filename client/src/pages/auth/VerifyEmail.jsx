@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from "react";
 import { FaEnvelope, FaKey, FaSpinner, FaCheckCircle } from "react-icons/fa";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useVerifyEmail, useResendOtp } from "../../../Hooks/auth/useSignup";
+import { useResendOtp, useVerifyEmail } from "../../../Hooks/auth/useSignup";
+
 
 const VerifyOTP = () => {
   const [otp, setOtp] = useState("");
   const [isFocused, setIsFocused] = useState({ otp: false });
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [email, setEmail] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Use both hooks
   const { loading: verifyLoading, error: verifyError, success: verifySuccess, verifyEmail } = useVerifyEmail();
   const { loading: resendLoading, error: resendError, success: resendSuccess, resendOtp } = useResendOtp();
 
-  // Get email from location state (passed from signup page)
+  // Get email from location state or URL params
   useEffect(() => {
     if (location.state?.email) {
       setEmail(location.state.email);
     }
     
-    // Alternatively, check URL params if email was passed that way
     const searchParams = new URLSearchParams(location.search);
     const emailParam = searchParams.get('email');
     if (emailParam) {
@@ -31,18 +31,15 @@ const VerifyOTP = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if ( !otp) {
+    if (!otp || otp.length !== 6) {
       return;
     }
 
-    setIsSubmitting(true);
-    await verifyEmail({ email, otp });
-    setIsSubmitting(false);
+    await verifyEmail(email, otp);
   };
 
   const handleResendOTP = async () => {
-    
-    await resendOtp({ email });
+    await resendOtp(email);
   };
 
   useEffect(() => {
@@ -54,8 +51,9 @@ const VerifyOTP = () => {
   }, [verifySuccess, navigate, email]);
 
   return (
-    <div className="fixed inset-0 bg-gray-100 flex items-center justify-center">
-      <div className="w-full max-w-sm h-screen max-h-screen bg-white shadow-xl overflow-hidden flex flex-col">
+   <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="w-full max-w-sm bg-white overflow-hidden flex flex-col">
+        
         
         {/* Image Section - Top Half */}
         <div className="relative h-2/5 overflow-hidden">
@@ -102,7 +100,7 @@ const VerifyOTP = () => {
               </div>
             )}
 
-            {/* Success Message */}
+            {/* Success Messages */}
             {resendSuccess && (
               <div className="mb-4 p-3 bg-green-100 border border-green-200 rounded-xl">
                 <div className="flex items-center justify-center">
@@ -153,11 +151,11 @@ const VerifyOTP = () => {
               {/* Verify Button */}
               <button
                 type="submit"
-                disabled={verifyLoading || isSubmitting || !otp || otp.length !== 6}
+                disabled={verifyLoading || !otp || otp.length !== 6}
                 className="w-full py-3 bg-[#2D8C72] hover:bg-[#248066] disabled:bg-gray-400 text-white rounded-2xl font-semibold text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg disabled:hover:scale-100 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center justify-center">
-                  {verifyLoading || isSubmitting ? (
+                  {verifyLoading ? (
                     <>
                       <FaSpinner className="w-4 h-4 mr-2 animate-spin" />
                       Verifying...
@@ -176,7 +174,7 @@ const VerifyOTP = () => {
               </p>
               <button
                 onClick={handleResendOTP}
-                disabled={resendLoading }
+                disabled={resendLoading}
                 className="text-[#2D8C72] hover:text-[#248066] font-medium transition-colors duration-300 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {resendLoading ? (
