@@ -1,7 +1,9 @@
 @import "tailwindcss";
 
 /* Dark mode configuration for Tailwind CSS v4 */
+/* Dark mode configuration for Tailwind CSS v4 */
 @theme {
+  /* Primary color palette */
   --color-primary-50: #f0fdf4;
   --color-primary-100: #dcfce7;
   --color-primary-200: #bbf7d0;
@@ -12,26 +14,62 @@
   --color-primary-700: #15803d;
   --color-primary-800: #166534;
   --color-primary-900: #14532d;
+
+  /* Dark theme (default) */
+  --color-bg-primary: #0f172a;
+  --color-bg-secondary: #1e293b;
+  --color-bg-tertiary: #334155;
+  --color-text-primary: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-border: #475569;
+  --color-accent: var(--color-primary-500); /* #22c55e */
+  --color-accent-hover: var(--color-primary-600); /* #16a34a */
+  --color-error: #ef4444;
+  --color-success: var(--color-primary-600); /* #16a34a */
+}
+
+.light {
+  /* Light theme */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #f8fafc;
+  --color-bg-tertiary: #e2e8f0;
+  --color-text-primary: #0f172a;
+  --color-text-secondary: #475569;
+  --color-border: #cbd5e1;
+  --color-accent: var(--color-primary-600); /* #16a34a */
+  --color-accent-hover: var(--color-primary-700); /* #15803d */
+  --color-error: #dc2626;
+  --color-success: var(--color-primary-600); /* #16a34a */
 }
 
 /* Dark mode styles using Tailwind CSS v4 approach */
 @layer base {
   :root {
-    --color-bg-primary: #111827;
-    --color-bg-secondary: #1f2937;
-    --color-bg-tertiary: #374151;
-    --color-text-primary: #f9fafb;
-    --color-text-secondary: #d1d5db;
-    --color-border: #4b5563;
+    /* Dark theme (default) */
+    --color-bg-primary: #0f172a;
+    --color-bg-secondary: #1e293b;
+    --color-bg-tertiary: #334155;
+    --color-text-primary: #f8fafc;
+    --color-text-secondary: #cbd5e1;
+    --color-border: #475569;
+    --color-accent: #3b82f6;
+    --color-accent-hover: #2563eb;
+    --color-error: #ef4444;
+    --color-success: #10b981;
   }
 
-  .dark {
+  .light {
+    /* Light theme */
     --color-bg-primary: #ffffff;
-    --color-bg-secondary: #f9fafb;
-    --color-bg-tertiary: #f3f4f6;
-    --color-text-primary: #111827;
-    --color-text-secondary: #6b7280;
-    --color-border: #e5e7eb;
+    --color-bg-secondary: #f8fafc;
+    --color-bg-tertiary: #e2e8f0;
+    --color-text-primary: #0f172a;
+    --color-text-secondary: #475569;
+    --color-border: #cbd5e1;
+    --color-accent: #2563eb;
+    --color-accent-hover: #1d4ed8;
+    --color-error: #dc2626;
+    --color-success: #059669;
   }
 }
 

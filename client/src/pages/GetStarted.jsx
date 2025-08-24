@@ -56,18 +56,6 @@ const GetStarted = () => {
   return (
     <>
       <style jsx>{`
-        .slide-container {
-          height: 110vh;
-          min-height: 100vh;
-          top: -5vh;
-        }
-        
-        .content-wrapper {
-          height: 105vh;
-          min-height: 100vh;
-          max-height: none;
-        }
-        
         .profile-card {
           transition: all 0.7s cubic-bezier(0.16, 1, 0.3, 1);
           transform-origin: center;
@@ -138,11 +126,11 @@ const GetStarted = () => {
         }
       `}</style>
       
-      <div className="fixed inset-0 bg-gray-100 flex items-center justify-center slide-container">
-        <div className="w-full max-w-sm bg-white shadow-xl overflow-hidden flex flex-col content-wrapper">
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center ">
+        <div className="w-full max-w-sm bg-white shadow-xl overflow-hidden flex flex-col ">
           
           {/* Image Section */}
-          <div className="relative h-2/5 overflow-hidden">
+          <div className="relative h-64 overflow-hidden">
             <div 
               className={`w-full h-full bg-cover bg-center bg-no-repeat transition-all duration-700 ease-out ${
                 isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-105'
@@ -156,8 +144,8 @@ const GetStarted = () => {
           </div>
 
           {/* Content Section */}
-          <div className="flex-1 px-6 py-6 flex flex-col justify-between">
-            <div className="flex-grow flex flex-col justify-center">
+          <div className="flex-1 px-6 py-6 flex flex-col">
+            <div className="flex-grow flex flex-col">
               
               {/* Welcome Text */}
               <div className={`text-center mb-6 transition-all duration-600 ease-out ${
@@ -172,7 +160,7 @@ const GetStarted = () => {
               </div>
 
               {/* Profile Selection Grid */}
-              <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-2 gap-4 mb-8">
                 {profileOptions.map((option, index) => (
                   <div
                     key={option.id}
@@ -225,27 +213,27 @@ const GetStarted = () => {
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`} style={{ transitionDelay: '600ms' }}>
               
-               <Link
-              to={selectedProfile ? `/signup?identity=${selectedProfile}` : "#"}
-              className={`w-full py-3 rounded-2xl font-semibold text-base transition-all duration-300 flex items-center justify-center ${
-                selectedProfile 
-                  ? 'bg-[#2D8C72] hover:bg-[#248066] text-white transform hover:scale-[1.02] shadow-md hover:shadow-lg' 
-                  : 'bg-gray-200 text-gray-500 cursor-not-allowed'
-              }`}
-            >
-              Continue
-              <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
+              <Link
+                to={selectedProfile ? `/signup?identity=${selectedProfile}` : "#"}
+                className={`w-full py-3 rounded-2xl font-semibold text-base transition-all duration-300 flex items-center justify-center ${
+                  selectedProfile 
+                    ? 'bg-[#2D8C72] hover:bg-[#248066] text-white transform hover:scale-[1.02] shadow-md hover:shadow-lg' 
+                    : 'bg-gray-200 text-gray-500 cursor-not-allowed'
+                }`}
+              >
+                Continue
+                <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
+              </Link>
               
               <div className="text-center">
                 <p className="text-gray-600 text-sm">
                   Already have an account?{" "}
                   <Link 
-                  to="/login" 
-                  className="text-[#2D8C72] hover:text-[#248066] font-medium transition-colors duration-300 hover:underline"
-                >
-                  Sign in
-                </Link>
+                    to="/login" 
+                    className="text-[#2D8C72] hover:text-[#248066] font-medium transition-colors duration-300 hover:underline"
+                  >
+                    Sign in
+                  </Link>
                 </p>
               </div>
             </div>
