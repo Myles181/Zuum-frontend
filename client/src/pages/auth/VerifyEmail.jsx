@@ -36,7 +36,7 @@ const VerifyOTP = () => {
     }
 
     await verifyEmail(email, otp);
-  };
+  };z
 
   const handleResendOTP = async () => {
     await resendOtp(email);
