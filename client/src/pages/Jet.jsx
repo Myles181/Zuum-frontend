@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Music, Share2, ChevronRight, CheckCircle, Globe, Rocket, List } from 'lucide-react';
+import { Music, Share2, ChevronRight, CheckCircle, Globe, Rocket, List, Wallet, DollarSign, TrendingUp, CreditCard } from 'lucide-react';
 import Navbar from '../components/profile/NavBar';
 import BottomNav from '../components/homepage/BottomNav';
 import { Link, useNavigate } from 'react-router-dom';
@@ -14,6 +14,8 @@ export const Jet = () => {
       navigate('/promotion');
     } else if (option === 'distribution') {
       navigate('/distribution');
+    } else if (option === 'wallet') {
+      navigate('/wallet');
     } else {
       navigate('/global');
     }
@@ -61,185 +63,219 @@ export const Jet = () => {
           Music Creator Hub
         </h1>
         <p className="text-lg text-gray-600 dark:text-gray-300 max-w-lg mx-auto">
-          Take your music to the next level - choose how you want to share your sound with the world
+          Manage your music career in one place - promote, distribute, and track your earnings
         </p>
       </header>
 
-          <div className="fixed bottom-20 right-6 z-50">
+      <div className="fixed bottom-20 right-6 z-50">
         <Link
           to="/user/promotions"
           className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-[#1a5f4b] to-[#2d7a63] text-blue-200 border-2 border-[#1a5f4b] font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105" 
         >
           <List className="w-5 h-5 text-white" />
           <span className='text-white'>My Promotions</span>
-        
         </Link>
       </div>
 
-      <main className="container mx-auto px-4 pt-4 pb-16 max-w-5xl">
-        {/* Global Promotion Option - NEW STARRED SECTION */}
-        <motion.div 
-          className="relative mb-12 rounded-2xl p-8 bg-gradient-to-r from-[#1c6350] to-[#2a9d8f] shadow-2xl cursor-pointer overflow-hidden group"
-          onClick={() => handleOptionSelect('global-promotion')}
-          initial="initial"
-          animate="animate"
-          variants={pulseVariants}
-        >
-          {/* Floating elements for decoration */}
-          <div className="absolute -top-10 -right-10 w-32 h-32 rounded-full bg-white/10"></div>
-          <div className="absolute -bottom-5 -left-5 w-20 h-20 rounded-full bg-white/10"></div>
-          
-          <div className="relative z-10">
-            <div className="flex justify-between items-start mb-6">
-              <div className="flex items-center space-x-4">
-                <motion.div 
-                  className="p-4 rounded-xl text-[#1c6350]"
-            style={{ backgroundColor: 'var(--color-bg-primary)' }}
-                  variants={bounceVariants}
-                >
-                  <Rocket size={32} />
-                </motion.div>
-                <div className="text-white">
-                  <span className="block text-sm font-medium opacity-80">PREMIUM</span>
-                  <h2 className="text-3xl font-bold">Global Promotion</h2>
+      <main className="container mx-auto px-4 pt-4 pb-16 max-w-6xl">
+        {/* 2x2 Grid Layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Global Promotion - Top Left */}
+          <motion.div 
+            className="rounded-2xl p-6 bg-gradient-to-r from-[#1c6350] to-[#2a9d8f] shadow-xl cursor-pointer overflow-hidden group h-full"
+            onClick={() => handleOptionSelect('global-promotion')}
+            initial="initial"
+            animate="animate"
+            variants={pulseVariants}
+          >
+            <div className="relative z-10 h-full flex flex-col">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex items-center space-x-3">
+                  <motion.div 
+                    className="p-3 rounded-xl text-[#1c6350]"
+                    style={{ backgroundColor: 'var(--color-bg-primary)' }}
+                    variants={bounceVariants}
+                  >
+                    <Rocket size={24} />
+                  </motion.div>
+                  <div className="text-white">
+                    <span className="block text-xs font-medium opacity-80">PREMIUM</span>
+                    <h2 className="text-xl font-bold">Global Promotion</h2>
+                  </div>
+                </div>
+                <ChevronRight className="text-white" size={20} />
+              </div>
+              
+              <p className="text-white/90 mb-4 text-sm flex-grow">
+                Supercharge your reach with our ultimate promotion package for maximum exposure.
+              </p>
+              
+              <div className="space-y-2 mb-4">
+                <div className="flex items-center text-white">
+                  <CheckCircle size={14} className="text-white mr-2" />
+                  <span className="text-xs">Cross-platform promotion</span>
+                </div>
+                <div className="flex items-center text-white">
+                  <CheckCircle size={14} className="text-white mr-2" />
+                  <span className="text-xs">Influencer partnerships</span>
+                </div>
+                <div className="flex items-center text-white">
+                  <CheckCircle size={14} className="text-white mr-2" />
+                  <span className="text-xs">Social media campaigns</span>
                 </div>
               </div>
-              <ChevronRight className="text-white" size={28} />
+              
+              <motion.button 
+                className="mt-auto py-2 px-4 text-[#1c6350] rounded-lg font-semibold text-sm flex items-center justify-center space-x-1 transition-colors"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-primary)',
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span>Launch Campaign</span>
+                <Rocket size={16} />
+              </motion.button>
             </div>
-            
-            <p className="text-white/90 mb-6 text-lg max-w-2xl">
-              <span className="font-semibold">Supercharge your reach</span> with our ultimate promotion package that combines platform distribution, social media campaigns, and influencer marketing for maximum exposure.
-            </p>
-            
-            <div className="grid md:grid-cols-2 gap-4 mb-6">
-              <div className="flex items-center text-white">
-                <CheckCircle size={18} className="text-white mr-3" />
-                <span className="text-base">Cross-platform promotion</span>
-              </div>
-              <div className="flex items-center text-white">
-                <CheckCircle size={18} className="text-white mr-3" />
-                <span className="text-base">Influencer partnerships</span>
-              </div>
-              <div className="flex items-center text-white">
-                <CheckCircle size={18} className="text-white mr-3" />
-                <span className="text-base">Social media campaigns</span>
-              </div>
-              <div className="flex items-center text-white">
-                <CheckCircle size={18} className="text-white mr-3" />
-                <span className="text-base">Press coverage</span>
-              </div>
-            </div>
-            
-            <motion.button 
-              className="mt-4 py-3 px-6 text-[#1c6350] rounded-lg font-bold text-lg flex items-center justify-center space-x-2 transition-colors"
-            style={{ 
-              backgroundColor: 'var(--color-bg-primary)',
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'var(--color-bg-secondary)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'var(--color-bg-primary)';
-            }}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span>Launch Global Campaign</span>
-              <Rocket size={20} />
-            </motion.button>
-          </div>
-        </motion.div>
+          </motion.div>
 
-        {/* Original Options */}
-        <div className="grid md:grid-cols-2 gap-8">
-          {/* Promotion Option */}
+          {/* Promotion Option - Top Right */}
           <motion.div 
-            className="rounded-xl p-8 border-2 border-[#1c6350] shadow-lg shadow-[#1c6350]/10 hover:shadow-xl hover:shadow-[#1c6350]/20 transition-all cursor-pointer"
+            className="rounded-xl p-6 border-2 border-[#1c6350] shadow-lg h-full flex flex-col"
             style={{ backgroundColor: 'var(--color-bg-primary)' }}
             onClick={() => handleOptionSelect('promotion')}
             whileHover={{ y: -5 }}
           >
-            <div className="flex justify-between items-start mb-8">
-              <div className="p-4 bg-[#1c6350] rounded-xl text-white">
-                <Music size={32} />
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 bg-[#1c6350] rounded-xl text-white">
+                <Music size={24} />
               </div>
-              <ChevronRight className="text-[#1c6350]" size={28} />
+              <ChevronRight className="text-[#1c6350]" size={20} />
             </div>
-            <h2 className="text-2xl font-bold mb-4 text-[#1c6350]">In-App Promotion</h2>
+            <h2 className="text-xl font-bold mb-3 text-[#1c6350]">In-App Promotion</h2>
             <p 
-              className="mb-6 text-lg"
+              className="mb-4 text-sm flex-grow"
               style={{ color: 'var(--color-text-secondary)' }}
             >
-              Amplify your music within our platform. Get featured in playlists, gain exposure to our community of listeners, and build your audience.
+              Amplify your music within our platform. Get featured in playlists and build your audience.
             </p>
-            <div className="space-y-4">
+            <div className="space-y-2 mb-4">
               <div className="flex items-center">
-                <CheckCircle size={18} className="text-[#1c6350] mr-3" />
-                <span className="text-base" style={{ color: 'var(--color-text-primary)' }}>Featured in app playlists</span>
+                <CheckCircle size={14} className="text-[#1c6350] mr-2" />
+                <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Featured in playlists</span>
               </div>
               <div className="flex items-center">
-                <CheckCircle size={18} className="text-[#1c6350] mr-3" />
-                <span className="text-base" style={{ color: 'var(--color-text-primary)' }}>Spotlight on discover page</span>
+                <CheckCircle size={14} className="text-[#1c6350] mr-2" />
+                <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Discover page spotlight</span>
               </div>
               <div className="flex items-center">
-                <CheckCircle size={18} className="text-[#1c6350] mr-3" />
-                <span className="text-base" style={{ color: 'var(--color-text-primary)' }}>Targeted user recommendations</span>
+                <CheckCircle size={14} className="text-[#1c6350] mr-2" />
+                <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Targeted recommendations</span>
               </div>
             </div>
-            <div 
-              className="mt-8 pt-6 border-t"
-              style={{ borderTopColor: 'var(--color-border)' }}
-            >
-              <button className="w-full py-3 px-4 bg-[#1c6350] text-white rounded-lg font-medium text-lg flex items-center justify-center hover:bg-[#15503f] transition-colors">
-                <span>Promote Your Music</span>
-                <ChevronRight size={20} className="ml-2" />
-              </button>
-            </div>
+            <button className="mt-auto w-full py-2 px-4 bg-[#1c6350] text-white rounded-lg font-semibold text-sm flex items-center justify-center hover:bg-[#15503f] transition-colors">
+              <span>Promote Your Music</span>
+              <ChevronRight size={16} className="ml-1" />
+            </button>
           </motion.div>
 
-          {/* Distribution Option */}
+          {/* Distribution Option - Bottom Left */}
           <motion.div 
-            className="rounded-xl p-8 border-2 border-[#1c6350] shadow-lg shadow-[#1c6350]/10 hover:shadow-xl hover:shadow-[#1c6350]/20 transition-all cursor-pointer"
+            className="rounded-xl p-6 border-2 border-[#1c6350] shadow-lg h-full flex flex-col"
             style={{ backgroundColor: 'var(--color-bg-primary)' }}
             onClick={() => handleOptionSelect('distribution')}
             whileHover={{ y: -5 }}
           >
-            <div className="flex justify-between items-start mb-8">
-              <div className="p-4 bg-[#1c6350] rounded-xl text-white">
-                <Share2 size={32} />
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 bg-[#1c6350] rounded-xl text-white">
+                <Share2 size={24} />
               </div>
-              <ChevronRight className="text-[#1c6350]" size={28} />
+              <ChevronRight className="text-[#1c6350]" size={20} />
             </div>
-            <h2 className="text-2xl font-bold mb-4 text-[#1c6350]">Global Distribution</h2>
+            <h2 className="text-xl font-bold mb-3 text-[#1c6350]">Global Distribution</h2>
             <p 
-              className="mb-6 text-lg"
+              className="mb-4 text-sm flex-grow"
               style={{ color: 'var(--color-text-secondary)' }}
             >
-              Share your music across all major streaming platforms. Reach millions of potential listeners worldwide and maximize your revenue.
+              Share your music across all major streaming platforms worldwide.
             </p>
-            <div className="space-y-4">
+            <div className="space-y-2 mb-4">
               <div className="flex items-center">
-                <CheckCircle size={18} className="text-[#1c6350] mr-3" />
-                <span className="text-base" style={{ color: 'var(--color-text-primary)' }}>Release to 150+ platforms</span>
+                <CheckCircle size={14} className="text-[#1c6350] mr-2" />
+                <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>150+ platforms</span>
               </div>
               <div className="flex items-center">
-                <CheckCircle size={18} className="text-[#1c6350] mr-3" />
-                <span className="text-base" style={{ color: 'var(--color-text-primary)' }}>Royalty collection</span>
+                <CheckCircle size={14} className="text-[#1c6350] mr-2" />
+                <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Royalty collection</span>
               </div>
               <div className="flex items-center">
-                <CheckCircle size={18} className="text-[#1c6350] mr-3" />
-                <span className="text-base" style={{ color: 'var(--color-text-primary)' }}>Release scheduling</span>
+                <CheckCircle size={14} className="text-[#1c6350] mr-2" />
+                <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Release scheduling</span>
               </div>
             </div>
-            <div 
-              className="mt-8 pt-6 border-t"
-              style={{ borderTopColor: 'var(--color-border)' }}
+            <button className="mt-auto w-full py-2 px-4 bg-[#1c6350] text-white rounded-lg font-semibold text-sm flex items-center justify-center hover:bg-[#15503f] transition-colors">
+              <span>Distribute Your Music</span>
+              <ChevronRight size={16} className="ml-1" />
+            </button>
+          </motion.div>
+
+          {/* Wallet Section - Bottom Right */}
+          <motion.div 
+            className="rounded-xl p-6 border-2 border-[#1c6350] shadow-lg h-full flex flex-col"
+            style={{ backgroundColor: 'var(--color-bg-primary)' }}
+            onClick={() => handleOptionSelect('wallet')}
+            whileHover={{ y: -5 }}
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div className="p-3 bg-[#1c6350] rounded-xl text-white">
+                <Wallet size={24} />
+              </div>
+              <ChevronRight className="text-[#1c6350]" size={20} />
+            </div>
+            <h2 className="text-xl font-bold mb-3 text-[#1c6350]">Wallet & Earnings</h2>
+            <p 
+              className="mb-4 text-sm flex-grow"
+              style={{ color: 'var(--color-text-secondary)' }}
             >
-              <button className="w-full py-3 px-4 bg-[#1c6350] text-white rounded-lg font-medium text-lg flex items-center justify-center hover:bg-[#15503f] transition-colors">
-                <span>Distribute Your Music</span>
-                <ChevronRight size={20} className="ml-2" />
-              </button>
+              Track your earnings, withdraw funds, and manage your revenue from promotions and distributions.
+            </p>
+            
+            {/* Earnings Summary */}
+            <div className="bg-gray-700 rounded-lg p-3 mb-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Available Balance</span>
+                <span className="text-lg font-bold text-[#1c6350]">$1,250.00</span>
+              </div>
+              <div className="flex justify-between items-center text-xs">
+                <span style={{ color: 'var(--color-text-secondary)' }}>Pending: $350.00</span>
+                <span style={{ color: 'var(--color-text-secondary)' }}>Total Earned: $4,820.00</span>
+              </div>
             </div>
+            
+            <div className="space-y-2 mb-4">
+              <div className="flex items-center">
+                <DollarSign size={14} className="text-[#1c6350] mr-2" />
+                <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Withdraw earnings</span>
+              </div>
+              <div className="flex items-center">
+                <TrendingUp size={14} className="text-[#1c6350] mr-2" />
+                <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Revenue tracking</span>
+              </div>
+              <div className="flex items-center">
+                <CreditCard size={14} className="text-[#1c6350] mr-2" />
+                <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Transaction history</span>
+              </div>
+            </div>
+            <button className="mt-auto w-full py-2 px-4 bg-[#1c6350] text-white rounded-lg font-semibold text-sm flex items-center justify-center hover:bg-[#15503f] transition-colors">
+              <span>View Wallet</span>
+              <ChevronRight size={16} className="ml-1" />
+            </button>
           </motion.div>
         </div>
 
