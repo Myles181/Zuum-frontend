@@ -54,6 +54,9 @@ const ProfileSection = ({ profile }) => {
     }
   };
 
+  console.log(mergedProfile.beats);
+  
+
   // Format date function
   const formatDate = (dateString) => {
     if (!dateString) return "N/A";
@@ -163,43 +166,63 @@ const ProfileSection = ({ profile }) => {
               </div>
             </div>
             
-            <div className="flex space-x-3">
-              <Link to="/editprofile" className="flex-1">
-                <button 
-                  className="border px-4 py-2 rounded-lg text-sm font-medium w-full transition-colors shadow-sm"
-                  style={{ 
-                    backgroundColor: 'var(--color-bg-primary)',
-                    borderColor: 'var(--color-primary)',
-                    color: 'var(--color-primary)'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = 'var(--color-bg-secondary)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = 'var(--color-bg-primary)';
-                  }}
-                >
-                  Edit Profile
-                </button>
-              </Link>
-              <button 
-                className="border p-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
-                style={{ 
-                  backgroundColor: 'var(--color-bg-primary)',
-                  borderColor: 'var(--color-primary)',
-                  color: 'var(--color-primary)'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.backgroundColor = 'var(--color-bg-secondary)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.backgroundColor = 'var(--color-bg-primary)';
-                }}
-              >
-                <FiShare2 className="w-4 h-4" />
-              </button>
-            
-            </div>
+           <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 w-full">
+  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+    <Link to="/editprofile" className="w-full sm:w-auto">
+      <button 
+        className="border px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm w-full"
+        style={{ 
+          backgroundColor: 'var(--color-bg-primary)',
+          borderColor: 'var(--color-primary)',
+          color: 'var(--color-primary)'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = 'var(--color-bg-primary)';
+        }}
+      >
+        Edit Profile
+      </button>
+    </Link>
+    <Link to="/purchasedbeats" className="w-full sm:w-auto">
+      <button 
+        className="border px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm w-full"
+        style={{ 
+          backgroundColor: 'var(--color-primary)',
+          borderColor: 'var(--color-primary)',
+          color: 'var(--color-text-on-primary)'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = 'var(--color-primary-dark)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = 'var(--color-primary)';
+        }}
+      >
+        Purchased Beats
+      </button>
+    </Link>
+  </div>
+
+  <button 
+    className="border p-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm w-full sm:w-auto flex items-center justify-center"
+    style={{ 
+      backgroundColor: 'var(--color-bg-primary)',
+      borderColor: 'var(--color-primary)',
+      color: 'var(--color-primary)'
+    }}
+    onMouseEnter={(e) => {
+      e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+    }}
+    onMouseLeave={(e) => {
+      e.target.style.backgroundColor = 'var(--color-bg-primary)';
+    }}
+  >
+    <FiShare2 className="w-4 h-4" />
+  </button>
+</div>
           </div>
         </div>
 
@@ -225,12 +248,7 @@ const ProfileSection = ({ profile }) => {
   {[
     { title: 'Contact', icon: <FiPhone className="w-5 h-5" />, value: mergedProfile.phonenumber || "N/A" },
     { title: 'Email', icon: <FiMail className="w-5 h-5" />, value: mergedProfile.email || "N/A" },
-    {
-      title: `My Beats (${mergedProfile.beats})`,
-      icon: <Headphones className="w-5 h-5" />,
-      value: "View purchased beats",
-      link: "/purchasedbeats"
-    },
+   
     { title: 'Subscription', icon: <FiCreditCard className="w-5 h-5" />, value: mergedProfile.subscription_status || "None" }
   ].map((item, idx) => {
     const CardContent = (
