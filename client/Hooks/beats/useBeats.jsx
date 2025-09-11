@@ -499,7 +499,7 @@ export const usePurchasedBeats = () => {
       setLoading(true);
       setError(null);
       
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('auth_token');
       if (!token) {
         throw new Error('Authentication token missing');
       }
