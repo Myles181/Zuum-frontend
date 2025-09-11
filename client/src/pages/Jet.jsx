@@ -15,7 +15,7 @@ export const Jet = () => {
     } else if (option === 'distribution') {
       navigate('/distribution');
     } else if (option === 'wallet') {
-      navigate('/wallet');
+      navigate('/dashboard');
     } else {
       navigate('/global');
     }
@@ -247,7 +247,7 @@ export const Jet = () => {
             </p>
             
             {/* Earnings Summary */}
-            <div className="bg-gray-700 rounded-lg p-3 mb-4">
+            {/* <div className="bg-gray-700 rounded-lg p-3 mb-4">
               <div className="flex justify-between items-center mb-2">
                 <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Available Balance</span>
                 <span className="text-lg font-bold text-[#1c6350]">$1,250.00</span>
@@ -256,7 +256,7 @@ export const Jet = () => {
                 <span style={{ color: 'var(--color-text-secondary)' }}>Pending: $350.00</span>
                 <span style={{ color: 'var(--color-text-secondary)' }}>Total Earned: $4,820.00</span>
               </div>
-            </div>
+            </div> */}
             
             <div className="space-y-2 mb-4">
               <div className="flex items-center">

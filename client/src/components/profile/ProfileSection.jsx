@@ -41,7 +41,7 @@ const ProfileSection = ({ profile }) => {
 
   // Tab state
   const [activeTab, setActiveTab] = useState("audio");
-  const tabs = mergedProfile.identity.toLowerCase() === "producer" || "dev"
+ const tabs = ["producer", "dev"].includes(mergedProfile.identity.toLowerCase())
     ? ["beats", "audio", "video"]
     : ["audio", "video"];
 
