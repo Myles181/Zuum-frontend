@@ -296,17 +296,17 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
           >
             {mergedProfile.bio}
           </p>
-          <div 
+          {/* <div 
             className="flex items-center mt-3 text-sm font-medium transition-colors"
             style={{ color: 'var(--color-primary)' }}
           >
             <Headphones className="w-4 h-4 mr-1.5" />
             My Beats ({mergedProfile.beats || 0})
-          </div>
+          </div> */}
         </div>
 
         {/* Highlights (Contact info) */}
-        <div className="flex space-x-5 mb-6 overflow-x-auto pb-2 hide-scrollbar">
+        {/* <div className="flex space-x-5 mb-6 overflow-x-auto pb-2 hide-scrollbar">
           {[
             { title: 'Contact', icon: <FiPhone className="w-5 h-5" />, value: mergedProfile.phonenumber || "N/A" },
             { title: 'Email', icon: <FiMail className="w-5 h-5" />, value: mergedProfile.email || "N/A" },
@@ -339,8 +339,8 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
               </span>
             </div>
           ))}
-        </div>
-      </div>
+        </div> */}
+      </div> 
 
       {/* Status Messages */}
       {message && (
