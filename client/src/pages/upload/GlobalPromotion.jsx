@@ -13,6 +13,22 @@ const PromotionPlatforms = () => {
   const [showFormModal, setShowFormModal] = useState(false);
   const { packages, loading, error } = usePackages();
 
+  // Dark mode styles
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+    '--color-border': '#374151',
+    '--color-info-bg': 'rgba(59, 130, 246, 0.1)',
+    '--color-info-border': 'rgba(59, 130, 246, 0.2)',
+    '--color-info': '#3b82f6',
+    '--color-info-text': '#93c5fd'
+  };
+
   const tabs = [
     { id: 'youtube', icon: <PlayCircle size={18} />, label: 'YouTube' },
     { id: 'tiktok', icon: <Music2 size={18} />, label: 'TikTok' },
@@ -62,8 +78,8 @@ const PromotionPlatforms = () => {
       style={{ backgroundColor: 'var(--color-bg-primary)' }}
     >
       <div className="text-center">
-        <div className="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
-          <X className="text-red-600 dark:text-red-300" size={24} />
+        <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+          <X className="text-red-600" size={24} />
         </div>
         <p style={{ color: 'var(--color-text-primary)' }}>Error loading packages</p>
       </div>
@@ -77,7 +93,8 @@ const PromotionPlatforms = () => {
         backgroundColor: activeTab === 'tiktok' ? '#000000' : 
                        activeTab === 'youtube' ? '#FF0000' : 
                        'var(--color-bg-primary)',
-        color: (activeTab === 'tiktok' || activeTab === 'youtube') ? 'white' : 'var(--color-text-primary)'
+        color: (activeTab === 'tiktok' || activeTab === 'youtube') ? 'white' : 'var(--color-text-primary)',
+        ...darkModeStyles
       }}
     >
       <Navbar name="Global Promotion" />
@@ -128,7 +145,6 @@ const PromotionPlatforms = () => {
           </p>
         </div>
       </div>
-      
 
       <main 
         className="container mx-auto px-4 py-8 max-w-6xl"
@@ -154,7 +170,7 @@ const PromotionPlatforms = () => {
                       : tab.id === 'youtube'
                       ? 'bg-red-700 text-white'
                       : 'bg-[#008066] text-white'
-                    : 'hover:bg-gray-100 dark:hover:bg-gray-700'
+                    : 'hover:bg-gray-700'
                 }`}
                 style={{
                   color: activeTab !== tab.id ? 'var(--color-text-primary)' : undefined

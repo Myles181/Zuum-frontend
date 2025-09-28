@@ -16,6 +16,22 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
   const { getRoomId, loading: roomLoading, error: roomError } = useGetRoomId();
   const navigate = useNavigate();
 
+  // Dark mode styles - consistent with other components
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+    '--color-border': '#374151',
+    '--color-success': '#10B981',
+    '--color-success-light': '#064E3B',
+    '--color-error': '#EF4444',
+    '--color-error-light': '#7F1D1D'
+  };
+
   // local UI state
   const [isFollowing, setIsFollowing]       = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
@@ -113,11 +129,14 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
   return (
     <div 
       className="max-w-2xl mx-auto pb-16 font-sans"
-      style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+      style={{ 
+        backgroundColor: 'var(--color-bg-secondary)',
+        ...darkModeStyles
+      }}
     >
       {/* Header Section */}
       <div 
-        className="p-5 "
+        className="p-5"
         style={{ backgroundColor: 'var(--color-bg-primary)' }}
       >
         {/* Profile Info Row */}
@@ -128,7 +147,7 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
               style={{ background: 'linear-gradient(to right, var(--color-primary), var(--color-primary-light))' }}
             >
               <img
-                src={mergedProfile.image || fallbackProfile.image }
+                src={mergedProfile.image || fallbackProfile.image}
                 alt="Profile"
                 className="w-full h-full rounded-full border-2 object-cover"
                 style={{ borderColor: 'var(--color-bg-primary)' }}
@@ -156,8 +175,11 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
                 {mergedProfile.username}
               </h2>
               <span 
-                className="bg-gray-700 text-xs px-3 py-1.5 rounded-full capitalize font-medium"
-                style={{ color: 'var(--color-text-secondary)' }}
+                className="text-xs px-3 py-1.5 rounded-full capitalize font-medium"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  color: 'var(--color-text-secondary)'
+                }}
               >
                 {mergedProfile.identity}
               </span>
@@ -209,78 +231,78 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
             </div>
             
             {/* Follow / Message buttons */}
-       <div className="flex space-x-3">
-  <button
-    onClick={handleFollow}
-    disabled={followLoading}
-    className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm ${
-      followLoading ? "opacity-50 cursor-not-allowed" : ""
-    }`}
-    style={{ 
-      backgroundColor: followLoading 
-        ? "#f8f8f8" 
-        : isFollowing 
-          ? "#ffffff" 
-          : "#008066",
-      border: isFollowing ? "1px solid #e0e0e0" : "none",
-      color: followLoading 
-        ? "#666666" 
-        : isFollowing 
-          ? "#333333" 
-          : "#ffffff"
-    }}
-    onMouseEnter={(e) => {
-      if (!followLoading && isFollowing) {
-        e.target.style.backgroundColor = "#fed7d7";
-        e.target.style.color = "#e53e3e";
-        e.target.style.borderColor = "#e53e3e";
-      }
-    }}
-    onMouseLeave={(e) => {
-      if (!followLoading && isFollowing) {
-        e.target.style.backgroundColor = "#ffffff";
-        e.target.style.color = "#333333";
-        e.target.style.borderColor = "#e0e0e0";
-      }
-    }}
-  >
-    {followLoading
-      ? (isFollowing ? "Following..." : "Unfollowing...")
-      : (isFollowing ? "Unfollow" : "Follow")
-    }
-  </button>
+            <div className="flex space-x-3">
+              <button
+                onClick={handleFollow}
+                disabled={followLoading}
+                className={`flex-1 px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm ${
+                  followLoading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                style={{ 
+                  backgroundColor: followLoading 
+                    ? 'var(--color-bg-secondary)' 
+                    : isFollowing 
+                      ? 'var(--color-bg-primary)' 
+                      : 'var(--color-primary)',
+                  border: isFollowing ? '1px solid var(--color-primary)' : 'none',
+                  color: followLoading 
+                    ? 'var(--color-text-secondary)' 
+                    : isFollowing 
+                      ? 'var(--color-primary)' 
+                      : 'var(--color-text-on-primary)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!followLoading && isFollowing) {
+                    e.target.style.backgroundColor = 'var(--color-error)';
+                    e.target.style.color = 'var(--color-text-on-primary)';
+                    e.target.style.borderColor = 'var(--color-error)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!followLoading && isFollowing) {
+                    e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                    e.target.style.color = 'var(--color-primary)';
+                    e.target.style.borderColor = 'var(--color-primary)';
+                  }
+                }}
+              >
+                {followLoading
+                  ? (isFollowing ? "Unfollowing..." : "Following...")
+                  : (isFollowing ? "Unfollow" : "Follow")
+                }
+              </button>
 
-  {isFollowing && (
-    <button
-      onClick={handleMessageClick}
-      disabled={roomLoading}
-      className={`p-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm ${
-        roomLoading ? "opacity-50 cursor-not-allowed" : ""
-      }`}
-      style={{ 
-        backgroundColor: "#ffffff",
-        border: "1px solid #008066",
-        color: "#008066"
-      }}
-      onMouseEnter={(e) => {
-        if (!roomLoading) {
-          e.target.style.backgroundColor = "#008066";
-          e.target.style.color = "#ffffff";
-        }
-      }}
-      onMouseLeave={(e) => {
-        if (!roomLoading) {
-          e.target.style.backgroundColor = "#ffffff";
-          e.target.style.color = "#008066";
-        }
-      }}
-    >
-      <FiMail className="w-4 h-4" />
-    </button>
-  )}
-</div>
-</div>
-</div>
+              {isFollowing && (
+                <button
+                  onClick={handleMessageClick}
+                  disabled={roomLoading}
+                  className={`p-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm ${
+                    roomLoading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  style={{ 
+                    backgroundColor: 'var(--color-bg-primary)',
+                    border: '1px solid var(--color-primary)',
+                    color: 'var(--color-primary)'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!roomLoading) {
+                      e.target.style.backgroundColor = 'var(--color-primary)';
+                      e.target.style.color = 'var(--color-text-on-primary)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!roomLoading) {
+                      e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                      e.target.style.color = 'var(--color-primary)';
+                    }
+                  }}
+                >
+                  <FiMail className="w-4 h-4" />
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
 
         {/* Bio Section */}
         <div className="mb-5">
@@ -296,16 +318,9 @@ const UserProfileSection = ({ profiles, isOtherUser = true }) => {
           >
             {mergedProfile.bio}
           </p>
-          {/* <div 
-            className="flex items-center mt-3 text-sm font-medium transition-colors"
-            style={{ color: 'var(--color-primary)' }}
-          >
-            <Headphones className="w-4 h-4 mr-1.5" />
-            My Beats ({mergedProfile.beats || 0})
-          </div> */}
         </div>
 
-        {/* Highlights (Contact info) */}
+        {/* Highlights (Contact info) - Uncomment if needed */}
         {/* <div className="flex space-x-5 mb-6 overflow-x-auto pb-2 hide-scrollbar">
           {[
             { title: 'Contact', icon: <FiPhone className="w-5 h-5" />, value: mergedProfile.phonenumber || "N/A" },

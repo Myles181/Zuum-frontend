@@ -3,7 +3,6 @@ import { FaEnvelope, FaKey, FaSpinner, FaCheckCircle } from "react-icons/fa";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useResendOtp, useVerifyEmail } from "../../../Hooks/auth/useSignup";
 
-
 const VerifyOTP = () => {
   const [otp, setOtp] = useState("");
   const [isFocused, setIsFocused] = useState({ otp: false });
@@ -14,6 +13,17 @@ const VerifyOTP = () => {
   // Use both hooks
   const { loading: verifyLoading, error: verifyError, success: verifySuccess, verifyEmail } = useVerifyEmail();
   const { loading: resendLoading, error: resendError, success: resendSuccess, resendOtp } = useResendOtp();
+
+  // Dark mode styles
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+  };
 
   // Get email from location state or URL params
   useEffect(() => {
@@ -36,7 +46,7 @@ const VerifyOTP = () => {
     }
 
     await verifyEmail(email, otp);
-  };z
+  };
 
   const handleResendOTP = async () => {
     await resendOtp(email);
@@ -51,9 +61,19 @@ const VerifyOTP = () => {
   }, [verifySuccess, navigate, email]);
 
   return (
-   <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="w-full max-w-sm bg-white overflow-hidden flex flex-col">
-        
+    <div 
+      className="min-h-screen flex items-center justify-center"
+      style={{ 
+        backgroundColor: 'var(--color-bg-secondary)',
+        ...darkModeStyles
+      }}
+    >
+      <div 
+        className="w-full max-w-sm overflow-hidden flex flex-col"
+        style={{ 
+          backgroundColor: 'var(--color-bg-primary)',
+        }}
+      >
         
         {/* Image Section - Top Half */}
         <div className="relative h-2/5 overflow-hidden">
@@ -63,8 +83,13 @@ const VerifyOTP = () => {
               backgroundImage: `url(https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&h=600&fit=crop&auto=format)`
             }}
           >
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-white/80"></div>
+            {/* Dark mode gradient overlay */}
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 50%, var(--color-bg-primary) 100%)'
+              }}
+            ></div>
           </div>
         </div>
 
@@ -74,14 +99,23 @@ const VerifyOTP = () => {
             
             {/* Welcome Text */}
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
+              <h2 
+                className="text-2xl font-bold mb-2 leading-tight"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Verify Your Email
               </h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p 
+                className="text-sm leading-relaxed"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
                 Enter the verification code sent to your email
               </p>
               {email && (
-                <p className="text-[#2D8C72] text-sm font-medium mt-2">
+                <p 
+                  className="text-sm font-medium mt-2"
+                  style={{ color: '#2D8C72' }}
+                >
                   {email}
                 </p>
               )}
@@ -89,32 +123,82 @@ const VerifyOTP = () => {
 
             {/* Error Messages */}
             {verifyError && (
-              <div className="mb-4 p-3 bg-red-100 border border-red-200 rounded-xl">
-                <p className="text-red-600 text-sm text-center">{verifyError}</p>
+              <div 
+                className="mb-4 p-3 rounded-xl"
+                style={{
+                  backgroundColor: 'rgba(248, 113, 113, 0.1)',
+                  border: '1px solid rgba(248, 113, 113, 0.2)'
+                }}
+              >
+                <p 
+                  className="text-sm text-center"
+                  style={{ color: '#f87171' }}
+                >
+                  {verifyError}
+                </p>
               </div>
             )}
 
             {resendError && (
-              <div className="mb-4 p-3 bg-red-100 border border-red-200 rounded-xl">
-                <p className="text-red-600 text-sm text-center">{resendError}</p>
+              <div 
+                className="mb-4 p-3 rounded-xl"
+                style={{
+                  backgroundColor: 'rgba(248, 113, 113, 0.1)',
+                  border: '1px solid rgba(248, 113, 113, 0.2)'
+                }}
+              >
+                <p 
+                  className="text-sm text-center"
+                  style={{ color: '#f87171' }}
+                >
+                  {resendError}
+                </p>
               </div>
             )}
 
             {/* Success Messages */}
             {resendSuccess && (
-              <div className="mb-4 p-3 bg-green-100 border border-green-200 rounded-xl">
+              <div 
+                className="mb-4 p-3 rounded-xl"
+                style={{
+                  backgroundColor: 'rgba(52, 211, 153, 0.1)',
+                  border: '1px solid rgba(52, 211, 153, 0.2)'
+                }}
+              >
                 <div className="flex items-center justify-center">
-                  <FaCheckCircle className="text-green-600 mr-2" />
-                  <p className="text-green-700 text-sm">OTP sent successfully!</p>
+                  <FaCheckCircle 
+                    className="mr-2"
+                    style={{ color: '#34d399' }}
+                  />
+                  <p 
+                    className="text-sm"
+                    style={{ color: '#34d399' }}
+                  >
+                    OTP sent successfully!
+                  </p>
                 </div>
               </div>
             )}
 
             {verifySuccess && (
-              <div className="mb-4 p-3 bg-green-100 border border-green-200 rounded-xl">
+              <div 
+                className="mb-4 p-3 rounded-xl"
+                style={{
+                  backgroundColor: 'rgba(52, 211, 153, 0.1)',
+                  border: '1px solid rgba(52, 211, 153, 0.2)'
+                }}
+              >
                 <div className="flex items-center justify-center">
-                  <FaCheckCircle className="text-green-600 mr-2" />
-                  <p className="text-green-700 text-sm">Email verified successfully! Redirecting...</p>
+                  <FaCheckCircle 
+                    className="mr-2"
+                    style={{ color: '#34d399' }}
+                  />
+                  <p 
+                    className="text-sm"
+                    style={{ color: '#34d399' }}
+                  >
+                    Email verified successfully! Redirecting...
+                  </p>
                 </div>
               </div>
             )}
@@ -123,7 +207,10 @@ const VerifyOTP = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* OTP Field */}
               <div>
-                <label className="block text-gray-700 text-sm font-medium mb-2">
+                <label 
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
                   Verification Code
                 </label>
                 <div className="relative group">
@@ -135,7 +222,12 @@ const VerifyOTP = () => {
                   <input
                     type="text"
                     placeholder="Enter 6-digit code"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                    className="w-full pl-10 pr-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                    style={{
+                      backgroundColor: 'var(--color-bg-primary)',
+                      borderColor: isFocused.otp ? '#2D8C72' : '#374151',
+                      color: 'var(--color-text-primary)'
+                    }}
                     required
                     value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -143,7 +235,10 @@ const VerifyOTP = () => {
                     onBlur={() => setIsFocused({ ...isFocused, otp: false })}
                   />
                 </div>
-                <p className="text-gray-500 text-xs mt-2">
+                <p 
+                  className="text-xs mt-2"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
                   Enter the 6-digit code sent to your email
                 </p>
               </div>
@@ -152,7 +247,7 @@ const VerifyOTP = () => {
               <button
                 type="submit"
                 disabled={verifyLoading || !otp || otp.length !== 6}
-                className="w-full py-3 bg-[#2D8C72] hover:bg-[#248066] disabled:bg-gray-400 text-white rounded-2xl font-semibold text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg disabled:hover:scale-100 disabled:cursor-not-allowed"
+                className="w-full py-3 bg-[#2D8C72] hover:bg-[#248066] disabled:bg-gray-600 text-white rounded-2xl font-semibold text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg disabled:hover:scale-100 disabled:cursor-not-allowed"
               >
                 <div className="flex items-center justify-center">
                   {verifyLoading ? (
@@ -169,7 +264,10 @@ const VerifyOTP = () => {
 
             {/* Resend OTP Section */}
             <div className="mt-6 text-center">
-              <p className="text-gray-600 text-sm mb-3">
+              <p 
+                className="text-sm mb-3"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
                 Didn't receive the code?
               </p>
               <button
@@ -191,7 +289,10 @@ const VerifyOTP = () => {
 
           {/* Navigation Links */}
           <div className="text-center space-y-3">
-            <p className="text-gray-600 text-sm">
+            <p 
+              className="text-sm"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
               Remember your password?{" "}
               <Link 
                 to="/login" 
@@ -200,7 +301,10 @@ const VerifyOTP = () => {
                 Sign in
               </Link>
             </p>
-            <p className="text-gray-500 text-xs">
+            <p 
+              className="text-xs"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
               Need to create an account?{" "}
               <Link 
                 to="/signup" 

@@ -11,7 +11,6 @@ import { FaPlay, FaCheck } from 'react-icons/fa';
 import PreviewModal from '../components/promotion/PreviewModal';
 import { usePromotePost, useUserPosts } from '../../Hooks/search/useAllPost';
 
-
 const PromotionPage = () => {
   const {
     beats,
@@ -24,10 +23,22 @@ const PromotionPage = () => {
     refetch
   } = useUserPosts();
 
+  // Dark mode styles - consistent with other components
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+    '--color-border': '#374151',
+    '--color-error': '#EF4444',
+    '--color-error-light': '#7F1D1D'
+  };
 
   console.log(allPosts);
   
-
   // UI state
   const [selectedContent, setSelectedContent] = useState(null);
   const [duration, setDuration] = useState(7);
@@ -66,21 +77,53 @@ const PromotionPage = () => {
 
   if (loading.all) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 my-13 flex justify-center items-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#2D8C72]"></div>
+      <div 
+        className="min-h-screen p-4 my-13 flex justify-center items-center"
+        style={{ 
+          ...darkModeStyles,
+          backgroundColor: 'var(--color-bg-primary)'
+        }}
+      >
+        <div 
+          className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2"
+          style={{ borderColor: 'var(--color-primary)' }}
+        ></div>
       </div>
     );
   }
 
   if (error.any) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 my-13 flex flex-col justify-center items-center">
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-4 max-w-md">
+      <div 
+        className="min-h-screen p-4 my-13 flex flex-col justify-center items-center"
+        style={{ 
+          ...darkModeStyles,
+          backgroundColor: 'var(--color-bg-primary)'
+        }}
+      >
+        <div 
+          className="border-l-4 p-4 mb-4 max-w-md"
+          style={{
+            backgroundColor: 'var(--color-error-light)',
+            borderColor: 'var(--color-error)',
+            color: 'var(--color-error)'
+          }}
+        >
           {/* Error display */}
         </div>
         <button 
           onClick={refetch.all}
-          className="mt-4 px-6 py-2 rounded-lg bg-[#2D8C72] text-white hover:bg-[#1E6B5E]"
+          className="mt-4 px-6 py-2 rounded-lg font-medium transition-colors"
+          style={{ 
+            backgroundColor: 'var(--color-primary)',
+            color: 'var(--color-text-on-primary)'
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = 'var(--color-primary-light)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = 'var(--color-primary)';
+          }}
         >
           Retry
         </button>
@@ -90,12 +133,43 @@ const PromotionPage = () => {
 
   if (isEmpty) {
     return (
-      <div className="min-h-screen bg-gray-50 p-4 my-13 flex flex-col justify-center items-center">
+      <div 
+        className="min-h-screen p-4 my-13 flex flex-col justify-center items-center"
+        style={{ 
+          ...darkModeStyles,
+          backgroundColor: 'var(--color-bg-primary)'
+        }}
+      >
         <div className="text-center max-w-md">
-          <FaMusic className="mx-auto text-4xl text-gray-400 mb-4" />
-          <h3 className="text-xl font-medium text-gray-900">No content to promote</h3>
-          <p className="mt-2 text-gray-500">You haven't uploaded any beats, videos, or audios yet.</p>
-          <button className="mt-6 px-6 py-2 rounded-lg bg-[#2D8C72] text-white hover:bg-[#1E6B5E]">
+          <FaMusic 
+            className="mx-auto text-4xl mb-4"
+            style={{ color: 'var(--color-text-secondary)' }}
+          />
+          <h3 
+            className="text-xl font-medium mb-2"
+            style={{ color: 'var(--color-text-primary)' }}
+          >
+            No content to promote
+          </h3>
+          <p 
+            className="mt-2"
+            style={{ color: 'var(--color-text-secondary)' }}
+          >
+            You haven't uploaded any beats, videos, or audios yet.
+          </p>
+          <button 
+            className="mt-6 px-6 py-2 rounded-lg font-medium transition-colors"
+            style={{ 
+              backgroundColor: 'var(--color-primary)',
+              color: 'var(--color-text-on-primary)'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.backgroundColor = 'var(--color-primary-light)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.backgroundColor = 'var(--color-primary)';
+            }}
+          >
             Upload Content
           </button>
         </div>
@@ -104,7 +178,13 @@ const PromotionPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 p-4 my-13">
+    <div 
+      className="min-h-screen p-4 my-13"
+      style={{ 
+        ...darkModeStyles,
+        backgroundColor: 'var(--color-bg-primary)'
+      }}
+    >
       <Navbar name="Promote Content" toggleSidebar={toggleSidebar} />
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
       <Overlay isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
@@ -116,8 +196,12 @@ const PromotionPage = () => {
           animate={{ y: 0, opacity: 1 }}
           className="flex items-center justify-between mb-8"
         >
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <FaBullhorn className="text-[#2D8C72]" /> Promote Your Content
+          <h1 
+            className="text-2xl font-bold flex items-center gap-2"
+            style={{ color: 'var(--color-text-primary)' }}
+          >
+            <FaBullhorn style={{ color: 'var(--color-primary)' }} /> 
+            Promote Your Content
           </h1>
         </motion.div>
 
@@ -125,24 +209,34 @@ const PromotionPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Content Selection */}
           <div className="md:col-span-2 space-y-4">
-            <h2 className="text-xl font-semibold flex items-center gap-2 mb-4">
-              <FaMusic /> Your Uploads ({allPosts.length})
+            <h2 
+              className="text-xl font-semibold flex items-center gap-2 mb-4"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              <FaMusic style={{ color: 'var(--color-primary)' }} /> 
+              Your Uploads ({allPosts.length})
             </h2>
             
             {allPosts.map(item => (
               <motion.div
                 key={item.id}
                 whileHover={{ scale: 1.01 }}
-                className={`rounded-xl shadow-sm overflow-hidden border ${
+                className={`rounded-xl shadow-sm overflow-hidden border transition-colors ${
                   selectedContent?.id === item.id 
-                    ? 'border-[#2D8C72] ring-1 ring-[#2D8C72]' 
-                    : 'border-gray-200'
+                    ? 'ring-1' 
+                    : ''
                 }`}
-                style={{ backgroundColor: 'var(--color-bg-primary)' }}
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  borderColor: selectedContent?.id === item.id 
+                    ? 'var(--color-primary)' 
+                    : 'var(--color-border)'
+                }}
               >
                 <div className="flex">
                   <div 
-                    className="w-24 h-24 bg-gray-100 relative cursor-pointer"
+                    className="w-24 h-24 relative cursor-pointer"
+                    style={{ backgroundColor: 'var(--color-bg-primary)' }}
                     onClick={() => {
                       setCurrentItem(item);
                       setShowLockedModal(true);
@@ -153,7 +247,10 @@ const PromotionPage = () => {
                       alt={item.title}
                       className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
+                    <div 
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
+                    >
                       <FaPlay className="text-white text-lg" />
                     </div>
                   </div>
@@ -161,7 +258,12 @@ const PromotionPage = () => {
                   <div className="flex-1 p-4">
                     <div className="flex justify-between">
                       <div>
-                        <h3 className="font-medium">{item.title}</h3>
+                        <h3 
+                          className="font-medium"
+                          style={{ color: 'var(--color-text-primary)' }}
+                        >
+                          {item.title}
+                        </h3>
                         <p 
                           className="text-sm capitalize"
                           style={{ color: 'var(--color-text-secondary)' }}
@@ -171,11 +273,19 @@ const PromotionPage = () => {
                       </div>
                       <button
                         onClick={() => toggleContentSelection(item)}
-                        className={`w-6 h-6 rounded-full flex items-center justify-center ${
+                        className={`w-6 h-6 rounded-full flex items-center justify-center transition-colors ${
                           selectedContent?.id === item.id
-                            ? 'bg-[#2D8C72] text-white'
-                            : 'border-2 border-gray-300'
+                            ? 'text-white'
+                            : 'border-2'
                         }`}
+                        style={{
+                          backgroundColor: selectedContent?.id === item.id
+                            ? 'var(--color-primary)'
+                            : 'transparent',
+                          borderColor: selectedContent?.id === item.id
+                            ? 'var(--color-primary)'
+                            : 'var(--color-text-secondary)'
+                        }}
                         disabled={promotionLoading}
                       >
                         {selectedContent?.id === item.id && <FaCheck className="text-xs" />}
@@ -189,7 +299,10 @@ const PromotionPage = () => {
                       >
                         {item.plays_count?.toLocaleString() || '0'} plays
                       </span>
-                      <span className="font-medium">
+                      <span 
+                        className="font-medium"
+                        style={{ color: 'var(--color-text-primary)' }}
+                      >
                         ₦{item.price?.toLocaleString() || '0'}
                       </span>
                     </div>

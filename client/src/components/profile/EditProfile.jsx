@@ -4,7 +4,6 @@ import { FaCamera } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useAlerts } from "../../contexts/AlertConntexts";
 
-
 const EditProfilePage = ({profile}) => {
   const {
     fetchError,
@@ -16,6 +15,18 @@ const EditProfilePage = ({profile}) => {
 
   // Get alert functions from context
   const { showSuccess, showError, showInfo, showWarning } = useAlerts();
+
+  // Dark mode styles
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+    '--color-border': '#374151'
+  };
 
   // Form state
   const [formData, setFormData] = useState({
@@ -132,9 +143,20 @@ const EditProfilePage = ({profile}) => {
 
   if (fetchError) {
     return (
-      <div className="max-w-md mx-auto mt-10 p-6 bg-red-50 rounded-lg shadow-md">
-        <h2 className="text-xl font-bold text-red-600 mb-2">Error</h2>
-        <p className="text-gray-700">{fetchError}</p>
+      <div 
+        className="max-w-md mx-auto mt-10 p-6 rounded-lg shadow-md"
+        style={{ 
+          backgroundColor: 'var(--color-bg-primary)',
+          border: '1px solid var(--color-border)'
+        }}
+      >
+        <h2 
+          className="text-xl font-bold mb-2"
+          style={{ color: '#ef4444' }}
+        >
+          Error
+        </h2>
+        <p style={{ color: 'var(--color-text-primary)' }}>{fetchError}</p>
       </div>
     );
   }
@@ -142,7 +164,10 @@ const EditProfilePage = ({profile}) => {
   return (
     <div 
       className="min-h-screen"
-      style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+      style={{ 
+        backgroundColor: 'var(--color-bg-secondary)',
+        ...darkModeStyles
+      }}
     >
       <div className="max-w-5xl mx-auto">
         {/* Cover + Profile */}
@@ -177,8 +202,14 @@ const EditProfilePage = ({profile}) => {
                     className="w-full h-full object-cover"
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full bg-gray-200">
-                    <span className="text-gray-400 text-6xl font-medium">
+                  <div 
+                    className="flex items-center justify-center h-full"
+                    style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+                  >
+                    <span 
+                      className="text-6xl font-medium"
+                      style={{ color: 'var(--color-text-secondary)' }}
+                    >
                       {getInitial()}
                     </span>
                   </div>
@@ -186,7 +217,11 @@ const EditProfilePage = ({profile}) => {
               </div>
               <label
                 htmlFor="image"
-                className="absolute bottom-2 right-2 bg-gray-100 text-gray-700 p-2 rounded-full cursor-pointer shadow-md hover:bg-gray-200 transition"
+                className="absolute bottom-2 right-2 p-2 rounded-full cursor-pointer shadow-md transition-colors hover:bg-gray-700"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  color: 'var(--color-text-primary)'
+                }}
               >
                 <FaCamera />
               </label>
@@ -202,16 +237,15 @@ const EditProfilePage = ({profile}) => {
           </div>
           <label
             htmlFor="cover_image"
-            className="absolute bottom-4 right-4 px-4 py-2 rounded-md shadow cursor-pointer transition flex items-center gap-2"
-            style={{ backgroundColor: 'var(--color-bg-primary)' }}
-            onMouseEnter={(e) => {
-              e.target.style.backgroundColor = 'var(--color-bg-secondary)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.backgroundColor = 'var(--color-bg-primary)';
+            className="absolute bottom-4 right-4 px-4 py-2 rounded-md shadow cursor-pointer transition flex items-center gap-2 hover:bg-gray-700"
+            style={{ 
+              backgroundColor: 'var(--color-bg-primary)',
+              color: 'var(--color-text-primary)',
+              border: '1px solid var(--color-border)'
             }}
           >
             <FaCamera />
+            Change Cover
           </label>
           <input
             type="file"
@@ -226,11 +260,17 @@ const EditProfilePage = ({profile}) => {
         {/* Form */}
         <div 
           className="mt-24 rounded-lg shadow-md p-6"
-          style={{ backgroundColor: 'var(--color-bg-primary)' }}
+          style={{ 
+            backgroundColor: 'var(--color-bg-primary)',
+            border: '1px solid var(--color-border)'
+          }}
         >
           <form onSubmit={handleSubmit}>
             {/* Basic Info */}
-            <div className="border-b border-gray-200 pb-4 mb-6">
+            <div 
+              className="border-b pb-4 mb-6"
+              style={{ borderColor: 'var(--color-border)' }}
+            >
               <h2 
                 className="text-xl font-semibold"
                 style={{ color: 'var(--color-text-primary)' }}
@@ -254,7 +294,12 @@ const EditProfilePage = ({profile}) => {
                   name="firstname"
                   value={formData.firstname}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all"
+                  style={{
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text-primary)'
+                  }}
                 />
               </div>
 
@@ -262,7 +307,8 @@ const EditProfilePage = ({profile}) => {
               <div>
                 <label
                   htmlFor="middlename"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: 'var(--color-text-primary)' }}
                 >
                   Middle Name
                 </label>
@@ -272,7 +318,12 @@ const EditProfilePage = ({profile}) => {
                   name="middlename"
                   value={formData.middlename}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all"
+                  style={{
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text-primary)'
+                  }}
                 />
               </div>
 
@@ -280,7 +331,8 @@ const EditProfilePage = ({profile}) => {
               <div>
                 <label
                   htmlFor="lastname"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: 'var(--color-text-primary)' }}
                 >
                   Last Name
                 </label>
@@ -290,7 +342,12 @@ const EditProfilePage = ({profile}) => {
                   name="lastname"
                   value={formData.lastname}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all"
+                  style={{
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text-primary)'
+                  }}
                 />
               </div>
 
@@ -298,7 +355,8 @@ const EditProfilePage = ({profile}) => {
               <div>
                 <label
                   htmlFor="username"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: 'var(--color-text-primary)' }}
                 >
                   Username
                 </label>
@@ -308,14 +366,25 @@ const EditProfilePage = ({profile}) => {
                   name="username"
                   value={formData.username}
                   disabled
-                  className="w-full pl-3 px-4 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
+                  className="w-full pl-3 px-4 py-2 border rounded-md cursor-not-allowed transition-all"
+                  style={{
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text-secondary)'
+                  }}
                 />
               </div>
             </div>
 
             {/* Contact Info */}
-            <div className="border-b border-gray-200 pb-4 mb-6 mt-8">
-              <h2 className="text-xl font-semibold text-gray-800">
+            <div 
+              className="border-b pb-4 mb-6 mt-8"
+              style={{ borderColor: 'var(--color-border)' }}
+            >
+              <h2 
+                className="text-xl font-semibold"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Contact Information
               </h2>
             </div>
@@ -324,7 +393,8 @@ const EditProfilePage = ({profile}) => {
               <div>
                 <label
                   htmlFor="email"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: 'var(--color-text-primary)' }}
                 >
                   Email Address
                 </label>
@@ -334,7 +404,12 @@ const EditProfilePage = ({profile}) => {
                   name="email"
                   value={formData.email}
                   disabled
-                  className="w-full pl-3 px-4 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
+                  className="w-full pl-3 px-4 py-2 border rounded-md cursor-not-allowed transition-all"
+                  style={{
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text-secondary)'
+                  }}
                 />
               </div>
 
@@ -342,7 +417,8 @@ const EditProfilePage = ({profile}) => {
               <div>
                 <label
                   htmlFor="phonenumber"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: 'var(--color-text-primary)' }}
                 >
                   Phone Number
                 </label>
@@ -352,15 +428,26 @@ const EditProfilePage = ({profile}) => {
                   name="phonenumber"
                   value={formData.phonenumber || ""}
                   onChange={handleChange}
-                  className="w-full pl-3 px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full pl-3 px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all"
+                  style={{
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text-primary)'
+                  }}
                   placeholder="Add your phone number"
                 />
               </div>
             </div>
 
             {/* About You */}
-            <div className="border-b border-gray-200 pb-4 mb-6 mt-8">
-              <h2 className="text-xl font-semibold text-gray-800">
+            <div 
+              className="border-b pb-4 mb-6 mt-8"
+              style={{ borderColor: 'var(--color-border)' }}
+            >
+              <h2 
+                className="text-xl font-semibold"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 About You
               </h2>
             </div>
@@ -369,7 +456,8 @@ const EditProfilePage = ({profile}) => {
               <div>
                 <label
                   htmlFor="identity"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: 'var(--color-text-primary)' }}
                 >
                   Identity
                 </label>
@@ -378,10 +466,14 @@ const EditProfilePage = ({profile}) => {
                   name="identity"
                   value={formData.identity}
                   disabled
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md bg-gray-100 cursor-not-allowed"
+                  className="w-full px-4 py-2 border rounded-md cursor-not-allowed transition-all"
+                  style={{
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text-secondary)'
+                  }}
                 >
                   <option value="">{formData.identity}</option>
-                  
                 </select>
               </div>
 
@@ -389,7 +481,8 @@ const EditProfilePage = ({profile}) => {
               <div>
                 <label
                   htmlFor="bio"
-                  className="block text-sm font-medium text-gray-700 mb-1"
+                  className="block text-sm font-medium mb-1"
+                  style={{ color: 'var(--color-text-primary)' }}
                 >
                   Bio
                 </label>
@@ -399,10 +492,18 @@ const EditProfilePage = ({profile}) => {
                   rows="4"
                   value={formData.bio || ""}
                   onChange={handleChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                  className="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all"
+                  style={{
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    borderColor: 'var(--color-border)',
+                    color: 'var(--color-text-primary)'
+                  }}
                   placeholder="Tell us a bit about yourself..."
                 />
-                <p className="text-xs text-gray-500 mt-1">
+                <p 
+                  className="text-xs mt-1"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
                   Write a short introduction about yourself. What makes you
                   unique?
                 </p>
@@ -410,11 +511,23 @@ const EditProfilePage = ({profile}) => {
             </div>
 
             {/* Account Info */}
-            <div className="mt-8 p-4 bg-gray-50 rounded-md">
-              <h3 className="font-medium text-gray-700 flex items-center">
+            <div 
+              className="mt-8 p-4 rounded-md"
+              style={{ 
+                backgroundColor: 'var(--color-bg-secondary)',
+                border: '1px solid var(--color-border)'
+              }}
+            >
+              <h3 
+                className="font-medium flex items-center"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Account Information
               </h3>
-              <div className="mt-2 text-sm text-gray-500">
+              <div 
+                className="mt-2 text-sm"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
                 <p>
                   Account created:{" "}
                   {new Date(profile?.created_at).toLocaleDateString("en-US", {
@@ -432,14 +545,22 @@ const EditProfilePage = ({profile}) => {
               <button
                 type="button"
                 onClick={() => navigate(-1)}
-                className="px-6 py-2 border border-gray-300 rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                className="px-6 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:ring-offset-2 transition-all hover:bg-gray-700"
+                style={{ 
+                  borderColor: 'var(--color-border)',
+                  color: 'var(--color-text-primary)',
+                  backgroundColor: 'var(--color-bg-primary)'
+                }}
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={updateLoading}
-                className="px-6 py-2 border border-transparent rounded-md shadow-sm text-white bg-[#2D8C72] hover:bg-[#25725D] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 flex items-center"
+                className="px-6 py-2 border border-transparent rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:ring-offset-2 flex items-center transition-all hover:bg-[#248066] disabled:opacity-50 disabled:cursor-not-allowed"
+                style={{
+                  backgroundColor: '#2D8C72'
+                }}
               >
                 {updateLoading ? (
                   <>

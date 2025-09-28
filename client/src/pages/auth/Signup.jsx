@@ -32,13 +32,24 @@ const ZuumSignup = () => {
     phonenumber: "",
     password: "",
     confirmPassword: "",
-    identity: formattedIdentity, // Set from URL parameter
+    identity: formattedIdentity,
   });
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
     setIsVisible(true);
   }, []);
+
+  // Dark mode styles
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+  };
 
   const togglePasswordVisibility = (field) => {
     if (field === "password") {
@@ -121,11 +132,9 @@ const ZuumSignup = () => {
     e.preventDefault();
     if (!validateStep(3)) return;
     
-    // Use the signup hook
     const success = await signup(formData);
     
     if (success) {
-      // Navigate to OTP verification page on success
       navigate('/verify', { 
         state: { email: formData.email } 
       });
@@ -134,7 +143,6 @@ const ZuumSignup = () => {
 
   // Handle Google Signup
   const handleGoogleSignup = () => {
-    // Redirect to Google OAuth endpoint
     window.location.href = `${import.meta.env.VITE_API_URL}/auth/google`;
   };
 
@@ -152,8 +160,19 @@ const ZuumSignup = () => {
   ];
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f3f4f6' }}>
-      <div className="w-full max-w-sm overflow-hidden flex flex-col" style={{ backgroundColor: '#ffffff' }}>
+    <div 
+      className="min-h-screen flex items-center justify-center"
+      style={{ 
+        backgroundColor: 'var(--color-bg-secondary)',
+        ...darkModeStyles
+      }}
+    >
+      <div 
+        className="w-full max-w-sm overflow-hidden flex flex-col"
+        style={{ 
+          backgroundColor: 'var(--color-bg-primary)',
+        }}
+      >
         
         {/* Header with Logo */}
         <div className="m-5 absolute z-10 transition-all duration-700 ease-in-out">
@@ -170,30 +189,47 @@ const ZuumSignup = () => {
               backgroundImage: `url(${stepImages[currentStep - 1]})`
             }}
           >
-            {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-white/90"></div>
+            {/* Dark mode gradient overlay */}
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 50%, var(--color-bg-primary) 100%)'
+              }}
+            ></div>
           </div>
         </div>
 
         {/* Content Section */}
-        <div className="flex-1 px-6 py-6 flex flex-col" style={{ backgroundColor: '#ffffff' }}>
+        <div className="flex-1 px-6 py-6 flex flex-col" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
           <div className="flex-grow">
             
             {/* Welcome Text */}
             <div className={`text-center mb-6 transition-all duration-600 ease-out ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}>
-              <h2 className="text-2xl font-bold mb-2 leading-tight" style={{ color: '#111827' }}>
+              <h2 
+                className="text-2xl font-bold mb-2 leading-tight"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Join as {formData.identity}
               </h2>
-              <p className="text-sm leading-relaxed" style={{ color: '#4b5563' }}>
+              <p 
+                className="text-sm leading-relaxed"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
                 Step {currentStep} of 3 - {steps[currentStep - 1].description}
               </p>
             </div>
 
             {/* Display error message if any */}
             {error && (
-              <div className="mb-4 p-3 rounded-lg text-sm" style={{ backgroundColor: '#fee2e2', color: '#b91c1c' }}>
+              <div 
+                className="mb-4 p-3 rounded-lg text-sm"
+                style={{ 
+                  backgroundColor: 'rgba(248, 113, 113, 0.1)', 
+                  color: '#f87171' 
+                }}
+              >
                 {error}
               </div>
             )}
@@ -207,15 +243,19 @@ const ZuumSignup = () => {
                 {currentStep === 1 && (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                        <span style={{ color: '#374151' }}>First Name *</span>
+                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                        First Name *
                       </label>
                       <input
                         type="text"
                         id="firstname"
                         placeholder="Enter your first name"
-                        className="w-full px-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300"
-                        style={{ borderColor: '#e5e7eb', color: '#111827', backgroundColor: '#ffffff' }}
+                        className="w-full px-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                        style={{ 
+                          borderColor: errors.firstname ? '#ef4444' : '#374151', 
+                          color: 'var(--color-text-primary)', 
+                          backgroundColor: 'var(--color-bg-primary)' 
+                        }}
                         value={formData.firstname}
                         onChange={handleInputChange}
                         required
@@ -224,30 +264,38 @@ const ZuumSignup = () => {
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                        <span style={{ color: '#374151' }}>Middle Name</span>
+                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                        Middle Name
                       </label>
                       <input
                         type="text"
                         id="middlename"
                         placeholder="Enter your middle name (optional)"
-                        className="w-full px-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300"
-                        style={{ borderColor: '#e5e7eb', color: '#111827', backgroundColor: '#ffffff' }}
+                        className="w-full px-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                        style={{ 
+                          borderColor: '#374151', 
+                          color: 'var(--color-text-primary)', 
+                          backgroundColor: 'var(--color-bg-primary)' 
+                        }}
                         value={formData.middlename}
                         onChange={handleInputChange}
                       />
                     </div>
                     
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                        <span style={{ color: '#374151' }}>Last Name *</span>
+                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                        Last Name *
                       </label>
                       <input
                         type="text"
                         id="lastname"
                         placeholder="Enter your last name"
-                        className="w-full px-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300"
-                        style={{ borderColor: '#e5e7eb', color: '#111827', backgroundColor: '#ffffff' }}
+                        className="w-full px-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                        style={{ 
+                          borderColor: errors.lastname ? '#ef4444' : '#374151', 
+                          color: 'var(--color-text-primary)', 
+                          backgroundColor: 'var(--color-bg-primary)' 
+                        }}
                         value={formData.lastname}
                         onChange={handleInputChange}
                         required
@@ -261,8 +309,8 @@ const ZuumSignup = () => {
                 {currentStep === 2 && (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                        <span style={{ color: '#374151' }}>Username *</span>
+                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                        Username *
                       </label>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: '#9ca3af' }} />
@@ -270,8 +318,12 @@ const ZuumSignup = () => {
                           type="text"
                           id="username"
                           placeholder="Choose a username"
-                          className="w-full pl-10 pr-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300"
-                          style={{ borderColor: '#e5e7eb', color: '#111827', backgroundColor: '#ffffff' }}
+                          className="w-full pl-10 pr-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                          style={{ 
+                            borderColor: errors.username ? '#ef4444' : '#374151', 
+                            color: 'var(--color-text-primary)', 
+                            backgroundColor: 'var(--color-bg-primary)' 
+                          }}
                           value={formData.username}
                           onChange={handleInputChange}
                           required
@@ -281,8 +333,8 @@ const ZuumSignup = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                        <span style={{ color: '#374151' }}>Email Address *</span>
+                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                        Email Address *
                       </label>
                       <div className="relative">
                         <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: '#9ca3af' }} />
@@ -290,8 +342,12 @@ const ZuumSignup = () => {
                           type="email"
                           id="email"
                           placeholder="Enter your email address"
-                          className="w-full pl-10 pr-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300"
-                          style={{ borderColor: '#e5e7eb', color: '#111827', backgroundColor: '#ffffff' }}
+                          className="w-full pl-10 pr-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                          style={{ 
+                            borderColor: errors.email ? '#ef4444' : '#374151', 
+                            color: 'var(--color-text-primary)', 
+                            backgroundColor: 'var(--color-bg-primary)' 
+                          }}
                           value={formData.email}
                           onChange={handleInputChange}
                           required
@@ -301,8 +357,8 @@ const ZuumSignup = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                        <span style={{ color: '#374151' }}>Phone Number *</span>
+                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                        Phone Number *
                       </label>
                       <div className="relative">
                         <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: '#9ca3af' }} />
@@ -310,8 +366,12 @@ const ZuumSignup = () => {
                           type="tel"
                           id="phonenumber"
                           placeholder="Enter your phone number"
-                          className="w-full pl-10 pr-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300"
-                          style={{ borderColor: '#e5e7eb', color: '#111827', backgroundColor: '#ffffff' }}
+                          className="w-full pl-10 pr-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                          style={{ 
+                            borderColor: errors.phonenumber ? '#ef4444' : '#374151', 
+                            color: 'var(--color-text-primary)', 
+                            backgroundColor: 'var(--color-bg-primary)' 
+                          }}
                           value={formData.phonenumber}
                           onChange={handleInputChange}
                           required
@@ -326,8 +386,8 @@ const ZuumSignup = () => {
                 {currentStep === 3 && (
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                        <span style={{ color: '#374151' }}>Password *</span>
+                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                        Password *
                       </label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: '#9ca3af' }} />
@@ -335,16 +395,19 @@ const ZuumSignup = () => {
                           type={passwordVisible ? "text" : "password"}
                           id="password"
                           placeholder="Create a strong password"
-                          className="w-full pl-10 pr-12 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300"
-                          style={{ borderColor: '#e5e7eb', color: '#111827', backgroundColor: '#ffffff' }}
+                          className="w-full pl-10 pr-12 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                          style={{ 
+                            borderColor: errors.password ? '#ef4444' : '#374151', 
+                            color: 'var(--color-text-primary)', 
+                            backgroundColor: 'var(--color-bg-primary)' 
+                          }}
                           value={formData.password}
                           onChange={handleInputChange}
                           required
                         />
                         <button
                           type="button"
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                          style={{ color: '#9ca3af' }}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors duration-300"
                           onClick={() => togglePasswordVisibility("password")}
                         >
                           {passwordVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -354,8 +417,8 @@ const ZuumSignup = () => {
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium mb-2" style={{ color: '#374151' }}>
-                        <span style={{ color: '#374151' }}>Confirm Password *</span>
+                      <label className="block text-sm font-medium mb-2" style={{ color: 'var(--color-text-primary)' }}>
+                        Confirm Password *
                       </label>
                       <div className="relative">
                         <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5" style={{ color: '#9ca3af' }} />
@@ -363,16 +426,19 @@ const ZuumSignup = () => {
                           type={confirmPasswordVisible ? "text" : "password"}
                           id="confirmPassword"
                           placeholder="Confirm your password"
-                          className="w-full pl-10 pr-12 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-300"
-                          style={{ borderColor: '#e5e7eb', color: '#111827', backgroundColor: '#ffffff' }}
+                          className="w-full pl-10 pr-12 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                          style={{ 
+                            borderColor: errors.confirmPassword ? '#ef4444' : '#374151', 
+                            color: 'var(--color-text-primary)', 
+                            backgroundColor: 'var(--color-bg-primary)' 
+                          }}
                           value={formData.confirmPassword}
                           onChange={handleInputChange}
                           required
                         />
                         <button
                           type="button"
-                          className="absolute right-3 top-1/2 transform -translate-y-1/2"
-                          style={{ color: '#9ca3af' }}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors duration-300"
                           onClick={() => togglePasswordVisibility("confirmPassword")}
                         >
                           {confirmPasswordVisible ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
@@ -386,12 +452,16 @@ const ZuumSignup = () => {
                       <input
                         type="checkbox"
                         id="terms"
-                        className="w-4 h-4 bg-gray-100 border-gray-300 rounded focus:ring-2"
-                        style={{ color: '#2D8C72', borderColor: '#d1d5db' }}
+                        className="w-4 h-4 rounded focus:ring-2 transition-colors duration-300"
+                        style={{ 
+                          backgroundColor: 'var(--color-bg-primary)',
+                          borderColor: '#374151',
+                          color: '#2D8C72'
+                        }}
                         required
                       />
-                      <label htmlFor="terms" className="ml-2 text-sm">
-                        <span style={{ color: '#374151' }}>I agree to the terms and conditions</span>
+                      <label htmlFor="terms" className="ml-2 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+                        I agree to the terms and conditions
                       </label>
                     </div>
                   </div>
@@ -403,11 +473,15 @@ const ZuumSignup = () => {
                     <button
                       type="button"
                       onClick={prevStep}
-                      className="flex-1 py-3 border-2 rounded-2xl font-medium transition-all duration-300 flex items-center justify-center"
-                      style={{ borderColor: '#e5e7eb', color: '#374151' }}
+                      className="flex-1 py-3 border-2 rounded-2xl font-medium transition-all duration-300 flex items-center justify-center hover:bg-gray-800"
+                      style={{ 
+                        borderColor: '#374151', 
+                        color: 'var(--color-text-primary)',
+                        backgroundColor: 'transparent'
+                      }}
                     >
                       <ArrowLeft className="w-4 h-4 mr-2" />
-                      <span style={{ color: '#374151' }}>Back</span>
+                      Back
                     </button>
                   )}
 
@@ -448,16 +522,31 @@ const ZuumSignup = () => {
               {currentStep === 1 && (
                 <div className="mt-4">
                   <div className="relative flex items-center">
-                    <div className="flex-grow border-t" style={{ borderColor: '#d1d5db' }}></div>
-                    <span className="flex-shrink mx-4 text-sm" style={{ color: '#6b7280' }}>Or continue with</span>
-                    <div className="flex-grow border-t" style={{ borderColor: '#d1d5db' }}></div>
+                    <div 
+                      className="flex-grow border-t"
+                      style={{ borderColor: '#374151' }}
+                    ></div>
+                    <span 
+                      className="flex-shrink mx-4 text-sm"
+                      style={{ color: 'var(--color-text-secondary)' }}
+                    >
+                      Or continue with
+                    </span>
+                    <div 
+                      className="flex-grow border-t"
+                      style={{ borderColor: '#374151' }}
+                    ></div>
                   </div>
                   
                   <button
                     type="button"
                     onClick={handleGoogleSignup}
-                    className="w-full mt-4 py-3 border rounded-2xl font-medium transition-all duration-300 flex items-center justify-center"
-                    style={{ borderColor: '#d1d5db', color: '#374151', backgroundColor: '#ffffff' }}
+                    className="w-full mt-4 py-3 border rounded-2xl font-medium transition-all duration-300 flex items-center justify-center hover:bg-gray-800"
+                    style={{ 
+                      borderColor: '#374151', 
+                      color: 'var(--color-text-primary)', 
+                      backgroundColor: 'transparent'
+                    }}
                   >
                     <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" width="24" height="24">
                       <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -465,7 +554,7 @@ const ZuumSignup = () => {
                       <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
                       <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
                     </svg>
-                    <span style={{ color: '#374151' }}>Sign up with Google</span>
+                    <span>Sign up with Google</span>
                   </button>
                 </div>
               )}
@@ -475,13 +564,13 @@ const ZuumSignup = () => {
           {/* Login Link */}
           <div className="text-center mt-6">
             <p className="text-sm">
-              <span style={{ color: '#6b7280' }}>Already have an account? </span>
+              <span style={{ color: 'var(--color-text-secondary)' }}>Already have an account? </span>
               <Link 
                 to="/login" 
                 className="font-medium transition-colors duration-300"
                 style={{ color: '#2D8C72' }}
               >
-                <span style={{ color: '#2D8C72' }}>Sign in</span>
+                Sign in
               </Link>
             </p>
           </div>

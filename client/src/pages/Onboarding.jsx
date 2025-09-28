@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom';
 const ZuumOnboarding = () => {
   const [currentStep, setCurrentStep] = useState(0);
   const [isTransitioning, setIsTransitioning] = useState(false);
+  const darkMode = true; // Set dark mode as default
 
   const steps = [
     {
@@ -53,6 +54,17 @@ const ZuumOnboarding = () => {
         setTimeout(() => setIsTransitioning(false), 100);
       }, 300);
     }
+  };
+
+  // CSS variables for dark mode
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
   };
 
   const currentStepData = steps[currentStep];
@@ -109,12 +121,23 @@ const ZuumOnboarding = () => {
         }
       `}</style>
       
-      <div className="min-h-screen inset-0 bg-white  flex  justify-center slide-container">
-        <div className="w-full max-w-sm bg-white overflow-hidden flex flex-col content-wrapper">
-          {/* Header with Logo */}
-           <div className="m-5 absolute z-10 transition-all duration-700 ease-in-out">
-          <img src={a} className="w-25 transition-transform duration-500 hover:scale-105" alt="Zuum logo" />
-        </div>
+      <div 
+        className="min-h-screen inset-0 flex justify-center slide-container"
+        style={{ 
+          backgroundColor: 'var(--color-bg-secondary)',
+          ...darkModeStyles
+        }}
+      >
+        <div 
+          className="w-full max-w-sm overflow-hidden flex flex-col content-wrapper"
+          style={{ 
+            backgroundColor: 'var(--color-bg-primary)',
+          }}
+        >
+          {/* Header with Logo - Dark mode toggle removed */}
+          <div className="absolute top-4 left-4 z-10 transition-all duration-700 ease-in-out">
+            <img src={a} className="w-25 transition-transform duration-500 hover:scale-105" alt="Zuum logo" />
+          </div>
 
           {/* Image Section */}
           <div className="relative flex-1 overflow-hidden">
@@ -126,7 +149,12 @@ const ZuumOnboarding = () => {
               }`}
               style={{ backgroundImage: `url(${currentStepData.image})` }}
             >
-              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-white/80"></div>
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 50%, var(--color-bg-primary) 100%)'
+                }}
+              ></div>
             </div>
           </div>
 
@@ -143,7 +171,7 @@ const ZuumOnboarding = () => {
                         ? 'w-8 bg-gradient-to-r from-[#2D8C72] to-[#34A085]' 
                         : index < currentStep
                           ? 'w-2 bg-[#2D8C72]/60'
-                          : 'w-2 bg-gray-300'
+                          : 'w-2 bg-gray-600'
                     }`}
                   />
                 ))}
@@ -157,10 +185,16 @@ const ZuumOnboarding = () => {
                     : 'opacity-100 translate-y-0'
                 }`}
               >
-                <h2 className="text-2xl font-bold text-gray-900 mb-4 leading-tight">
+                <h2 
+                  className="text-2xl font-bold mb-4 leading-tight"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
                   {currentStepData.title}
                 </h2>
-                <p className="text-gray-600 text-base leading-relaxed px-2">
+                <p 
+                  className="text-base leading-relaxed px-2"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
                   {currentStepData.description}
                 </p>
               </div>
@@ -186,7 +220,8 @@ const ZuumOnboarding = () => {
                   <button
                     onClick={skipToEnd}
                     disabled={isTransitioning}
-                    className="w-full py-2 text-gray-600 font-medium button-hover hover:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-2 font-medium button-hover disabled:opacity-50 disabled:cursor-not-allowed"
+                    style={{ color: 'var(--color-text-secondary)' }}
                   >
                     Skip
                   </button>
@@ -203,7 +238,20 @@ const ZuumOnboarding = () => {
                 </Link>
                 <Link 
                   to={'/start'} 
-                  className="w-full py-3 bg-transparent border-2 border-gray-200 text-gray-700 rounded-2xl font-semibold text-base transition-all duration-300 hover:bg-gray-50 transform hover:scale-[1.02] active:scale-[0.98] block text-center hover:border-gray-300"
+                  className="w-full py-3 bg-transparent border-2 rounded-2xl font-semibold text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] block text-center"
+                  style={{ 
+                    borderColor: '#374151',
+                    color: 'var(--color-text-primary)',
+                    backgroundColor: 'transparent'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = 'rgba(55, 65, 81, 0.1)';
+                    e.target.style.borderColor = '#4b5563';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                    e.target.style.borderColor = '#374151';
+                  }}
                 >
                   Sign up
                 </Link>

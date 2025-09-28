@@ -6,6 +6,7 @@ const GetStarted = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [selectedProfile, setSelectedProfile] = useState(null);
   const [profilesVisible, setProfilesVisible] = useState(false);
+  const darkMode = true; // Set dark mode as default
 
   useEffect(() => {
     setIsVisible(true);
@@ -52,6 +53,17 @@ const GetStarted = () => {
       direction: "right"
     }
   ];
+
+  // CSS variables for dark mode
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+  };
 
   return (
     <>
@@ -126,8 +138,20 @@ const GetStarted = () => {
         }
       `}</style>
       
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center ">
-        <div className="w-full max-w-sm bg-white shadow-xl overflow-hidden flex flex-col ">
+      <div 
+        className="min-h-screen flex items-center justify-center"
+        style={{ 
+          backgroundColor: 'var(--color-bg-secondary)',
+          ...darkModeStyles
+        }}
+      >
+        <div 
+          className="w-full max-w-sm shadow-xl overflow-hidden flex flex-col"
+          style={{ 
+            backgroundColor: 'var(--color-bg-primary)',
+          }}
+        >
+          {/* Dark Mode Toggle removed */}
           
           {/* Image Section */}
           <div className="relative h-64 overflow-hidden">
@@ -139,7 +163,12 @@ const GetStarted = () => {
                 backgroundImage: `url(https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?w=800&h=600&fit=crop&auto=format)`
               }}
             >
-              <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-white/80"></div>
+              <div 
+                className="absolute inset-0"
+                style={{
+                  background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 50%, var(--color-bg-primary) 100%)'
+                }}
+              ></div>
             </div>
           </div>
 
@@ -148,13 +177,21 @@ const GetStarted = () => {
             <div className="flex-grow flex flex-col">
               
               {/* Welcome Text */}
-              <div className={`text-center mb-6 transition-all duration-600 ease-out ${
-                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-              }`}>
-                <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
+              <div 
+                className={`text-center mb-6 transition-all duration-600 ease-out ${
+                  isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+                }`}
+              >
+                <h2 
+                  className="text-2xl font-bold mb-2 leading-tight"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
                   Choose Your Profile
                 </h2>
-                <p className="text-gray-600 text-sm leading-relaxed">
+                <p 
+                  className="text-sm leading-relaxed"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
                   Select your role to begin your musical journey
                 </p>
               </div>
@@ -165,10 +202,10 @@ const GetStarted = () => {
                   <div
                     key={option.id}
                     className={`
-                      profile-card relative p-4 bg-white rounded-2xl border-2 cursor-pointer flex flex-col items-center
+                      profile-card relative p-4 rounded-2xl border-2 cursor-pointer flex flex-col items-center
                       ${selectedProfile === option.id 
                         ? 'border-[#2D8C72] shadow-lg selected' 
-                        : 'border-gray-200 hover:border-gray-300 hover:shadow-md'
+                        : 'hover:shadow-md'
                       }
                       ${profilesVisible 
                         ? 'profile-card-visible' 
@@ -178,7 +215,11 @@ const GetStarted = () => {
                       }
                     `}
                     style={{ 
-                      transitionDelay: `${index * 150}ms`
+                      transitionDelay: `${index * 150}ms`,
+                      backgroundColor: 'var(--color-bg-primary)',
+                      borderColor: selectedProfile === option.id 
+                        ? '#2D8C72' 
+                        : '#374151'
                     }}
                     onClick={() => {
                       setSelectedProfile(option.id);
@@ -193,8 +234,18 @@ const GetStarted = () => {
                       />
                     </div>
                     
-                    <h3 className="font-semibold text-gray-900 text-sm text-center">{option.title}</h3>
-                    <p className="text-xs text-gray-600 text-center mt-1 hidden md:block">{option.description}</p>
+                    <h3 
+                      className="font-semibold text-sm text-center"
+                      style={{ color: 'var(--color-text-primary)' }}
+                    >
+                      {option.title}
+                    </h3>
+                    <p 
+                      className="text-xs text-center mt-1 hidden md:block"
+                      style={{ color: 'var(--color-text-secondary)' }}
+                    >
+                      {option.description}
+                    </p>
                     
                     {selectedProfile === option.id && (
                       <div className="absolute -top-1 -right-1 w-6 h-6 bg-[#2D8C72] rounded-full flex items-center justify-center checkmark-appear shadow-md">
@@ -209,28 +260,32 @@ const GetStarted = () => {
             </div>
 
             {/* Buttons Section */}
-            <div className={`space-y-3 transition-all duration-700 ease-out ${
-              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
-            }`} style={{ transitionDelay: '600ms' }}>
+            <div 
+              className={`space-y-3 transition-all duration-700 ease-out ${
+                isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+              }`} 
+              style={{ transitionDelay: '600ms' }}
+            >
               
               <Link
                 to={selectedProfile ? `/signup?identity=${selectedProfile}` : "#"}
                 className={`w-full py-3 rounded-2xl font-semibold text-base transition-all duration-300 flex items-center justify-center ${
                   selectedProfile 
                     ? 'bg-[#2D8C72] hover:bg-[#248066] text-white transform hover:scale-[1.02] shadow-md hover:shadow-lg' 
-                    : 'bg-gray-300 text-white cursor-not-allowed'
+                    : 'bg-gray-600 text-white cursor-not-allowed'
                 }`}
               >
                 <span className="text-white flex items-center justify-center">
-                    Continue
-                                    <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
-
+                  Continue
+                  <ArrowRight className="w-5 h-5 ml-2 transition-transform duration-300 group-hover:translate-x-1" />
                 </span>
-                
               </Link>
               
-              <div className="text-center">
-                <p className="text-gray-600 text-sm">
+              {/* <div className="text-center">
+                <p 
+                  className="text-sm"
+                  style={{ color: 'var(--color-text-secondary)' }}
+                >
                   Already have an account?{" "}
                   <Link 
                     to="/login" 
@@ -239,7 +294,7 @@ const GetStarted = () => {
                     Sign in
                   </Link>
                 </p>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>

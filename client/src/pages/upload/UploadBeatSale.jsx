@@ -7,7 +7,6 @@ import Overlay from '../../components/homepage/Overlay';
 import BottomNav from '../../components/homepage/BottomNav';
 import { useNavigate } from 'react-router-dom';
 import { useAlerts } from '../../contexts/AlertConntexts';
-import { useDarkMode } from '../../contexts/DarkModeContext';
 
 const UploadBeats = () => {
   const { createBeatPost, loading, error, success } = useCreateBeatPost();
@@ -28,7 +27,19 @@ const UploadBeats = () => {
   
   // Get alert functions from context
   const { showSuccess, showError, showInfo, showWarning } = useAlerts();
-  const { isDarkMode } = useDarkMode();
+
+  // Dark mode styles
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-bg-tertiary': '#374151',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+    '--color-border': '#374151'
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -169,13 +180,16 @@ const UploadBeats = () => {
     }
   }, [error, showError]);
 
-  const tealColor = '#008066';
+  const primaryColor = '#2D8C72';
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
   
   return (
     <div 
       className="min-h-screen my-13"
-      style={{ backgroundColor: 'var(--color-bg-primary)' }}
+      style={{ 
+        backgroundColor: 'var(--color-bg-primary)',
+        ...darkModeStyles
+      }}
     >
       <Navbar name={"Upload Beats"} toggleSidebar={toggleSidebar} />
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
@@ -183,7 +197,10 @@ const UploadBeats = () => {
       
       <div 
         className="max-w-2xl mx-auto overflow-hidden rounded-lg shadow-lg"
-        style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+        style={{ 
+          backgroundColor: 'var(--color-bg-secondary)',
+          border: '1px solid var(--color-border)'
+        }}
       >
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div>
@@ -198,17 +215,15 @@ const UploadBeats = () => {
               name="caption"
               value={formData.caption}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
-                submitAttempted && !formData.caption ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all ${
+                submitAttempted && !formData.caption ? 'border-red-500' : 'border-gray-600'
               }`}
               style={{ 
-                boxShadow: `0 0 0 1px transparent`,
-                outline: 'none',
-                '--tw-ring-color': tealColor,
                 backgroundColor: 'var(--color-bg-primary)',
                 color: 'var(--color-text-primary)'
               }}
               placeholder="Give your beat a catchy title"
+              disabled={loading}
             />
             {submitAttempted && !formData.caption && (
               <p className="mt-1 text-sm text-red-500">Title is required</p>
@@ -227,17 +242,15 @@ const UploadBeats = () => {
               value={formData.description}
               onChange={handleInputChange}
               rows="3"
-              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent ${
-                submitAttempted && !formData.description ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+              className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all ${
+                submitAttempted && !formData.description ? 'border-red-500' : 'border-gray-600'
               }`}
               style={{ 
-                boxShadow: `0 0 0 1px transparent`,
-                outline: 'none',
-                '--tw-ring-color': tealColor,
                 backgroundColor: 'var(--color-bg-primary)',
                 color: 'var(--color-text-primary)'
               }}
               placeholder="Describe your beat, mention genre, mood, or inspiration"
+              disabled={loading}
             ></textarea>
             {submitAttempted && !formData.description && (
               <p className="mt-1 text-sm text-red-500">Description is required</p>
@@ -262,14 +275,12 @@ const UploadBeats = () => {
                   onChange={handleInputChange}
                   min="0.01"
                   step="0.01"
-                  className="w-full pl-7 pr-3 py-2 border rounded-lg focus:ring-2 focus:border-transparent border-gray-300 dark:border-gray-600"
+                  className="w-full pl-7 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all border-gray-600"
                   style={{ 
-                    boxShadow: `0 0 0 1px transparent`,
-                    outline: 'none',
-                    '--tw-ring-color': tealColor,
                     backgroundColor: 'var(--color-bg-primary)',
                     color: 'var(--color-text-primary)'
                   }}
+                  disabled={loading}
                 />
               </div>
             </div>
@@ -284,15 +295,12 @@ const UploadBeats = () => {
             {!coverPhoto ? (
               <div 
                 className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer transition-colors ${
-                  submitAttempted && !coverPhoto ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'
-                }`}
+                  submitAttempted && !coverPhoto ? 'border-red-400' : 'border-gray-600'
+                } ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:border-[#2D8C72]'}`}
                 style={{ 
-                  backgroundColor: 'var(--color-bg-primary)',
-                  '&:hover': {
-                    backgroundColor: isDarkMode ? 'var(--color-bg-tertiary)' : '#f9fafb'
-                  }
+                  backgroundColor: 'var(--color-bg-primary)'
                 }}
-                onClick={() => document.getElementById('cover-upload').click()}
+                onClick={() => !loading && document.getElementById('cover-upload').click()}
               >
                 <Upload className="h-10 w-10 mb-2" style={{ color: 'var(--color-text-secondary)' }} />
                 <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Click to upload cover photo</p>
@@ -302,6 +310,7 @@ const UploadBeats = () => {
                   accept="image/*"
                   onChange={handleCoverPhotoChange}
                   className="hidden"
+                  disabled={loading}
                 />
               </div>
             ) : (
@@ -314,7 +323,8 @@ const UploadBeats = () => {
                 <button
                   type="button"
                   onClick={removeCoverPhoto}
-                  className="absolute top-2 right-2 bg-black bg-opacity-50 rounded-full p-1 text-white hover:bg-opacity-70"
+                  className="absolute top-2 right-2 bg-black bg-opacity-50 rounded-full p-1 text-white hover:bg-opacity-70 transition-colors"
+                  disabled={loading}
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -335,15 +345,12 @@ const UploadBeats = () => {
             {!audioFile ? (
               <div 
                 className={`border-2 border-dashed rounded-lg p-6 flex flex-col items-center justify-center cursor-pointer transition-colors ${
-                  submitAttempted && !audioFile ? 'border-red-400' : 'border-gray-300 dark:border-gray-600'
-                }`}
+                  submitAttempted && !audioFile ? 'border-red-400' : 'border-gray-600'
+                } ${loading ? 'opacity-50 cursor-not-allowed' : 'hover:border-[#2D8C72]'}`}
                 style={{ 
-                  backgroundColor: 'var(--color-bg-primary)',
-                  '&:hover': {
-                    backgroundColor: isDarkMode ? 'var(--color-bg-tertiary)' : '#f9fafb'
-                  }
+                  backgroundColor: 'var(--color-bg-primary)'
                 }}
-                onClick={() => document.getElementById('audio-upload').click()}
+                onClick={() => !loading && document.getElementById('audio-upload').click()}
               >
                 <Music className="h-10 w-10 mb-2" style={{ color: 'var(--color-text-secondary)' }} />
                 <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>Click to upload audio file</p>
@@ -353,6 +360,7 @@ const UploadBeats = () => {
                   accept="audio/*"
                   onChange={handleAudioChange}
                   className="hidden"
+                  disabled={loading}
                 />
               </div>
             ) : (
@@ -367,8 +375,9 @@ const UploadBeats = () => {
                   <button
                     type="button"
                     onClick={toggleAudioPlay}
-                    className="rounded-full p-2 text-white mr-3 flex-shrink-0"
-                    style={{ backgroundColor: tealColor }}
+                    className="rounded-full p-2 text-white mr-3 flex-shrink-0 transition-colors hover:bg-[#248066]"
+                    style={{ backgroundColor: primaryColor }}
+                    disabled={loading}
                   >
                     {isPlaying ? (
                       <div className="h-5 w-5 relative">
@@ -389,8 +398,9 @@ const UploadBeats = () => {
                 <button
                   type="button"
                   onClick={removeAudioFile}
-                  className="ml-2 hover:text-gray-600 flex-shrink-0"
+                  className="ml-2 hover:text-gray-300 flex-shrink-0 transition-colors"
                   style={{ color: 'var(--color-text-secondary)' }}
+                  disabled={loading}
                 >
                   <X className="h-5 w-5" />
                 </button>
@@ -404,10 +414,9 @@ const UploadBeats = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full text-white font-medium py-3 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-opacity-50 disabled:opacity-70 flex items-center justify-center"
+            className="w-full text-white font-medium py-3 px-4 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:ring-offset-2 disabled:opacity-70 flex items-center justify-center transition-all hover:bg-[#248066]"
             style={{ 
-              backgroundColor: tealColor,
-              '--tw-ring-color': tealColor,
+              backgroundColor: primaryColor
             }}
           >
             {loading ? (

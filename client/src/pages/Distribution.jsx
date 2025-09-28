@@ -1,5 +1,3 @@
-"use client"
-
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
 import { Music, ChevronLeft, ChevronRight, Upload, CheckCircle } from "lucide-react"
@@ -13,8 +11,19 @@ import BottomNav from "../components/homepage/BottomNav"
 
 // Step Components
 
-
 const Distribution = () => {
+  // Dark mode styles - consistent with other components
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+    '--color-border': '#374151'
+  };
+
   // Step management
   const [currentStep, setCurrentStep] = useState(1)
   const totalSteps = 5
@@ -346,9 +355,9 @@ const Distribution = () => {
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="p-4 md:p-8 text-center">
       <div 
         className="w-20 h-20 md:w-24 md:h-24 mx-auto mb-6 md:mb-8 rounded-full flex items-center justify-center"
-        style={{ backgroundColor: 'var(--color-bg-tertiary)' }}
+        style={{ backgroundColor: 'var(--color-bg-secondary)' }}
       >
-        <CheckCircle className="w-10 h-10 md:w-12 md:h-12 text-[#008066]" />
+        <CheckCircle className="w-10 h-10 md:w-12 md:h-12" style={{ color: 'var(--color-primary)' }} />
       </div>
       <h2 
         className="text-2xl md:text-3xl font-bold mb-3 md:mb-4"
@@ -364,7 +373,17 @@ const Distribution = () => {
       </p>
       <button
         onClick={handleReset}
-        className="px-6 py-3 bg-[#008066] text-white rounded-lg hover:bg-[#006e58] transition-colors text-base md:text-lg font-medium"
+        className="px-6 py-3 rounded-lg transition-colors text-base md:text-lg font-medium"
+        style={{ 
+          backgroundColor: 'var(--color-primary)',
+          color: 'var(--color-text-on-primary)'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = 'var(--color-primary-light)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = 'var(--color-primary)';
+        }}
       >
         Submit Another Release
       </button>
@@ -383,8 +402,15 @@ const Distribution = () => {
             <div
               key={step}
               className={`w-2.5 h-2.5 rounded-full transition-all ${
-                currentStep === step ? "bg-[#008066] w-4 h-4" : currentStep > step ? "bg-[#008066]/60" : "bg-gray-200 dark:bg-gray-600"
+                currentStep === step ? "w-4 h-4" : currentStep > step ? "" : ""
               }`}
+              style={{
+                backgroundColor: currentStep === step 
+                  ? 'var(--color-primary)' 
+                  : currentStep > step 
+                    ? 'var(--color-primary)/60' 
+                    : 'var(--color-border)'
+              }}
             ></div>
           ))}
         </div>
@@ -407,8 +433,11 @@ const Distribution = () => {
             style={{ backgroundColor: 'var(--color-border)' }}
           ></div>
           <div
-            className="absolute top-1/2 left-0 h-1 bg-[#008066] -translate-y-1/2 z-0 transition-all duration-300"
-            style={{ width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%` }}
+            className="absolute top-1/2 left-0 h-1 -translate-y-1/2 z-0 transition-all duration-300"
+            style={{ 
+              width: `${((currentStep - 1) / (totalSteps - 1)) * 100}%`,
+              backgroundColor: 'var(--color-primary)'
+            }}
           ></div>
 
           {/* Step indicators */}
@@ -417,9 +446,20 @@ const Distribution = () => {
               <div
                 className={`relative flex items-center justify-center w-12 h-12 rounded-full text-sm font-medium transition-all ${
                   currentStep >= step
-                    ? "bg-[#008066] text-white shadow-md"
-                    : "bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 text-gray-400"
+                    ? "shadow-md"
+                    : "border-2"
                 }`}
+                style={{
+                  backgroundColor: currentStep >= step
+                    ? 'var(--color-primary)'
+                    : 'var(--color-bg-primary)',
+                  color: currentStep >= step
+                    ? 'var(--color-text-on-primary)'
+                    : 'var(--color-text-secondary)',
+                  borderColor: currentStep >= step
+                    ? 'var(--color-primary)'
+                    : 'var(--color-border)'
+                }}
               >
                 {step}
                 <span 
@@ -482,9 +522,12 @@ const Distribution = () => {
   return (
     <div 
       className="h-full md:py-12 my-13"
-      style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+      style={{ 
+        ...darkModeStyles,
+        backgroundColor: 'var(--color-bg-secondary)' 
+      }}
     >
-    <Navbar  name='distribution'/>
+      <Navbar name='distribution'/>
       <div 
         className="max-w-3xl mx-auto rounded-xl md:rounded-2xl shadow-lg overflow-hidden"
         style={{ 
@@ -495,7 +538,7 @@ const Distribution = () => {
         <div 
           className="p-4 md:p-8"
           style={{ 
-            background: `linear-gradient(to right, rgba(0, 128, 102, 0.2), var(--color-bg-primary))`,
+            background: `linear-gradient(to right, var(--color-primary)/20, var(--color-bg-primary))`,
             borderBottom: '1px solid var(--color-border)'
           }}
         >
@@ -503,7 +546,7 @@ const Distribution = () => {
             className="text-2xl md:text-3xl font-bold flex items-center"
             style={{ color: 'var(--color-text-primary)' }}
           >
-            <Music className="mr-3 md:mr-4 text-[#008066]" size={24} />
+            <Music className="mr-3 md:mr-4" style={{ color: 'var(--color-primary)' }} size={24} />
             Music Distribution
           </h1>
           <p 
@@ -526,8 +569,17 @@ const Distribution = () => {
                   <button
                     type="button"
                     onClick={goToPrevStep}
-                    className="px-4 md:px-6 py-2.5 md:py-3 flex items-center gap-1 md:gap-2 transition-colors text-sm md:text-base"
-                    style={{ color: 'var(--color-text-secondary)' }}
+                    className="px-4 md:px-6 py-2.5 md:py-3 flex items-center gap-1 md:gap-2 transition-colors text-sm md:text-base rounded-lg"
+                    style={{ 
+                      color: 'var(--color-text-secondary)',
+                      backgroundColor: 'var(--color-bg-secondary)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = 'var(--color-bg-primary)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                    }}
                   >
                     <ChevronLeft size={16} /> Back
                   </button>
@@ -539,7 +591,17 @@ const Distribution = () => {
                   <button
                     type="button"
                     onClick={goToNextStep}
-                    className="px-5 md:px-8 py-2.5 md:py-3 bg-[#008066] text-white rounded-lg hover:bg-[#006e58] transition-colors flex items-center gap-1 md:gap-2 shadow-md text-sm md:text-base"
+                    className="px-5 md:px-8 py-2.5 md:py-3 rounded-lg transition-colors flex items-center gap-1 md:gap-2 shadow-md text-sm md:text-base"
+                    style={{ 
+                      backgroundColor: 'var(--color-primary)',
+                      color: 'var(--color-text-on-primary)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = 'var(--color-primary-light)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = 'var(--color-primary)';
+                    }}
                   >
                     Next <ChevronRight size={16} />
                   </button>
@@ -547,7 +609,21 @@ const Distribution = () => {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="px-5 md:px-8 py-2.5 md:py-3 bg-[#008066] text-white rounded-lg hover:bg-[#006e58] transition-colors flex items-center gap-1 md:gap-2 shadow-md disabled:opacity-50 disabled:hover:bg-[#008066] text-sm md:text-base"
+                    className="px-5 md:px-8 py-2.5 md:py-3 rounded-lg transition-colors flex items-center gap-1 md:gap-2 shadow-md disabled:opacity-50 text-sm md:text-base"
+                    style={{ 
+                      backgroundColor: loading ? 'var(--color-border)' : 'var(--color-primary)',
+                      color: 'var(--color-text-on-primary)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!loading) {
+                        e.target.style.backgroundColor = 'var(--color-primary-light)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!loading) {
+                        e.target.style.backgroundColor = 'var(--color-primary)';
+                      }
+                    }}
                   >
                     {loading ? "Submitting..." : "Submit Music"} <Upload size={16} />
                   </button>
