@@ -9,8 +9,6 @@ import Overlay from '../../components/homepage/Overlay';
 import BottomNav from '../../components/homepage/BottomNav';
 import { useNavigate } from 'react-router-dom';
 import { useAlerts } from '../../contexts/AlertConntexts';
-import { useDarkMode } from '../../contexts/DarkModeContext';
-
 
 const MusicUploadForm = () => {
   const [formData, setFormData] = useState({
@@ -34,7 +32,22 @@ const MusicUploadForm = () => {
   
   const { showSuccess, showError, showInfo, showWarning } = useAlerts();
   const { createAudioPost, loading, error, success } = useCreateAudioPost();
-  const { isDarkMode } = useDarkMode();
+
+  // Dark mode styles
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-bg-tertiary': '#374151',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+    '--color-border': '#374151',
+    '--color-emerald-500': '#10b981',
+    '--color-emerald-600': '#059669',
+    '--color-emerald-700': '#047857'
+  };
 
   useEffect(() => {
     if (success) {
@@ -171,7 +184,10 @@ const MusicUploadForm = () => {
   return (
     <div 
       className="min-h-screen mb-13"
-      style={{ backgroundColor: 'var(--color-bg-primary)' }}
+      style={{ 
+        backgroundColor: 'var(--color-bg-primary)',
+        ...darkModeStyles
+      }}
     >
       <Navbar name={"Upload Beats"} toggleSidebar={toggleSidebar} />
       <Sidebar isOpen={sidebarOpen} toggleSidebar={toggleSidebar} />
@@ -179,7 +195,10 @@ const MusicUploadForm = () => {
       
       <div 
         className="max-w-3xl mx-auto rounded-xl shadow-sm overflow-hidden"
-        style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+        style={{ 
+          backgroundColor: 'var(--color-bg-secondary)',
+          border: '1px solid var(--color-border)'
+        }}
       >
         {/* Debug Info Panel - Optional, can be removed in production */}
         {process.env.NODE_ENV === 'development' && (
@@ -199,7 +218,10 @@ const MusicUploadForm = () => {
               </summary>
               <div 
                 className="mt-2 p-3 rounded text-xs overflow-auto max-h-40"
-                style={{ backgroundColor: 'var(--color-bg-primary)' }}
+                style={{ 
+                  backgroundColor: 'var(--color-bg-primary)',
+                  border: '1px solid var(--color-border)'
+                }}
               >
                 <div style={{ color: 'var(--color-text-primary)' }}><strong>Loading:</strong> {loading ? 'true' : 'false'}</div>
                 <div style={{ color: 'var(--color-text-primary)' }}><strong>Success:</strong> {success ? 'true' : 'false'}</div>
@@ -263,15 +285,15 @@ const MusicUploadForm = () => {
                 <span className={`h-5 w-5 rounded-full border flex items-center justify-center transition-colors ${
                   formData.type === 'music' 
                     ? 'bg-emerald-600 border-emerald-600' 
-                    : 'border-gray-300 dark:border-gray-600'
+                    : 'border-gray-600'
                 }`} style={{ 
-                  backgroundColor: formData.type === 'music' ? '#059669' : 'var(--color-bg-primary)'
+                  backgroundColor: formData.type === 'music' ? 'var(--color-emerald-600)' : 'var(--color-bg-primary)'
                 }}>
                   {formData.type === 'music' && <span className="h-2 w-2 rounded-full bg-white"></span>}
                 </span>
                 <span style={{ 
                   color: formData.type === 'music' 
-                    ? '#065f46' 
+                    ? 'var(--color-emerald-600)' 
                     : 'var(--color-text-secondary)'
                 }} className={formData.type === 'music' ? 'font-medium' : ''}>
                   Music
@@ -291,15 +313,15 @@ const MusicUploadForm = () => {
                 <span className={`h-5 w-5 rounded-full border flex items-center justify-center transition-colors ${
                   formData.type === 'beat' 
                     ? 'bg-emerald-600 border-emerald-600' 
-                    : 'border-gray-300 dark:border-gray-600'
+                    : 'border-gray-600'
                 }`} style={{ 
-                  backgroundColor: formData.type === 'beat' ? '#059669' : 'var(--color-bg-primary)'
+                  backgroundColor: formData.type === 'beat' ? 'var(--color-emerald-600)' : 'var(--color-bg-primary)'
                 }}>
                   {formData.type === 'beat' && <span className="h-2 w-2 rounded-full bg-white"></span>}
                 </span>
                 <span style={{ 
                   color: formData.type === 'beat' 
-                    ? '#065f46' 
+                    ? 'var(--color-emerald-600)' 
                     : 'var(--color-text-secondary)'
                 }} className={formData.type === 'beat' ? 'font-medium' : ''}>
                   Beat
@@ -338,6 +360,9 @@ const MusicUploadForm = () => {
                 ? 'bg-emerald-400 cursor-not-allowed'
                 : 'bg-emerald-600 hover:bg-emerald-700 text-white'
             }`}
+            style={{
+              backgroundColor: loading ? '#34d399' : 'var(--color-emerald-600)'
+            }}
             disabled={loading}
           >
             <div className="flex items-center justify-center gap-2">

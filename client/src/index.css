@@ -73,7 +73,7 @@
   }
 }
 
-@import "./styles/darkMode.css";
+/* @import "./styles/darkMode.css"; */
 
 /* Reset body and html to ensure proper viewport height */
 html, body {

@@ -22,6 +22,17 @@ const Login = () => {
     setIsVisible(true);
   }, []);
 
+  // Dark mode styles
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+  };
+
   // Toggle password visibility
   const togglePasswordVisibility = () => {
     setPasswordVisible(!passwordVisible);
@@ -29,16 +40,13 @@ const Login = () => {
 
   // Handle Google login
   const handleGoogleLogin = () => {
-    // Implement Google OAuth logic here
     console.log("Google login clicked");
-    // This would typically redirect to your backend OAuth endpoint
   };
 
   // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Basic validation
     if (!email || !password) {
       return;
     }
@@ -53,21 +61,30 @@ const Login = () => {
   };
 
   useEffect(() => {
-    // Only redirect if user has attempted login and is authenticated
     if (isAuthenticated && hasAttemptedLogin) {
       navigate('/home');
     }
   }, [isAuthenticated, hasAttemptedLogin, navigate]);
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="w-full max-w-sm bg-white overflow-hidden flex flex-col">
+    <div 
+      className="min-h-screen flex items-center justify-center"
+      style={{ 
+        backgroundColor: 'var(--color-bg-secondary)',
+        ...darkModeStyles
+      }}
+    >
+      <div 
+        className="w-full max-w-sm overflow-hidden flex flex-col"
+        style={{ 
+          backgroundColor: 'var(--color-bg-primary)',
+        }}
+      >
         
         {/* Header with Logo */}
-         <div className="m-5 absolute z-10 transition-all duration-700 ease-in-out">
-                
-                    <img src={a} className='w-25' alt="Zuum Logo" />
-                </div>
+        <div className="m-5 absolute z-10 transition-all duration-700 ease-in-out">
+          <img src={a} className='w-25' alt="Zuum Logo" />
+        </div>
 
         {/* Image Section - Top Half */}
         <div className="relative h-65 overflow-hidden">
@@ -79,8 +96,13 @@ const Login = () => {
               backgroundImage: `url(https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=600&fit=crop&auto=format)`
             }}
           >
-            {/* Lighter gradient overlay to not obscure logo */}
-            <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-white/80"></div>
+            {/* Dark mode gradient overlay */}
+            <div 
+              className="absolute inset-0"
+              style={{
+                background: 'linear-gradient(to bottom, rgba(0,0,0,0.4) 0%, transparent 50%, var(--color-bg-primary) 100%)'
+              }}
+            ></div>
           </div>
         </div>
 
@@ -92,17 +114,29 @@ const Login = () => {
             <div className={`text-center mb-6 transition-all duration-600 ease-out ${
               isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
             }`}>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2 leading-tight">
+              <h2 
+                className="text-2xl font-bold mb-2 leading-tight"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
                 Welcome Back
               </h2>
-              <p className="text-gray-600 text-sm leading-relaxed">
+              <p 
+                className="text-sm leading-relaxed"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
                 Sign in to your account to continue
               </p>
             </div>
 
             {/* Error Message */}
             {error && (
-              <div className="mb-4 p-3 bg-red-100 text-red-700 rounded-lg text-sm transition-all duration-300">
+              <div 
+                className="mb-4 p-3 rounded-lg text-sm transition-all duration-300"
+                style={{
+                  backgroundColor: 'rgba(248, 113, 113, 0.1)',
+                  color: '#f87171'
+                }}
+              >
                 {error}
               </div>
             )}
@@ -123,7 +157,12 @@ const Login = () => {
                   <input
                     type="email"
                     placeholder="Enter your email"
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                    className="w-full pl-10 pr-4 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                    style={{
+                      backgroundColor: 'var(--color-bg-primary)',
+                      borderColor: isFocused.email ? '#2D8C72' : '#374151',
+                      color: 'var(--color-text-primary)'
+                    }}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onFocus={() => setIsFocused({ ...isFocused, email: true })}
@@ -143,7 +182,12 @@ const Login = () => {
                   <input
                     type={passwordVisible ? "text" : "password"}
                     placeholder="Enter your password"
-                    className="w-full pl-10 pr-12 py-3 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                    className="w-full pl-10 pr-12 py-3 border rounded-xl placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all duration-300"
+                    style={{
+                      backgroundColor: 'var(--color-bg-primary)',
+                      borderColor: isFocused.password ? '#2D8C72' : '#374151',
+                      color: 'var(--color-text-primary)'
+                    }}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onFocus={() => setIsFocused({ ...isFocused, password: true })}
@@ -153,7 +197,7 @@ const Login = () => {
                   />
                   <button
                     type="button"
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 transition-colors duration-300 focus:outline-none"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-300 transition-colors duration-300 focus:outline-none"
                     onClick={togglePasswordVisibility}
                     disabled={loading}
                   >
@@ -175,7 +219,7 @@ const Login = () => {
                       <div className={`w-4 h-4 border-2 rounded transition-all duration-300 flex items-center justify-center ${
                         rememberMe 
                           ? 'bg-[#2D8C72] border-[#2D8C72]' 
-                          : 'border-gray-300 group-hover:border-[#2D8C72]'
+                          : 'border-gray-500 group-hover:border-[#2D8C72]'
                       } ${loading ? 'opacity-50' : ''}`}>
                         {rememberMe && (
                           <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -184,12 +228,15 @@ const Login = () => {
                         )}
                       </div>
                     </div>
-                    <span className={`ml-2 text-gray-600 group-hover:text-gray-900 transition-colors duration-300 ${loading ? 'opacity-50' : ''}`}>
+                    <span 
+                      className={`ml-2 transition-colors duration-300 group-hover:text-gray-300 ${loading ? 'opacity-50' : ''}`}
+                      style={{ color: 'var(--color-text-secondary)' }}
+                    >
                       Remember me
                     </span>
                   </label>
                   <Link 
-                    to="/forgot-password" 
+                    to="/forgot" 
                     className={`text-[#2D8C72] hover:text-[#248066] transition-colors duration-300 font-medium ${loading ? 'opacity-50 pointer-events-none' : ''}`}
                   >
                     Forgot Password?
@@ -206,7 +253,7 @@ const Login = () => {
                 <button
                   type="submit"
                   disabled={loading || isSubmitting}
-                  className="w-full py-3 bg-[#2D8C72] hover:bg-[#248066] disabled:bg-gray-400 text-white rounded-2xl font-semibold text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg disabled:hover:scale-100 disabled:cursor-not-allowed"
+                  className="w-full py-3 bg-[#2D8C72] hover:bg-[#248066] disabled:bg-gray-600 text-white rounded-2xl font-semibold text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg disabled:hover:scale-100 disabled:cursor-not-allowed"
                 >
                   <div className="flex items-center justify-center">
                     {loading ? (
@@ -227,9 +274,20 @@ const Login = () => {
           <div className="mt-4">
             {/* Divider */}
             <div className="flex items-center my-4">
-              <div className="flex-1 border-t border-gray-200"></div>
-              <span className="px-3 text-gray-500 text-xs">or continue with</span>
-              <div className="flex-1 border-t border-gray-200"></div>
+              <div 
+                className="flex-1 border-t"
+                style={{ borderColor: '#374151' }}
+              ></div>
+              <span 
+                className="px-3 text-xs"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
+                or continue with
+              </span>
+              <div 
+                className="flex-1 border-t"
+                style={{ borderColor: '#374151' }}
+              ></div>
             </div>
 
             {/* Google Sign In */}
@@ -237,7 +295,20 @@ const Login = () => {
               type="button"
               disabled={loading}
               onClick={handleGoogleLogin}
-              className="w-full py-3 bg-transparent border-2 border-gray-200 text-gray-700 rounded-2xl font-semibold text-base transition-all duration-300 hover:bg-gray-50 hover:border-gray-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center"
+              className="w-full py-3 bg-transparent border-2 rounded-2xl font-semibold text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center"
+              style={{
+                borderColor: '#374151',
+                color: 'var(--color-text-primary)',
+                backgroundColor: 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'rgba(55, 65, 81, 0.1)';
+                e.target.style.borderColor = '#4b5563';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'transparent';
+                e.target.style.borderColor = '#374151';
+              }}
             >
               <FcGoogle className="w-5 h-5 mr-3" />
               Sign in with Google
@@ -245,7 +316,10 @@ const Login = () => {
 
             {/* Sign Up Link */}
             <div className="text-center mt-4">
-              <p className="text-gray-600 text-sm">
+              <p 
+                className="text-sm"
+                style={{ color: 'var(--color-text-secondary)' }}
+              >
                 Don't have an account?{' '}
                 <Link 
                   to="/start" 

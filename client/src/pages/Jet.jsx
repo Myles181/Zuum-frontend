@@ -9,6 +9,18 @@ export const Jet = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const navigate = useNavigate();
 
+  // Dark mode styles - consistent with other components
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+    '--color-border': '#374151'
+  };
+
   const handleOptionSelect = (option) => {
     if (option === 'promotion') {
       navigate('/promotion');
@@ -50,19 +62,31 @@ export const Jet = () => {
   return (
     <div 
       className="min-h-screen my-13"
-      style={{ backgroundColor: 'var(--color-bg-primary)' }}
+      style={{ 
+        ...darkModeStyles,
+        backgroundColor: 'var(--color-bg-primary)'
+      }}
     >
       <Navbar name="Creator Hub" />
       <header className="pt-12 pb-6 px-4 text-center">
         <div className="inline-block mb-4">
-          <div className="h-16 w-16 bg-[#1c6350] rounded-full flex items-center justify-center mx-auto">
-            <Music size={32} className="text-white" />
+          <div 
+            className="h-16 w-16 rounded-full flex items-center justify-center mx-auto"
+            style={{ backgroundColor: 'var(--color-primary)' }}
+          >
+            <Music size={32} style={{ color: 'var(--color-text-on-primary)' }} />
           </div>
         </div>
-        <h1 className="text-4xl font-bold mb-3 text-[#1c6350] dark:text-[#2d8c72]">
+        <h1 
+          className="text-4xl font-bold mb-3"
+          style={{ color: 'var(--color-primary)' }}
+        >
           Music Creator Hub
         </h1>
-        <p className="text-lg text-gray-600 dark:text-gray-300 max-w-lg mx-auto">
+        <p 
+          className="text-lg max-w-lg mx-auto"
+          style={{ color: 'var(--color-text-secondary)' }}
+        >
           Manage your music career in one place - promote, distribute, and track your earnings
         </p>
       </header>
@@ -70,10 +94,23 @@ export const Jet = () => {
       <div className="fixed bottom-20 right-6 z-50">
         <Link
           to="/user/promotions"
-          className="flex items-center justify-center gap-2 px-5 py-3 bg-gradient-to-r from-[#1a5f4b] to-[#2d7a63] text-blue-200 border-2 border-[#1a5f4b] font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105" 
+          className="flex items-center justify-center gap-2 px-5 py-3 font-semibold rounded-full shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
+          style={{ 
+            backgroundColor: 'var(--color-primary)',
+            color: 'var(--color-text-on-primary)',
+            border: `2px solid var(--color-primary)`
+          }}
+          onMouseEnter={(e) => {
+            e.target.style.backgroundColor = 'var(--color-primary-light)';
+            e.target.style.borderColor = 'var(--color-primary-light)';
+          }}
+          onMouseLeave={(e) => {
+            e.target.style.backgroundColor = 'var(--color-primary)';
+            e.target.style.borderColor = 'var(--color-primary)';
+          }}
         >
-          <List className="w-5 h-5 text-white" />
-          <span className='text-white'>My Promotions</span>
+          <List className="w-5 h-5" />
+          <span>My Promotions</span>
         </Link>
       </div>
 
@@ -82,7 +119,10 @@ export const Jet = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Global Promotion - Top Left */}
           <motion.div 
-            className="rounded-2xl p-6 bg-gradient-to-r from-[#1c6350] to-[#2a9d8f] shadow-xl cursor-pointer overflow-hidden group h-full"
+            className="rounded-2xl p-6 shadow-xl cursor-pointer overflow-hidden group h-full"
+            style={{ 
+              background: 'linear-gradient(to right, var(--color-primary), var(--color-primary-light))'
+            }}
             onClick={() => handleOptionSelect('global-promotion')}
             initial="initial"
             animate="animate"
@@ -92,43 +132,44 @@ export const Jet = () => {
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center space-x-3">
                   <motion.div 
-                    className="p-3 rounded-xl text-[#1c6350]"
+                    className="p-3 rounded-xl"
                     style={{ backgroundColor: 'var(--color-bg-primary)' }}
                     variants={bounceVariants}
                   >
-                    <Rocket size={24} />
+                    <Rocket size={24} style={{ color: 'var(--color-primary)' }} />
                   </motion.div>
-                  <div className="text-white">
+                  <div style={{ color: 'var(--color-text-on-primary)' }}>
                     <span className="block text-xs font-medium opacity-80">PREMIUM</span>
                     <h2 className="text-xl font-bold">Global Promotion</h2>
                   </div>
                 </div>
-                <ChevronRight className="text-white" size={20} />
+                <ChevronRight style={{ color: 'var(--color-text-on-primary)' }} size={20} />
               </div>
               
-              <p className="text-white/90 mb-4 text-sm flex-grow">
+              <p className="mb-4 text-sm flex-grow" style={{ color: 'var(--color-text-on-primary)', opacity: 0.9 }}>
                 Supercharge your reach with our ultimate promotion package for maximum exposure.
               </p>
               
               <div className="space-y-2 mb-4">
-                <div className="flex items-center text-white">
-                  <CheckCircle size={14} className="text-white mr-2" />
+                <div className="flex items-center" style={{ color: 'var(--color-text-on-primary)' }}>
+                  <CheckCircle size={14} className="mr-2" />
                   <span className="text-xs">Cross-platform promotion</span>
                 </div>
-                <div className="flex items-center text-white">
-                  <CheckCircle size={14} className="text-white mr-2" />
+                <div className="flex items-center" style={{ color: 'var(--color-text-on-primary)' }}>
+                  <CheckCircle size={14} className="mr-2" />
                   <span className="text-xs">Influencer partnerships</span>
                 </div>
-                <div className="flex items-center text-white">
-                  <CheckCircle size={14} className="text-white mr-2" />
+                <div className="flex items-center" style={{ color: 'var(--color-text-on-primary)' }}>
+                  <CheckCircle size={14} className="mr-2" />
                   <span className="text-xs">Social media campaigns</span>
                 </div>
               </div>
               
               <motion.button 
-                className="mt-auto py-2 px-4 text-[#1c6350] rounded-lg font-semibold text-sm flex items-center justify-center space-x-1 transition-colors"
+                className="mt-auto py-2 px-4 rounded-lg font-semibold text-sm flex items-center justify-center space-x-1 transition-colors"
                 style={{ 
                   backgroundColor: 'var(--color-bg-primary)',
+                  color: 'var(--color-primary)'
                 }}
                 onMouseEnter={(e) => {
                   e.target.style.backgroundColor = 'var(--color-bg-secondary)';
@@ -147,18 +188,32 @@ export const Jet = () => {
 
           {/* Promotion Option - Top Right */}
           <motion.div 
-            className="rounded-xl p-6 border-2 border-[#1c6350] shadow-lg h-full flex flex-col"
-            style={{ backgroundColor: 'var(--color-bg-primary)' }}
+            className="rounded-xl p-6 shadow-lg h-full flex flex-col"
+            style={{ 
+              backgroundColor: 'var(--color-bg-secondary)',
+              border: '2px solid var(--color-primary)'
+            }}
             onClick={() => handleOptionSelect('promotion')}
             whileHover={{ y: -5 }}
           >
             <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-[#1c6350] rounded-xl text-white">
+              <div 
+                className="p-3 rounded-xl"
+                style={{ 
+                  backgroundColor: 'var(--color-primary)',
+                  color: 'var(--color-text-on-primary)'
+                }}
+              >
                 <Music size={24} />
               </div>
-              <ChevronRight className="text-[#1c6350]" size={20} />
+              <ChevronRight style={{ color: 'var(--color-primary)' }} size={20} />
             </div>
-            <h2 className="text-xl font-bold mb-3 text-[#1c6350]">In-App Promotion</h2>
+            <h2 
+              className="text-xl font-bold mb-3"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              In-App Promotion
+            </h2>
             <p 
               className="mb-4 text-sm flex-grow"
               style={{ color: 'var(--color-text-secondary)' }}
@@ -167,19 +222,31 @@ export const Jet = () => {
             </p>
             <div className="space-y-2 mb-4">
               <div className="flex items-center">
-                <CheckCircle size={14} className="text-[#1c6350] mr-2" />
+                <CheckCircle size={14} style={{ color: 'var(--color-primary)' }} className="mr-2" />
                 <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Featured in playlists</span>
               </div>
               <div className="flex items-center">
-                <CheckCircle size={14} className="text-[#1c6350] mr-2" />
+                <CheckCircle size={14} style={{ color: 'var(--color-primary)' }} className="mr-2" />
                 <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Discover page spotlight</span>
               </div>
               <div className="flex items-center">
-                <CheckCircle size={14} className="text-[#1c6350] mr-2" />
+                <CheckCircle size={14} style={{ color: 'var(--color-primary)' }} className="mr-2" />
                 <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Targeted recommendations</span>
               </div>
             </div>
-            <button className="mt-auto w-full py-2 px-4 bg-[#1c6350] text-white rounded-lg font-semibold text-sm flex items-center justify-center hover:bg-[#15503f] transition-colors">
+            <button 
+              className="mt-auto w-full py-2 px-4 rounded-lg font-semibold text-sm flex items-center justify-center transition-colors"
+              style={{ 
+                backgroundColor: 'var(--color-primary)',
+                color: 'var(--color-text-on-primary)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'var(--color-primary-light)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'var(--color-primary)';
+              }}
+            >
               <span>Promote Your Music</span>
               <ChevronRight size={16} className="ml-1" />
             </button>
@@ -187,18 +254,32 @@ export const Jet = () => {
 
           {/* Distribution Option - Bottom Left */}
           <motion.div 
-            className="rounded-xl p-6 border-2 border-[#1c6350] shadow-lg h-full flex flex-col"
-            style={{ backgroundColor: 'var(--color-bg-primary)' }}
+            className="rounded-xl p-6 shadow-lg h-full flex flex-col"
+            style={{ 
+              backgroundColor: 'var(--color-bg-secondary)',
+              border: '2px solid var(--color-primary)'
+            }}
             onClick={() => handleOptionSelect('distribution')}
             whileHover={{ y: -5 }}
           >
             <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-[#1c6350] rounded-xl text-white">
+              <div 
+                className="p-3 rounded-xl"
+                style={{ 
+                  backgroundColor: 'var(--color-primary)',
+                  color: 'var(--color-text-on-primary)'
+                }}
+              >
                 <Share2 size={24} />
               </div>
-              <ChevronRight className="text-[#1c6350]" size={20} />
+              <ChevronRight style={{ color: 'var(--color-primary)' }} size={20} />
             </div>
-            <h2 className="text-xl font-bold mb-3 text-[#1c6350]">Global Distribution</h2>
+            <h2 
+              className="text-xl font-bold mb-3"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              Global Distribution
+            </h2>
             <p 
               className="mb-4 text-sm flex-grow"
               style={{ color: 'var(--color-text-secondary)' }}
@@ -207,19 +288,31 @@ export const Jet = () => {
             </p>
             <div className="space-y-2 mb-4">
               <div className="flex items-center">
-                <CheckCircle size={14} className="text-[#1c6350] mr-2" />
+                <CheckCircle size={14} style={{ color: 'var(--color-primary)' }} className="mr-2" />
                 <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>150+ platforms</span>
               </div>
               <div className="flex items-center">
-                <CheckCircle size={14} className="text-[#1c6350] mr-2" />
+                <CheckCircle size={14} style={{ color: 'var(--color-primary)' }} className="mr-2" />
                 <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Royalty collection</span>
               </div>
               <div className="flex items-center">
-                <CheckCircle size={14} className="text-[#1c6350] mr-2" />
+                <CheckCircle size={14} style={{ color: 'var(--color-primary)' }} className="mr-2" />
                 <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Release scheduling</span>
               </div>
             </div>
-            <button className="mt-auto w-full py-2 px-4 bg-[#1c6350] text-white rounded-lg font-semibold text-sm flex items-center justify-center hover:bg-[#15503f] transition-colors">
+            <button 
+              className="mt-auto w-full py-2 px-4 rounded-lg font-semibold text-sm flex items-center justify-center transition-colors"
+              style={{ 
+                backgroundColor: 'var(--color-primary)',
+                color: 'var(--color-text-on-primary)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'var(--color-primary-light)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'var(--color-primary)';
+              }}
+            >
               <span>Distribute Your Music</span>
               <ChevronRight size={16} className="ml-1" />
             </button>
@@ -227,18 +320,32 @@ export const Jet = () => {
 
           {/* Wallet Section - Bottom Right */}
           <motion.div 
-            className="rounded-xl p-6 border-2 border-[#1c6350] shadow-lg h-full flex flex-col"
-            style={{ backgroundColor: 'var(--color-bg-primary)' }}
+            className="rounded-xl p-6 shadow-lg h-full flex flex-col"
+            style={{ 
+              backgroundColor: 'var(--color-bg-secondary)',
+              border: '2px solid var(--color-primary)'
+            }}
             onClick={() => handleOptionSelect('wallet')}
             whileHover={{ y: -5 }}
           >
             <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-[#1c6350] rounded-xl text-white">
+              <div 
+                className="p-3 rounded-xl"
+                style={{ 
+                  backgroundColor: 'var(--color-primary)',
+                  color: 'var(--color-text-on-primary)'
+                }}
+              >
                 <Wallet size={24} />
               </div>
-              <ChevronRight className="text-[#1c6350]" size={20} />
+              <ChevronRight style={{ color: 'var(--color-primary)' }} size={20} />
             </div>
-            <h2 className="text-xl font-bold mb-3 text-[#1c6350]">Wallet & Earnings</h2>
+            <h2 
+              className="text-xl font-bold mb-3"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              Wallet & Earnings
+            </h2>
             <p 
               className="mb-4 text-sm flex-grow"
               style={{ color: 'var(--color-text-secondary)' }}
@@ -246,33 +353,33 @@ export const Jet = () => {
               Track your earnings, withdraw funds, and manage your revenue from promotions and distributions.
             </p>
             
-            {/* Earnings Summary */}
-            {/* <div className="bg-gray-700 rounded-lg p-3 mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>Available Balance</span>
-                <span className="text-lg font-bold text-[#1c6350]">$1,250.00</span>
-              </div>
-              <div className="flex justify-between items-center text-xs">
-                <span style={{ color: 'var(--color-text-secondary)' }}>Pending: $350.00</span>
-                <span style={{ color: 'var(--color-text-secondary)' }}>Total Earned: $4,820.00</span>
-              </div>
-            </div> */}
-            
             <div className="space-y-2 mb-4">
               <div className="flex items-center">
-                <DollarSign size={14} className="text-[#1c6350] mr-2" />
+                <DollarSign size={14} style={{ color: 'var(--color-primary)' }} className="mr-2" />
                 <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Withdraw earnings</span>
               </div>
               <div className="flex items-center">
-                <TrendingUp size={14} className="text-[#1c6350] mr-2" />
+                <TrendingUp size={14} style={{ color: 'var(--color-primary)' }} className="mr-2" />
                 <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Revenue tracking</span>
               </div>
               <div className="flex items-center">
-                <CreditCard size={14} className="text-[#1c6350] mr-2" />
+                <CreditCard size={14} style={{ color: 'var(--color-primary)' }} className="mr-2" />
                 <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Transaction history</span>
               </div>
             </div>
-            <button className="mt-auto w-full py-2 px-4 bg-[#1c6350] text-white rounded-lg font-semibold text-sm flex items-center justify-center hover:bg-[#15503f] transition-colors">
+            <button 
+              className="mt-auto w-full py-2 px-4 rounded-lg font-semibold text-sm flex items-center justify-center transition-colors"
+              style={{ 
+                backgroundColor: 'var(--color-primary)',
+                color: 'var(--color-text-on-primary)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'var(--color-primary-light)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'var(--color-primary)';
+              }}
+            >
               <span>View Wallet</span>
               <ChevronRight size={16} className="ml-1" />
             </button>
@@ -283,7 +390,22 @@ export const Jet = () => {
           className="mt-12 text-center"
           style={{ color: 'var(--color-text-secondary)' }}
         >
-          <p>Need help deciding? <a href="#" className="text-[#1c6350] font-medium hover:underline">Contact our support team</a></p>
+          <p>
+            Need help deciding?{' '}
+            <a 
+              href="#" 
+              className="font-medium hover:underline"
+              style={{ color: 'var(--color-primary)' }}
+              onMouseEnter={(e) => {
+                e.target.style.color = 'var(--color-primary-light)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.color = 'var(--color-primary)';
+              }}
+            >
+              Contact our support team
+            </a>
+          </p>
         </div>
       </main>
       <BottomNav activeTab="home" />

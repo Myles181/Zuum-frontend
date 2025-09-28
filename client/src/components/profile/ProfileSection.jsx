@@ -11,6 +11,18 @@ import { Headphones } from "lucide-react";
 const ProfileSection = ({ profile }) => {
   const navigate = useNavigate();
 
+  // Dark mode styles
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+    '--color-border': '#374151'
+  };
+
   // Fallback data in case profile is null or undefined
   const fallbackProfile = useMemo(
     () => ({
@@ -41,7 +53,7 @@ const ProfileSection = ({ profile }) => {
 
   // Tab state
   const [activeTab, setActiveTab] = useState("audio");
- const tabs = ["producer", "dev"].includes(mergedProfile.identity.toLowerCase())
+  const tabs = ["producer", "dev"].includes(mergedProfile.identity.toLowerCase())
     ? ["beats", "audio", "video"]
     : ["audio", "video"];
 
@@ -55,7 +67,6 @@ const ProfileSection = ({ profile }) => {
   };
 
   console.log(mergedProfile.beats);
-  
 
   // Format date function
   const formatDate = (dateString) => {
@@ -71,7 +82,10 @@ const ProfileSection = ({ profile }) => {
   return (
     <div 
       className="max-w-2xl mx-auto pb-16 font-sans"
-      style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+      style={{ 
+        backgroundColor: 'var(--color-bg-secondary)',
+        ...darkModeStyles
+      }}
     >
       {/* Header Section */}
       <div 
@@ -105,7 +119,7 @@ const ProfileSection = ({ profile }) => {
             )}
           </div>
           
-          <div className="flex-1 ">
+          <div className="flex-1">
             <div className="flex items-center mb-3">
               <h2 
                 className="text-2xl font-light mr-3"
@@ -114,8 +128,11 @@ const ProfileSection = ({ profile }) => {
                 {mergedProfile.username}
               </h2>
               <span 
-                className="bg-gray-700 text-xs px-3 py-1.5 rounded-full capitalize font-medium"
-                style={{ color: 'var(--color-text-secondary)' }}
+                className="text-xs px-3 py-1.5 rounded-full capitalize font-medium"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-secondary)',
+                  color: 'var(--color-text-secondary)'
+                }}
               >
                 {mergedProfile.identity}
               </span>
@@ -166,63 +183,45 @@ const ProfileSection = ({ profile }) => {
               </div>
             </div>
             
-           <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 w-full">
-  <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-    <Link to="/editprofile" className="w-full sm:w-auto">
-      <button 
-        className="border px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm w-full"
-        style={{ 
-          backgroundColor: 'var(--color-bg-primary)',
-          borderColor: 'var(--color-primary)',
-          color: 'var(--color-primary)'
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.backgroundColor = 'var(--color-bg-secondary)';
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.backgroundColor = 'var(--color-bg-primary)';
-        }}
-      >
-        Edit Profile
-      </button>
-    </Link>
-    <Link to="/purchasedbeats" className="w-full sm:w-auto">
-      <button 
-        className="border px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm w-full"
-        style={{ 
-          backgroundColor: 'var(--color-primary)',
-          borderColor: 'var(--color-primary)',
-          color: 'var(--color-text-on-primary)'
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.backgroundColor = 'var(--color-primary-dark)';
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.backgroundColor = 'var(--color-primary)';
-        }}
-      >
-        Purchased Beats
-      </button>
-    </Link>
-  </div>
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 w-full">
+              <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                <Link to="/editprofile" className="w-full sm:w-auto">
+                  <button 
+                    className="border px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm w-full hover:bg-gray-800"
+                    style={{ 
+                      backgroundColor: 'var(--color-bg-primary)',
+                      borderColor: 'var(--color-primary)',
+                      color: 'var(--color-primary)'
+                    }}
+                  >
+                    Edit Profile
+                  </button>
+                </Link>
+                <Link to="/purchasedbeats" className="w-full sm:w-auto">
+                  <button 
+                    className="border px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm w-full hover:bg-[#248066]"
+                    style={{ 
+                      backgroundColor: 'var(--color-primary)',
+                      borderColor: 'var(--color-primary)',
+                      color: 'var(--color-text-on-primary)'
+                    }}
+                  >
+                    Purchased Beats
+                  </button>
+                </Link>
+              </div>
 
-  <button 
-    className="border p-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm w-full sm:w-auto flex items-center justify-center"
-    style={{ 
-      backgroundColor: 'var(--color-bg-primary)',
-      borderColor: 'var(--color-primary)',
-      color: 'var(--color-primary)'
-    }}
-    onMouseEnter={(e) => {
-      e.target.style.backgroundColor = 'var(--color-bg-secondary)';
-    }}
-    onMouseLeave={(e) => {
-      e.target.style.backgroundColor = 'var(--color-bg-primary)';
-    }}
-  >
-    <FiShare2 className="w-4 h-4" />
-  </button>
-</div>
+              <button 
+                className="border p-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm w-full sm:w-auto flex items-center justify-center hover:bg-gray-800"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-primary)',
+                  borderColor: 'var(--color-primary)',
+                  color: 'var(--color-primary)'
+                }}
+              >
+                <FiShare2 className="w-4 h-4" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -240,60 +239,57 @@ const ProfileSection = ({ profile }) => {
           >
             {mergedProfile.bio || "No bio provided"}
           </p>
-       
         </div>
 
         {/* Highlights (Instagram-style stories) */}
-    <div className="flex space-x-5 mb-6 overflow-x-auto pb-2 hide-scrollbar">
-  {[
-    { title: 'Contact', icon: <FiPhone className="w-5 h-5" />, value: mergedProfile.phonenumber || "N/A" },
-    { title: 'Email', icon: <FiMail className="w-5 h-5" />, value: mergedProfile.email || "N/A" },
-   
-    { title: 'Subscription', icon: <FiCreditCard className="w-5 h-5" />, value: mergedProfile.subscription_status || "None" }
-  ].map((item, idx) => {
-    const CardContent = (
-      <div className="flex flex-col items-center space-y-2 flex-shrink-0">
-        <div 
-          className="w-16 h-16 rounded-full flex items-center justify-center p-0.5"
-          style={{ background: 'linear-gradient(to right, var(--color-primary), var(--color-primary-light))' }}
-        >
-          <div 
-            className="w-full h-full rounded-full flex items-center justify-center"
-            style={{ backgroundColor: 'var(--color-bg-primary)' }}
-          >
-            <span style={{ color: 'var(--color-primary)' }}>{item.icon}</span>
-          </div>
+        <div className="flex space-x-5 mb-6 overflow-x-auto pb-2 hide-scrollbar">
+          {[
+            { title: 'Contact', icon: <FiPhone className="w-5 h-5" />, value: mergedProfile.phonenumber || "N/A" },
+            { title: 'Email', icon: <FiMail className="w-5 h-5" />, value: mergedProfile.email || "N/A" },
+            { title: 'Subscription', icon: <FiCreditCard className="w-5 h-5" />, value: mergedProfile.subscription_status || "None" }
+          ].map((item, idx) => {
+            const CardContent = (
+              <div className="flex flex-col items-center space-y-2 flex-shrink-0">
+                <div 
+                  className="w-16 h-16 rounded-full flex items-center justify-center p-0.5"
+                  style={{ background: 'linear-gradient(to right, var(--color-primary), var(--color-primary-light))' }}
+                >
+                  <div 
+                    className="w-full h-full rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: 'var(--color-bg-primary)' }}
+                  >
+                    <span style={{ color: 'var(--color-primary)' }}>{item.icon}</span>
+                  </div>
+                </div>
+                <span 
+                  className="text-xs font-medium"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
+                  {item.title}
+                </span>
+                {item.value && (
+                  <span 
+                    className="text-xs text-center max-w-16 truncate"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    {item.value}
+                  </span>
+                )}
+              </div>
+            );
+
+            return item.link ? (
+              <a key={idx} href={item.link} className="flex-shrink-0">
+                {CardContent}
+              </a>
+            ) : (
+              <div key={idx} className="flex-shrink-0">
+                {CardContent}
+              </div>
+            );
+          })}
         </div>
-        <span 
-          className="text-xs font-medium"
-          style={{ color: 'var(--color-text-primary)' }}
-        >
-          {item.title}
-        </span>
-        {item.value && (
-          <span 
-            className="text-xs text-center max-w-16 truncate"
-            style={{ color: 'var(--color-text-secondary)' }}
-          >
-            {item.value}
-          </span>
-        )}
       </div>
-    );
-
-    return item.link ? (
-      <a key={idx} href={item.link} className="flex-shrink-0">
-        {CardContent}
-      </a>
-    ) : (
-      <div key={idx} className="flex-shrink-0">
-        {CardContent}
-      </div>
-    );
-  })}
-</div>
-
-</div>
 
       {/* Tab Navigation */}
       <div 

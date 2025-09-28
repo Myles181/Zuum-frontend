@@ -8,6 +8,20 @@ import { useMassPromotion } from '../../Hooks/search/useAllPost';
 export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
   const { createPromotion, loading, error } = useMassPromotion();
 
+  // Dark mode styles - consistent with other components
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+    '--color-border': '#374151',
+    '--color-error': '#EF4444',
+    '--color-error-light': '#7F1D1D'
+  };
+
   console.log('Selected Platform:', selectedPlatform);
   
   const category = selectedPlatform?.category || 'print';
@@ -71,18 +85,18 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
       case 'print':
       case 'national':
       case 'international':
-        return <Newspaper className="w-5 h-5 text-[#008066]" />;
+        return <Newspaper className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />;
       case 'tv':
-        return <Tv className="w-5 h-5 text-[#008066]" />;
+        return <Tv className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />;
       case 'radio':
-        return <Radio className="w-5 h-5 text-[#008066]" />;
+        return <Radio className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />;
       case 'chart':
       case 'playlist':
-        return <ListMusic className="w-5 h-5 text-[#008066]" />;
+        return <ListMusic className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />;
       case 'digital':
-        return <Globe className="w-5 h-5 text-[#008066]" />;
+        return <Globe className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />;
       case 'youtube':
-        return <Youtube className="w-5 h-5 text-[#FF0000]" />;
+        return <Youtube className="w-5 h-5" style={{ color: '#FF0000' }} />;
       case 'tiktok':
         return (
           <svg className="w-5 h-5" viewBox="0 0 24 24" fill="currentColor">
@@ -90,7 +104,7 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
           </svg>
         );
       default:
-        return <TrendingUp className="w-5 h-5 text-[#008066]" />;
+        return <TrendingUp className="w-5 h-5" style={{ color: 'var(--color-primary)' }} />;
     }
   };
 
@@ -98,27 +112,27 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
     switch(category) {
       case 'youtube':
         return {
-          bgFrom: 'from-[#FF0000]',
-          bgTo: 'to-[#CC0000]',
-          text: 'text-[#FF0000]',
-          hover: 'hover:bg-[#CC0000]',
+          bgFrom: '#FF0000',
+          bgTo: '#CC0000',
+          text: '#FF0000',
+          hover: '#CC0000',
           focusRing: 'focus:ring-red-500/20 focus:border-red-500'
         };
       case 'tiktok':
         return {
-          bgFrom: 'from-[#000000]',
-          bgTo: 'to-[#000000]',
-          text: 'text-[#000000]',
-          hover: 'hover:bg-[#222222]',
+          bgFrom: '#000000',
+          bgTo: '#000000',
+          text: '#000000',
+          hover: '#222222',
           focusRing: 'focus:ring-gray-600/20 focus:border-gray-700'
         };
       default:
         return {
-          bgFrom: 'from-[#008066]',
-          bgTo: 'to-[#006e58]',
-          text: 'text-[#008066]',
-          hover: 'hover:bg-[#006e58]',
-          focusRing: 'focus:ring-[#008066]/20 focus:border-[#008066]'
+          bgFrom: 'var(--color-primary)',
+          bgTo: 'var(--color-primary-light)',
+          text: 'var(--color-primary)',
+          hover: 'var(--color-primary-light)',
+          focusRing: 'focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)]'
         };
     }
   };
@@ -144,7 +158,7 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] smooth-transition placeholder-gray-400"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none transition-all duration-200 placeholder-gray-400"
                 style={{ 
                   backgroundColor: 'var(--color-bg-secondary)',
                   border: '1px solid var(--color-border)',
@@ -166,7 +180,7 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 value={formData.body}
                 onChange={handleChange}
                 rows={4}
-                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] smooth-transition placeholder-gray-400 resize-none"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none transition-all duration-200 placeholder-gray-400 resize-none"
                 style={{ 
                   backgroundColor: 'var(--color-bg-secondary)',
                   border: '1px solid var(--color-border)',
@@ -203,7 +217,7 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                   value={formData.description}
                   onChange={handleChange}
                   rows={3}
-                  className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] transition-all duration-200 placeholder-gray-400 resize-none"
+                  className="w-full px-4 py-3 rounded-xl focus:outline-none transition-all duration-200 placeholder-gray-400 resize-none"
                   style={{ 
                     backgroundColor: 'var(--color-bg-secondary)',
                     border: '1px solid var(--color-border)',
@@ -231,7 +245,7 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 name="title"
                 value={formData.title}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] transition-all duration-200 placeholder-gray-400"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none transition-all duration-200 placeholder-gray-400"
                 style={{ 
                   backgroundColor: 'var(--color-bg-secondary)',
                   border: '1px solid var(--color-border)',
@@ -253,7 +267,7 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 value={formData.biography}
                 onChange={handleChange}
                 rows={4}
-                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] transition-all duration-200 placeholder-gray-400 resize-none"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none transition-all duration-200 placeholder-gray-400 resize-none"
                 style={{ 
                   backgroundColor: 'var(--color-bg-secondary)',
                   border: '1px solid var(--color-border)',
@@ -298,7 +312,7 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 value={formData.song_link}
                 onChange={handleChange}
                 placeholder="https://example.com/song.mp3"
-                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] transition-all duration-200 placeholder-gray-400"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none transition-all duration-200 placeholder-gray-400"
                 style={{ 
                   backgroundColor: 'var(--color-bg-secondary)',
                   border: '1px solid var(--color-border)',
@@ -331,7 +345,7 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 name="artist_name"
                 value={formData.artist_name}
                 onChange={handleChange}
-                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] transition-all duration-200 placeholder-gray-400"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none transition-all duration-200 placeholder-gray-400"
                 style={{ 
                   backgroundColor: 'var(--color-bg-secondary)',
                   border: '1px solid var(--color-border)',
@@ -353,7 +367,7 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 value={formData.biography}
                 onChange={handleChange}
                 rows={4}
-                className="w-full px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#008066]/20 focus:border-[#008066] transition-all duration-200 placeholder-gray-400 resize-none"
+                className="w-full px-4 py-3 rounded-xl focus:outline-none transition-all duration-200 placeholder-gray-400 resize-none"
                 style={{ 
                   backgroundColor: 'var(--color-bg-secondary)',
                   border: '1px solid var(--color-border)',
@@ -585,7 +599,10 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center my-13">
+    <div 
+      className="fixed inset-0 z-50 flex items-end justify-center my-13"
+      style={darkModeStyles}
+    >
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm animate-fade-in"
         onClick={onClose}
@@ -598,7 +615,12 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
           border: '1px solid var(--color-border)'
         }}
       >
-        <div className={`relative bg-gradient-to-r ${colors.bgFrom} ${colors.bgTo} px-6 py-2`}>
+        <div 
+          className="relative px-6 py-2"
+          style={{ 
+            background: `linear-gradient(to right, ${colors.bgFrom}, ${colors.bgTo})`
+          }}
+        >
           <div className="absolute top-3 left-1/2 transform -translate-x-1/2">
             <div className="w-12 h-1 bg-white/30 rounded-full"></div>
           </div>
@@ -616,7 +638,7 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
             </div>
             <button 
               onClick={onClose} 
-              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 smooth-transition backdrop-blur-sm hover:scale-110"
+              className="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-all duration-200 backdrop-blur-sm hover:scale-110"
             >
               <X size={20} className="text-white" />
             </button>
@@ -635,8 +657,8 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                 <div 
                   className="p-4 rounded-xl"
                   style={{ 
-                    backgroundColor: 'var(--color-error-bg)',
-                    border: '1px solid var(--color-error-border)'
+                    backgroundColor: 'var(--color-error-light)',
+                    border: '1px solid var(--color-error)'
                   }}
                 >
                   <div className="flex items-center space-x-2">
@@ -665,7 +687,7 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                   <button
                     type="button"
                     onClick={onClose}
-                    className="px-6 py-3 font-semibold rounded-xl smooth-transition hover:scale-105"
+                    className="px-6 py-3 font-semibold rounded-xl transition-all duration-200 hover:scale-105"
                     style={{ 
                       color: 'var(--color-text-secondary)',
                       backgroundColor: 'var(--color-bg-secondary)'
@@ -677,7 +699,16 @@ export const AllPromotionForms = ({ selectedPlatform, onClose }) => {
                     type="button"
                     onClick={handleSubmit}
                     disabled={loading}
-                    className={`px-8 py-3 ${colors.bgFrom.replace('from-', 'bg-' || "#000")} ${colors.hover} text-white font-semibold rounded-xl smooth-transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg hover:shadow-xl hover:scale-105`}
+                    className="px-8 py-3 text-white font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2 shadow-lg hover:shadow-xl hover:scale-105"
+                    style={{ 
+                      backgroundColor: colors.bgFrom,
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.backgroundColor = colors.hover;
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.backgroundColor = colors.bgFrom;
+                    }}
                   >
                     {loading ? (
                       <>
@@ -738,26 +769,32 @@ const FileUpload = ({ accept, onChange, icon, type }) => {
 
   return (
     <div 
-      className={`relative border-2 border-dashed rounded-xl p-6 smooth-transition cursor-pointer ${
+      className={`relative border-2 border-dashed rounded-xl p-6 transition-all duration-200 cursor-pointer ${
         isDragOver 
-          ? 'border-current bg-current/5 scale-105' 
+          ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5 scale-105' 
           : fileName 
-            ? 'border-current bg-current/5' 
-            : 'border-gray-300 hover:border-current hover:bg-gray-50 dark:hover:bg-gray-700'
+            ? 'border-[var(--color-primary)] bg-[var(--color-primary)]/5' 
+            : 'border-[var(--color-border)] hover:border-[var(--color-primary)] hover:bg-[var(--color-bg-secondary)]'
       }`}
       onDrop={handleDrop}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
     >
       <label className="flex flex-col items-center justify-center cursor-pointer">
-        <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 smooth-transition ${
-          fileName ? 'bg-current text-white animate-scale-in' : 'bg-gray-100 dark:bg-gray-700 text-gray-400'
+        <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-all duration-200 ${
+          fileName 
+            ? 'bg-[var(--color-primary)] text-white animate-scale-in' 
+            : 'bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)]'
         }`}>
           {fileName ? <Check size={24} /> : icon}
         </div>
         
         <div className="text-center">
-          <p className={`font-semibold ${fileName ? 'text-current' : 'text-gray-700 dark:text-gray-300'}`}>
+          <p className={`font-semibold ${
+            fileName 
+              ? 'text-[var(--color-primary)]' 
+              : 'text-[var(--color-text-primary)]'
+          }`}>
             {fileName || `Upload ${type}`}
           </p>
           {!fileName && (
@@ -781,7 +818,10 @@ const FileUpload = ({ accept, onChange, icon, type }) => {
       
       {fileName && (
         <div className="absolute top-2 right-2 animate-scale-in">
-          <div className="w-6 h-6 bg-current rounded-full flex items-center justify-center">
+          <div 
+            className="w-6 h-6 rounded-full flex items-center justify-center"
+            style={{ backgroundColor: 'var(--color-primary)' }}
+          >
             <Check size={14} className="text-white" />
           </div>
         </div>

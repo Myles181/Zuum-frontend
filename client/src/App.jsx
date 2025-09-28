@@ -58,22 +58,93 @@ import AdminPromotionsPage from './admin/pages/promotion';
 import { DarkModeProvider } from './contexts/DarkModeContext';
 import ZuumOnboarding from './pages/Onboarding';
 
+// Dark mode styles for consistent theming
+const darkModeStyles = {
+  '--color-bg-primary': '#1a1a1a',
+  '--color-bg-secondary': '#2d2d2d',
+  '--color-text-primary': '#ffffff',
+  '--color-text-secondary': '#9ca3af',
+  '--color-primary': '#2D8C72',
+  '--color-primary-light': '#34A085',
+  '--color-text-on-primary': '#ffffff',
+  '--color-border': '#374151',
+  '--color-error': '#EF4444',
+  '--color-error-light': '#7F1D1D'
+};
+
 const CustomLoader = () => (
-  <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-gray-900">
+  <div 
+    className="fixed inset-0 flex items-center justify-center z-50"
+    style={{ 
+      ...darkModeStyles,
+      backgroundColor: 'var(--color-bg-primary)'
+    }}
+  >
     <div className="text-center">
-      <div className="w-16 h-16 border-4 border-[#2D8C72] border-t-transparent rounded-full animate-spin mx-auto"></div>
-      <p className="mt-4 text-gray-600 dark:text-gray-300">Loading your experience...</p>
+      <div 
+        className="w-16 h-16 border-4 rounded-full animate-spin mx-auto"
+        style={{
+          borderColor: 'var(--color-primary)',
+          borderTopColor: 'transparent'
+        }}
+      ></div>
+      <p 
+        className="mt-4 text-lg font-medium"
+        style={{ color: 'var(--color-text-primary)' }}
+      >
+        Loading your experience...
+      </p>
     </div>
   </div>
 );
 
 const AuthErrorDisplay = ({ errorMessage }) => (
-  <div className="fixed inset-0 flex items-center justify-center bg-white dark:bg-gray-900 p-4">
-    <div className="text-center max-w-md">
-      <div className="text-red-500 text-5xl mb-4">⚠️</div>
-      <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-200 mb-2">Authentication Error</h2>
-      <p className="text-gray-600 dark:text-gray-300 mb-6">{errorMessage}</p>
-      <button onClick={() => window.location.reload()} className="bg-[#2D8C72] text-white px-6 py-2 rounded-lg font-medium">
+  <div 
+    className="fixed inset-0 flex items-center justify-center z-50 p-4"
+    style={{ 
+      ...darkModeStyles,
+      backgroundColor: 'var(--color-bg-primary)'
+    }}
+  >
+    <div 
+      className="text-center max-w-md p-8 rounded-xl shadow-2xl"
+      style={{ 
+        backgroundColor: 'var(--color-bg-secondary)',
+        border: '1px solid var(--color-border)'
+      }}
+    >
+      <div 
+        className="text-5xl mb-4"
+        style={{ color: 'var(--color-error)' }}
+      >
+        ⚠️
+      </div>
+      <h2 
+        className="text-2xl font-bold mb-2"
+        style={{ color: 'var(--color-text-primary)' }}
+      >
+        Authentication Error
+      </h2>
+      <p 
+        className="mb-6"
+        style={{ color: 'var(--color-text-secondary)' }}
+      >
+        {errorMessage}
+      </p>
+      <button 
+        onClick={() => window.location.reload()} 
+        className="px-6 py-3 rounded-lg font-medium transition-colors"
+        style={{ 
+          backgroundColor: 'var(--color-primary)',
+          color: 'var(--color-text-on-primary)'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.backgroundColor = 'var(--color-primary-light)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.backgroundColor = 'var(--color-primary)';
+        }}
+      >
         Try Again
       </button>
     </div>
@@ -172,10 +243,9 @@ const App = () => (
               <Route element={<AdminProtectedRoute />}>
                 <Route path="/admin/*" element={<AdminDashboard />} />
                 <Route path="/users" element={<AdminDashboard />} />
-                <Route path="/distribution" element={<DistributionRequestsPage />} />
-                <Route path="/beat" element={<AdminBeatPurchasesPage />} />
-                <Route path="/promotion" element={<AdminPromotionsPage />} />
-
+                <Route path="/addistributions" element={<DistributionRequestsPage />} />
+                <Route path="/adbeat" element={<AdminBeatPurchasesPage />} />
+                <Route path="/adpromotion" element={<AdminPromotionsPage />} />
               </Route>
           </Routes>
         </Router>
