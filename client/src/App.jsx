@@ -57,6 +57,7 @@ import AdminBeatPurchasesPage from './admin/pages/Beats';
 import AdminPromotionsPage from './admin/pages/promotion';
 import { DarkModeProvider } from './contexts/DarkModeContext';
 import ZuumOnboarding from './pages/Onboarding';
+import DepositPage from './components/dashboard/DepositPage';
 
 // Dark mode styles for consistent theming
 const darkModeStyles = {
@@ -209,6 +210,7 @@ const AppRoutes = () => {
         <Route path="/videos/:id" element={<VideoViewerPage />} />
         <Route path="/user/promotions" element={<UserPromotions />} />
         <Route path="/zuum-news" element={<ZuumNews />} />
+         <Route path="/dashboard/deposit" element={<DepositPage />} />
       </Routes>
     </>
   );
