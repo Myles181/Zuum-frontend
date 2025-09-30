@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
+import { useCallback } from "react";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
@@ -31,22 +32,33 @@ const useDepositAccount = () => {
   const [success, setSuccess] = useState(false);
   const [paymentDetails, setPaymentDetails] = useState(null);
 
-  const getDepositAccount = useCallback(async () => {
-    console.debug('[useDepositAccount] Initializing request...');
+  const getDepositAccount = useCallback(async (amount) => {
+    console.debug('[useDepositAccount] Initializing request...', { amount });
+    
+    // Validate amount
+    if (!amount || isNaN(amount) || amount < 1) {
+      const errorMsg = 'Valid amount is required';
+      console.error('[useDepositAccount] Validation error:', errorMsg);
+      setError(errorMsg);
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuccess(false);
     setPaymentDetails(null);
 
-    // Use cookies instead of localStorage token
-    const url = `${API_URL}/payment/deposit-account`;
-    console.debug(`[useDepositAccount] Making request to: ${url}`);
-
     try {
+      const url = `${API_URL}/payment/deposit-account`;
+      console.debug(`[useDepositAccount] Making request to: ${url}`, { amount });
+
       const response = await axios.get(url, {
         headers: {
           Accept: 'application/json',
           ...getAuthHeaders(),
+        },
+        params: {
+          amount: amount
         },
         withCredentials: true,
       });
@@ -110,6 +122,59 @@ const useDepositAccount = () => {
 };
 
 export default useDepositAccount;
+
+
+
+
+ export const useAccountDetails = () => {
+  const [account, setAccount] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
+  const fetchAccountDetails = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+    setAccount(null);
+
+    try {
+      const response = await axios.get(`${API_URL}/payment/account-details`, {
+        headers: {
+          Accept: 'application/json',
+          ...getAuthHeaders(),
+        },
+        withCredentials: true,
+      });
+
+      if (!response.data || !response.data.account) {
+        throw new Error('No account details found');
+      }
+
+      setAccount(response.data.account);
+      setSuccess(true);
+    } catch (err) {
+      console.error('[useAccountDetails] Error:', err);
+      if (err.response) {
+        setError(err.response.data?.message || `Server responded with ${err.response.status}`);
+      } else if (err.request) {
+        setError('No response from server');
+      } else {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  return {
+    fetchAccountDetails,
+    account,
+    loading,
+    error,
+    success,
+  };
+};
 
 
 

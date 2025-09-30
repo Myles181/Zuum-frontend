@@ -1,5 +1,6 @@
 "use client"
 
+import React from 'react';
 import { Music, FileMusic, ListMusic, AlertCircle } from "lucide-react"
 
 const ReleaseInfoStep = ({ formData, setFormData, errors, setErrors }) => {
@@ -44,22 +45,22 @@ const ReleaseInfoStep = ({ formData, setFormData, errors, setErrors }) => {
 
   return (
     <div className="space-y-5 md:space-y-6">
-      <h2 className="text-xl md:text-2xl font-semibold text-gray-800 flex items-center gap-2">
-        <Music className="text-[#247a63]" size={20} />
+      <h2 className="text-xl md:text-2xl font-semibold text-white flex items-center gap-2">
+        <Music className="text-[#2D8C72]" size={20} />
         Release Information
       </h2>
 
       {/* Release Type */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">Release Type</label>
+        <label className="block text-sm font-medium text-gray-300">Release Type</label>
         <div className="flex flex-wrap gap-3">
           <button
             type="button"
             onClick={() => setFormData((prev) => ({ ...prev, releaseType: "single" }))}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all ${
               formData.releaseType === "single"
-                ? "bg-[#247a63] text-white shadow-md"
-                : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                ? "bg-[#2D8C72] text-white shadow-md"
+                : "bg-[#2d2d2d] border border-[#374151] text-gray-300 hover:bg-[#374151]"
             } text-sm md:text-base`}
           >
             <FileMusic size={16} /> Single
@@ -69,8 +70,8 @@ const ReleaseInfoStep = ({ formData, setFormData, errors, setErrors }) => {
             onClick={() => setFormData((prev) => ({ ...prev, releaseType: "album" }))}
             className={`flex items-center gap-2 px-4 py-2.5 rounded-lg transition-all ${
               formData.releaseType === "album"
-                ? "bg-[#247a63] text-white shadow-md"
-                : "bg-white border border-gray-200 text-gray-700 hover:bg-gray-50"
+                ? "bg-[#2D8C72] text-white shadow-md"
+                : "bg-[#2d2d2d] border border-[#374151] text-gray-300 hover:bg-[#374151]"
             } text-sm md:text-base`}
           >
             <ListMusic size={16} /> Album
@@ -80,7 +81,7 @@ const ReleaseInfoStep = ({ formData, setFormData, errors, setErrors }) => {
 
       {/* Title */}
       <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
+        <label className="block text-sm font-medium text-gray-300">
           {formData.releaseType === "single" ? "Track Title" : "Album Title"}
         </label>
         <input
@@ -88,13 +89,13 @@ const ReleaseInfoStep = ({ formData, setFormData, errors, setErrors }) => {
           name="title"
           value={formData.title}
           onChange={handleChange}
-          className={`w-full p-2.5 md:p-3 rounded-lg bg-white border ${
-            errors.title ? "border-red-300 ring-1 ring-red-300" : "border-gray-200"
-          } focus:outline-none focus:ring-2 focus:ring-[#247a63] transition-all text-sm md:text-base`}
+          className={`w-full p-2.5 md:p-3 rounded-lg bg-[#2d2d2d] border ${
+            errors.title ? "border-red-500 ring-1 ring-red-500" : "border-[#374151]"
+          } text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] transition-all text-sm md:text-base`}
           placeholder={`Enter ${formData.releaseType === "single" ? "track" : "album"} title`}
         />
         {errors.title && (
-          <p className="text-red-500 text-xs md:text-sm flex items-center gap-1">
+          <p className="text-red-400 text-xs md:text-sm flex items-center gap-1">
             <AlertCircle size={14} />
             {errors.title}
           </p>
@@ -105,12 +106,12 @@ const ReleaseInfoStep = ({ formData, setFormData, errors, setErrors }) => {
       {formData.releaseType === "album" && (
         <div className="space-y-4">
           <div className="space-y-2">
-            <label className="block text-sm font-medium text-gray-700">Number of Tracks</label>
+            <label className="block text-sm font-medium text-gray-300">Number of Tracks</label>
             <select
               name="numberOfTracks"
               value={formData.numberOfTracks}
               onChange={handleChange}
-              className="w-full p-2.5 md:p-3 rounded-lg bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#247a63] transition-all text-sm md:text-base"
+              className="w-full p-2.5 md:p-3 rounded-lg bg-[#2d2d2d] border border-[#374151] text-white focus:outline-none focus:ring-2 focus:ring-[#2D8C72] transition-all text-sm md:text-base"
             >
               {[2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15].map((num) => (
                 <option key={num} value={num}>
@@ -121,26 +122,26 @@ const ReleaseInfoStep = ({ formData, setFormData, errors, setErrors }) => {
           </div>
 
           <div className="space-y-3 mt-4">
-            <h3 className="font-medium text-base md:text-lg text-gray-800">Track Information</h3>
+            <h3 className="font-medium text-base md:text-lg text-white">Track Information</h3>
 
             {formData.tracks.map((track, index) => (
-              <div key={index} className="p-3 md:p-4 border border-gray-200 rounded-lg bg-gray-50">
-                <h4 className="font-medium text-[#247a63] mb-2 md:mb-3 text-sm md:text-base">Track {index + 1}</h4>
+              <div key={index} className="p-3 md:p-4 border border-[#374151] rounded-lg bg-[#2d2d2d]">
+                <h4 className="font-medium text-[#2D8C72] mb-2 md:mb-3 text-sm md:text-base">Track {index + 1}</h4>
 
                 <div className="space-y-3">
                   <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700">Track Title</label>
+                    <label className="block text-sm font-medium text-gray-300">Track Title</label>
                     <input
                       type="text"
                       value={track.title}
                       onChange={(e) => handleTrackChange(index, "title", e.target.value)}
                       placeholder="Enter track title"
-                      className={`w-full p-2.5 md:p-3 rounded-lg bg-white border ${
-                        errors[`track${index}Title`] ? "border-red-300 ring-1 ring-red-300" : "border-gray-200"
-                      } focus:outline-none focus:ring-2 focus:ring-[#247a63] transition-all text-sm md:text-base`}
+                      className={`w-full p-2.5 md:p-3 rounded-lg bg-[#1a1a1a] border ${
+                        errors[`track${index}Title`] ? "border-red-500 ring-1 ring-red-500" : "border-[#374151]"
+                      } text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] transition-all text-sm md:text-base`}
                     />
                     {errors[`track${index}Title`] && (
-                      <p className="text-red-500 text-xs md:text-sm flex items-center gap-1">
+                      <p className="text-red-400 text-xs md:text-sm flex items-center gap-1">
                         <AlertCircle size={14} />
                         {errors[`track${index}Title`]}
                       </p>
@@ -148,22 +149,22 @@ const ReleaseInfoStep = ({ formData, setFormData, errors, setErrors }) => {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700">Featured Artist (Optional)</label>
+                    <label className="block text-sm font-medium text-gray-300">Featured Artist (Optional)</label>
                     <input
                       type="text"
                       value={track.featuredArtist}
                       onChange={(e) => handleTrackChange(index, "featuredArtist", e.target.value)}
                       placeholder="Enter featured artist name"
-                      className="w-full p-2.5 md:p-3 rounded-lg bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#247a63] transition-all text-sm md:text-base"
+                      className="w-full p-2.5 md:p-3 rounded-lg bg-[#1a1a1a] border border-[#374151] text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2D8C72] transition-all text-sm md:text-base"
                     />
                   </div>
 
                   <div className="space-y-1">
-                    <label className="block text-sm font-medium text-gray-700">Genre</label>
+                    <label className="block text-sm font-medium text-gray-300">Genre</label>
                     <select
                       value={track.genre}
                       onChange={(e) => handleTrackChange(index, "genre", e.target.value)}
-                      className="w-full p-2.5 md:p-3 rounded-lg bg-white border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[#247a63] transition-all text-sm md:text-base"
+                      className="w-full p-2.5 md:p-3 rounded-lg bg-[#1a1a1a] border border-[#374151] text-white focus:outline-none focus:ring-2 focus:ring-[#2D8C72] transition-all text-sm md:text-base"
                     >
                       <option value="">Select genre</option>
                       <option value="pop">Pop</option>

@@ -7,6 +7,18 @@ const ZuumNews = () => {
   const [activeCategory, setActiveCategory] = useState('all');
   const [reactions, setReactions] = useState({});
 
+  // Dark mode styles matching UploadPage
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+    '--color-border': '#374151'
+  };
+
   // Mock data for news articles
   const newsArticles = [
     {
@@ -100,114 +112,202 @@ const ZuumNews = () => {
   };
 
   return (
-    <div className="min-h-screen my-10 bg-gray-50 dark:bg-gray-900">
+    <div style={darkModeStyles}>
       <Navbar name="Zuum News" />
       
       {/* Header */}
-      <div className="bg-gradient-to-r from-[#1c6350] to-[#2a9d8f] text-white py-12 px-4">
+      <div 
+        className="text-white py-12 px-4"
+        style={{ 
+          background: 'linear-gradient(to right, #2D8C72, #1f6352)'
+        }}
+      >
         <div className="max-w-6xl mx-auto">
           <h1 className="text-3xl md:text-4xl font-bold mb-2">Zuum News</h1>
           <p className="text-green-100 text-lg">Stay updated with music industry insights and platform updates</p>
         </div>
       </div>
 
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Categories */}
-        <div className="mb-8 overflow-x-auto">
-          <div className="flex space-x-2 pb-2">
-            {categories.map(category => (
-              <button
-                key={category.id}
-                onClick={() => setActiveCategory(category.id)}
-                className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-colors ${
-                  activeCategory === category.id
-                    ? 'bg-[#1c6350] text-white'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
-                }`}
-              >
-                {category.name}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* News Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredArticles.map(article => (
-            <article
-              key={article.id}
-              className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-shadow overflow-hidden"
-            >
-              <div className="relative h-48">
-                <img
-                  src={article.image}
-                  alt={article.title}
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute bottom-3 left-3">
-                  <span className="bg-[#1c6350] text-white px-3 py-1 rounded-full text-xs font-medium">
-                    {article.category}
-                  </span>
-                </div>
+      <div 
+        className="flex items-center justify-center mt-10 mb-10"
+        style={{ backgroundColor: 'var(--color-bg-primary)' }}
+      >
+        <div 
+          className="container w-full md:w-11/12 lg:w-5/6 overflow-hidden rounded-lg shadow-lg"
+          style={{ 
+            backgroundColor: 'var(--color-bg-primary)',
+            border: '1px solid var(--color-border)'
+          }}
+        >
+          <div className="p-8">
+            {/* Categories */}
+            <div className="mb-8 overflow-x-auto">
+              <div className="flex space-x-2 pb-2">
+                {categories.map(category => (
+                  <button
+                    key={category.id}
+                    onClick={() => setActiveCategory(category.id)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 transform hover:scale-105`}
+                    style={
+                      activeCategory === category.id
+                        ? { 
+                            backgroundColor: '#2D8C72', 
+                            color: 'white' 
+                          }
+                        : { 
+                            backgroundColor: 'var(--color-bg-secondary)', 
+                            color: 'var(--color-text-secondary)',
+                            border: '1px solid var(--color-border)'
+                          }
+                    }
+                    onMouseEnter={(e) => {
+                      if (activeCategory !== category.id) {
+                        e.target.style.backgroundColor = '#374151';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (activeCategory !== category.id) {
+                        e.target.style.backgroundColor = 'var(--color-bg-secondary)';
+                      }
+                    }}
+                  >
+                    {category.name}
+                  </button>
+                ))}
               </div>
-              
-              <div className="p-5">
-                <div className="flex justify-between items-start mb-3">
-                  <h3 className="text-lg font-bold text-gray-800 dark:text-white line-clamp-2">
-                    {article.title}
-                  </h3>
-                </div>
-                
-                <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 line-clamp-3">
-                  {article.excerpt}
-                </p>
-                
-                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 mb-4">
-                  <span>{article.date}</span>
-                  <span>{article.readTime}</span>
-                </div>
-                
-                {/* Reactions */}
-                <div className="flex items-center justify-between border-t border-gray-100 dark:border-gray-700 pt-3">
-                  <div className="flex items-center space-x-4">
-                    <button 
-                      onClick={() => handleReaction(article.id, 'like')}
-                      className="flex items-center space-x-1 text-gray-500 dark:text-gray-400 hover:text-[#1c6350] dark:hover:text-[#2d8c72]"
-                    >
-                      {reactions[article.id] === 'like' ? (
-                        <FaHeart className="text-[#1c6350] dark:text-[#2d8c72]" />
-                      ) : (
-                        <FaRegHeart />
-                      )}
-                      <span>{article.likes + (reactions[article.id] === 'like' ? 1 : 0)}</span>
-                    </button>
-                    
-                    <button 
-                      onClick={() => handleReaction(article.id, 'dislike')}
-                      className="flex items-center space-x-1 text-gray-500 dark:text-gray-400 hover:text-red-500"
-                    >
-                      {reactions[article.id] === 'dislike' ? (
-                        <FaThumbsDown className="text-red-500" />
-                      ) : (
-                        <FaRegThumbsDown />
-                      )}
-                      <span>{article.dislikes + (reactions[article.id] === 'dislike' ? 1 : 0)}</span>
-                    </button>
+            </div>
+
+            {/* News Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredArticles.map(article => (
+                <article
+                  key={article.id}
+                  className="rounded-lg shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden transform hover:scale-105 hover:-translate-y-2"
+                  style={{ 
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    border: '1px solid var(--color-border)'
+                  }}
+                >
+                  <div className="relative h-48">
+                    <img
+                      src={article.image}
+                      alt={article.title}
+                      className="w-full h-full object-cover"
+                    />
+                    <div className="absolute bottom-3 left-3">
+                      <span 
+                        className="px-3 py-1 rounded-full text-xs font-medium text-white"
+                        style={{ backgroundColor: '#2D8C72' }}
+                      >
+                        {article.category}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
+                  
+                  <div className="p-5">
+                    <div className="flex justify-between items-start mb-3">
+                      <h3 
+                        className="text-lg font-bold line-clamp-2"
+                        style={{ color: 'var(--color-text-primary)' }}
+                      >
+                        {article.title}
+                      </h3>
+                    </div>
+                    
+                    <p 
+                      className="text-sm mb-4 line-clamp-3"
+                      style={{ color: 'var(--color-text-secondary)' }}
+                    >
+                      {article.excerpt}
+                    </p>
+                    
+                    <div 
+                      className="flex items-center justify-between text-xs mb-4"
+                      style={{ color: 'var(--color-text-secondary)' }}
+                    >
+                      <span>{article.date}</span>
+                      <span>{article.readTime}</span>
+                    </div>
+                    
+                    {/* Reactions */}
+                    <div 
+                      className="flex items-center justify-between border-t pt-3"
+                      style={{ borderColor: 'var(--color-border)' }}
+                    >
+                      <div className="flex items-center space-x-4">
+                        <button 
+                          onClick={() => handleReaction(article.id, 'like')}
+                          className="flex items-center space-x-1 transition-colors duration-300"
+                          style={{ 
+                            color: reactions[article.id] === 'like' ? '#2D8C72' : 'var(--color-text-secondary)'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (reactions[article.id] !== 'like') {
+                              e.currentTarget.style.color = '#2D8C72';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (reactions[article.id] !== 'like') {
+                              e.currentTarget.style.color = 'var(--color-text-secondary)';
+                            }
+                          }}
+                        >
+                          {reactions[article.id] === 'like' ? (
+                            <FaHeart />
+                          ) : (
+                            <FaRegHeart />
+                          )}
+                          <span>{article.likes + (reactions[article.id] === 'like' ? 1 : 0)}</span>
+                        </button>
+                        
+                        <button 
+                          onClick={() => handleReaction(article.id, 'dislike')}
+                          className="flex items-center space-x-1 transition-colors duration-300"
+                          style={{ 
+                            color: reactions[article.id] === 'dislike' ? '#ef4444' : 'var(--color-text-secondary)'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (reactions[article.id] !== 'dislike') {
+                              e.currentTarget.style.color = '#ef4444';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (reactions[article.id] !== 'dislike') {
+                              e.currentTarget.style.color = 'var(--color-text-secondary)';
+                            }
+                          }}
+                        >
+                          {reactions[article.id] === 'dislike' ? (
+                            <FaThumbsDown />
+                          ) : (
+                            <FaRegThumbsDown />
+                          )}
+                          <span>{article.dislikes + (reactions[article.id] === 'dislike' ? 1 : 0)}</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
 
-        {/* No Results */}
-        {filteredArticles.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">📰</div>
-            <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2">No articles found</h3>
-            <p className="text-gray-600 dark:text-gray-400">Try selecting a different category</p>
+            {/* No Results */}
+            {filteredArticles.length === 0 && (
+              <div className="text-center py-12">
+                <div className="text-6xl mb-4">📰</div>
+                <h3 
+                  className="text-xl font-semibold mb-2"
+                  style={{ color: 'var(--color-text-primary)' }}
+                >
+                  No articles found
+                </h3>
+                <p style={{ color: 'var(--color-text-secondary)' }}>
+                  Try selecting a different category
+                </p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
 
       <BottomNav />

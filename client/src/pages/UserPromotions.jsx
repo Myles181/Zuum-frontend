@@ -9,7 +9,6 @@ import { useUserPromotions } from '../../Hooks/search/useAllPost';
 import BottomNav from '../components/homepage/BottomNav';
 import Navbar from '../components/profile/NavBar';
 
-
 export const UserPromotions = () => {
   const [filters, setFilters] = useState({
     category: '',
@@ -19,6 +18,18 @@ export const UserPromotions = () => {
   const [selectedPromotion, setSelectedPromotion] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const { promotions, loading, error, pagination, refetch, loadMore, setLimit } = useUserPromotions();
+
+  // Dark mode styles matching UploadPage
+  const darkModeStyles = {
+    '--color-bg-primary': '#1a1a1a',
+    '--color-bg-secondary': '#2d2d2d',
+    '--color-text-primary': '#ffffff',
+    '--color-text-secondary': '#9ca3af',
+    '--color-primary': '#2D8C72',
+    '--color-primary-light': '#34A085',
+    '--color-text-on-primary': '#ffffff',
+    '--color-border': '#374151'
+  };
 
   // Handle view promotion details
   const handleViewPromotion = (promotion) => {
@@ -30,22 +41,22 @@ export const UserPromotions = () => {
     switch(category) {
       case 'national':
       case 'international':
-        return <Newspaper className="w-4 h-4 text-[#008066]" />;
+        return <Newspaper className="w-4 h-4 text-[#2D8C72]" />;
       case 'tv':
-        return <Tv className="w-4 h-4 text-[#008066]" />;
+        return <Tv className="w-4 h-4 text-[#2D8C72]" />;
       case 'radio':
-        return <Radio className="w-4 h-4 text-[#008066]" />;
+        return <Radio className="w-4 h-4 text-[#2D8C72]" />;
       case 'chart':
       case 'playlist':
-        return <ListMusic className="w-4 h-4 text-[#008066]" />;
+        return <ListMusic className="w-4 h-4 text-[#2D8C72]" />;
       case 'digital':
-        return <Globe className="w-4 h-4 text-[#008066]" />;
+        return <Globe className="w-4 h-4 text-[#2D8C72]" />;
       case 'youtube':
-        return <Youtube className="w-4 h-4 text-[#008066]" />;
+        return <Youtube className="w-4 h-4 text-[#2D8C72]" />;
       case 'tiktok':
-        return <Globe className="w-4 h-4 text-[#008066]" />;
+        return <Globe className="w-4 h-4 text-[#2D8C72]" />;
       default:
-        return <Newspaper className="w-4 h-4 text-[#008066]" />;
+        return <Newspaper className="w-4 h-4 text-[#2D8C72]" />;
     }
   };
 
@@ -108,306 +119,314 @@ export const UserPromotions = () => {
   };
 
   return (
-    <div 
-      className="rounded-xl shadow-sm overflow-hidden my-13"
-      style={{ 
-        backgroundColor: 'var(--color-bg-primary)',
-        border: '1px solid var(--color-border)'
-      }}
-    >
+    <div style={darkModeStyles}>
       <Navbar name="User Promotion" />
       
-      {/* Header */}
       <div 
-        className="px-6 py-4"
-        style={{ 
-          background: 'linear-gradient(to right, var(--color-primary), var(--color-primary-dark))'
-        }}
+        className="flex items-center justify-center mt-10 mb-10"
+        style={{ backgroundColor: 'var(--color-bg-primary)' }}
       >
-        <div className="flex items-center justify-between">
-          <h2 className="text-xl font-bold text-white">My Promotions</h2>
-          <button 
-            onClick={() => setShowFilters(!showFilters)}
-            className="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg text-white hover:bg-white/20 transition-all"
-          >
-            <Filter size={16} />
-            Filters
-            {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-          </button>
-        </div>
-      </div>
-
-      {/* Filter Panel */}
-      {showFilters && (
         <div 
-          className="px-6 py-4"
+          className="container w-full md:w-11/12 lg:w-5/6 overflow-hidden rounded-lg shadow-lg"
           style={{ 
-            borderBottom: '1px solid var(--color-border)',
-            backgroundColor: 'var(--color-bg-secondary)'
+            backgroundColor: 'var(--color-bg-primary)',
+            border: '1px solid var(--color-border)'
           }}
         >
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label 
-                className="block text-sm font-medium mb-1"
-                style={{ color: 'var(--color-text-secondary)' }}
+          {/* Header */}
+          <div 
+            className="px-6 py-4"
+            style={{ 
+              background: 'linear-gradient(to right, #2D8C72, #1f6352)',
+              borderBottom: '1px solid var(--color-border)'
+            }}
+          >
+            <div className="flex items-center justify-between">
+              <h2 className="text-xl font-bold text-white">My Promotions</h2>
+              <button 
+                onClick={() => setShowFilters(!showFilters)}
+                className="flex items-center gap-2 px-3 py-2 bg-white/10 rounded-lg text-white hover:bg-white/20 transition-all"
               >
-                Category
-              </label>
-              <select
-                name="category"
-                value={filters.category}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 rounded-lg focus:ring-[#008066] focus:border-[#008066]"
-                style={{ 
-                  border: '1px solid var(--color-border)',
-                  backgroundColor: 'var(--color-bg-primary)',
-                  color: 'var(--color-text-primary)'
-                }}
-              >
-                <option value="">All Categories</option>
-                <option value="national">National</option>
-                <option value="international">International</option>
-                <option value="tv">TV</option>
-                <option value="radio">Radio</option>
-                <option value="chart">Chart</option>
-                <option value="playlist">Playlist</option>
-                <option value="youtube">YouTube</option>
-                <option value="tiktok">TikTok</option>
-              </select>
-            </div>
-            <div>
-              <label 
-                className="block text-sm font-medium mb-1"
-                style={{ color: 'var(--color-text-secondary)' }}
-              >
-                Status
-              </label>
-              <select
-                name="status"
-                value={filters.status}
-                onChange={handleFilterChange}
-                className="w-full px-3 py-2 rounded-lg focus:ring-[#008066] focus:border-[#008066]"
-                style={{ 
-                  border: '1px solid var(--color-border)',
-                  backgroundColor: 'var(--color-bg-primary)',
-                  color: 'var(--color-text-primary)'
-                }}
-              >
-                <option value="">All Statuses</option>
-                <option value="active">Active</option>
-                <option value="pending">Pending</option>
-                <option value="completed">Completed</option>
-                <option value="expired">Expired</option>
-                <option value="failed">Failed</option>
-                <option value="cancelled">Cancelled</option>
-              </select>
-            </div>
-            <div className="flex items-end gap-2">
-              <button
-                onClick={applyFilters}
-                className="px-4 py-2 bg-[#008066] text-white rounded-lg hover:bg-[#006e58] transition-colors"
-              >
-                Apply
-              </button>
-              <button
-                onClick={resetFilters}
-                className="px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                style={{ 
-                  border: '1px solid var(--color-border)',
-                  color: 'var(--color-text-secondary)'
-                }}
-              >
-                Reset
+                <Filter size={16} />
+                Filters
+                {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
               </button>
             </div>
           </div>
-        </div>
-      )}
 
-      {/* Content */}
-      <div className="divide-y" style={{ borderColor: 'var(--color-border)' }}>
-        {loading && !promotions.length ? (
-          <div className="flex justify-center items-center p-8">
-            <Loader2 className="w-8 h-8 text-[#008066] animate-spin" />
-          </div>
-        ) : error ? (
-          <div className="p-6 text-center" style={{ color: 'var(--color-error)' }}>{error}</div>
-        ) : promotions.length === 0 ? (
-          <div className="p-8 text-center" style={{ color: 'var(--color-text-secondary)' }}>
-            No promotions found. Create your first promotion to get started!
-          </div>
-        ) : (
-          <>
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y" style={{ borderColor: 'var(--color-border)' }}>
-                <thead style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
-                  <tr>
-                    <th 
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                      style={{ color: 'var(--color-text-secondary)' }}
-                    >
-                      Promotion
-                    </th>
-                    <th 
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                      style={{ color: 'var(--color-text-secondary)' }}
-                    >
-                      Category
-                    </th>
-                    <th 
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                      style={{ color: 'var(--color-text-secondary)' }}
-                    >
-                      Status
-                    </th>
-                    <th 
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                      style={{ color: 'var(--color-text-secondary)' }}
-                    >
-                      Date
-                    </th>
-                    <th 
-                      className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
-                      style={{ color: 'var(--color-text-secondary)' }}
-                    >
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
-                  {promotions.map((promo, index) => (
-                    <tr 
-                      key={`${promo.id}-${index}`} 
-                      className="transition-colors hover:bg-gray-100 dark:hover:bg-gray-800"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div 
-                            className="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center"
-                            style={{ backgroundColor: 'var(--color-primary-light)' }}
-                          >
-                            {getCategoryIcon(promo.category_type)}
-                          </div>
-                          <div className="ml-4">
-                            <div style={{ color: 'var(--color-text-primary)' }} className="text-sm font-medium">
-                              {promo.title || promo.name || 'Untitled Promotion'}
-                            </div>
-                            <div style={{ color: 'var(--color-text-secondary)' }} className="text-sm">
-                              {promo.name}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div 
-                          className="text-sm capitalize"
-                          style={{ color: 'var(--color-text-primary)' }}
-                        >
-                          {promo.category_type}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        {getStatusBadge(promo.status)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div 
-                          className="text-sm"
-                          style={{ color: 'var(--color-text-secondary)' }}
-                        >
-                          {new Date(promo.created_at).toLocaleDateString()}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => handleViewPromotion(promo)}
-                          className="inline-flex items-center transition duration-150"
-                          style={{ color: 'var(--color-primary)' }}
-                        >
-                          <Eye size={16} className="mr-1" /> 
-                          <span className="hidden sm:inline">View Details</span>
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* Pagination */}
+          {/* Filter Panel */}
+          {showFilters && (
             <div 
-              className="px-6 py-4 flex items-center justify-between"
+              className="px-6 py-4"
               style={{ 
-                backgroundColor: 'var(--color-bg-secondary)',
-                borderTop: '1px solid var(--color-border)'
+                borderBottom: '1px solid var(--color-border)',
+                backgroundColor: 'var(--color-bg-secondary)'
               }}
             >
-              <div className="flex-1 flex justify-between items-center gap-4">
-                <button
-                  onClick={() => loadMore(pagination.offset - pagination.limit)}
-                  disabled={pagination.offset === 0}
-                  className="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ 
-                    border: '1px solid var(--color-border)',
-                    color: 'var(--color-text-secondary)',
-                    backgroundColor: 'var(--color-bg-primary)'
-                  }}
-                >
-                  <ChevronLeft className="w-4 h-4 mr-1" />
-                  Previous
-                </button>
-                
-                <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-center">
-                  <p 
-                    className="text-sm"
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label 
+                    className="block text-sm font-medium mb-1"
                     style={{ color: 'var(--color-text-secondary)' }}
                   >
-                    Showing <span className="font-medium">{pagination.offset + 1}</span> to{' '}
-                    <span className="font-medium">{Math.min(pagination.offset + pagination.limit, pagination.total)}</span> of{' '}
-                    <span className="font-medium">{pagination.total}</span> results
-                  </p>
+                    Category
+                  </label>
+                  <select
+                    name="category"
+                    value={filters.category}
+                    onChange={handleFilterChange}
+                    className="w-full px-3 py-2 rounded-lg focus:ring-[#2D8C72] focus:border-[#2D8C72]"
+                    style={{ 
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: 'var(--color-bg-primary)',
+                      color: 'var(--color-text-primary)'
+                    }}
+                  >
+                    <option value="">All Categories</option>
+                    <option value="national">National</option>
+                    <option value="international">International</option>
+                    <option value="tv">TV</option>
+                    <option value="radio">Radio</option>
+                    <option value="chart">Chart</option>
+                    <option value="playlist">Playlist</option>
+                    <option value="youtube">YouTube</option>
+                    <option value="tiktok">TikTok</option>
+                  </select>
                 </div>
-
-                <select
-                  value={pagination.limit}
-                  onChange={(e) => setLimit(Number(e.target.value))}
-                  className="ml-3 relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-1 focus:ring-[#008066] focus:border-[#008066]"
-                  style={{ 
-                    border: '1px solid var(--color-border)',
-                    color: 'var(--color-text-primary)',
-                    backgroundColor: 'var(--color-bg-primary)'
-                  }}
-                >
-                  <option value={5}>5 per page</option>
-                  <option value={10}>10 per page</option>
-                  <option value={25}>25 per page</option>
-                  <option value={50}>50 per page</option>
-                </select>
-
-                <button
-                  onClick={() => loadMore(pagination.offset + pagination.limit)}
-                  disabled={pagination.offset + pagination.limit >= pagination.total}
-                  className="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
-                  style={{ 
-                    border: '1px solid var(--color-border)',
-                    color: 'var(--color-text-secondary)',
-                    backgroundColor: 'var(--color-bg-primary)'
-                  }}
-                >
-                  Next
-                  <ChevronRight className="w-4 h-4 ml-1" />
-                </button>
+                <div>
+                  <label 
+                    className="block text-sm font-medium mb-1"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    Status
+                  </label>
+                  <select
+                    name="status"
+                    value={filters.status}
+                    onChange={handleFilterChange}
+                    className="w-full px-3 py-2 rounded-lg focus:ring-[#2D8C72] focus:border-[#2D8C72]"
+                    style={{ 
+                      border: '1px solid var(--color-border)',
+                      backgroundColor: 'var(--color-bg-primary)',
+                      color: 'var(--color-text-primary)'
+                    }}
+                  >
+                    <option value="">All Statuses</option>
+                    <option value="active">Active</option>
+                    <option value="pending">Pending</option>
+                    <option value="completed">Completed</option>
+                    <option value="expired">Expired</option>
+                    <option value="failed">Failed</option>
+                    <option value="cancelled">Cancelled</option>
+                  </select>
+                </div>
+                <div className="flex items-end gap-2">
+                  <button
+                    onClick={applyFilters}
+                    className="px-4 py-2 bg-[#2D8C72] text-white rounded-lg hover:bg-[#34A085] transition-colors"
+                  >
+                    Apply
+                  </button>
+                  <button
+                    onClick={resetFilters}
+                    className="px-4 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+                    style={{ 
+                      border: '1px solid var(--color-border)',
+                      color: 'var(--color-text-secondary)'
+                    }}
+                  >
+                    Reset
+                  </button>
+                </div>
               </div>
             </div>
-          </>
-        )}
+          )}
+
+          {/* Content */}
+          <div className="divide-y" style={{ borderColor: 'var(--color-border)' }}>
+            {loading && !promotions.length ? (
+              <div className="flex justify-center items-center p-8">
+                <Loader2 className="w-8 h-8 text-[#2D8C72] animate-spin" />
+              </div>
+            ) : error ? (
+              <div className="p-6 text-center text-red-500">{error}</div>
+            ) : promotions.length === 0 ? (
+              <div className="p-8 text-center" style={{ color: 'var(--color-text-secondary)' }}>
+                No promotions found. Create your first promotion to get started!
+              </div>
+            ) : (
+              <>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full divide-y" style={{ borderColor: 'var(--color-border)' }}>
+                    <thead style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                      <tr>
+                        <th 
+                          className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                          style={{ color: 'var(--color-text-secondary)' }}
+                        >
+                          Promotion
+                        </th>
+                        <th 
+                          className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                          style={{ color: 'var(--color-text-secondary)' }}
+                        >
+                          Category
+                        </th>
+                        <th 
+                          className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                          style={{ color: 'var(--color-text-secondary)' }}
+                        >
+                          Status
+                        </th>
+                        <th 
+                          className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                          style={{ color: 'var(--color-text-secondary)' }}
+                        >
+                          Date
+                        </th>
+                        <th 
+                          className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider"
+                          style={{ color: 'var(--color-text-secondary)' }}
+                        >
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y" style={{ borderColor: 'var(--color-border)', backgroundColor: 'var(--color-bg-primary)' }}>
+                      {promotions.map((promo, index) => (
+                        <tr 
+                          key={`${promo.id}-${index}`} 
+                          className="transition-colors hover:bg-gray-800"
+                        >
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex items-center">
+                              <div 
+                                className="flex-shrink-0 h-10 w-10 rounded-full flex items-center justify-center"
+                                style={{ backgroundColor: 'var(--color-primary-light)' }}
+                              >
+                                {getCategoryIcon(promo.category_type)}
+                              </div>
+                              <div className="ml-4">
+                                <div style={{ color: 'var(--color-text-primary)' }} className="text-sm font-medium">
+                                  {promo.title || promo.name || 'Untitled Promotion'}
+                                </div>
+                                <div style={{ color: 'var(--color-text-secondary)' }} className="text-sm">
+                                  {promo.name}
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div 
+                              className="text-sm capitalize"
+                              style={{ color: 'var(--color-text-primary)' }}
+                            >
+                              {promo.category_type}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            {getStatusBadge(promo.status)}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap">
+                            <div 
+                              className="text-sm"
+                              style={{ color: 'var(--color-text-secondary)' }}
+                            >
+                              {new Date(promo.created_at).toLocaleDateString()}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                            <button
+                              onClick={() => handleViewPromotion(promo)}
+                              className="inline-flex items-center transition duration-150 hover:underline"
+                              style={{ color: 'var(--color-primary)' }}
+                            >
+                              <Eye size={16} className="mr-1" /> 
+                              <span className="hidden sm:inline">View Details</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Pagination */}
+                <div 
+                  className="px-6 py-4 flex items-center justify-between"
+                  style={{ 
+                    backgroundColor: 'var(--color-bg-secondary)',
+                    borderTop: '1px solid var(--color-border)'
+                  }}
+                >
+                  <div className="flex-1 flex justify-between items-center gap-4">
+                    <button
+                      onClick={() => loadMore(pagination.offset - pagination.limit)}
+                      disabled={pagination.offset === 0}
+                      className="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ 
+                        border: '1px solid var(--color-border)',
+                        color: 'var(--color-text-secondary)',
+                        backgroundColor: 'var(--color-bg-primary)'
+                      }}
+                    >
+                      <ChevronLeft className="w-4 h-4 mr-1" />
+                      Previous
+                    </button>
+                    
+                    <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-center">
+                      <p 
+                        className="text-sm"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
+                        Showing <span className="font-medium">{pagination.offset + 1}</span> to{' '}
+                        <span className="font-medium">{Math.min(pagination.offset + pagination.limit, pagination.total)}</span> of{' '}
+                        <span className="font-medium">{pagination.total}</span> results
+                      </p>
+                    </div>
+
+                    <select
+                      value={pagination.limit}
+                      onChange={(e) => setLimit(Number(e.target.value))}
+                      className="ml-3 relative inline-flex items-center px-3 py-2 text-sm font-medium rounded-md focus:outline-none focus:ring-1 focus:ring-[#2D8C72] focus:border-[#2D8C72]"
+                      style={{ 
+                        border: '1px solid var(--color-border)',
+                        color: 'var(--color-text-primary)',
+                        backgroundColor: 'var(--color-bg-primary)'
+                      }}
+                    >
+                      <option value={5}>5 per page</option>
+                      <option value={10}>10 per page</option>
+                      <option value={25}>25 per page</option>
+                      <option value={50}>50 per page</option>
+                    </select>
+
+                    <button
+                      onClick={() => loadMore(pagination.offset + pagination.limit)}
+                      disabled={pagination.offset + pagination.limit >= pagination.total}
+                      className="relative inline-flex items-center px-4 py-2 text-sm font-medium rounded-md disabled:opacity-50 disabled:cursor-not-allowed"
+                      style={{ 
+                        border: '1px solid var(--color-border)',
+                        color: 'var(--color-text-secondary)',
+                        backgroundColor: 'var(--color-bg-primary)'
+                      }}
+                    >
+                      Next
+                      <ChevronRight className="w-4 h-4 ml-1" />
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
       
       {/* View Promotion Modal */}
       {isViewModalOpen && (
         <div 
           className="fixed inset-0 flex items-center justify-center z-50 p-4"
-          style={{ backgroundColor: 'rgba(0, 0, 0, 0.5)' }}
+          style={{ backgroundColor: 'rgba(0, 0, 0, 0.7)' }}
         >
           <div 
             className="rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto"
@@ -428,7 +447,7 @@ export const UserPromotions = () => {
               </h2>
               <button 
                 onClick={() => setIsViewModalOpen(false)}
-                className="focus:outline-none focus:ring-2 focus:ring-[#008066] p-1"
+                className="focus:outline-none focus:ring-2 focus:ring-[#2D8C72] p-1 hover:bg-gray-700 rounded"
                 style={{ color: 'var(--color-text-secondary)' }}
               >
                 <X size={20} />
@@ -612,7 +631,7 @@ export const UserPromotions = () => {
                     )}
                     
                     {selectedPromotion.description && (
-                      <div>
+                      <div className="col-span-2">
                         <h4 
                           className="text-xs font-medium uppercase tracking-wider"
                           style={{ color: 'var(--color-text-secondary)' }}
@@ -629,7 +648,7 @@ export const UserPromotions = () => {
                     )}
                     
                     {selectedPromotion.body && (
-                      <div>
+                      <div className="col-span-2">
                         <h4 
                           className="text-xs font-medium uppercase tracking-wider"
                           style={{ color: 'var(--color-text-secondary)' }}
@@ -678,7 +697,7 @@ export const UserPromotions = () => {
                     )}
                     
                     {selectedPromotion.song_link && (
-                      <div>
+                      <div className="col-span-2">
                         <h4 
                           className="text-xs font-medium uppercase tracking-wider"
                           style={{ color: 'var(--color-text-secondary)' }}
@@ -689,7 +708,7 @@ export const UserPromotions = () => {
                           href={selectedPromotion.song_link} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="mt-1 text-sm break-all"
+                          className="mt-1 text-sm break-all hover:underline"
                           style={{ color: 'var(--color-primary)' }}
                         >
                           {selectedPromotion.song_link}
@@ -698,7 +717,7 @@ export const UserPromotions = () => {
                     )}
                     
                     {selectedPromotion.video_link && (
-                      <div>
+                      <div className="col-span-2">
                         <h4 
                           className="text-xs font-medium uppercase tracking-wider"
                           style={{ color: 'var(--color-text-secondary)' }}
@@ -709,7 +728,7 @@ export const UserPromotions = () => {
                           href={selectedPromotion.video_link} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="mt-1 text-sm break-all"
+                          className="mt-1 text-sm break-all hover:underline"
                           style={{ color: 'var(--color-primary)' }}
                         >
                           {selectedPromotion.video_link}
@@ -731,7 +750,7 @@ export const UserPromotions = () => {
             >
               <button
                 onClick={() => setIsViewModalOpen(false)}
-                className="px-4 py-2 bg-[#008066] text-white rounded-md hover:bg-[#006e58] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#008066] transition duration-150"
+                className="px-4 py-2 bg-[#2D8C72] text-white rounded-md hover:bg-[#34A085] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2D8C72] transition duration-150"
               >
                 Close
               </button>
@@ -743,4 +762,4 @@ export const UserPromotions = () => {
       <BottomNav activeTab="home" />
     </div>
   );
-};
+}
