@@ -126,6 +126,116 @@ export default useDepositAccount;
 
 
 
+
+
+export const usePayStackPayment = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [paymentData, setPaymentData] = useState(null);
+
+  const initializePayment = useCallback(async (amount) => {
+    console.debug('[usePayStackPayment] Initializing payment...', { amount });
+    
+    // Validate amount (same validation as backend)
+    if (!amount || isNaN(amount) || amount < 100) {
+      const errorMsg = 'Valid amount is required (minimum: 100)';
+      console.error('[usePayStackPayment] Validation error:', errorMsg);
+      setError(errorMsg);
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+    setPaymentData(null);
+
+    try {
+      const url = `${API_URL}/payment/initialize`;
+      console.debug(`[usePayStackPayment] Making request to: ${url}`, { amount });
+
+      const response = await axios.post(
+        url,
+        { amount },
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders(),
+          },
+          withCredentials: true,
+        }
+      );
+
+      console.debug('[usePayStackPayment] Full response:', response);
+      
+      // Check if data exists and has the expected structure
+      if (!response.data) {
+        throw new Error('No data in response');
+      }
+
+      // Handle different possible response structures
+      const paymentInfo = response.data.data || response.data;
+      
+      if (!paymentInfo) {
+        throw new Error('Payment data not found in response');
+      }
+
+      console.debug('[usePayStackPayment] Extracted payment data:', paymentInfo);
+      setPaymentData(paymentInfo);
+      setSuccess(true);
+      
+      return paymentInfo; // Return payment data for immediate use if needed
+      
+    } catch (err) {
+      console.error('[usePayStackPayment] Error:', err);
+      
+      let errorMessage = 'Failed to initialize payment';
+      
+      if (err.response) {
+        console.error('[usePayStackPayment] Response error:', {
+          status: err.response.status,
+          data: err.response.data,
+        });
+        
+        errorMessage = err.response.data?.message || 
+                      err.response.data?.error || 
+                      `Server responded with ${err.response.status}`;
+      } else if (err.request) {
+        console.error('[usePayStackPayment] No response received');
+        errorMessage = 'No response from server';
+      } else {
+        console.error('[usePayStackPayment] Request error:', err.message);
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+      throw err; // Re-throw for additional error handling if needed
+    } finally {
+      setLoading(false);
+      console.debug('[usePayStackPayment] Request completed');
+    }
+  }, []);
+
+  // Reset function to clear states
+  const reset = useCallback(() => {
+    setLoading(false);
+    setError(null);
+    setSuccess(false);
+    setPaymentData(null);
+  }, []);
+
+  return {
+    initializePayment,
+    paymentData, // Contains reference and authorization_url
+    loading,
+    error,
+    success,
+    reset,
+  };
+};
+
+
+
  export const useAccountDetails = () => {
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(false);

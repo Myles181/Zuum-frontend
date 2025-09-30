@@ -8,13 +8,17 @@ const MobileDashboard = ({
   recentTransactions = [], 
   onSend, 
   onWithdraw, 
-  setActiveTab 
+  setActiveTab,
+  profile
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentBalanceIndex, setCurrentBalanceIndex] = useState(0);
   const scrollContainerRef = useRef(null);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
+
+  console.log(profile);
+  
 
  
 
@@ -38,7 +42,7 @@ const MobileDashboard = ({
   const balances = [
     { 
       currency: 'NGN', 
-      amount: balance || 50000.00, 
+      amount: profile?.balance , 
       symbol: '₦',
       change: '+2.3%',
       changeType: 'positive',
@@ -118,21 +122,42 @@ const MobileDashboard = ({
 
   const transactions = recentTransactions.length > 0 ? recentTransactions : defaultTransactions;
 
-  const handleScroll = (direction) => {
-    const container = scrollContainerRef.current;
-    if (!container) return;
+  // const handleScroll = (direction) => {
+  //   const container = scrollContainerRef.current;
+  //   if (!container) return;
 
-    const scrollAmount = 320;
-    const newIndex = direction === 'next' 
-      ? Math.min(currentBalanceIndex + 1, balances.length - 1)
-      : Math.max(currentBalanceIndex - 1, 0);
+  //   const scrollAmount = 320;
+  //   const newIndex = direction === 'next' 
+  //     ? Math.min(currentBalanceIndex + 1, balances.length - 1)
+  //     : Math.max(currentBalanceIndex - 1, 0);
 
-    setCurrentBalanceIndex(newIndex);
-    container.scrollTo({
-      left: newIndex * scrollAmount,
+  //   setCurrentBalanceIndex(newIndex);
+  //   container.scrollTo({
+  //     left: newIndex * scrollAmount,
+  //     behavior: 'smooth'
+  //   });
+  // };
+
+
+  const scrollToCard = (index) => {
+  if (scrollContainerRef.current) {
+    const cardWidth = 320; // w-80 = 320px
+    const scrollPosition = index * cardWidth;
+    scrollContainerRef.current.scrollTo({
+      left: scrollPosition,
       behavior: 'smooth'
     });
-  };
+  }
+};
+
+const handleScroll = () => {
+  if (scrollContainerRef.current) {
+    const scrollLeft = scrollContainerRef.current.scrollLeft;
+    const cardWidth = 320; // w-80 = 320px
+    const newIndex = Math.round(scrollLeft / cardWidth);
+    setCurrentBalanceIndex(newIndex);
+  }
+};
 
   const currentBalance = balances[currentBalanceIndex] || balances[0];
 
@@ -168,192 +193,181 @@ const MobileDashboard = ({
 
         {/* Modern Balance Carousel */}
         <div className="mb-8 mt-13">
-          <div className="flex justify-between items-center mb-4">
-            <h3 
-              className="text-lg font-semibold"
-              style={{ color: 'var(--color-text-primary)' }}
+  <div className="flex justify-between items-center mb-4">
+    <h3 
+      className="text-lg font-semibold"
+      style={{ color: 'var(--color-text-primary)' }}
+    >
+      Wallets
+    </h3>
+    <div className="flex space-x-1">
+      {balances.map((_, index) => (
+        <button
+          key={index}
+          onClick={() => {
+            setCurrentBalanceIndex(index);
+            scrollToCard(index);
+          }}
+          className={`w-2 h-2 rounded-full transition-all duration-300 ${
+            index === currentBalanceIndex 
+              ? 'bg-green-400 scale-125' 
+              : 'bg-gray-600'
+          }`}
+        />
+      ))}
+    </div>
+  </div>
+
+  {/* Fixed Carousel with proper scrolling */}
+  <div 
+    ref={scrollContainerRef}
+    className="flex overflow-x-auto scroll-smooth space-x-4 pb-4 snap-x snap-mandatory"
+    style={{ 
+      scrollbarWidth: 'none', 
+      msOverflowStyle: 'none',
+      WebkitOverflowScrolling: 'touch'
+    }}
+    onScroll={handleScroll}
+  >
+    {balances.map((balanceItem, index) => (
+      <div
+        key={balanceItem.currency}
+        className={`flex-shrink-0 w-80 p-6 rounded-3xl transition-all duration-500 transform cursor-pointer snap-center ${
+          index === currentBalanceIndex 
+            ? 'scale-100 shadow-2xl' 
+            : 'scale-95 opacity-90'
+        }`}
+        style={{ 
+          background: balanceItem.gradient,
+          border: '1px solid rgba(255, 255, 255, 0.1)'
+        }}
+        onClick={() => {
+          setCurrentBalanceIndex(index);
+          scrollToCard(index);
+        }}
+      >
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <div 
+              className="text-sm font-medium opacity-90 mb-1"
+              style={{ color: 'white' }}
             >
-              Wallets
-            </h3>
-            <div className="flex space-x-1">
-              {balances.map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentBalanceIndex(index)}
-                  className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                    index === currentBalanceIndex 
-                      ? 'bg-green-400 scale-125' 
-                      : 'bg-gray-600'
-                  }`}
-                />
-              ))}
+              {balanceItem.currency} Balance
+            </div>
+            <div 
+              className="text-2xl font-bold mb-2"
+              style={{ color: 'white' }}
+            >
+              {balanceItem.symbol}{formatAmount(balanceItem.amount)}
             </div>
           </div>
-
           <div 
-            ref={scrollContainerRef}
-            className="flex overflow-x-hidden scroll-smooth space-x-4 pb-2"
-            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
+            style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
           >
-            {balances.map((balanceItem, index) => (
-              <div
-                key={balanceItem.currency}
-                className={`flex-shrink-0 w-80 p-6 rounded-3xl transition-all duration-500 transform cursor-pointer ${
-                  index === currentBalanceIndex 
-                    ? 'scale-100 shadow-2xl' 
-                    : 'scale-90 opacity-80'
-                }`}
-                style={{ 
-                  background: balanceItem.gradient,
-                  border: '1px solid rgba(255, 255, 255, 0.1)'
-                }}
-                onClick={() => setCurrentBalanceIndex(index)}
-              >
-                <div className="flex justify-between items-start mb-6">
-                  <div>
-                    <div 
-                      className="text-sm font-medium opacity-90 mb-1"
-                      style={{ color: 'white' }}
-                    >
-                      {balanceItem.currency} Balance
-                    </div>
-                    <div 
-                      className="text-2xl font-bold mb-2"
-                      style={{ color: 'white' }}
-                    >
-                      {balanceItem.symbol}{formatAmount(balanceItem.amount)}
-                    </div>
-                  </div>
-                  <div 
-                    className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold"
-                    style={{ backgroundColor: 'rgba(255, 255, 255, 0.2)' }}
-                  >
-                    {balanceItem.currency.charAt(0)}
-                  </div>
-                </div>
-                <div className="flex justify-between items-center">
-                  <div 
-                    className="text-sm opacity-90"
-                    style={{ color: 'white' }}
-                  >
-                    {balanceItem.change} today
-                  </div>
-                  <div 
-                    className="text-xs px-3 py-1 rounded-full font-medium"
-                    style={{ 
-                      backgroundColor: 'rgba(255, 255, 255, 0.2)',
-                      color: 'white'
-                    }}
-                  >
-                    Active
-                  </div>
-                </div>
-              </div>
-            ))}
+            {balanceItem.currency.charAt(0)}
           </div>
         </div>
-
-        {/* Modern Action Buttons */}
-        <div className="grid grid-cols-4 gap-3 mb-8">
-          <Link to='/dashboard/deposit'>
-        
-          <button
-            // onClick={onFund}
-            className="group flex flex-col items-center p-3 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95"
+        <div className="flex justify-between items-center">
+          <div 
+            className="text-sm opacity-90"
+            style={{ color: 'white' }}
+          >
+            {balanceItem.change} today
+          </div>
+          <div 
+            className="text-xs px-3 py-1 rounded-full font-medium"
             style={{ 
-              backgroundColor: 'var(--color-card-bg)',
-              border: '1px solid var(--color-border)'
+              backgroundColor: 'rgba(255, 255, 255, 0.2)',
+              color: 'white'
             }}
           >
-            <div 
-              className="w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-all duration-300 group-hover:scale-110"
-              style={{ background: 'var(--color-gradient-primary)' }}
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-            </div>
-            <span 
-              className="text-xs font-medium"
-              style={{ color: 'var(--color-text-primary)' }}
-            >
-              Deposit
-            </span>
-          </button>
-            </Link>
-
-          <button
-            onClick={onSend}
-            className="group flex flex-col items-center p-3 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95"
-            style={{ 
-              backgroundColor: 'var(--color-card-bg)',
-              border: '1px solid var(--color-border)'
-            }}
-          >
-            <div 
-              className="w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-all duration-300 group-hover:scale-110"
-              style={{ background: 'var(--color-gradient-secondary)' }}
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-            </div>
-            <span 
-              className="text-xs font-medium"
-              style={{ color: 'var(--color-text-primary)' }}
-            >
-              Send
-            </span>
-          </button>
-
-          <button
-            onClick={onWithdraw}
-            className="group flex flex-col items-center p-3 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95"
-            style={{ 
-              backgroundColor: 'var(--color-card-bg)',
-              border: '1px solid var(--color-border)'
-            }}
-          >
-            <div 
-              className="w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-all duration-300 group-hover:scale-110"
-              style={{ background: 'var(--color-gradient-tertiary)' }}
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-              </svg>
-            </div>
-            <span 
-              className="text-xs font-medium"
-              style={{ color: 'var(--color-text-primary)' }}
-            >
-              Withdraw
-            </span>
-          </button>
-
-          <button
-            onClick={() => setActiveTab('history')}
-            className="group flex flex-col items-center p-3 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95"
-            style={{ 
-              backgroundColor: 'var(--color-card-bg)',
-              border: '1px solid var(--color-border)'
-            }}
-          >
-            <div 
-              className="w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-all duration-300 group-hover:scale-110"
-              style={{ background: 'var(--color-card-bg)' }}
-            >
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-            <span 
-              className="text-xs font-medium"
-              style={{ color: 'var(--color-text-primary)' }}
-            >
-              History
-            </span>
-          </button>
+            Active
+          </div>
         </div>
+      </div>
+    ))}
+  </div>
+</div>
+
+{/* Fixed Button Layout - 4 equal columns */}
+<div className="grid grid-cols-3 gap-3 mb-8">
+  <Link to='/dashboard/deposit' className="block">
+    <button
+      className="group flex flex-col items-center p-3 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 w-full h-full"
+      style={{ 
+        backgroundColor: 'var(--color-card-bg)',
+        border: '1px solid var(--color-border)'
+      }}
+    >
+      <div 
+        className="w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-all duration-300 group-hover:scale-110"
+        style={{ background: 'var(--color-gradient-primary)' }}
+      >
+        <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+        </svg>
+      </div>
+      <span 
+        className="text-xs font-medium"
+        style={{ color: 'var(--color-text-primary)' }}
+      >
+        Deposit
+      </span>
+    </button>
+  </Link>
+
+  <button
+    // onClick={}
+    className="group flex flex-col items-center p-3 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 w-full"
+    style={{ 
+      backgroundColor: 'var(--color-card-bg)',
+      border: '1px solid var(--color-border)'
+    }}
+  >
+    <div 
+      className="w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-all duration-300 group-hover:scale-110"
+      style={{ background: 'var(--color-gradient-secondary)' }}
+    >
+      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+      </svg>
+    </div>
+    <span 
+      className="text-xs font-medium"
+      style={{ color: 'var(--color-text-primary)' }}
+    >
+      Send
+    </span>
+  </button>
+
+  <button
+    
+    className="group flex flex-col items-center p-3 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 w-full"
+    style={{ 
+      backgroundColor: 'var(--color-card-bg)',
+      border: '1px solid var(--color-border)'
+    }}
+  >
+    <div 
+      className="w-12 h-12 rounded-xl flex items-center justify-center mb-2 transition-all duration-300 group-hover:scale-110"
+      style={{ background: 'var(--color-gradient-tertiary)' }}
+    >
+      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+      </svg>
+    </div>
+    <span 
+      className="text-xs font-medium"
+      style={{ color: 'var(--color-text-primary)' }}
+    >
+      Withdraw
+    </span>
+  </button>
+
+  {/* Add a fourth button to complete the grid - Exchange/More */}
+
+</div>
 
         {/* Modern Transaction History */}
         <div className="mb-20">

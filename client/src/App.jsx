@@ -198,7 +198,7 @@ const AppRoutes = () => {
         <Route path="/details" element={<SubscriptionDetails />} />
         <Route path="/lock" element={<LockedMusicPlayer />} />
         <Route path="/userbeats/:userId" element={<PurchaseFeed />} />
-        <Route path="/dashboard" element={<MusicDashboard />} />
+        <Route path="/dashboard" element={<MusicDashboard  profile={profile}/>} />
         <Route path="/beats/:id" element={<BeatDetails />} />
         <Route path="/purchasedbeats" element={<PurchasedBeats />} />
         <Route path="/promotion" element={<PromotionPage />} />
