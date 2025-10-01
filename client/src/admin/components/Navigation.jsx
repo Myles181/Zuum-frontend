@@ -16,7 +16,7 @@ const AdminNavigation = ({ activePage }) => {
     {
       name: "Distribution",
       icon: <BarChart3 className="h-5 w-5" />,
-      href: "/admin/distribution",
+      href: "/addistributions",
     },
     {
       name: "Settings",
