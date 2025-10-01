@@ -236,6 +236,104 @@ export const usePayStackPayment = () => {
 
 
 
+
+
+export const useWalletAddress = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [walletData, setWalletData] = useState(null);
+
+  const getWalletAddress = useCallback(async () => {
+    console.debug('[useWalletAddress] Getting wallet address...');
+    
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+    setWalletData(null);
+
+    try {
+      const url = `${API_URL}/payment/getWalletAddress`;
+      console.debug(`[useWalletAddress] Making request to: ${url}`);
+
+      const response = await axios.get(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(), // Assuming this function exists
+        },
+        withCredentials: true,
+      });
+
+      console.debug('[useWalletAddress] Full response:', response);
+      
+      // Check if data exists and has the expected structure
+      if (!response.data) {
+        throw new Error('No data in response');
+      }
+
+      // Handle different possible response structures
+      const walletInfo = response.data.data || response.data;
+      
+      if (!walletInfo) {
+        throw new Error('Wallet data not found in response');
+      }
+
+      console.debug('[useWalletAddress] Extracted wallet data:', walletInfo);
+      setWalletData(walletInfo);
+      setSuccess(true);
+      
+      return walletInfo; // Return wallet data for immediate use
+      
+    } catch (err) {
+      console.error('[useWalletAddress] Error:', err);
+      
+      let errorMessage = 'Failed to get wallet address';
+      
+      if (err.response) {
+        console.error('[useWalletAddress] Response error:', {
+          status: err.response.status,
+          data: err.response.data,
+        });
+        
+        errorMessage = err.response.data?.message || 
+                      err.response.data?.error || 
+                      `Server responded with ${err.response.status}`;
+      } else if (err.request) {
+        console.error('[useWalletAddress] No response received');
+        errorMessage = 'No response from server';
+      } else {
+        console.error('[useWalletAddress] Request error:', err.message);
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+      throw err; // Re-throw for additional error handling
+    } finally {
+      setLoading(false);
+      console.debug('[useWalletAddress] Request completed');
+    }
+  }, []);
+
+  // Reset function to clear states
+  const reset = useCallback(() => {
+    setLoading(false);
+    setError(null);
+    setSuccess(false);
+    setWalletData(null);
+  }, []);
+
+  return {
+    getWalletAddress,
+    walletData, // Contains walletAddress and message
+    loading,
+    error,
+    success,
+    reset,
+  };
+};
+
+
+
  export const useAccountDetails = () => {
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(false);

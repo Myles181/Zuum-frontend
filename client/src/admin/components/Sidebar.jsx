@@ -27,7 +27,7 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
       description: 'Manage user accounts'
     },
     {
-      id: 'distribution',
+      id: 'addistributions',
       label: 'Distribution Requests',
       icon: Mail,
       description: 'Handle distribution requests'

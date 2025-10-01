@@ -61,6 +61,9 @@ const AdminUsersPage = () => {
     setIsViewModalOpen(true);
   };
 
+  
+  
+
   // Handle confirmation modal for deactivation
   const handleDeactivateClick = (user) => {
     setUserToDeactivate(user);
@@ -262,12 +265,12 @@ const AdminUsersPage = () => {
                   <div className="flex items-center">
                     <div className="flex-shrink-0">
                       <div className="w-8 h-8 lg:w-10 lg:h-10 bg-[#2d7a63] bg-opacity-10 rounded-lg flex items-center justify-center">
-                        <User className="w-5 h-5 lg:w-6 lg:h-6 text-[#2d7a63]" />
+                        <User className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
                       </div>
                     </div>
                     <div className="ml-3 lg:ml-4">
                       <p className="text-sm font-medium text-gray-600">Total Users</p>
-                      <p className="text-xl lg:text-2xl font-bold text-gray-900">{pagination.total}</p>
+                      <p className="text-xl lg:text-2xl font-bold text-gray-900">{users.length}</p>
                     </div>
                   </div>
                 </div>
@@ -362,7 +365,7 @@ const AdminUsersPage = () => {
                             <td className="px-6 py-4 whitespace-nowrap">
                               <div className="flex items-center">
                                 <div className="flex-shrink-0 h-8 w-8 bg-[#2d7a63] bg-opacity-10 rounded-full flex items-center justify-center">
-                                  <User className="h-4 w-4 text-[#2d7a63]" />
+                                  <User className="h-4 w-4 text-white" />
                                 </div>
                                 <div className="ml-3">
                                   <div className="text-sm font-medium text-gray-900">{user.username}</div>
