@@ -44,27 +44,39 @@ const Login = () => {
   };
 
   // Handle form submission
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    
-    if (!email || !password) {
-      return;
-    }
-    
-    setIsSubmitting(true);
-    setHasAttemptedLogin(true);
-    
-    const credentials = { email, password, rememberMe };
-    await login(credentials);
-    
-    setIsSubmitting(false);
-  };
+ const [localError, setLocalError] = useState(null);
 
-  useEffect(() => {
-    if (isAuthenticated && hasAttemptedLogin) {
-      navigate('/home');
-    }
-  }, [isAuthenticated, hasAttemptedLogin, navigate]);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!email || !password) return;
+
+  setIsSubmitting(true);
+  setLocalError(null); // reset error
+
+  const credentials = { email, password, rememberMe };
+  const result = await login(credentials);
+
+  if (result.success) {
+    navigate('/home');
+  } else if (result.errorCode === 406) {
+    navigate('/verify', { state: { email } });
+  } 
+  else if (result.errorCode === 401) {
+    setLocalError("invalid Credentials" );
+  } else {
+    setLocalError(error.message );
+  }
+
+  setIsSubmitting(false);
+};
+
+
+
+  // useEffect(() => {
+  //   if (isAuthenticated && hasAttemptedLogin) {
+  //     navigate('/home');
+  //   }
+  // }, [isAuthenticated, hasAttemptedLogin, navigate]);
 
   return (
     <div 
@@ -129,7 +141,7 @@ const Login = () => {
             </div>
 
             {/* Error Message */}
-            {error && (
+            {localError && (
               <div 
                 className="mb-4 p-3 rounded-lg text-sm transition-all duration-300"
                 style={{
@@ -137,7 +149,7 @@ const Login = () => {
                   color: '#f87171'
                 }}
               >
-                {error}
+                {localError}
               </div>
             )}
 
@@ -252,7 +264,7 @@ const Login = () => {
                 {/* Sign In Button */}
                 <button
                   type="submit"
-                  disabled={loading || isSubmitting}
+                  disabled={ isSubmitting}
                   className="w-full py-3 bg-[#2D8C72] hover:bg-[#248066] disabled:bg-gray-600 text-white rounded-2xl font-semibold text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg disabled:hover:scale-100 disabled:cursor-not-allowed"
                 >
                   <div className="flex items-center justify-center">

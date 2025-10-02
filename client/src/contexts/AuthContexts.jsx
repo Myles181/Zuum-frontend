@@ -251,44 +251,32 @@ export const AuthProvider = ({ children }) => {
       }
       
       // 3. Check authentication status
-      const authSuccess = await checkAuth();
-      
-      if (authSuccess) {
-        console.debug('[AuthContext] Login successful, user authenticated');
-        return true;
-      } else {
-        console.error('[AuthContext] Login failed - authentication check failed');
-        setError('Login failed - please try again');
-        return false;
-      }
-      
-    } catch (err) {
-      console.error('[AuthContext] Login error:', err);
-      
-      if (err.response) {
-        // The request was made and the server responded with a status code
-        if (err.response.status === 401) {
-          setError('Invalid email or password');
-        } else if (err.response.status === 404) {
-          setError('User not found');
-        } else if (err.response.status === 500) {
-          setError('Server error - please try again later');
-        } else {
-          setError(err.response.data?.message || 'Login failed');
-        }
-      } else if (err.request) {
-        // The request was made but no response was received
-        setError('Network error - please check your connection');
-      } else {
-        // Something happened in setting up the request
-        setError('Login failed: ' + err.message);
-      }
-      
-      return false;
-    } finally {
-      setLoading(false);
+const authSuccess = await checkAuth();
+    if (authSuccess) {
+      return { success: true };
+    } else {
+      return { success: false, errorCode: 'auth_failed' };
     }
-  };
+
+  } catch (err) {
+    console.error('[AuthContext] Login error:', err);
+
+    if (err.response) {
+      return { 
+        success: false, 
+        errorCode: err.response.status,
+        message: err.response.data?.message || ''
+      };
+    } else if (err.request) {
+      return { success: false, errorCode: 'network_error', message: 'Network error' };
+    } else {
+      return { success: false, errorCode: 'unknown_error', message: err.message };
+    }
+  } finally {
+    setLoading(false);
+  }
+
+  }
 
   const logout = async () => {
     try {
