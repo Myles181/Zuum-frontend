@@ -268,7 +268,7 @@ const handleSubmit = async (e) => {
                   className="w-full py-3 bg-[#2D8C72] hover:bg-[#248066] disabled:bg-gray-600 text-white rounded-2xl font-semibold text-base transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] hover:shadow-lg disabled:hover:scale-100 disabled:cursor-not-allowed"
                 >
                   <div className="flex items-center justify-center">
-                    {loading ? (
+                    {isSubmitting ? (
                       <>
                         <FaSpinner className="w-4 h-4 mr-2 animate-spin" />
                         Signing in...
