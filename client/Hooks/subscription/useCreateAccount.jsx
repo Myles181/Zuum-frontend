@@ -126,6 +126,84 @@ export default useDepositAccount;
 
 
 
+export const useCreateVirtualAccount = () => {
+  const [account, setAccount] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
+  const createVirtualAccount = useCallback(async (amount) => {
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+    setAccount(null);
+
+    try {
+      // Validate amount
+      if (!amount || isNaN(amount) || amount < 1) {
+        throw new Error('Invalid amount');
+      }
+
+      // Send amount as query parameter, not in request body
+      const response = await axios.post(
+        `${API_URL}/payment/create-virtual-account?amount=${amount}`,
+        {}, // Empty body since backend expects query params
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders(),
+          },
+          withCredentials: true,
+        }
+      );
+
+      if (!response.data || !response.data.data) {
+        throw new Error('No account data received');
+      }
+
+      setAccount(response.data.data);
+      setSuccess(true);
+      return response.data.data;
+    } catch (err) {
+      console.error('[useCreateVirtualAccount] Error:', err);
+      
+      let errorMessage = 'Failed to create virtual account';
+      
+      if (err.response) {
+        // Get more specific error message from backend
+        errorMessage = err.response.data?.message || 
+                      err.response.data?.error || 
+                      `Server responded with ${err.response.status}`;
+      } else if (err.request) {
+        errorMessage = 'No response from server. Please check your connection.';
+      } else {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const reset = useCallback(() => {
+    setAccount(null);
+    setError(null);
+    setSuccess(false);
+    setLoading(false);
+  }, []);
+
+  return {
+    createVirtualAccount,
+    account,
+    loading,
+    error,
+    success,
+    reset,
+  };
+};
+
 
 
 export const usePayStackPayment = () => {

@@ -1,473 +1,202 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowDownToLine, CheckCircle, AlertCircle, Loader2, ExternalLink, Copy, QrCode, Shield, CreditCard, Wallet, Clock, Info, Check, TrendingUp, Lock, Zap } from 'lucide-react';
-import { usePayStackPayment, useWalletAddress } from '../../../Hooks/subscription/useCreateAccount';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowDownToLine, CheckCircle, AlertCircle, Loader2, Copy, QrCode, Shield, CreditCard, Wallet, Clock, Info, Check, TrendingUp, Zap } from 'lucide-react';
+import { useCreateVirtualAccount, useWalletAddress } from '../../../Hooks/subscription/useCreateAccount';
+import Navbar from '../profile/NavBar';
+import BottomNav from '../homepage/BottomNav';
 
 export const DepositPage = () => {
   const [amount, setAmount] = useState('');
-  const [showForm, setShowForm] = useState(true);
-  const [activeTab, setActiveTab] = useState('ngn');
-  const [copiedAddress, setCopiedAddress] = useState(null);
+  const [activeTab, setActiveTab] = useState('virtual');
+  const [copiedInfo, setCopiedInfo] = useState(null);
+  const [countdown, setCountdown] = useState(30);
 
-  const { initializePayment, paymentData, loading, error, success } = usePayStackPayment();
-  const { getWalletAddress, walletData, loading: walletLoading, error: walletError, success: walletSuccess } = useWalletAddress();
+  const navigate = useNavigate();
+  const { createVirtualAccount, account, loading, error, reset } = useCreateVirtualAccount();
+  const { getWalletAddress, walletData, loading: walletLoading, error: walletError } = useWalletAddress();
 
-  // Generate QR code from wallet address
-  const generateQRCode = (address) => {
-    return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(address)}`;
-  };
+  const isCountdownActive = useMemo(() => 
+    countdown > 0 && ((account && activeTab === 'virtual') || (walletData?.walletAddress && activeTab === 'crypto')),
+    [countdown, account, walletData, activeTab]
+  );
 
-  const cryptoAddresses = {
-    usdt: {
-      address: walletData?.walletAddress || 'Click to generate wallet address',
-      network: 'TRC20 (Tron)',
-      qrCode: walletData?.walletAddress ? generateQRCode(walletData.walletAddress) : '',
-      icon: '🪙',
-      minDeposit: '10 USDT',
-      processingTime: '5-15 minutes',
-      isLoading: walletLoading,
-      isGenerated: !!walletData?.walletAddress
+  // Countdown timer
+  useEffect(() => {
+    if (!isCountdownActive) return;
+    const timer = setTimeout(() => setCountdown(prev => Math.max(0, prev - 1)), 1000);
+    return () => clearTimeout(timer);
+  }, [isCountdownActive, countdown]);
+
+  // Reset countdown on account/wallet creation
+  useEffect(() => {
+    if ((account && activeTab === 'virtual') || (walletData?.walletAddress && activeTab === 'crypto')) {
+      setCountdown(30);
     }
-  };
+  }, [account, walletData, activeTab]);
 
-  const darkModeStyles = {
-    '--color-bg-primary': '#0f0f0f',
-    '--color-bg-secondary': '#1a1a1a',
-    '--color-bg-tertiary': '#141414',
-    '--color-card-bg': 'rgba(255, 255, 255, 0.05)',
-    '--color-card-hover': 'rgba(255, 255, 255, 0.08)',
-    '--color-text-primary': '#ffffff',
-    '--color-text-secondary': '#a0a0a0',
-    '--color-accent-primary': '#2D8C72',
-    '--color-accent-secondary': '#34A085',
-    '--color-accent-hover': '#25715E',
-    '--color-gradient-primary': 'linear-gradient(135deg, #2D8C72 0%, #34A085 100%)',
-    '--color-gradient-secondary': 'linear-gradient(135deg, #1a1a1a 0%, #2D8C72 100%)',
-    '--color-border': 'rgba(255, 255, 255, 0.1)',
-    '--color-border-focus': 'rgba(45, 140, 114, 0.5)',
-    '--color-success': '#22c55e',
-    '--color-warning': '#f59e0b',
-    '--color-error': '#ef4444',
-    '--shadow-sm': '0 2px 8px rgba(0, 0, 0, 0.3)',
-    '--shadow-md': '0 4px 16px rgba(0, 0, 0, 0.4)',
-    '--shadow-lg': '0 8px 32px rgba(0, 0, 0, 0.5)',
-    '--shadow-glow': '0 0 20px rgba(45, 140, 114, 0.3)'
-  };
-
-  const handleInitializePayment = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!amount || isNaN(amount) || amount < 100) {
-      return;
-    }
-
-    try {
-      await initializePayment(parseFloat(amount));
-      setShowForm(false);
-    } catch (err) {
-      console.error('Payment initialization failed:', err);
-    }
+    if (!amount || parseFloat(amount) < 100) return;
+    await createVirtualAccount(parseFloat(amount));
   };
 
-  const handleCreateNewPayment = () => {
-    setShowForm(true);
+  const handleReset = () => {
+    reset();
     setAmount('');
+    setCountdown(20);
   };
 
-  const handleRedirectToPayStack = () => {
-    if (paymentData?.authorization_url) {
-      window.location.href = paymentData.authorization_url;
-    }
+  const handleComplete = () => {
+    setTimeout(() => navigate('/dashboard'), 1000);
   };
 
-  const copyToClipboard = (text, type) => {
+  const copyText = (text, type) => {
     if (!text || text === 'Click to generate wallet address') return;
-    
-    navigator.clipboard.writeText(text).then(() => {
-      setCopiedAddress(type);
-      setTimeout(() => setCopiedAddress(null), 2000);
-    });
+    navigator.clipboard.writeText(text);
+    setCopiedInfo(type);
+    setTimeout(() => setCopiedInfo(null), 2000);
   };
 
-  // Handle tab change - fetch wallet when USDT tab is selected
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-    if (tabId === 'usdt' && !walletData && !walletLoading) {
+    if (tabId === 'crypto' && !walletData && !walletLoading) {
       getWalletAddress();
     }
   };
 
-  // Auto-fetch wallet when USDT tab is active and no wallet data
-  useEffect(() => {
-    if (activeTab === 'usdt' && !walletData && !walletLoading && !walletError) {
-      getWalletAddress();
-    }
-  }, [activeTab, walletData, walletLoading, walletError]);
-
-  useEffect(() => {
-    if (paymentData?.authorization_url && !loading && !error) {
-      const redirectTimer = setTimeout(() => {
-        window.location.href = paymentData.authorization_url;
-      }, 1500);
-
-      return () => clearTimeout(redirectTimer);
-    }
-  }, [paymentData, loading, error]);
-
-  useEffect(() => {
-    setShowForm(true);
-    setAmount('');
-  }, [activeTab]);
-
-  const quickAmounts = [500, 1000, 5000, 10000];
+  const quickAmounts = [1000, 5000, 10000, 50000];
+  const hasWallet = !!walletData?.walletAddress;
+  const qrCode = hasWallet ? `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(walletData.walletAddress)}` : '';
 
   return (
-    <div style={darkModeStyles}>
-      <div className="max-w-2xl mx-auto p-4 min-h-screen"
-        style={{ 
-          background: 'radial-gradient(circle at top, #1a1a1a 0%, #0f0f0f 100%)',
-          backgroundColor: 'var(--color-bg-primary)'
-        }}
-      >
-        {/* Professional Header with Gradient */}
-        <div className="relative overflow-hidden p-8 rounded-3xl mb-6"
-          style={{ 
-            background: 'var(--color-gradient-secondary)',
-            border: '1px solid var(--color-border)',
-            boxShadow: 'var(--shadow-glow)'
-          }}
-        >
-          <div className="relative z-10">
-            <div className="flex items-center justify-between mb-4">
-              <div className="flex items-center gap-4">
-                <div className="p-3 rounded-2xl"
-                  style={{ 
-                    background: 'rgba(255, 255, 255, 0.1)',
-                    backdropFilter: 'blur(10px)'
-                  }}
-                >
-                  <Wallet size={28} style={{ color: '#fff' }} />
-                </div>
-                <div>
-                  <h1 className="text-3xl font-bold mb-1"
-                    style={{ color: 'var(--color-text-primary)' }}
-                  >
-                    Deposit Funds
-                  </h1>
-                  <p className="text-sm opacity-90"
-                    style={{ color: 'var(--color-text-primary)' }}
-                  >
-                    Secure and instant deposits
-                  </p>
-                </div>
-              </div>
-              <div className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-xl"
-                style={{ 
-                  backgroundColor: 'rgba(34, 197, 94, 0.2)',
-                  border: '1px solid rgba(34, 197, 94, 0.3)'
-                }}
-              >
-                <Shield size={16} style={{ color: 'var(--color-success)' }} />
-                <span className="text-sm font-semibold" style={{ color: 'var(--color-success)' }}>
-                  SSL Secured
-                </span>
-              </div>
+    <div className="min-h-screen" style={{ background: '#0f0f0f' }}>
+      <Navbar name="Deposit" />
+      
+      <div className="max-w-2xl mx-auto p-4 pb-24">
+        {/* Header */}
+        <div className="relative overflow-hidden p-6 rounded-2xl mb-4" style={{ 
+          background: 'linear-gradient(135deg, #1a1a1a 0%, #2D8C72 100%)',
+          border: '1px solid rgba(255,255,255,0.1)'
+        }}>
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-xl" style={{ background: 'rgba(255,255,255,0.1)' }}>
+              <Wallet size={24} color="#fff" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-white">Deposit Funds</h1>
+              <p className="text-xs text-white/80">Fast & Secure Deposits</p>
             </div>
           </div>
-          
-          {/* Decorative Background Elements */}
-          <div className="absolute top-0 right-0 w-64 h-64 opacity-10"
-            style={{
-              background: 'radial-gradient(circle, rgba(45, 140, 114, 0.4) 0%, transparent 70%)',
-              filter: 'blur(40px)'
-            }}
-          />
         </div>
 
-        {/* Enhanced Deposit Method Tabs */}
-        <div className="p-2 rounded-2xl mb-6"
-          style={{ 
-            backgroundColor: 'var(--color-card-bg)',
-            border: '1px solid var(--color-border)',
-            boxShadow: 'var(--shadow-sm)'
-          }}
-        >
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { id: 'ngn', label: 'Naira', sublabel: 'Card/Bank',  color: '#2D8C72' },
-              { id: 'usdt', label: 'USDT', sublabel: 'Tether',  color: '#26A17B' }
-            ].map((tab) => {
-              const Icon = tab.icon;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => handleTabChange(tab.id)}
-                  className={`relative p-4 rounded-xl text-center transition-all duration-300 ${
-                    activeTab === tab.id 
-                      ? 'transform scale-105' 
-                      : 'opacity-70 hover:opacity-100 hover:scale-102'
-                  }`}
-                  style={{
-                    backgroundColor: activeTab === tab.id 
-                      ? 'var(--color-accent-primary)' 
-                      : 'var(--color-bg-secondary)',
-                    border: activeTab === tab.id 
-                      ? '2px solid var(--color-accent-secondary)' 
-                      : '1px solid var(--color-border)',
-                    boxShadow: activeTab === tab.id ? 'var(--shadow-glow)' : 'none'
-                  }}
-                >
-                  
-                  <div className="font-semibold text-sm mb-0.5"
-                    style={{ color: activeTab === tab.id ? '#fff' : 'var(--color-text-primary)' }}
-                  >
-                    {tab.label}
-                  </div>
-                  <div className="text-xs"
-                    style={{ 
-                      color: activeTab === tab.id 
-                        ? 'rgba(255, 255, 255, 0.8)' 
-                        : 'var(--color-text-secondary)' 
-                    }}
-                  >
-                    {tab.sublabel}
-                  </div>
-                  {activeTab === tab.id && (
-                    <div className="absolute -top-1 -right-1 p-1 rounded-full"
-                      style={{ backgroundColor: 'var(--color-success)' }}
-                    >
-                      <Check size={12} style={{ color: '#fff' }} />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
-          </div>
+        {/* Tabs */}
+        <div className="grid grid-cols-2 gap-2 p-2 rounded-xl mb-4" style={{ background: 'rgba(255,255,255,0.05)' }}>
+          {[
+            { id: 'virtual', label: 'Bank Transfer', sub: 'Instant' },
+            { id: 'crypto', label: 'Crypto', sub: 'USDT TRC20' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => handleTabChange(tab.id)}
+              className="relative p-3 rounded-lg transition-all"
+              style={{
+                background: activeTab === tab.id ? '#2D8C72' : '#1a1a1a',
+                border: activeTab === tab.id ? '2px solid #34A085' : '1px solid rgba(255,255,255,0.1)'
+              }}
+            >
+              <div className="font-semibold text-sm text-white">{tab.label}</div>
+              <div className="text-xs" style={{ color: activeTab === tab.id ? 'rgba(255,255,255,0.8)' : '#a0a0a0' }}>
+                {tab.sub}
+              </div>
+              {activeTab === tab.id && (
+                <div className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-green-500 flex items-center justify-center">
+                  <Check size={10} color="#fff" />
+                </div>
+              )}
+            </button>
+          ))}
         </div>
 
-        {/* NGN Deposit Form */}
-        {activeTab === 'ngn' && (
+        {/* Virtual Account Tab */}
+        {activeTab === 'virtual' && (
           <>
-            {showForm && !paymentData && (
-              <div className="rounded-2xl p-6 mb-5"
-                style={{ 
-                  backgroundColor: 'var(--color-card-bg)',
-                  border: '1px solid var(--color-border)',
-                  boxShadow: 'var(--shadow-md)'
-                }}
-              >
-                <form onSubmit={handleInitializePayment} className="space-y-6">
-                  {/* Amount Input */}
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-semibold mb-3"
-                      style={{ color: 'var(--color-text-primary)' }}
-                    >
-                      <CreditCard size={16} />
-                      Enter Deposit Amount
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="number"
-                        value={amount}
-                        onChange={(e) => setAmount(e.target.value)}
-                        placeholder="0.00"
-                        min="100"
-                        step="0.01"
-                        className="w-full p-3 rounded-xl text-2xl font-bold pr-16 transition-all duration-300"
-                        style={{ 
-                          backgroundColor: 'var(--color-bg-secondary)',
-                          border: `2px solid ${amount ? 'var(--color-border-focus)' : 'var(--color-border)'}`,
-                          color: 'var(--color-text-primary)',
-                          outline: 'none',
-                          boxShadow: amount ? 'var(--shadow-glow)' : 'none'
-                        }}
-                        required
-                      />
-                      <div className="absolute right-5 top-1/2 transform -translate-y-1/2">
-                        <span className="text-lg font-bold"
-                          style={{ color: 'var(--color-accent-primary)' }}
-                        >
-                          NGN
-                        </span>
-                      </div>
-                    </div>
-                    {(!amount || isNaN(amount) || amount < 100) && amount !== '' && (
-                      <div className="flex items-center gap-2 mt-2 p-2 rounded-lg"
-                        style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)' }}
-                      >
-                        <AlertCircle size={14} style={{ color: 'var(--color-error)' }} />
-                        <p className="text-xs" style={{ color: 'var(--color-error)' }}>
-                          Minimum deposit amount is ₦100
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Quick Amount Selection */}
-                  <div>
-                    <p className="text-xs font-medium mb-3"
-                      style={{ color: 'var(--color-text-secondary)' }}
-                    >
-                      Quick Select
-                    </p>
-                    <div className="grid grid-cols-4 gap-2">
-                      {quickAmounts.map((quickAmount) => (
-                        <button
-                          key={quickAmount}
-                          type="button"
-                          onClick={() => setAmount(quickAmount.toString())}
-                          className="p-3 rounded-xl text-sm font-semibold transition-all duration-300 hover:scale-105"
-                          style={{ 
-                            backgroundColor: amount === quickAmount.toString() 
-                              ? 'var(--color-accent-primary)' 
-                              : 'var(--color-bg-secondary)',
-                            border: `1px solid ${amount === quickAmount.toString() 
-                              ? 'var(--color-accent-secondary)' 
-                              : 'var(--color-border)'}`,
-                            color: amount === quickAmount.toString() 
-                              ? '#fff' 
-                              : 'var(--color-text-primary)'
-                          }}
-                        >
-                          ₦{quickAmount.toLocaleString()}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Submit Button */}
-                  <button
-                    type="submit"
-                    disabled={!amount || isNaN(amount) || amount < 100 || loading}
-                    className="w-full py-3 rounded-xl font-bold text-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] flex items-center justify-center gap-3"
+            {!account && !loading && (
+              <form onSubmit={handleSubmit} className="rounded-xl p-5 mb-4" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <label className="flex items-center gap-2 text-sm font-semibold text-white mb-2">
+                  <CreditCard size={14} />
+                  Amount
+                </label>
+                <div className="relative mb-4">
+                  <input
+                    type="number"
+                    value={amount}
+                    onChange={(e) => setAmount(e.target.value)}
+                    placeholder="0.00"
+                    min="100"
+                    className="w-full p-3 rounded-lg text-xl font-bold pr-16 text-white"
                     style={{ 
-                      background: 'var(--color-gradient-primary)',
-                      color: '#fff',
-                      border: '2px solid var(--color-accent-secondary)',
-                      boxShadow: 'var(--shadow-glow)'
+                      background: '#1a1a1a',
+                      border: `2px solid ${amount ? 'rgba(45,140,114,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                      outline: 'none'
                     }}
-                  >
-                    {loading ? (
-                      <>
-                        <Loader2 size={22} className="animate-spin" />
-                        Processing...
-                      </>
-                    ) : (
-                      <>
-                        <Shield size={22} />
-                        Proceed to Secure Payment
-                      </>
-                    )}
-                  </button>
-                </form>
-
-                {/* Info Cards */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
-                  <div className="p-4 rounded-xl"
-                    style={{ 
-                      backgroundColor: 'var(--color-bg-secondary)',
-                      border: '1px solid var(--color-border)'
-                    }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <Zap size={18} style={{ color: 'var(--color-accent-primary)' }} className="mt-0.5" />
-                      <div>
-                        <p className="text-sm font-semibold mb-1" 
-                          style={{ color: 'var(--color-text-primary)' }}
-                        >
-                          Instant Processing
-                        </p>
-                        <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                          Funds reflect immediately after payment
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Security Notice */}
-                <div className="mt-6 p-4 rounded-xl"
-                  style={{ 
-                    backgroundColor: 'rgba(45, 140, 114, 0.1)',
-                    border: '1px solid rgba(45, 140, 114, 0.3)'
-                  }}
-                >
-                  <div className="flex gap-3">
-                    <Shield size={20} style={{ color: 'var(--color-accent-primary)' }} className="flex-shrink-0" />
-                    <div>
-                      <p className="text-sm font-semibold mb-1" 
-                        style={{ color: 'var(--color-accent-primary)' }}
-                      >
-                        Protected by Paystack
-                      </p>
-                      <p className="text-xs opacity-90"
-                        style={{ color: 'var(--color-accent-primary)' }}
-                      >
-                        Your payment information is encrypted and processed securely through Paystack's bank-level security infrastructure.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Loading State */}
-            {loading && (
-              <div className="p-12 rounded-2xl flex flex-col items-center justify-center"
-                style={{ 
-                  backgroundColor: 'var(--color-card-bg)',
-                  border: '1px solid var(--color-border)',
-                  boxShadow: 'var(--shadow-md)'
-                }}
-              >
-                <div className="relative mb-6">
-                  <Loader2 size={48} className="animate-spin"
-                    style={{ color: 'var(--color-accent-primary)' }}
                   />
-                  <div className="absolute inset-0 animate-ping opacity-20">
-                    <Loader2 size={48} style={{ color: 'var(--color-accent-primary)' }} />
-                  </div>
+                  <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg font-bold" style={{ color: '#2D8C72' }}>
+                    NGN
+                  </span>
                 </div>
-                <p className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                  Initializing Payment
-                </p>
-                <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                  Please wait while we set up your secure payment...
-                </p>
-              </div>
-            )}
 
-            {/* Error State */}
-            {error && (
-              <div className="p-6 rounded-2xl"
-                style={{ 
-                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  boxShadow: 'var(--shadow-md)'
-                }}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-xl"
-                    style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)' }}
-                  >
-                    <AlertCircle size={24} style={{ color: 'var(--color-error)' }} />
+                {amount && parseFloat(amount) < 100 && (
+                  <div className="flex items-center gap-2 p-2 rounded-lg mb-4" style={{ background: 'rgba(239,68,68,0.1)' }}>
+                    <AlertCircle size={14} color="#ef4444" />
+                    <p className="text-xs text-red-400">Minimum ₦100</p>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-lg font-bold mb-2" style={{ color: 'var(--color-error)' }}>
-                      Payment Error
-                    </p>
-                    <p className="text-sm mb-4" style={{ color: 'var(--color-error)' }}>
-                      {error}
-                    </p>
+                )}
+
+                <div className="grid grid-cols-4 gap-2 mb-4">
+                  {quickAmounts.map(amt => (
                     <button
-                      onClick={handleCreateNewPayment}
-                      className="px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2"
+                      key={amt}
+                      type="button"
+                      onClick={() => setAmount(amt.toString())}
+                      className="p-2.5 rounded-lg text-sm font-semibold transition-all"
                       style={{ 
-                        backgroundColor: 'var(--color-accent-primary)',
-                        color: '#fff',
-                        boxShadow: 'var(--shadow-sm)'
+                        background: amount === amt.toString() ? '#2D8C72' : '#1a1a1a',
+                        border: `1px solid ${amount === amt.toString() ? '#34A085' : 'rgba(255,255,255,0.1)'}`,
+                        color: '#fff'
                       }}
                     >
-                      <ArrowDownToLine size={16} />
+                      ₦{(amt/1000).toFixed(0)}k
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={!amount || parseFloat(amount) < 100 || loading}
+                  className="w-full py-3 rounded-lg font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                  style={{ background: 'linear-gradient(135deg, #2D8C72 0%, #34A085 100%)' }}
+                >
+                  {loading ? <Loader2 size={20} className="animate-spin" /> : <Shield size={20} />}
+                  {loading ? 'Creating...' : 'Generate Account'}
+                </button>
+              </form>
+            )}
+
+            {loading && (
+              <div className="p-8 rounded-xl flex flex-col items-center" style={{ background: 'rgba(255,255,255,0.05)' }}>
+                <Loader2 size={40} className="animate-spin mb-3" color="#2D8C72" />
+                <p className="text-white font-semibold">Creating Account...</p>
+              </div>
+            )}
+
+            {error && (
+              <div className="p-5 rounded-xl" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>
+                <div className="flex items-start gap-3">
+                  <AlertCircle size={24} color="#ef4444" />
+                  <div className="flex-1">
+                    <p className="text-red-400 font-bold mb-2">Failed</p>
+                    <p className="text-sm text-red-400 mb-3">{error}</p>
+                    <button onClick={handleReset} className="px-4 py-2 rounded-lg font-semibold text-white" style={{ background: '#2D8C72' }}>
                       Try Again
                     </button>
                   </div>
@@ -475,485 +204,178 @@ export const DepositPage = () => {
               </div>
             )}
 
-            {/* Payment Success */}
-            {paymentData && !loading && !error && (
-              <div className="rounded-2xl p-6 mb-5"
-                style={{ 
-                  backgroundColor: 'var(--color-card-bg)',
-                  border: '1px solid var(--color-border)',
-                  boxShadow: 'var(--shadow-lg)'
-                }}
-              >
-                {/* Success Animation */}
-                <div className="mb-6 p-6 rounded-2xl text-center relative overflow-hidden"
-                  style={{ 
-                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                    border: '2px solid rgba(34, 197, 94, 0.3)'
-                  }}
+            {account && (
+              <div className="rounded-xl p-5 space-y-4" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle size={20} color="#22c55e" />
+                    <span className="font-bold text-white">Account Ready</span>
+                  </div>
+                  {isCountdownActive && (
+                    <div className="flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold" style={{ background: 'rgba(245,158,11,0.2)', color: '#f59e0b' }}>
+                      <Clock size={12} />
+                      {countdown}s
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Account Number</label>
+                  <div className="relative">
+                    <input value={account.accountNumber} readOnly className="w-full p-3 rounded-lg font-mono pr-20 text-white" style={{ background: '#1a1a1a', border: '2px solid #22c55e' }} />
+                    <button onClick={() => copyText(account.accountNumber, 'account')} className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded text-xs font-semibold text-white flex items-center gap-1" style={{ background: copiedInfo === 'account' ? '#22c55e' : '#2D8C72' }}>
+                      {copiedInfo === 'account' ? <Check size={12} /> : <Copy size={12} />}
+                      {copiedInfo === 'account' ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Bank Name</label>
+                  <div className="p-3 rounded-lg font-semibold text-white" style={{ background: '#1a1a1a' }}>
+                    {account.bankName}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg" style={{ background: '#1a1a1a' }}>
+                    <p className="text-xs text-gray-400 mb-1">Amount</p>
+                    <p className="text-xl font-bold" style={{ color: '#2D8C72' }}>₦{parseFloat(amount).toLocaleString()}</p>
+                  </div>
+                  <div className="p-3 rounded-lg" style={{ background: '#1a1a1a' }}>
+                    <p className="text-xs text-gray-400 mb-1">Status</p>
+                    <p className="text-sm font-semibold text-white">Active</p>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}>
+                  <p className="text-xs font-semibold mb-1" style={{ color: '#f59e0b' }}>Instructions</p>
+                  <p className="text-xs" style={{ color: '#f59e0b' }}>
+                    Transfer ₦{parseFloat(amount).toLocaleString()} to the account above. Funds reflect instantly.
+                  </p>
+                </div>
+
+                <button
+                  onClick={handleComplete}
+                  disabled={isCountdownActive}
+                  className="w-full py-3 rounded-lg font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                  style={{ background: isCountdownActive ? '#1a1a1a' : 'linear-gradient(135deg, #2D8C72 0%, #34A085 100%)' }}
                 >
-                  <div className="relative z-10">
-                    <div className="inline-block p-4 rounded-full mb-4"
-                      style={{ backgroundColor: 'rgba(34, 197, 94, 0.2)' }}
-                    >
-                      <CheckCircle size={56} style={{ color: 'var(--color-success)' }} />
-                    </div>
-                    <p className="text-2xl font-bold mb-2" style={{ color: 'var(--color-success)' }}>
-                      Payment Ready!
-                    </p>
-                    <p className="text-sm" style={{ color: 'var(--color-success)' }}>
-                      Redirecting to secure payment gateway...
-                    </p>
-                  </div>
-                  <div className="absolute inset-0 opacity-10"
-                    style={{
-                      background: 'radial-gradient(circle, rgba(34, 197, 94, 0.4) 0%, transparent 70%)',
-                      animation: 'pulse 2s infinite'
-                    }}
-                  />
-                </div>
+                  <CheckCircle size={20} />
+                  {isCountdownActive ? `Wait ${countdown}s` : 'Payment Complete'}
+                </button>
 
-                {/* Payment Details Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                  <div className="p-5 rounded-xl"
-                    style={{ 
-                      backgroundColor: 'var(--color-bg-secondary)',
-                      border: '1px solid var(--color-border)'
-                    }}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <CreditCard size={16} style={{ color: 'var(--color-text-secondary)' }} />
-                      <p className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                        Deposit Amount
-                      </p>
-                    </div>
-                    <p className="text-3xl font-bold" style={{ color: 'var(--color-accent-primary)' }}>
-                      ₦{parseFloat(amount).toLocaleString()}
-                    </p>
-                  </div>
-
-                  <div className="p-5 rounded-xl"
-                    style={{ 
-                      backgroundColor: 'var(--color-bg-secondary)',
-                      border: '1px solid var(--color-border)'
-                    }}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <Info size={16} style={{ color: 'var(--color-text-secondary)' }} />
-                      <p className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                        Reference
-                      </p>
-                    </div>
-                    <p className="text-sm font-mono font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                      {paymentData.reference}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="space-y-3">
-                  <button
-                    onClick={handleRedirectToPayStack}
-                    className="w-full py-5 rounded-xl font-bold text-lg transition-all duration-300 hover:scale-[1.02] flex items-center justify-center gap-3"
-                    style={{ 
-                      background: 'var(--color-gradient-primary)',
-                      color: '#fff',
-                      border: '2px solid var(--color-accent-secondary)',
-                      boxShadow: 'var(--shadow-glow)'
-                    }}
-                  >
-                    <ExternalLink size={22} />
-                    Continue to Paystack
-                  </button>
-
-                  <button
-                    onClick={handleCreateNewPayment}
-                    className="w-full py-4 rounded-xl font-semibold transition-all duration-300 hover:scale-[1.02]"
-                    style={{ 
-                      backgroundColor: 'var(--color-bg-secondary)',
-                      color: 'var(--color-text-primary)',
-                      border: '1px solid var(--color-border)'
-                    }}
-                  >
-                    Create New Payment
-                  </button>
-                </div>
-
-                {/* Security Badge */}
-                <div className="mt-6 flex items-center justify-center gap-4 p-4 rounded-xl"
-                  style={{ 
-                    backgroundColor: 'var(--color-bg-secondary)',
-                    border: '1px solid var(--color-border)'
-                  }}
-                >
-                  <Shield size={20} style={{ color: 'var(--color-success)' }} />
-                  <div className="text-center">
-                    <p className="text-xs font-semibold" style={{ color: 'var(--color-text-primary)' }}>
-                      Secured by Paystack • SSL Encrypted • PCI Compliant
-                    </p>
-                  </div>
-                </div>
+                <button onClick={handleReset} className="w-full py-3 rounded-lg font-semibold text-white" style={{ background: 'transparent', border: '2px solid #2D8C72' }}>
+                  New Account
+                </button>
               </div>
             )}
           </>
         )}
 
-        {/* USDT Deposit Form */}
-        {activeTab === 'usdt' && (
-          <div className="rounded-2xl p-6 mb-5"
-            style={{ 
-              backgroundColor: 'var(--color-card-bg)',
-              border: '1px solid var(--color-border)',
-              boxShadow: 'var(--shadow-md)'
-            }}
-          >
-            {/* Crypto Header */}
-            <div className="text-center mb-6">
-              {/* <div className="inline-block p-4 rounded-2xl mb-4"
-                style={{ 
-                  background: 'var(--color-gradient-primary)',
-                  boxShadow: 'var(--shadow-glow)'
-                }}
-              >
-                <Wallet size={32} style={{ color: '#fff' }} />
-              </div> */}
-              <h3 className="text-2xl font-bold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                Deposit USDT
-              </h3>
-              <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
-                Send USDT via TRC20 to your personal wallet address
-              </p>
+        {/* Crypto Tab */}
+        {activeTab === 'crypto' && (
+          <div className="rounded-xl p-5 space-y-4" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
+            <div className="text-center">
+              <h3 className="text-xl font-bold text-white mb-1">Deposit USDT</h3>
+              <p className="text-xs text-gray-400">Send via TRC20 Network</p>
             </div>
 
-            {/* Loading State for Wallet Generation */}
             {walletLoading && (
-              <div className="p-8 rounded-2xl flex flex-col items-center justify-center mb-6"
-                style={{ 
-                  backgroundColor: 'var(--color-bg-secondary)',
-                  border: '1px solid var(--color-border)'
-                }}
-              >
-                <div className="relative mb-4">
-                  <Loader2 size={40} className="animate-spin"
-                    style={{ color: 'var(--color-accent-primary)' }}
-                  />
-                </div>
-                <p className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
-                  Generating Your TRON Wallet
-                </p>
-                <p className="text-sm text-center" style={{ color: 'var(--color-text-secondary)' }}>
-                  Creating your secure TRON wallet address...
-                </p>
+              <div className="p-8 flex flex-col items-center">
+                <Loader2 size={40} className="animate-spin mb-3" color="#2D8C72" />
+                <p className="text-white font-semibold">Generating Wallet...</p>
               </div>
             )}
 
-            {/* Error State for Wallet Generation */}
             {walletError && (
-              <div className="p-6 rounded-2xl mb-6"
-                style={{ 
-                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)'
-                }}
-              >
-                <div className="flex items-start gap-4">
-                  <div className="p-3 rounded-xl"
-                    style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)' }}
-                  >
-                    <AlertCircle size={24} style={{ color: 'var(--color-error)' }} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="text-lg font-bold mb-2" style={{ color: 'var(--color-error)' }}>
-                      Wallet Generation Failed
-                    </p>
-                    <p className="text-sm mb-4" style={{ color: 'var(--color-error)' }}>
-                      {walletError}
-                    </p>
-                    <button
-                      onClick={getWalletAddress}
-                      className="px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2"
-                      style={{ 
-                        backgroundColor: 'var(--color-accent-primary)',
-                        color: '#fff',
-                        boxShadow: 'var(--shadow-sm)'
-                      }}
-                    >
-                      <Wallet size={16} />
-                      Try Again
+              <div className="p-4 rounded-lg" style={{ background: 'rgba(239,68,68,0.1)' }}>
+                <div className="flex items-start gap-3">
+                  <AlertCircle size={20} color="#ef4444" />
+                  <div>
+                    <p className="text-red-400 font-bold mb-2">Error</p>
+                    <p className="text-sm text-red-400 mb-3">{walletError}</p>
+                    <button onClick={getWalletAddress} className="px-4 py-2 rounded-lg font-semibold text-white" style={{ background: '#2D8C72' }}>
+                      Retry
                     </button>
                   </div>
                 </div>
               </div>
             )}
 
-            {/* Success State - Show QR Code and Address */}
-            {walletSuccess && cryptoAddresses.usdt.isGenerated && (
+            {hasWallet && (
               <>
-                {/* QR Code with Border */}
-                <div className="flex justify-center mb-6">
-                  <div className="p-6 rounded-2xl relative"
-                    style={{ 
-                      backgroundColor: '#fff',
-                      border: '4px solid var(--color-accent-primary)',
-                      boxShadow: 'var(--shadow-glow)'
-                    }}
-                  >
-                    <img 
-                      src={cryptoAddresses.usdt.qrCode} 
-                      alt="USDT QR Code"
-                      className="w-48 h-48"
-                    />
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold"
-                      style={{ 
-                        backgroundColor: 'var(--color-accent-primary)',
-                        color: '#fff'
-                      }}
-                    >
-                      <QrCode size={12} className="inline mr-1" />
-                      SCAN ME
+                <div className="flex justify-center">
+                  <div className="p-4 rounded-xl relative" style={{ background: '#fff' }}>
+                    <img src={qrCode} alt="QR" className="w-40 h-40" />
+                    <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1" style={{ background: '#2D8C72', color: '#fff' }}>
+                      <QrCode size={10} />
+                      SCAN
                     </div>
                   </div>
                 </div>
 
-                {/* Success Message */}
-                {/* <div className="mb-6 p-4 rounded-xl text-center"
-                  style={{ 
-                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                    border: '1px solid rgba(34, 197, 94, 0.3)'
-                  }}
-                >
-                  <div className="flex items-center justify-center gap-2">
-                    <CheckCircle size={20} style={{ color: 'var(--color-success)' }} />
-                    <p className="text-sm font-semibold" style={{ color: 'var(--color-success)' }}>
-                      Your TRON wallet has been generated successfully!
-                    </p>
+                {isCountdownActive && (
+                  <div className="flex items-center justify-center gap-2 p-2 rounded-lg" style={{ background: 'rgba(245,158,11,0.2)' }}>
+                    <Clock size={16} color="#f59e0b" />
+                    <span className="text-sm font-semibold" style={{ color: '#f59e0b' }}>Wait {countdown}s</span>
                   </div>
-                  <p className="text-xs mt-1" style={{ color: 'var(--color-success)' }}>
-                    Private key has been securely stored and sent via Telegram
-                  </p>
-                </div> */}
+                )}
+
+                <div>
+                  <label className="text-xs text-gray-400 mb-1 block">Wallet Address</label>
+                  <div className="relative">
+                    <input value={walletData.walletAddress} readOnly className="w-full p-3 rounded-lg font-mono text-xs pr-20 text-white" style={{ background: '#1a1a1a', border: '2px solid #22c55e' }} />
+                    <button onClick={() => copyText(walletData.walletAddress, 'usdt')} className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded text-xs font-semibold text-white flex items-center gap-1" style={{ background: copiedInfo === 'usdt' ? '#22c55e' : '#2D8C72' }}>
+                      {copiedInfo === 'usdt' ? <Check size={12} /> : <Copy size={12} />}
+                      {copiedInfo === 'usdt' ? 'Copied' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {[
+                    { label: 'Network', value: 'TRC20' },
+                    { label: 'Min', value: '10 USDT' },
+                    { label: 'Time', value: '5-15m' }
+                  ].map(item => (
+                    <div key={item.label} className="p-3 rounded-lg" style={{ background: '#1a1a1a' }}>
+                      <p className="text-xs text-gray-400">{item.label}</p>
+                      <p className="text-xs font-semibold text-white">{item.value}</p>
+                    </div>
+                  ))}
+                </div>
+
+                <div className="p-3 rounded-lg" style={{ background: 'rgba(245,158,11,0.1)' }}>
+                  <div className="flex gap-2">
+                    <AlertCircle size={14} color="#f59e0b" className="flex-shrink-0 mt-0.5" />
+                    <p className="text-xs" style={{ color: '#f59e0b' }}>Only send USDT (TRC20). Other tokens will be lost.</p>
+                  </div>
+                </div>
+
+                <button
+                  onClick={handleComplete}
+                  disabled={isCountdownActive}
+                  className="w-full py-3 rounded-lg font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+                  style={{ background: isCountdownActive ? '#1a1a1a' : 'linear-gradient(135deg, #2D8C72 0%, #34A085 100%)' }}
+                >
+                  <CheckCircle size={20} />
+                  {isCountdownActive ? `Wait ${countdown}s` : 'Payment Complete'}
+                </button>
               </>
             )}
 
-            {/* Wallet Address Section */}
-            <div className="space-y-4">
-              <div>
-                <label className="flex items-center gap-2 text-sm font-semibold mb-3"
-                  style={{ color: 'var(--color-text-primary)' }}
-                >
-                  <Wallet size={16} />
-                  USDT Wallet Address
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={cryptoAddresses.usdt.address}
-                    readOnly
-                    className="w-full p-4 rounded-xl text-sm font-mono pr-28"
-                    style={{ 
-                      backgroundColor: 'var(--color-bg-secondary)',
-                      border: `2px solid ${
-                        cryptoAddresses.usdt.isGenerated 
-                          ? 'var(--color-success)' 
-                          : 'var(--color-border)'
-                      }`,
-                      color: cryptoAddresses.usdt.isGenerated 
-                        ? 'var(--color-text-primary)' 
-                        : 'var(--color-text-secondary)',
-                      outline: 'none',
-                      cursor: cryptoAddresses.usdt.isGenerated ? 'text' : 'default'
-                    }}
-                    onClick={!cryptoAddresses.usdt.isGenerated ? getWalletAddress : undefined}
-                  />
-                  {cryptoAddresses.usdt.isGenerated ? (
-                    <button
-                      onClick={() => copyToClipboard(cryptoAddresses.usdt.address, 'usdt')}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2"
-                      style={{ 
-                        background: copiedAddress === 'usdt' 
-                          ? 'var(--color-success)' 
-                          : 'var(--color-gradient-primary)',
-                        color: '#fff',
-                        boxShadow: 'var(--shadow-sm)'
-                      }}
-                    >
-                      {copiedAddress === 'usdt' ? (
-                        <>
-                          <Check size={16} />
-                          Copied!
-                        </>
-                      ) : (
-                        <>
-                          <Copy size={16} />
-                          Copy
-                        </>
-                      )}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={getWalletAddress}
-                      disabled={walletLoading}
-                      className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2 disabled:opacity-50"
-                      style={{ 
-                        background: 'var(--color-gradient-primary)',
-                        color: '#fff',
-                        boxShadow: 'var(--shadow-sm)'
-                      }}
-                    >
-                      {walletLoading ? (
-                        <Loader2 size={16} className="animate-spin" />
-                      ) : (
-                        <Wallet size={16} />
-                      )}
-                      Generate
-                    </button>
-                  )}
-                </div>
-                {!cryptoAddresses.usdt.isGenerated && !walletLoading && (
-                  <p className="text-xs mt-2" style={{ color: 'var(--color-text-secondary)' }}>
-                    Click the input field or Generate button to create your TRON wallet
-                  </p>
-                )}
-              </div>
-
-              {/* Info Grid */}
-              {cryptoAddresses.usdt.isGenerated && (
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  <div className="p-4 rounded-xl"
-                    style={{ 
-                      backgroundColor: 'var(--color-bg-secondary)',
-                      border: '1px solid var(--color-border)'
-                    }}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <Info size={14} style={{ color: 'var(--color-text-secondary)' }} />
-                      <p className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                        Network
-                      </p>
-                    </div>
-                    <p className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
-                      {cryptoAddresses.usdt.network}
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-xl"
-                    style={{ 
-                      backgroundColor: 'var(--color-bg-secondary)',
-                      border: '1px solid var(--color-border)'
-                    }}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <ArrowDownToLine size={14} style={{ color: 'var(--color-text-secondary)' }} />
-                      <p className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                        Min. Deposit
-                      </p>
-                    </div>
-                    <p className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
-                      {cryptoAddresses.usdt.minDeposit}
-                    </p>
-                  </div>
-
-                  <div className="p-4 rounded-xl"
-                    style={{ 
-                      backgroundColor: 'var(--color-bg-secondary)',
-                      border: '1px solid var(--color-border)'
-                    }}
-                  >
-                    <div className="flex items-center gap-2 mb-2">
-                      <Clock size={14} style={{ color: 'var(--color-text-secondary)' }} />
-                      <p className="text-xs font-medium" style={{ color: 'var(--color-text-secondary)' }}>
-                        Confirmations
-                      </p>
-                    </div>
-                    <p className="font-semibold text-sm" style={{ color: 'var(--color-text-primary)' }}>
-                      {cryptoAddresses.usdt.processingTime}
-                    </p>
-                  </div>
-                </div>
-              )}
-
-              {/* Important Notices */}
-              {cryptoAddresses.usdt.isGenerated && (
-                <div className="space-y-3">
-                  <div className="p-4 rounded-xl"
-                    style={{ 
-                      backgroundColor: 'rgba(245, 158, 11, 0.1)',
-                      border: '1px solid rgba(245, 158, 11, 0.3)'
-                    }}
-                  >
-                    <div className="flex items-start gap-3">
-                      <AlertCircle size={16} style={{ color: 'var(--color-warning)' }} className="mt-0.5 flex-shrink-0" />
-                      <div>
-                        <p className="text-sm font-semibold mb-1" style={{ color: 'var(--color-warning)' }}>
-                          Important Notice
-                        </p>
-                        <p className="text-xs" style={{ color: 'var(--color-warning)' }}>
-                          Only send USDT (TRC20) to this address. Sending other cryptocurrencies may result in permanent loss.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                
-                  </div>
-              )}
-            </div>
-
-            {/* Need Help Section */}
-            <div className="mt-6 p-5 rounded-xl text-center"
-              style={{ 
-                backgroundColor: 'var(--color-bg-secondary)',
-                border: '1px solid var(--color-border)'
-              }}
-            >
-              <Info size={20} className="mx-auto mb-2" style={{ color: 'var(--color-text-secondary)' }} />
-              <p className="text-sm font-semibold mb-1" style={{ color: 'var(--color-text-primary)' }}>
-                Need Help?
-              </p>
-              <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
-                Contact our 24/7 support team if you need assistance with your deposit
-              </p>
-            </div>
-          </div>
-        )}
-
-        {/* No Data State */}
-        {!showForm && !paymentData && !loading && !error && activeTab === 'ngn' && (
-          <div className="p-6 rounded-2xl flex items-start gap-4"
-            style={{ 
-              backgroundColor: 'rgba(245, 158, 11, 0.1)',
-              border: '1px solid rgba(245, 158, 11, 0.3)',
-              boxShadow: 'var(--shadow-md)'
-            }}
-          >
-            <div className="p-3 rounded-xl"
-              style={{ backgroundColor: 'rgba(245, 158, 11, 0.2)' }}
-            >
-              <AlertCircle size={24} style={{ color: 'var(--color-warning)' }} />
-            </div>
-            <div className="flex-1">
-              <p className="text-lg font-bold mb-2" style={{ color: 'var(--color-warning)' }}>
-                No Payment Initialized
-              </p>
-              <p className="text-sm mb-4" style={{ color: 'var(--color-warning)' }}>
-                No payment has been initialized yet.
-              </p>
-              <button
-                onClick={handleCreateNewPayment}
-                className="px-6 py-3 rounded-xl text-sm font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2"
-                style={{ 
-                  backgroundColor: 'var(--color-accent-primary)',
-                  color: '#fff',
-                  boxShadow: 'var(--shadow-sm)'
-                }}
-              >
-                <ArrowDownToLine size={16} />
-                Initialize Payment
+            {!hasWallet && !walletLoading && !walletError && (
+              <button onClick={getWalletAddress} className="w-full py-3 rounded-lg font-bold text-white flex items-center justify-center gap-2" style={{ background: 'linear-gradient(135deg, #2D8C72 0%, #34A085 100%)' }}>
+                <Wallet size={20} />
+                Generate Wallet
               </button>
-            </div>
+            )}
           </div>
         )}
       </div>
+
+      <BottomNav />
     </div>
   );
 };
-
-export default DepositPage;
