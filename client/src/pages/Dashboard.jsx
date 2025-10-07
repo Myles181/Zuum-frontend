@@ -317,6 +317,7 @@ const handleScroll = () => {
     </button>
   </Link>
 
+ <Link to='/dashboard/transfer' className="block">
   <button
     // onClick={}
     className="group flex flex-col items-center p-3 rounded-2xl transition-all duration-300 hover:scale-105 active:scale-95 w-full"
@@ -340,6 +341,9 @@ const handleScroll = () => {
       Send
     </span>
   </button>
+  </Link>
+
+ <Link to='/dashboard/withdraw' className="block">
 
   <button
     
@@ -364,6 +368,8 @@ const handleScroll = () => {
       Withdraw
     </span>
   </button>
+    </Link>
+
 
   {/* Add a fourth button to complete the grid - Exchange/More */}
 
