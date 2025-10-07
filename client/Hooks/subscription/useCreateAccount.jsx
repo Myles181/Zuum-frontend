@@ -412,6 +412,102 @@ export const useWalletAddress = () => {
 
 
 
+
+export const useCreateTronWallet = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+  const [walletData, setWalletData] = useState(null);
+
+  const createTronWallet = useCallback(async () => {
+    console.debug('[useCreateTronWallet] Creating TRON wallet...');
+    
+    setLoading(true);
+    setError(null);
+    setSuccess(false);
+    setWalletData(null);
+
+    try {
+      const url = `${API_URL}/payment/wallet/create`;
+      console.debug(`[useCreateTronWallet] Making request to: ${url}`);
+
+      const response = await axios.post(url, {}, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...getAuthHeaders(), // Assuming this function exists
+        },
+        withCredentials: true,
+      });
+
+      console.debug('[useCreateTronWallet] Full response:', response);
+      
+      // Check if data exists and has the expected structure
+      if (!response.data) {
+        throw new Error('No data in response');
+      }
+
+      // Handle different possible response structures
+      const walletInfo = response.data.data || response.data;
+      
+      if (!walletInfo) {
+        throw new Error('Wallet data not found in response');
+      }
+
+      console.debug('[useCreateTronWallet] Created wallet data:', walletInfo);
+      setWalletData(walletInfo);
+      setSuccess(true);
+      
+      return walletInfo; // Return wallet data for immediate use
+      
+    } catch (err) {
+      console.error('[useCreateTronWallet] Error:', err);
+      
+      let errorMessage = 'Failed to create TRON wallet';
+      
+      if (err.response) {
+        console.error('[useCreateTronWallet] Response error:', {
+          status: err.response.status,
+          data: err.response.data,
+        });
+        
+        errorMessage = err.response.data?.message || 
+                      err.response.data?.error || 
+                      `Server responded with ${err.response.status}`;
+      } else if (err.request) {
+        console.error('[useCreateTronWallet] No response received');
+        errorMessage = 'No response from server';
+      } else {
+        console.error('[useCreateTronWallet] Request error:', err.message);
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+      throw err; // Re-throw for additional error handling
+    } finally {
+      setLoading(false);
+      console.debug('[useCreateTronWallet] Request completed');
+    }
+  }, []);
+
+  // Reset function to clear states
+  const reset = useCallback(() => {
+    setLoading(false);
+    setError(null);
+    setSuccess(false);
+    setWalletData(null);
+  }, []);
+
+  return {
+    createTronWallet,
+    walletData, // Contains { status, message, walletAddress }
+    loading,
+    error,
+    success,
+    reset,
+  };
+};
+
+
  export const useAccountDetails = () => {
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(false);
