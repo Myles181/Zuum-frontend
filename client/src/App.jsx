@@ -58,6 +58,8 @@ import AdminPromotionsPage from './admin/pages/promotion';
 import { DarkModeProvider } from './contexts/DarkModeContext';
 import ZuumOnboarding from './pages/Onboarding';
 import DepositPage from './components/dashboard/DepositPage';
+import WithdrawalPage from './components/dashboard/WithdrawalPage';
+import P2PTransferPage from './components/dashboard/TransferPage';
 
 // Dark mode styles for consistent theming
 const darkModeStyles = {
@@ -211,6 +213,11 @@ const AppRoutes = () => {
         <Route path="/user/promotions" element={<UserPromotions />} />
         <Route path="/zuum-news" element={<ZuumNews />} />
          <Route path="/dashboard/deposit" element={<DepositPage />} />
+         <Route path="/dashboard/withdraw" element={<WithdrawalPage />} />
+          <Route path="/dashboard/transfer" element={<P2PTransferPage />} />
+
+
+
       </Routes>
     </>
   );
