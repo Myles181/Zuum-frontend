@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowDownToLine, CheckCircle, AlertCircle, Loader2, Copy, QrCode, Shield, CreditCard, Wallet, Clock, Info, Check, TrendingUp, Zap } from 'lucide-react';
-import { useCreateVirtualAccount, useWalletAddress } from '../../../Hooks/subscription/useCreateAccount';
+import { useCreateTronWallet, useCreateVirtualAccount } from '../../../Hooks/subscription/useCreateAccount';
 import Navbar from '../profile/NavBar';
 import BottomNav from '../homepage/BottomNav';
 
-export const DepositPage = () => {
+const DepositPage = () => {
   const [amount, setAmount] = useState('');
   const [activeTab, setActiveTab] = useState('virtual');
   const [copiedInfo, setCopiedInfo] = useState(null);
@@ -13,7 +13,7 @@ export const DepositPage = () => {
 
   const navigate = useNavigate();
   const { createVirtualAccount, account, loading, error, reset } = useCreateVirtualAccount();
-  const { getWalletAddress, walletData, loading: walletLoading, error: walletError } = useWalletAddress();
+  const { createTronWallet, walletData, loading: walletLoading, error: walletError, reset: resetTronWallet } = useCreateTronWallet();
 
   const isCountdownActive = useMemo(() => 
     countdown > 0 && ((account && activeTab === 'virtual') || (walletData?.walletAddress && activeTab === 'crypto')),
@@ -46,6 +46,11 @@ export const DepositPage = () => {
     setCountdown(20);
   };
 
+  const handleTronReset = () => {
+    resetTronWallet();
+    setCountdown(30);
+  };
+
   const handleComplete = () => {
     setTimeout(() => navigate('/dashboard'), 1000);
   };
@@ -59,8 +64,16 @@ export const DepositPage = () => {
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-    if (tabId === 'crypto' && !walletData && !walletLoading) {
-      getWalletAddress();
+    // No automatic wallet generation when switching to crypto tab
+    // Wallet will be generated only when user clicks the button
+  };
+
+  const handleCreateTronWallet = async () => {
+    try {
+      await createTronWallet();
+    } catch (err) {
+      // Error is handled in the hook
+      console.error('Failed to create TRON wallet:', err);
     }
   };
 
@@ -284,7 +297,7 @@ export const DepositPage = () => {
             {walletLoading && (
               <div className="p-8 flex flex-col items-center">
                 <Loader2 size={40} className="animate-spin mb-3" color="#2D8C72" />
-                <p className="text-white font-semibold">Generating Wallet...</p>
+                <p className="text-white font-semibold">Creating TRON Wallet...</p>
               </div>
             )}
 
@@ -295,7 +308,7 @@ export const DepositPage = () => {
                   <div>
                     <p className="text-red-400 font-bold mb-2">Error</p>
                     <p className="text-sm text-red-400 mb-3">{walletError}</p>
-                    <button onClick={getWalletAddress} className="px-4 py-2 rounded-lg font-semibold text-white" style={{ background: '#2D8C72' }}>
+                    <button onClick={handleCreateTronWallet} className="px-4 py-2 rounded-lg font-semibold text-white" style={{ background: '#2D8C72' }}>
                       Retry
                     </button>
                   </div>
@@ -305,6 +318,19 @@ export const DepositPage = () => {
 
             {hasWallet && (
               <>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <CheckCircle size={20} color="#22c55e" />
+                    <span className="font-bold text-white">Wallet Ready</span>
+                  </div>
+                  {isCountdownActive && (
+                    <div className="flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold" style={{ background: 'rgba(245,158,11,0.2)', color: '#f59e0b' }}>
+                      <Clock size={12} />
+                      {countdown}s
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex justify-center">
                   <div className="p-4 rounded-xl relative" style={{ background: '#fff' }}>
                     <img src={qrCode} alt="QR" className="w-40 h-40" />
@@ -315,28 +341,38 @@ export const DepositPage = () => {
                   </div>
                 </div>
 
-                {isCountdownActive && (
-                  <div className="flex items-center justify-center gap-2 p-2 rounded-lg" style={{ background: 'rgba(245,158,11,0.2)' }}>
-                    <Clock size={16} color="#f59e0b" />
-                    <span className="text-sm font-semibold" style={{ color: '#f59e0b' }}>Wait {countdown}s</span>
-                  </div>
-                )}
-
                 <div>
-                  <label className="text-xs text-gray-400 mb-1 block">Wallet Address</label>
+                  <label className="text-xs text-gray-400 mb-1 block">TRON Wallet Address</label>
                   <div className="relative">
-                    <input value={walletData.walletAddress} readOnly className="w-full p-3 rounded-lg font-mono text-xs pr-20 text-white" style={{ background: '#1a1a1a', border: '2px solid #22c55e' }} />
-                    <button onClick={() => copyText(walletData.walletAddress, 'usdt')} className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded text-xs font-semibold text-white flex items-center gap-1" style={{ background: copiedInfo === 'usdt' ? '#22c55e' : '#2D8C72' }}>
+                    <input 
+                      value={walletData.walletAddress} 
+                      readOnly 
+                      className="w-full p-3 rounded-lg font-mono text-xs pr-20 text-white" 
+                      style={{ background: '#1a1a1a', border: '2px solid #22c55e' }} 
+                    />
+                    <button 
+                      onClick={() => copyText(walletData.walletAddress, 'usdt')} 
+                      className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded text-xs font-semibold text-white flex items-center gap-1" 
+                      style={{ background: copiedInfo === 'usdt' ? '#22c55e' : '#2D8C72' }}
+                    >
                       {copiedInfo === 'usdt' ? <Check size={12} /> : <Copy size={12} />}
                       {copiedInfo === 'usdt' ? 'Copied' : 'Copy'}
                     </button>
                   </div>
                 </div>
 
+                {walletData.message && (
+                  <div className="p-3 rounded-lg" style={{ background: 'rgba(45,140,114,0.1)' }}>
+                    <p className="text-xs text-center" style={{ color: '#2D8C72' }}>
+                      {walletData.message}
+                    </p>
+                  </div>
+                )}
+
                 <div className="grid grid-cols-3 gap-2">
                   {[
                     { label: 'Network', value: 'TRC20' },
-                    { label: 'Min', value: '10 USDT' },
+                    { label: 'Coin', value: 'USDT' },
                     { label: 'Time', value: '5-15m' }
                   ].map(item => (
                     <div key={item.label} className="p-3 rounded-lg" style={{ background: '#1a1a1a' }}>
@@ -349,7 +385,9 @@ export const DepositPage = () => {
                 <div className="p-3 rounded-lg" style={{ background: 'rgba(245,158,11,0.1)' }}>
                   <div className="flex gap-2">
                     <AlertCircle size={14} color="#f59e0b" className="flex-shrink-0 mt-0.5" />
-                    <p className="text-xs" style={{ color: '#f59e0b' }}>Only send USDT (TRC20). Other tokens will be lost.</p>
+                    <p className="text-xs" style={{ color: '#f59e0b' }}>
+                      Only send USDT (TRC20) to this address. Other tokens will be lost.
+                    </p>
                   </div>
                 </div>
 
@@ -362,14 +400,38 @@ export const DepositPage = () => {
                   <CheckCircle size={20} />
                   {isCountdownActive ? `Wait ${countdown}s` : 'Payment Complete'}
                 </button>
+
+                <button 
+                  onClick={handleTronReset}
+                  className="w-full py-3 rounded-lg font-semibold text-white" 
+                  style={{ background: 'transparent', border: '2px solid #2D8C72' }}
+                >
+                  Generate New Wallet
+                </button>
               </>
             )}
 
             {!hasWallet && !walletLoading && !walletError && (
-              <button onClick={getWalletAddress} className="w-full py-3 rounded-lg font-bold text-white flex items-center justify-center gap-2" style={{ background: 'linear-gradient(135deg, #2D8C72 0%, #34A085 100%)' }}>
-                <Wallet size={20} />
-                Generate Wallet
-              </button>
+              <div className="space-y-4">
+                <div className="p-4 rounded-lg" style={{ background: 'rgba(45,140,114,0.1)' }}>
+                  <div className="flex items-start gap-3">
+                    <Info size={16} color="#2D8C72" className="flex-shrink-0 mt-0.5" />
+                    <p className="text-xs" style={{ color: '#2D8C72' }}>
+                      Click below to generate a temporary TRON wallet address for USDT deposits. 
+                      Each new deposit requires a fresh wallet address for security.
+                    </p>
+                  </div>
+                </div>
+
+                <button 
+                  onClick={handleCreateTronWallet}
+                  className="w-full py-3 rounded-lg font-bold text-white flex items-center justify-center gap-2"
+                  style={{ background: 'linear-gradient(135deg, #2D8C72 0%, #34A085 100%)' }}
+                >
+                  <Wallet size={20} />
+                  Generate TRON Wallet
+                </button>
+              </div>
             )}
           </div>
         )}
@@ -379,3 +441,5 @@ export const DepositPage = () => {
     </div>
   );
 };
+
+export default DepositPage;
