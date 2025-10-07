@@ -48,17 +48,17 @@ const MobileDashboard = ({
       changeType: 'positive',
       gradient: 'var(--color-gradient-primary)'
     },
-    { 
-      currency: 'BTC', 
-      amount: 0.0234, 
-      symbol: '₿',
-      change: '+5.7%',
-      changeType: 'positive',
-      gradient: 'var(--color-gradient-secondary)'
-    },
+    // { 
+    //   currency: 'BTC', 
+    //   amount: 0.0234, 
+    //   symbol: '₿',
+    //   change: '+5.7%',
+    //   changeType: 'positive',
+    //   gradient: 'var(--color-gradient-secondary)'
+    // },
     { 
       currency: 'USDT', 
-      amount: 1200.50, 
+      amount: profile?.usdt_balance, 
       symbol: '$',
       change: '+0.1%',
       changeType: 'positive',
