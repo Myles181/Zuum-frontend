@@ -41,7 +41,7 @@ export const usePromotions = () => {
         params.category = category;
       }
 
-      const response = await axios.get(`${API_URL}/admin/promotions`, {
+      const response = await axios.get(`/admin/promotions`, {
         withCredentials: true,
         params
       });
@@ -165,7 +165,7 @@ export const usePromotions = () => {
 
     try {
       const response = await axios.put(
-        `${API_URL}/admin/promotions`,
+        `/admin/promotions`,
         {
           promotion_id: promotionId,
           category,

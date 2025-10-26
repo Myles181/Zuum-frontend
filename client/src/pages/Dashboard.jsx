@@ -2,6 +2,9 @@ import React, { useState, useRef } from 'react';
 import Navbar from '../components/profile/NavBar';
 import BottomNav from '../components/homepage/BottomNav';
 import { Link } from 'react-router-dom';
+import { useUserTransactions } from "../../Hooks/Dashbored/userTransactions";
+import { useGetUserWithdrawalRequests } from "../../Hooks/Dashbored/useGetUserWithdrawalRequests";
+
 
 const MobileDashboard = ({ 
   balance = 50000.00, 
@@ -13,14 +16,20 @@ const MobileDashboard = ({
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentBalanceIndex, setCurrentBalanceIndex] = useState(0);
+  const [NoOfData, setNoOfData] = useState(5);
+  const [withdrawalsNoOfData, setWithdrawalsNoOfData] = useState(5);
   const scrollContainerRef = useRef(null);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
-  console.log(profile);
-  
 
  
+  const { data, loading, error, refetch } = useUserTransactions();
+  const { withdrawals, withdrawalAPIloading, withdrawalAPIerror, fetchWithdrawals } = useGetUserWithdrawalRequests();
+
+  // console.log("data logging:")
+  
+  withdrawalAPIloading === true ? console.log("data logging:") :   console.log(withdrawals);
 
   // Dark mode styles with modern gradient
   const darkModeStyles = {
@@ -121,7 +130,7 @@ const MobileDashboard = ({
   ];
 
   const transactions = recentTransactions.length > 0 ? recentTransactions : defaultTransactions;
-
+  console.log(transactions);
   // const handleScroll = (direction) => {
   //   const container = scrollContainerRef.current;
   //   if (!container) return;
@@ -376,7 +385,251 @@ const handleScroll = () => {
 </div>
 
         {/* Modern Transaction History */}
-        <div className="mb-20">
+         <div className="mb-20">
+          <div className="flex justify-between items-center mb-4">
+            <h3 
+              className="text-lg font-semibold"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              Recent Activity
+            </h3>
+            <button
+           onClick={() => {
+             setNoOfData(prev => prev === 5 ? data.length : 5);
+           }}
+
+              className="text-sm font-medium transition-all duration-300 hover:scale-105 active:scale-95"
+              style={{ color: 'var(--color-accent-primary)' }}
+            >
+              {NoOfData === 5 ? "See All":"see Less"}
+            </button>
+          </div>
+
+          <div className="space-y-3">
+           {loading ? (
+            "Loading..."
+           ) : (
+           Array.isArray(data) && data.length > 0 ? (
+           data.slice(0, NoOfData).map((transaction) => (
+              <div
+                key={transaction.id}
+                className="flex items-center justify-between p-4 rounded-2xl transition-all duration-300 hover:scale-[1.02] active:scale-95 cursor-pointer group"
+                style={{ 
+                  backgroundColor: 'var(--color-card-bg)',
+                  border: '1px solid var(--color-border)'
+                }}
+              >
+                <div className="flex items-center space-x-4">
+                  <div 
+                    className="w-12 h-12 rounded-xl flex items-center justify-center text-lg transition-all duration-300 group-hover:scale-110"
+                    style={{ 
+                      backgroundColor: 'rgba(45, 140, 114, 0.1)',
+                      border: '1px solid rgba(45, 140, 114, 0.2)'
+                    }}
+                  >
+                    {transaction.icon || getTransactionIcon(transaction.type)}
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <div 
+                        className="font-medium"
+                        style={{ color: 'var(--color-text-primary)' }}
+                      >
+                        {transaction.to || transaction.from}
+                      </div>
+                      <div 
+                        className="px-2 py-1 rounded-full text-xs"
+                        style={{ 
+                          backgroundColor: transaction.status === 'successful'  || 'success'
+                            ? 'rgba(34, 197, 94, 0.1)' 
+                            : 'rgba(251, 191, 36, 0.1)',
+                          color: transaction.status === 'successful'  || 'success' 
+                            ? '#22c55e' 
+                            : '#fbbf24',
+                          border: `1px solid ${transaction.status === 'successful'  || 'success' 
+                            ? 'rgba(34, 197, 94, 0.2)' 
+                            : 'rgba(251, 191, 36, 0.2)'}`
+                        }}
+                      >
+                        {transaction.status}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div 
+                        className="text-sm capitalize"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
+                        {transaction.type}
+                      </div>
+                      <div 
+                        className="text-sm"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
+                        •
+                      </div>
+                      <div 
+                        className="text-sm"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
+                        {transaction.date}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div 
+                    className={`font-semibold text-lg ${
+                      transaction.type === 'deposit' ? 'text-green-400' : 'text-red'
+                    }`}
+                  >
+                    {transaction.type === 'deposit' ? '+' : '-'}₦{transaction.amount?.toLocaleString() || '0'}
+                  </div>
+                  <div 
+                    className="text-xs capitalize mt-1"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    {transaction.category}
+                  </div>
+                </div>
+              </div>
+             ))
+           ) : (
+           <p>No transactions found</p>
+          )
+          )}
+          </div>
+        </div> 
+
+            <div className="mb-20">
+          <div className="flex justify-between items-center mb-4">
+            <h3 
+              className="text-lg font-semibold"
+              style={{ color: 'var(--color-text-primary)' }}
+            >
+              withdrawal request
+            </h3>
+            <button
+           onClick={() => {
+             setWithdrawalsNoOfData(prev => prev === 5 ? withdrawals.length : 5);
+           }}
+
+              className="text-sm font-medium transition-all duration-300 hover:scale-105 active:scale-95"
+              style={{ color: 'var(--color-accent-primary)' }}
+            >
+              {withdrawalsNoOfData === 5 ? "See All":"see Less"}
+            </button>
+          </div>
+
+          <div className="space-y-3">
+           {loading ? (
+            "Loading..."
+           ) : (
+           Array.isArray(withdrawals) && withdrawals.length > 0 ? (
+           withdrawals.slice(0, withdrawalsNoOfData).map((withdrawal) => (
+              <div
+                key={withdrawal.id}
+                className="flex items-center justify-between p-4 rounded-2xl transition-all duration-300 hover:scale-[1.02] active:scale-95 cursor-pointer group"
+                style={{ 
+                  backgroundColor: 'var(--color-card-bg)',
+                  border: '1px solid var(--color-border)'
+                }}
+              >
+                <div className="flex items-center space-x-4">
+                  {/* <div 
+                    className="w-12 h-12 rounded-xl flex items-center justify-center text-lg transition-all duration-300 group-hover:scale-110"
+                    style={{ 
+                      backgroundColor: 'rgba(45, 140, 114, 0.1)',
+                      border: '1px solid rgba(45, 140, 114, 0.2)'
+                    }}
+                  >
+                  </div> */}
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-2 mb-1">
+                      <div 
+                        className="font-medium"
+                        style={{ color: 'var(--color-text-primary)' }}
+                     >
+                        {withdrawal.account_name}
+                      </div>
+
+                         <div
+                         className="px-2 py-1 rounded-full text-xs"
+                         style={{
+                           backgroundColor:
+                             withdrawal.status === 'sent'
+                               ? 'rgba(34, 197, 94, 0.1)'
+                               : withdrawal.status === 'rejected'
+                               ? 'rgba(239, 68, 68, 0.1)'
+                               : 'rgba(251, 191, 36, 0.1)',
+                           color:
+                             withdrawal.status === 'sent'
+                               ? '#22c55e'
+                               : withdrawal.status === 'rejected'
+                               ? '#ef4444'
+                               : '#fbbf24',
+                           border:
+                             withdrawal.status === 'sent'
+                               ? '1px solid rgba(34, 197, 94, 0.2)'
+                               : withdrawal.status === 'rejected'
+                               ? '1px solid rgba(239, 68, 68, 0.2)'
+                               : '1px solid rgba(251, 191, 36, 0.2)'
+                         }}
+                       >
+                         {withdrawal.status}
+                       </div>
+
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div 
+                        className="text-sm capitalize"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
+                       {withdrawal.bank_name}
+                      </div>
+                      <div 
+                        className="text-sm"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
+                        •
+                      </div>
+                      <div 
+                        className="text-sm"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
+                        {withdrawal.account_number}
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-3">
+                      <div 
+                        className="text-sm capitalize"
+                        style={{ color: 'var(--color-text-secondary)' }}
+                      >
+                       {withdrawal.reason}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <div 
+                   className={`font-semibold text-lg 'text-green-400'`} >
+                    {withdrawal.amount}
+                  </div>
+                  <div 
+                    className="text-xs capitalize mt-1"
+                    style={{ color: 'var(--color-text-secondary)' }}
+                  >
+                    {new Date(withdrawal.updated_at).toLocaleString()}
+                  </div>
+                </div>
+              </div>
+             ))
+           ) : (
+           <p>No transactions found</p>
+          )
+          )}
+          </div>
+        </div> 
+        {/* <div className="mb-20">
           <div className="flex justify-between items-center mb-4">
             <h3 
               className="text-lg font-semibold"
@@ -478,7 +731,7 @@ const handleScroll = () => {
               </div>
             ))}
           </div>
-        </div>
+        </div> */}
       </div>
 
       <BottomNav />

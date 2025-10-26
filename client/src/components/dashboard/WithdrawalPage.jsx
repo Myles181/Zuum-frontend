@@ -3,16 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { ArrowUpFromLine, Wallet, AlertCircle, CheckCircle, Loader2, Copy, Shield, CreditCard, Clock, Check, Info, Banknote } from 'lucide-react';
 import Navbar from '../profile/NavBar';
 import BottomNav from '../homepage/BottomNav';
+import { useCreateWithdrawal } from "../../../Hooks/Dashbored/useCreateWithdrawal";
 
 const WithdrawalPage = ({ profile }) => {
   const [activeTab, setActiveTab] = useState('bank');
   const [amount, setAmount] = useState('');
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
+  // const [success, setSuccess] = useState(false);
   const [copiedInfo, setCopiedInfo] = useState(null);
   const [withdrawalData, setWithdrawalData] = useState(null);
-
+  const { createWithdrawal, loading, errorFromServer, success } = useCreateWithdrawal();
   // Bank details state
   const [bankDetails, setBankDetails] = useState({
     accountName: '',
@@ -117,66 +118,64 @@ const WithdrawalPage = ({ profile }) => {
     setError(null);
   };
 
-  const handleWithdrawal = async (e) => {
-    e.preventDefault();
-    setError(null);
-    setSuccess(false);
+ const handleWithdrawal = async (e) => {
+  e.preventDefault();
+  setError(null);
 
-    let isValid = false;
-    if (activeTab === 'bank') {
-      isValid = validateBankDetails();
+  const isValid = activeTab === 'bank'
+    ? validateBankDetails()
+    : validateUsdtDetails();
+
+   if (!isValid) return;
+   
+   const withdrawalRecord = {
+     id: Date.now(),
+     type: activeTab,
+     amount: parseFloat(amount),
+     details: activeTab === 'bank' ? bankDetails : usdtDetails, status: 'pending',
+     date: new Date().toISOString(), fee: activeTab === 'bank' ? 50 : 1,
+     // NGN fee for bank, USDT fee for crypto 
+     netAmount: activeTab === 'bank' ? parseFloat(amount) - 50 : parseFloat(amount) - 1
+   };
+   
+    setWithdrawalData(withdrawalRecord);
+   const payload = {
+    amount: parseFloat(amount),
+    account_name: bankDetails.accountName,
+    account_number: bankDetails.accountNumber,
+    bank_name: bankDetails.bankName
+   };
+
+  try {
+    const res = await createWithdrawal(payload); // ✅ real API call
+
+    // if (!res) return; // Error already handled in hook
+
+    // ✅ backend succeeded → reset form
+    setAmount("");
+
+    if (activeTab === "bank") {
+      setBankDetails({
+        accountName: '',
+        accountNumber: '',
+        bankName: '',
+        bankCode: ''
+      });
     } else {
-      isValid = validateUsdtDetails();
+      setUsdtDetails({
+        walletAddress: '',
+        network: 'TRC20'
+      });
     }
 
-    if (!isValid) return;
+    console.log("✅ Withdrawal success:", res);
 
-    setLoading(true);
-
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
-
-      const withdrawalRecord = {
-        id: Date.now(),
-        type: activeTab,
-        amount: parseFloat(amount),
-        details: activeTab === 'bank' ? bankDetails : usdtDetails,
-        status: 'pending',
-        date: new Date().toISOString(),
-        fee: activeTab === 'bank' ? 50 : 1, // NGN fee for bank, USDT fee for crypto
-        netAmount: activeTab === 'bank' ? parseFloat(amount) - 50 : parseFloat(amount) - 1
-      };
-
-      setWithdrawalData(withdrawalRecord);
-      setSuccess(true);
-
-      // Reset form after success
-      setTimeout(() => {
-        setAmount('');
-        if (activeTab === 'bank') {
-          setBankDetails({
-            accountName: '',
-            accountNumber: '',
-            bankName: '',
-            bankCode: ''
-          });
-        } else {
-          setUsdtDetails({
-            walletAddress: '',
-            network: 'TRC20'
-          });
-        }
-        setSuccess(false);
-        setWithdrawalData(null);
-      }, 5000);
-
-    } catch (err) {
-      setError('Withdrawal failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+  } catch (err) {
+    console.log("❌ Withdrawal error:", err);
+    setError("Withdrawal failed.");
+  }
   };
+  
 
   const copyText = (text, type) => {
     if (!text) return;
