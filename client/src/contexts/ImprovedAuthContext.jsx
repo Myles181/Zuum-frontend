@@ -1,9 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL;
-axios.defaults.baseURL = API_URL;
-axios.defaults.withCredentials = true;
+// const API_URL = import.meta.env.VITE_API_URL;
+// const API_URL = "http://localhost:5000"
+// axios.defaults.baseURL = API_URL;
+// axios.defaults.withCredentials = true;
 
 const ImprovedAuthContext = createContext();
 
@@ -12,6 +13,10 @@ export const ImprovedAuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
+  const API_URL = "http://localhost:5000/api"
+  axios.defaults.baseURL = API_URL;
+  axios.defaults.withCredentials = true; // Crucial for cookies
+
   // Progressive loading states
   const [loadingStates, setLoadingStates] = useState({
     initialCheck: true,

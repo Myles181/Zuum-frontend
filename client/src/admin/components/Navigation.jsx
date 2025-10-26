@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Users, BarChart3, Settings, Menu, X } from 'lucide-react';
+import { Users, BarChart3, Settings, Menu, X,ClipboardList } from 'lucide-react';
 import useMobile from '../components/use-mobile';
 import { Link } from 'react-router-dom';
 
@@ -16,6 +16,11 @@ const AdminNavigation = ({ activePage }) => {
     {
       name: "Distribution",
       icon: <BarChart3 className="h-5 w-5" />,
+      href: "/addistributions",
+    },
+    {
+      name: "withdrawal request",
+      icon: <ClipboardList className="h-5 w-5" />,
       href: "/addistributions",
     },
     {

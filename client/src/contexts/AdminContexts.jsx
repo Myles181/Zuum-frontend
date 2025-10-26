@@ -2,9 +2,10 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import axios from 'axios';
 
-const API_URL = import.meta.env.VITE_API_URL;
-axios.defaults.baseURL = API_URL;
-axios.defaults.withCredentials = true; // Enable cookie authentication
+// const API_URL = import.meta.env.VITE_API_URL;
+// const API_URL = "http://localhost:5000"
+// axios.defaults.baseURL = API_URL;
+// axios.defaults.withCredentials = true; // Enable cookie authentication
 
 const AdminContext = createContext();
 
@@ -14,6 +15,11 @@ export const AdminProvider = ({ children }) => {
   const [loading, setLoading] = useState(false); // Changed to false initially
   const [error, setError] = useState(null);
 
+  const API_URL = "http://localhost:5000/api"
+  axios.defaults.baseURL = API_URL;
+  axios.defaults.withCredentials = true; // Crucial for cookies
+
+  
   const checkAdminAuth = async () => {
     setLoading(true);
     try {

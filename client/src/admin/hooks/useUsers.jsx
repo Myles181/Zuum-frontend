@@ -28,7 +28,7 @@ export const useAdmins = () => {
     setError(null);
 
     try {
-      const response = await axios.get(`${API_URL}/admin/users`, {
+      const response = await axios.get(`/admin/users`, {
         withCredentials: true,
         params: { page, limit: 10 }
       });

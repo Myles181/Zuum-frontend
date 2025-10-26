@@ -121,9 +121,6 @@ const AdminUsersPage = () => {
       case 'beat':
         navigate('/beat');
         break;
-      case 'withdrawalRequest':
-        navigate('/withdrawalRequest');
-        break;
       case 'promotion':
         navigate('/promotion');
         break;

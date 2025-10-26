@@ -22,8 +22,15 @@ const AdminLogin = () => {
 
   const handleSubmit = async (e) => {
       e.preventDefault();
-      const credentials = { email, username, password };
-      await login(credentials);
+    const credentials = { email, username, password };
+    document.cookie.split(";").forEach((c) => {
+    document.cookie = c
+    .replace(/^ +/, "")
+    .replace(/=.*/, `=;expires=${new Date(0).toUTCString()};path=/`);
+    });
+
+    await login(credentials);
+    
     };
   
   useEffect(() => {

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Music, Share2, ChevronRight, CheckCircle, Globe, Rocket, List, Wallet, DollarSign, TrendingUp, CreditCard } from 'lucide-react';
+import { Music, Share2, ChevronRight, CheckCircle, Globe, Rocket, List, Wallet, DollarSign, TrendingUp, CreditCard, BarChart3 } from 'lucide-react';
 import Navbar from '../components/profile/NavBar';
 import BottomNav from '../components/homepage/BottomNav';
 import { Link, useNavigate } from 'react-router-dom';
@@ -28,6 +28,8 @@ export const Jet = () => {
       navigate('/distribution');
     } else if (option === 'wallet') {
       navigate('/dashboard');
+    } else if (option === 'analytics') {
+      navigate('/analytics');
     } else {
       navigate('/global');
     }
@@ -318,7 +320,73 @@ export const Jet = () => {
             </button>
           </motion.div>
 
-          {/* Wallet Section - Bottom Right */}
+          {/* NEW: Analytics Section - Before Wallet */}
+          <motion.div 
+            className="rounded-xl p-6 shadow-lg h-full flex flex-col"
+            style={{ 
+              backgroundColor: 'var(--color-bg-secondary)',
+              border: '2px solid var(--color-primary)'
+            }}
+            onClick={() => handleOptionSelect('analytics')}
+            whileHover={{ y: -5 }}
+          >
+            <div className="flex justify-between items-start mb-4">
+              <div 
+                className="p-3 rounded-xl"
+                style={{ 
+                  backgroundColor: 'var(--color-primary)',
+                  color: 'var(--color-text-on-primary)'
+                }}
+              >
+                <BarChart3 size={24} />
+              </div>
+              <ChevronRight style={{ color: 'var(--color-primary)' }} size={20} />
+            </div>
+            <h2 
+              className="text-xl font-bold mb-3"
+              style={{ color: 'var(--color-primary)' }}
+            >
+              Analytics Dashboard
+            </h2>
+            <p 
+              className="mb-4 text-sm flex-grow"
+              style={{ color: 'var(--color-text-secondary)' }}
+            >
+              Track streams, engagement, and audience insights across all platforms in real-time.
+            </p>
+            <div className="space-y-2 mb-4">
+              <div className="flex items-center">
+                <CheckCircle size={14} style={{ color: 'var(--color-primary)' }} className="mr-2" />
+                <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Real-time streaming data</span>
+              </div>
+              <div className="flex items-center">
+                <CheckCircle size={14} style={{ color: 'var(--color-primary)' }} className="mr-2" />
+                <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Audience demographics</span>
+              </div>
+              <div className="flex items-center">
+                <CheckCircle size={14} style={{ color: 'var(--color-primary)' }} className="mr-2" />
+                <span className="text-xs" style={{ color: 'var(--color-text-primary)' }}>Performance reports</span>
+              </div>
+            </div>
+            <button 
+              className="mt-auto w-full py-2 px-4 rounded-lg font-semibold text-sm flex items-center justify-center transition-colors"
+              style={{ 
+                backgroundColor: 'var(--color-primary)',
+                color: 'var(--color-text-on-primary)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'var(--color-primary-light)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'var(--color-primary)';
+              }}
+            >
+              <span>View Analytics</span>
+              <ChevronRight size={16} className="ml-1" />
+            </button>
+          </motion.div>
+
+          {/* Wallet Section - Now Bottom Right */}
           <motion.div 
             className="rounded-xl p-6 shadow-lg h-full flex flex-col"
             style={{ 
@@ -411,4 +479,4 @@ export const Jet = () => {
       <BottomNav activeTab="home" />
     </div>
   );
-}
+};

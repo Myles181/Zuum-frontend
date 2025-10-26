@@ -60,6 +60,7 @@ import ZuumOnboarding from './pages/Onboarding';
 import DepositPage from './components/dashboard/DepositPage';
 import WithdrawalPage from './components/dashboard/WithdrawalPage';
 import P2PTransferPage from './components/dashboard/TransferPage';
+import Analytics from './pages/analytics';
 
 // Dark mode styles for consistent theming
 const darkModeStyles = {
@@ -213,8 +214,9 @@ const AppRoutes = () => {
         <Route path="/user/promotions" element={<UserPromotions />} />
         <Route path="/zuum-news" element={<ZuumNews />} />
          <Route path="/dashboard/deposit" element={<DepositPage />} />
-         <Route path="/dashboard/withdraw" element={<WithdrawalPage />} />
-          <Route path="/dashboard/transfer" element={<P2PTransferPage />} />
+         <Route path="/dashboard/withdraw" element={<WithdrawalPage profile={profile} />} />
+          <Route path="/dashboard/transfer" element={<P2PTransferPage profile={profile} />} />
+          <Route path="/analytics" element={<Analytics />} />
 
 
 

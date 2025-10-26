@@ -10,10 +10,12 @@ import {
   X,
   Shield,
   FileText,
+  ClipboardList,
   TrendingUp,
   LogOut
 } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
+
 
 const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onToggleCollapse }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -39,6 +41,12 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
       description: 'Manage beat purchases & licenses'
     },
     {
+      id: 'withdrawalRequest',
+      label: "request",
+      icon: ClipboardList,
+      description: "withdrawal request",
+    },
+    {
       id: 'promotion',
       label: 'Promotions',
       icon: Megaphone,
@@ -48,6 +56,7 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
 
   const handlePageChange = (pageId) => {
     onPageChange(pageId);
+    console.log(pageId);
   };
 
   const SidebarContent = ({ isMobile = false }) => (
@@ -159,7 +168,7 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
 <button
   onClick={() => {
     localStorage.clear();
-    navigate('/login');
+    navigate('/adlog');
   }}
   className={`mt-4 flex items-center ${
     isCollapsed ? 'justify-center' : 'justify-start'
