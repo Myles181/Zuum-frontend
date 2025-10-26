@@ -70,7 +70,7 @@ const WithdrawalPage = ({ profile }) => {
       setError('Please select a bank');
       return false;
     }
-    if (!amount || parseFloat(amount) < 1000) {
+    if (!amount || parseFloat(amount) < 10) {
       setError('Minimum withdrawal amount is ₦1,000');
       return false;
     }
@@ -280,7 +280,7 @@ const WithdrawalPage = ({ profile }) => {
                   setError(null);
                 }}
                 placeholder="0.00"
-                min={activeTab === 'bank' ? "1000" : "10"}
+                min={activeTab === 'bank' ? "10" : "10"}
                 step="0.01"
                 className="w-full p-3 rounded-lg text-xl font-bold pr-16 text-white"
                 style={{ 

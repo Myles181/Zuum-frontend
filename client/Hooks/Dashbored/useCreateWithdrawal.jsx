@@ -68,3 +68,55 @@ export const useCreateWithdrawal = () => {
 
   return { createWithdrawal, loading, error, success };
 };
+
+
+
+
+export const useTransferFunds = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
+  const transferFunds = async (payload) => {
+    // { recipient_email, amount }
+    setLoading(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const response = await axios.post(
+        "/withdrawals/transfer",
+        payload,
+        {
+          withCredentials: true,
+          headers: getAuthHeaders(),
+        }
+      );
+
+      if (response.data?.status) {
+        setSuccess(response.data.message || "Transfer successful");
+
+        setTimeout(() => {
+          setSuccess(null);
+        }, 5000);
+      }
+    } catch (err) {
+      if (err.response) {
+        setError(err.response.data?.error || err.response.data?.message || "Transfer failed");
+      } else if (err.request) {
+        setError("No response from server");
+      } else {
+        setError(err.message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    transferFunds,
+    loading,
+    error,
+    success,
+  };
+};

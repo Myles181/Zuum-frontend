@@ -125,20 +125,7 @@ const Navbar = ({
           </Link>
         )}
 
-        {/* Menu button for mobile/sidebar toggle */}
-        <button 
-          onClick={toggleSidebar}
-          className={`p-1 rounded-lg transition-colors ${
-            isProfilePage 
-              ? 'hover:bg-white hover:bg-opacity-10' 
-              : 'hover:bg-[var(--color-bg-secondary)]'
-          }`}
-          style={{ 
-            color: isProfilePage ? 'var(--color-text-primary)' : 'var(--color-text-primary)'
-          }}
-        >
-          <FiMenu className="w-5 h-5" />
-        </button>
+       
       </div>
     </div>
   );
