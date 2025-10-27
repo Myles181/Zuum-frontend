@@ -60,6 +60,7 @@ import ZuumOnboarding from './pages/Onboarding';
 import DepositPage from './components/dashboard/DepositPage';
 import WithdrawalPage from './components/dashboard/WithdrawalPage';
 import P2PTransferPage from './components/dashboard/TransferPage';
+import AdminWithdrawalRequest from '../src/admin/pages/withdrawalRequest'
 
 // Dark mode styles for consistent theming
 const darkModeStyles = {
@@ -242,6 +243,7 @@ const App = () => (
             <Route path="/adlog" element={<AdminLogin />} />
               <Route path="/adsin" element={<AdminSignup />} />
                <Route path="/adver" element={<VerifyEmailForm />} />
+               <Route path="/withdrawalRequest" element={<AdminWithdrawalRequest />} />
                
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>

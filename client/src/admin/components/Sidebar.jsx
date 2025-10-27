@@ -97,7 +97,7 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
           {navigationItems.map((item) => {
             const Icon = item.icon;
             const isActive = currentPage === item.id;
-            
+            console.log(currentPage)
             return (
               <button
                 key={item.id}
