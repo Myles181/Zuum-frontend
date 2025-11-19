@@ -12,7 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [paymentDetails, setPaymentDetails] = useState(null);
   const [initialCheckDone, setInitialCheckDone] = useState(false);
 
-  const API_URL = "http://localhost:5000/api"
+  const API_URL = import.meta.env.VITE_API_URL;
   axios.defaults.baseURL = API_URL;
   axios.defaults.withCredentials = true; // Crucial for cookies
   

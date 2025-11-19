@@ -13,7 +13,7 @@ export const ImprovedAuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
-  const API_URL = "http://localhost:5000/api"
+  const API_URL = import.meta.env.VITE_API_URL
   axios.defaults.baseURL = API_URL;
   axios.defaults.withCredentials = true; // Crucial for cookies
 

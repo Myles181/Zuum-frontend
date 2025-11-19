@@ -15,7 +15,9 @@ export const AdminProvider = ({ children }) => {
   const [loading, setLoading] = useState(false); // Changed to false initially
   const [error, setError] = useState(null);
 
-  const API_URL = "http://localhost:5000/api"
+  // const API_URL = "http://localhost:5000/api"
+  // const API_URL = import.meta.env.VITE_API_URL;
+  const API_URL = import.meta.env.VITE_API_URL;
   axios.defaults.baseURL = API_URL;
   axios.defaults.withCredentials = true; // Crucial for cookies
 
