@@ -45,6 +45,7 @@ import Distribution from './pages/Distribution';
 import AdminLogin from './admin/pages/Login';
 import AdminSignup from './admin/pages/Signup';
 import VerifyEmailForm from './admin/pages/Verify';
+import AdminWithdrawalRequest from './admin/pages/withdrawalRequest'
 import AdminDashboard from './admin/pages/Users';
 import { AdminProvider } from './contexts/AdminContexts';
 import AdminProtectedRoute from './contexts/AdminProtectedRoutes';
