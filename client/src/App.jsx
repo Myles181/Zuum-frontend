@@ -244,6 +244,7 @@ const App = () => (
             <Route path="/adlog" element={<AdminLogin />} />
               <Route path="/adsin" element={<AdminSignup />} />
                <Route path="/adver" element={<VerifyEmailForm />} />
+               <Route path="/withdrawalRequest" element={<AdminWithdrawalRequest />} />
                
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
