@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
+const DEFAULT_PAGE_SIZE = 25;
+
 axios.defaults.baseURL = API_URL;
 axios.defaults.withCredentials = true;
 
@@ -17,23 +19,24 @@ export const useDistributionRequests = () => {
   const [pagination, setPagination] = useState({
     currentPage: 1,
     total: 0,
-    totalPages: 0
+    totalPages: 1,
+    pageSize: DEFAULT_PAGE_SIZE
   });
 
   /**
    * Fetch all distribution requests
    */
-  const fetchRequests = useCallback(async (readFilter = null) => {
+  const fetchRequests = useCallback(async (readFilter = null, page = 1, limit = DEFAULT_PAGE_SIZE) => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const params = {};
+      const params = { page, limit };
       if (readFilter !== null) {
         params.read = readFilter;
       }
 
-      const response = await axios.get(`${API_URL}/admin/distribution-requests`, {
+      const response = await axios.get(`/admin/distribution-requests`, {
         withCredentials: true,
         params
       });
@@ -55,23 +58,25 @@ export const useDistributionRequests = () => {
         
         setRequests(requestsData);
         
-        // Handle pagination data
-        if (response.data && response.data.pagination) {
-          setPagination(response.data.pagination);
-        } else if (response.data && response.data.meta) {
-          setPagination({
-            currentPage: response.data.meta.current_page || 1,
-            total: response.data.meta.total || requestsData.length,
-            totalPages: response.data.meta.last_page || 1
-          });
-        } else {
-          // Default pagination if none provided
-          setPagination({
-            currentPage: 1,
-            total: requestsData.length,
-            totalPages: 1
-          });
-        }
+        const apiPagination = response.data?.pagination || response.data?.meta;
+        const total = apiPagination?.total ?? apiPagination?.total_count ?? requestsData.length ?? 0;
+        const totalPages = apiPagination?.totalPages || apiPagination?.last_page || Math.max(1, Math.ceil((total || 0) / limit) || 1);
+
+        setPagination({
+          currentPage: apiPagination?.currentPage || apiPagination?.current_page || page,
+          total,
+          totalPages,
+          pageSize: apiPagination?.pageSize || apiPagination?.per_page || limit
+        });
+      } else {
+        // Default pagination if none provided
+        setRequests([]);
+        setPagination({
+          currentPage: page,
+          total: 0,
+          totalPages: 1,
+          pageSize: limit
+        });
       }
     } catch (err) {
       console.error('Distribution requests fetch error:', err);
@@ -133,7 +138,8 @@ export const useDistributionRequests = () => {
         setPagination({
           currentPage: 1,
           total: mockRequests.length,
-          totalPages: 1
+          totalPages: 1,
+          pageSize: limit
         });
         setError('Using demo data - API not available');
       } else {
@@ -232,7 +238,7 @@ export const useDistributionRequests = () => {
 
   // Initial fetch when hook is first used
   useEffect(() => {
-    fetchRequests();
+    fetchRequests(null, 1, DEFAULT_PAGE_SIZE);
   }, [fetchRequests]);
 
   return {
@@ -245,4 +251,4 @@ export const useDistributionRequests = () => {
     markRequestAsRead,
     resetError
   };
-}; 
+};

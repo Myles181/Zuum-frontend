@@ -42,6 +42,7 @@ import { AlertProvider } from './contexts/AlertConntexts';
 import {Jet} from './pages/Jet';
 import { AuthProvider, useAuth } from './contexts/AuthContexts';
 import Distribution from './pages/Distribution';
+import UserDistributionRequests from './pages/UserDistributionRequests';
 import AdminLogin from './admin/pages/Login';
 import AdminSignup from './admin/pages/Signup';
 import VerifyEmailForm from './admin/pages/Verify';
@@ -193,6 +194,7 @@ const AppRoutes = () => {
         <Route path="/message" element={<ChatListPage />} />
         <Route path="/chat/:roomId" element={<MessagePage />} />
         <Route path="/music/:postId" element={<MusicDetailsPage />} />
+        <Route path="/distribution-requests" element={<UserDistributionRequests />} />
         <Route path="/add" element={<UploadPage profile={profile} />} />
         <Route path="/addpaybeat" element={<UploadBeat />} />
         <Route path="/addbeat" element={<MusicUploadInterface />} />

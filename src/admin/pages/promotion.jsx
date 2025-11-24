@@ -140,22 +140,20 @@ const AdminPromotionsPage = () => {
   console.log('Filtered promotions:', filteredPromotions);
   console.log('Total promotions:', totalPromotions);
 
+  const adminRoutes = {
+    users: '/users',
+    distribution: '/addistributions',
+    beat: '/adbeat',
+    withdrawalRequest: '/withdrawalRequest',
+    promotion: '/adpromotion',
+  };
+
   const handlePageChange = (pageId) => {
-    switch (pageId) {
-      case 'users':
-        navigate('/users');
-        break;
-      case 'distribution':
-        navigate('/distribution');
-        break;
-      case 'beat':
-        navigate('/beat');
-        break;
-      case 'promotion':
-        navigate('/promotion');
-        break;
-      default:
-        console.log('Unknown page:', pageId);
+    const targetRoute = adminRoutes[pageId];
+    if (targetRoute) {
+      navigate(targetRoute);
+    } else {
+      console.log('Unknown page:', pageId);
     }
   };
 

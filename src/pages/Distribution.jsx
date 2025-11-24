@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import { motion, AnimatePresence } from "framer-motion"
+import { Link } from "react-router-dom"
 import { Music, ChevronLeft, ChevronRight, Upload, CheckCircle } from "lucide-react"
 import ReleaseInfoStep from "../components/distribution/ReleaseInfoStep"
 import ArtistProfileStep from "../components/distribution/ArtistPage"
@@ -8,6 +9,7 @@ import MetadataStep from "../components/distribution/MetaDataStep"
 import DistributionStep from "../components/distribution/DistributionStep"
 import Navbar from "../components/profile/NavBar"
 import BottomNav from "../components/homepage/BottomNav"
+import { useUserDistributionRequest } from "../../Hooks/distribution/useUserDistributionRequest"
 
 // Step Components
 
@@ -27,6 +29,13 @@ const Distribution = () => {
   // Step management
   const [currentStep, setCurrentStep] = useState(1)
   const totalSteps = 5
+
+  const {
+    createDistributionRequest,
+    loading: submissionLoading,
+    error: submissionError,
+    reset: resetDistributionState,
+  } = useUserDistributionRequest()
 
   // Form data state
   const [formData, setFormData] = useState({
@@ -94,7 +103,6 @@ const Distribution = () => {
 
   // UI state
   const [errors, setErrors] = useState({})
-  const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
 
   // Initialize tracks when number changes
@@ -215,69 +223,41 @@ const Distribution = () => {
     e.preventDefault()
     if (!validateStep(currentStep)) return
 
-    setLoading(true)
+    const primaryAudioFile =
+      formData.releaseType === "single"
+        ? formData.audioFile
+        : formData.tracks.find((track) => !!track.audioFile)?.audioFile || null
+
+    if (!primaryAudioFile) {
+      setErrors((prev) => ({ ...prev, submit: "Please upload at least one audio file." }))
+      return
+    }
 
     try {
-      // Simulate API call with a timeout
-      await new Promise((resolve) => setTimeout(resolve, 2000))
-
-      // Build FormData for API submission
-      const submitData = new FormData()
-
-      // Add all form data
-      submitData.append("artistName", formData.artistName)
-      submitData.append("hasDistributed", formData.hasDistributed)
-      submitData.append("existingProfiles", JSON.stringify(formData.existingProfiles))
-      submitData.append("releaseType", formData.releaseType)
-      submitData.append("title", formData.title)
-      submitData.append("coverArt", formData.coverArt)
-
-      if (formData.releaseType === "single") {
-        submitData.append("audioFile", formData.audioFile)
-        submitData.append("lyrics", formData.lyrics)
-      } else {
-        submitData.append(
-          "tracks",
-          JSON.stringify(
-            formData.tracks.map((t) => ({
-              ...t,
-              audioFile: null, // Don't stringify the file
-            })),
-          ),
-        )
-
-        // Add each track audio file separately
-        formData.tracks.forEach((track, index) => {
-          if (track.audioFile) {
-            submitData.append(`track${index}Audio`, track.audioFile)
-          }
-        })
+      resetDistributionState()
+      // Map existingProfiles to API format, providing defaults for required fields
+      const socialLinks = {
+        spotify: formData.existingProfiles.spotify || "https://spotify.com",
+        apple_music: formData.existingProfiles.appleMusic || "https://apple.com",
+        boomplay: "https://boomplay.com",
+        audio_mark: "https://audiomack.com",
       }
-
-      submitData.append("genre", formData.genre)
-      submitData.append("secondaryGenre", formData.secondaryGenre)
-      submitData.append("releaseDate", formData.releaseDate)
-      submitData.append("isExplicit", formData.isExplicit)
-      submitData.append("clipStartTime", formData.clipStartTime)
-      submitData.append("copyright", JSON.stringify(formData.copyright))
-      submitData.append("recordLabel", formData.recordLabel)
-      submitData.append("recordLabelName", formData.recordLabelName)
-      submitData.append("songwriter", formData.songwriter)
-      submitData.append("songwriters", JSON.stringify(formData.songwriters))
-      submitData.append("allPlatforms", formData.allPlatforms)
-      submitData.append("platforms", JSON.stringify(formData.platforms))
-      submitData.append("promotionPackage", formData.promotionPackage)
-      submitData.append("agreements", JSON.stringify(formData.agreements))
-
-      // For demo purposes, just log the data
-      console.log("Submitting music:", Object.fromEntries(submitData.entries()))
+      
+      await createDistributionRequest({
+        caption: formData.title.trim(),
+        description: formData.lyrics.trim() || `Music release: ${formData.title}`,
+        genre: formData.genre,
+        social_links: socialLinks,
+        audio_upload: primaryAudioFile,
+        cover_photo: formData.coverArt,
+      })
 
       setSuccess(true)
     } catch (error) {
-      console.error("Submission error:", error)
-      setErrors((prev) => ({ ...prev, submit: "Failed to submit. Please try again." }))
-    } finally {
-      setLoading(false)
+      setErrors((prev) => ({
+        ...prev,
+        submit: error?.message || "Failed to submit. Please try again.",
+      }))
     }
   }
 
@@ -348,6 +328,7 @@ const Distribution = () => {
     setCurrentStep(1)
     setSuccess(false)
     setErrors({})
+    resetDistributionState()
   }
 
   // Render success state
@@ -555,6 +536,25 @@ const Distribution = () => {
           >
             Submit your music to major streaming platforms
           </p>
+          <div className="mt-4">
+            <Link
+              to="/distribution-requests"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm md:text-base transition-colors"
+              style={{
+                backgroundColor: 'rgba(45, 140, 114, 0.15)',
+                color: 'var(--color-text-primary)',
+                border: '1px solid var(--color-border)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'rgba(45, 140, 114, 0.25)'
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'rgba(45, 140, 114, 0.15)'
+              }}
+            >
+              View submitted requests
+            </Link>
+          </div>
         </div>
 
         <div className="p-4 md:p-8">
@@ -562,6 +562,12 @@ const Distribution = () => {
 
           <form onSubmit={handleSubmit}>
             {renderStepContent()}
+
+            {(errors.submit || submissionError) && (
+              <div className="mt-4 rounded-lg border border-red-500/40 bg-red-500/10 p-3 text-sm text-red-300">
+                {errors.submit || submissionError?.message || "Something went wrong. Please try again."}
+              </div>
+            )}
 
             {!success && (
               <div className="mt-6 md:mt-10 flex justify-between">
@@ -608,24 +614,24 @@ const Distribution = () => {
                 ) : (
                   <button
                     type="submit"
-                    disabled={loading}
+                    disabled={submissionLoading}
                     className="px-5 md:px-8 py-2.5 md:py-3 rounded-lg transition-colors flex items-center gap-1 md:gap-2 shadow-md disabled:opacity-50 text-sm md:text-base"
                     style={{ 
-                      backgroundColor: loading ? 'var(--color-border)' : 'var(--color-primary)',
+                      backgroundColor: submissionLoading ? 'var(--color-border)' : 'var(--color-primary)',
                       color: 'var(--color-text-on-primary)'
                     }}
                     onMouseEnter={(e) => {
-                      if (!loading) {
+                      if (!submissionLoading) {
                         e.target.style.backgroundColor = 'var(--color-primary-light)';
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (!loading) {
+                      if (!submissionLoading) {
                         e.target.style.backgroundColor = 'var(--color-primary)';
                       }
                     }}
                   >
-                    {loading ? "Submitting..." : "Submit Music"} <Upload size={16} />
+                    {submissionLoading ? "Submitting..." : "Submit Music"} <Upload size={16} />
                   </button>
                 )}
               </div>

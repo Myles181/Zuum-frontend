@@ -2,6 +2,8 @@ import { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 
 const API_URL = import.meta.env.VITE_API_URL;
+const DEFAULT_PAGE_SIZE = 200;
+
 axios.defaults.baseURL = API_URL;
 axios.defaults.withCredentials = true; // Enable cookie authentication
 
@@ -16,26 +18,38 @@ export const useAdmins = () => {
   const [pagination, setPagination] = useState({
     currentPage: 1,
     total: 0,
-    totalPages: 0
+    totalPages: 1,
+    pageSize: DEFAULT_PAGE_SIZE,
   });
   const [deactivationSuccess, setDeactivationSuccess] = useState(false);
 
   /**
    * Fetch all users with pagination
    */
-  const fetchUsers = useCallback(async (page = 1) => {
+  const fetchUsers = useCallback(async (page = 1, limit = DEFAULT_PAGE_SIZE) => {
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await axios.get(`/admin/users`, {
         withCredentials: true,
-        params: { page, limit: 10 }
+        params: { page, limit }
       });
 
       if (response.status === 200) {
-        setUsers(response.data.users || []);
-        setPagination(response.data.pagination || {});
+        const payloadUsers = response.data.users || [];
+        const apiPagination = response.data.pagination || {};
+        const total = apiPagination.total ?? payloadUsers.length ?? 0;
+        const resolvedLimit = apiPagination.pageSize ?? limit;
+        const derivedTotalPages = apiPagination.totalPages ?? Math.max(1, Math.ceil(total / resolvedLimit || 1));
+
+        setUsers(payloadUsers);
+        setPagination({
+          currentPage: apiPagination.currentPage ?? page,
+          total,
+          totalPages: derivedTotalPages,
+          pageSize: resolvedLimit,
+        });
       }
     } catch (err) {
       if (err.response) {
@@ -89,7 +103,10 @@ export const useAdmins = () => {
         
         // After successful deactivation, refetch the users
         setTimeout(() => {
-          fetchUsers(pagination.currentPage);
+          fetchUsers(
+            pagination.currentPage,
+            pagination.pageSize || DEFAULT_PAGE_SIZE
+          );
           setDeactivationSuccess(false);
         }, 2000);
         
@@ -109,10 +126,9 @@ export const useAdmins = () => {
    */
   const resetError = useCallback(() => setError(null), []);
 
-  // Initial fetch when hook is first used - only run once
   useEffect(() => {
-    fetchUsers(1);
-  }, []); // Empty dependency array - only run on mount
+    fetchUsers(1, DEFAULT_PAGE_SIZE);
+  }, [fetchUsers]);
 
   return { 
     users, 

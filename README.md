@@ -1,45 +1,23 @@
-# Zuum
+# React + Vite
 
-Zuum is a dynamic music social media platform that enables users to share music and music videos, and provides a marketplace for purchasing beats.
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-## Features
+Currently, two official plugins are available:
 
-- **Music and Video Sharing**: Upload and share your favorite tracks and videos with the community.
-- **Beat Marketplace**: Browse and purchase beats from various producers to enhance your own creations.
-- **Social Interaction**: Follow other users, comment on posts, and build your musical network.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-## Getting Started
+## Expanding the ESLint configuration
 
-To set up Zuum locally:
- 
-1. **Clone the Repository**:
-   ```bash
-   git clone https://github.com/Myles181/Zuum-frontend.git
-   ```
-2. **Install Dependencies**:
-   ```bash
-   cd Zuum-frontend
-   npm install
-   ```
-3. **Start the Application**:
-   ```bash
-   npm start
-   ```
+If you are developing a production application, we recommend using TypeScript and enable type-aware lint rules. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
 
-## Contributing
+To start, cd to client and run npm install
 
-We welcome contributions! Please read our [CONTRIBUTING.md](https://github.com/Myles181/Zuum-frontend/blob/main/CONTRIBUTION.md) for guidelines on how to proceed.
+add tailwind
 
-## Design Prototype
+npm install tailwindcss @tailwindcss/vite
 
-Explore our design prototype on Figma:
-[Zuum Design Prototype](https://www.figma.com/proto/hMIck8al1FM0FFZXABTZKK/Zuum-Design?node-id=425-124&p=f&t=7e1XJpNLIAbOzRgK-0&scaling=scale-down&content-scaling=responsive&page-id=0%3A1)
+add other dependencies
 
-## License
-
-This project is licensed under the [MIT License](link_to_license).
-
-## Contact
-
-For inquiries or support, reach out to [support@example.com](mailto:cyrile450@gmail.com).
-
+npm i react-router-dom
+npm i react-icons
