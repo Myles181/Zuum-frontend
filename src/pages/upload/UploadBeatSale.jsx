@@ -11,9 +11,16 @@ import { useAlerts } from '../../contexts/AlertConntexts';
 const UploadBeats = () => {
   const { createBeatPost, loading, error, success } = useCreateBeatPost();
   const [formData, setFormData] = useState({
+    // core fields
     caption: '',
     description: '',
-    amount: 999
+    amount: 999,
+    // metadata
+    artist: '',
+    genre: '',
+    bpm: '',
+    musicalKey: '',
+    beatType: '', // plain text input
   });
 
   const navigate = useNavigate();
@@ -43,10 +50,15 @@ const UploadBeats = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: name === 'amount' ? parseFloat(value) : value
-    });
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        name === 'amount'
+          ? parseFloat(value || 0)
+          : name === 'bpm'
+          ? value.replace(/[^\d]/g, '')
+          : value,
+    }));
   };
   
   const handleCoverPhotoChange = (e) => {
@@ -118,13 +130,29 @@ const UploadBeats = () => {
   };
   
   const validateForm = () => {
-    const isValid = formData.caption && formData.description && coverPhoto && audioFile;
+    const isValid =
+      formData.caption &&
+      formData.description &&
+      formData.artist &&
+      formData.genre &&
+      formData.beatType &&
+      coverPhoto &&
+      audioFile;
     
     if (!formData.caption) {
       showError('Please add a title for your beat');
     }
+    if (!formData.artist) {
+      showError('Please add an artist name');
+    }
+    if (!formData.genre) {
+      showError('Please select a genre');
+    }
     if (!formData.description) {
       showError('Please add a description for your beat');
+    }
+    if (!formData.beatType) {
+      showError('Please select a beat type');
     }
     if (!coverPhoto) {
       showError('Please select a cover photo');
@@ -144,11 +172,19 @@ const UploadBeats = () => {
     
     try {
       const submitData = new FormData();
+      // keep existing API fields
       submitData.append('caption', formData.caption);
       submitData.append('description', formData.description);
       submitData.append('amount', formData.amount);
       submitData.append('cover_photo', coverPhoto);
       submitData.append('audio_upload', audioFile);
+      // new metadata fields
+      submitData.append('title', formData.caption);
+      submitData.append('artist', formData.artist);
+      submitData.append('genre', formData.genre);
+      if (formData.bpm) submitData.append('bpm', formData.bpm);
+      if (formData.musicalKey) submitData.append('key', formData.musicalKey);
+      submitData.append('beat_type', formData.beatType);
       
       await createBeatPost(submitData);
     } catch (err) {
@@ -164,7 +200,12 @@ const UploadBeats = () => {
       setFormData({
         caption: '',
         description: '',
-        amount: 999
+        amount: 999,
+        artist: '',
+        genre: '',
+        bpm: '',
+        musicalKey: '',
+        beatType: '',
       });
       setCoverPhoto(null);
       setAudioFile(null);
@@ -229,7 +270,173 @@ const UploadBeats = () => {
               <p className="mt-1 text-sm text-red-500">Title is required</p>
             )}
           </div>
-          
+
+          {/* Artist & Genre */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label 
+                className="block text-sm font-medium mb-1"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
+                Artist
+              </label>
+              <input
+                type="text"
+                name="artist"
+                value={formData.artist}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all ${
+                  submitAttempted && !formData.artist ? 'border-red-500' : 'border-gray-600'
+                }`}
+                style={{ 
+                  backgroundColor: 'var(--color-bg-primary)',
+                  color: 'var(--color-text-primary)'
+                }}
+                placeholder="Producer / artist name"
+                disabled={loading}
+              />
+              {submitAttempted && !formData.artist && (
+                <p className="mt-1 text-sm text-red-500">Artist is required</p>
+              )}
+            </div>
+            <div>
+              <label 
+                className="block text-sm font-medium mb-1"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
+                Genre
+              </label>
+              <select
+                name="genre"
+                value={formData.genre}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all ${
+                  submitAttempted && !formData.genre ? 'border-red-500' : 'border-gray-600'
+                }`}
+                style={{ 
+                  backgroundColor: 'var(--color-bg-primary)',
+                  color: 'var(--color-text-primary)'
+                }}
+                disabled={loading}
+              >
+                <option value="">Select genre</option>
+                <option value="hip-hop">Hip-Hop</option>
+                <option value="trap">Trap</option>
+                <option value="afrobeats">Afrobeats</option>
+                <option value="rnb">R&B</option>
+                <option value="pop">Pop</option>
+                <option value="drill">Drill</option>
+                <option value="lofi">Lo-fi</option>
+                <option value="other">Other</option>
+              </select>
+              {submitAttempted && !formData.genre && (
+                <p className="mt-1 text-sm text-red-500">Genre is required</p>
+              )}
+            </div>
+          </div>
+
+          {/* BPM & Key */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label 
+                className="block text-sm font-medium mb-1"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
+                BPM
+              </label>
+              <input
+                type="text"
+                name="bpm"
+                value={formData.bpm}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all border-gray-600"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-primary)',
+                  color: 'var(--color-text-primary)'
+                }}
+                placeholder="e.g. 140"
+                disabled={loading}
+              />
+            </div>
+            <div>
+              <label 
+                className="block text-sm font-medium mb-1"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
+                Key
+              </label>
+              <input
+                type="text"
+                name="musicalKey"
+                value={formData.musicalKey}
+                onChange={handleInputChange}
+                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all border-gray-600"
+                style={{ 
+                  backgroundColor: 'var(--color-bg-primary)',
+                  color: 'var(--color-text-primary)'
+                }}
+                placeholder="e.g. Cm, F#"
+                disabled={loading}
+              />
+            </div>
+          </div>
+
+          {/* Beat Type & Price */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label 
+                className="block text-sm font-medium mb-1"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
+                Beat Type
+              </label>
+              <input
+                name="beatType"
+                value={formData.beatType}
+                onChange={handleInputChange}
+                className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all border-gray-600 ${
+                  submitAttempted && !formData.beatType ? 'border-red-500' : 'border-gray-600'
+                }`}
+                style={{ 
+                  backgroundColor: 'var(--color-bg-primary)',
+                  color: 'var(--color-text-primary)'
+                }}
+                disabled={loading}
+                placeholder="e.g. Exclusive, Lease, Free"
+              />
+              {submitAttempted && !formData.beatType && (
+                <p className="mt-1 text-sm text-red-500">Beat type is required</p>
+              )}
+            </div>
+            <div>
+              <label 
+                className="block text-sm font-medium mb-1"
+                style={{ color: 'var(--color-text-primary)' }}
+              >
+                Price
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <span style={{ color: 'var(--color-text-secondary)' }}>₦</span>
+                </div>
+                <input
+                  type="number"
+                  name="amount"
+                  value={formData.amount}
+                  onChange={handleInputChange}
+                  min="0"
+                  step="0.01"
+                  className="w-full pl-7 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all border-gray-600"
+                  style={{ 
+                    backgroundColor: 'var(--color-bg-primary)',
+                    color: 'var(--color-text-primary)'
+                  }}
+                  disabled={loading || formData.beatType === 'free'}
+                />
+              </div>
+            </div>
+          </div>
+
           <div>
             <label 
               className="block text-sm font-medium mb-1"
@@ -249,41 +456,13 @@ const UploadBeats = () => {
                 backgroundColor: 'var(--color-bg-primary)',
                 color: 'var(--color-text-primary)'
               }}
-              placeholder="Describe your beat, mention genre, mood, or inspiration"
+              placeholder="Describe your beat, mention mood, instruments, or usage terms"
               disabled={loading}
             ></textarea>
             {submitAttempted && !formData.description && (
               <p className="mt-1 text-sm text-red-500">Description is required</p>
             )}
           </div>
-          
-          <div>
-            <label 
-              className="block text-sm font-medium mb-1"
-              style={{ color: 'var(--color-text-primary)' }}
-            >
-              Price
-            </label>
-            <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <span style={{ color: 'var(--color-text-secondary)' }}>₦</span>
-                </div>
-                <input
-                  type="number"
-                  name="amount"
-                  value={formData.amount}
-                  onChange={handleInputChange}
-                  min="0.01"
-                  step="0.01"
-                  className="w-full pl-7 pr-3 py-2 border rounded-lg focus:ring-2 focus:ring-[#2D8C72] focus:border-transparent transition-all border-gray-600"
-                  style={{ 
-                    backgroundColor: 'var(--color-bg-primary)',
-                    color: 'var(--color-text-primary)'
-                  }}
-                  disabled={loading}
-                />
-              </div>
-            </div>
           
           <div>
             <p 
