@@ -14,8 +14,10 @@ const MusicSection = ({ userId }) => {
 
   const filteredPosts = posts.filter(post => post.profile_id === userId);
 
+  // When a user clicks on a track in the grid, open the shared-audio viewer
+  // so it uses the same full-screen experience as shared links.
   const handleMusicClick = (postId) => {
-    navigate(`/music/${postId}`);
+    navigate(`/shared-audio/${postId}`);
   };
 
   return (

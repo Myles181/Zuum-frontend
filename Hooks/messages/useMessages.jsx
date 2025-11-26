@@ -220,10 +220,18 @@ export const useFetchMessages = (roomId) => {
   const [loading, setLoading] = useState(true); // New loading state
 
   useEffect(() => {
-    if (!socket || !roomId) return;
+    // If we don't have a socket or roomId yet, log and avoid infinite loading
+    if (!socket || !roomId) {
+      console.warn('[Messages] useFetchMessages: missing socket or roomId', {
+        hasSocket: !!socket,
+        roomId,
+      });
+      setLoading(false);
+      return;
+    }
 
     const handleRecentMessages = (messages) => {
-      console.log('Backend returned messages:', messages);
+      console.log('[Messages] recentMessages:', messages);
       setFetchedMessages(messages);
       setLoading(false); // Set loading to false once messages are received
     };
@@ -240,6 +248,7 @@ export const useFetchMessages = (roomId) => {
 
     // Immediately request messages for the room
     socket.emit('fetchMessages', roomId);
+    console.log('[Messages] fetchMessages emitted for room:', roomId);
 
     // Set up an interval to fetch messages every 5 seconds
     const interval = setInterval(() => {

@@ -214,10 +214,10 @@ const PromotionPage = () => {
               style={{ color: 'var(--color-text-primary)' }}
             >
               <FaMusic style={{ color: 'var(--color-primary)' }} /> 
-              Your Uploads ({allPosts.length})
+              Your Audio Uploads ({audios.length})
             </h2>
             
-            {allPosts.map(item => (
+            {audios.map(item => (
               <motion.div
                 key={item.id}
                 whileHover={{ scale: 1.01 }}

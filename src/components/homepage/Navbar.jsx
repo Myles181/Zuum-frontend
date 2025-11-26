@@ -9,7 +9,9 @@ const Navbar = ({
   profilePicture, 
   goBack, 
   isDashboardPage,
-  isMessagePage 
+  isMessagePage,
+  activeTab,
+  handleTabClick,
 }) => {
   const location = useLocation();
   const isProfilePage = location.pathname === '/profile';
@@ -26,8 +28,8 @@ const Navbar = ({
     '--color-border': '#374151'
   };
 
-  // Truncate name if it's too long
-  const displayName = name?.length > 8 ? name.substring(0, 10) + "..." : name;
+  const isHomePage = location.pathname === '/home';
+  const currentTab = activeTab || 'audio';
 
   return (
     <div 
@@ -61,13 +63,9 @@ const Navbar = ({
         )}
       </div>
 
-      {/* Middle Section */}
+      {/* Middle Section - Audio/Video switch (only on Home) */}
       <div 
         className="flex items-center space-x-2 px-4 py-1 rounded-full transition-colors"
-        style={{ 
-          backgroundColor: 'var(--color-primary)',
-          color: 'var(--color-text-on-primary)'
-        }}
       >
         {isMessagePage && profilePicture && (
           <img
@@ -77,14 +75,39 @@ const Navbar = ({
             style={{ borderColor: 'var(--color-primary-light)' }}
           />
         )}
-        <div className="rounded-full flex items-center">
-          <span 
-            className="font-medium text-sm"
-            style={{ color: 'var(--color-text-on-primary)' }}
-          >
-            {displayName || "User"}
-          </span>
-        </div>
+        {isHomePage && (
+          <div className="relative flex items-center w-30 text-xs rounded-full bg-white/5 border border-white/15 px-1 py-1">
+            <button
+              type="button"
+              onClick={() => handleTabClick && handleTabClick('audio')}
+              className={`relative z-10 px-3 py-1.5 font-medium transition-all duration-200 ${
+                currentTab === 'audio'
+                  ? 'text-[var(--color-primary)]'
+                  : 'text-[var(--color-text-on-primary)]/75'
+              }`}
+            >
+              Audio
+            </button>
+            <button
+              type="button"
+              onClick={() => handleTabClick && handleTabClick('video')}
+              className={`relative z-10 px-3 py-1.5 font-medium transition-all duration-200 ${
+                currentTab === 'video'
+                  ? 'text-[var(--color-primary)]'
+                  : 'text-[var(--color-text-on-primary)]/75'
+              }`}
+            >
+              Video
+            </button>
+            {/* Sliding pill background */}
+            <div
+              className="absolute inset-y-1 w-14 rounded-full bg-white shadow-sm transition-transform duration-200 ease-out"
+              style={{
+                transform: currentTab === 'audio' ? 'translateX(0%)' : 'translateX(100%)',
+              }}
+            />
+          </div>
+        )}
       </div>
 
       {/* Right Section */}
