@@ -25,9 +25,8 @@ const AdminUsersPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
   
-  // Modal states
+  // Selection / modal states
   const [selectedUser, setSelectedUser] = useState(null);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
   const [userToDeactivate, setUserToDeactivate] = useState(null);
   
@@ -83,7 +82,6 @@ const AdminUsersPage = () => {
   // Handle view user details
   const handleViewUser = (user) => {
     setSelectedUser(user);
-    setIsViewModalOpen(true);
   };
 
   
@@ -331,9 +329,10 @@ const AdminUsersPage = () => {
             {/* Main content */}
             <div className="flex-1 overflow-hidden">
               <div className="h-full bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200 mx-4 lg:mx-6">
-                {/* Desktop Table */}
-                <div className="hidden lg:block h-full overflow-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
+                {/* Desktop: list OR details */}
+                {!selectedUser ? (
+                  <div className="hidden lg:block h-full overflow-auto">
+                    <table className="min-w-full divide-y divide-gray-200">
                     <thead className="bg-gray-50 sticky top-0">
                       <tr>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -429,7 +428,130 @@ const AdminUsersPage = () => {
                       )}
                     </tbody>
                   </table>
-                </div>
+                  </div>
+                ) : (
+                  <div className="hidden lg:flex h-full flex-col overflow-auto">
+                    <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+                      <div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedUser(null)}
+                          className="text-xs text-[#2d7a63] hover:text-[#245a4f] mb-1"
+                        >
+                          &larr; Back to user list
+                        </button>
+                        <h2 className="text-2xl font-bold text-gray-900">
+                          {selectedUser.username}
+                        </h2>
+                        <p
+                          className={`mt-1 text-sm ${
+                            selectedUser.deactivated
+                              ? 'text-red-600'
+                              : 'text-green-600'
+                          }`}
+                        >
+                          {selectedUser.deactivated ? 'Deactivated' : 'Active'}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => navigate(`/admin-analytics/${selectedUser.id}`)}
+                        className="inline-flex items-center px-3 py-2 rounded-md text-xs font-semibold text-white bg-[#2d7a63] hover:bg-[#245a4f] shadow-sm"
+                      >
+                        Analytics
+                      </button>
+                    </div>
+
+                    <div className="p-6 space-y-6">
+                      {/* User financial stats */}
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
+                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            User balance
+                          </p>
+                          <p className="mt-2 text-xl font-bold text-gray-900">
+                            ₦
+                            {(selectedUser.balance ?? 0).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
+                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Withdrawals
+                          </p>
+                          <p className="mt-2 text-xl font-bold text-gray-900">
+                            ₦
+                            {(selectedUser.total_withdrawals ?? 0).toLocaleString()}
+                          </p>
+                        </div>
+                        <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
+                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Deposits
+                          </p>
+                          <p className="mt-2 text-xl font-bold text-gray-900">
+                            ₦
+                            {(selectedUser.total_deposits ?? 0).toLocaleString()}
+                          </p>
+                        </div>
+                      </div>
+
+                      {/* Core user details */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Email
+                          </h3>
+                          <p className="mt-1 text-sm text-gray-900 break-all">
+                            {selectedUser.email}
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            User ID
+                          </h3>
+                          <p className="mt-1 text-sm text-gray-900">
+                            {selectedUser.id}
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Full name
+                          </h3>
+                          <p className="mt-1 text-sm text-gray-900">
+                            {selectedUser.firstname}{' '}
+                            {selectedUser.middlename || ''}{' '}
+                            {selectedUser.lastname}
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Identity
+                          </h3>
+                          <p className="mt-1 text-sm text-gray-900">
+                            {selectedUser.identity || 'Not specified'}
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Phone number
+                          </h3>
+                          <p className="mt-1 text-sm text-gray-900">
+                            {selectedUser.phonenumber || 'Not provided'}
+                          </p>
+                        </div>
+                        <div>
+                          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            Account created
+                          </h3>
+                          <p className="mt-1 text-sm text-gray-900">
+                            {selectedUser.created_at
+                              ? new Date(selectedUser.created_at).toLocaleString()
+                              : 'Unknown'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Mobile Cards */}
                 <div className="lg:hidden h-full overflow-auto">
@@ -556,81 +678,9 @@ const AdminUsersPage = () => {
                 </div>
               </div>
             )}
-          </div>
+            </div>
         </div>
       </div>
-      
-      {/* View User Modal */}
-      {isViewModalOpen && selectedUser && (
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl max-w-lg w-full max-h-[90vh] overflow-y-auto">
-            <div className="flex justify-between items-center p-4 lg:p-6 border-b border-gray-200">
-              <h2 className="text-lg lg:text-xl font-bold text-gray-900">User Details</h2>
-              <button 
-                onClick={() => setIsViewModalOpen(false)}
-                className="text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2d7a63] p-1"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            
-            <div className="p-4 lg:p-6 space-y-4 lg:space-y-6">
-              <div className="flex flex-col items-center mb-4 lg:mb-6">
-                <div className="h-16 w-16 lg:h-20 lg:w-20 bg-[#2d7a63] bg-opacity-10 rounded-full flex items-center justify-center">
-                  <User className="h-8 w-8 lg:h-10 lg:w-10 text-[#2d7a63]" />
-                </div>
-                <h3 className="mt-3 lg:mt-4 text-base lg:text-lg font-medium text-gray-900">{selectedUser.username}</h3>
-                <p className={`mt-1 text-xs lg:text-sm ${selectedUser.deactivated ? "text-red-600" : "text-green-600"}`}>
-                  {selectedUser.deactivated ? 'Deactivated' : 'Active'}
-                </p>
-              </div>
-              
-              <div className="grid grid-cols-1 gap-4 lg:gap-6 sm:grid-cols-2">
-                <div>
-                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Email</h4>
-                  <p className="mt-1 text-sm text-gray-900 break-all">{selectedUser.email}</p>
-                </div>
-                
-                <div>
-                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">User ID</h4>
-                  <p className="mt-1 text-sm text-gray-900">{selectedUser.id}</p>
-                </div>
-                
-                <div>
-                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Full Name</h4>
-                  <p className="mt-1 text-sm text-gray-900">
-                    {selectedUser.firstname} {selectedUser.middlename ? selectedUser.middlename : ''} {selectedUser.lastname}
-                  </p>
-                </div>
-                
-                <div>
-                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Identity</h4>
-                  <p className="mt-1 text-sm text-gray-900">{selectedUser.identity || 'Not specified'}</p>
-                </div>
-                
-                <div>
-                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Phone Number</h4>
-                  <p className="mt-1 text-sm text-gray-900">{selectedUser.phonenumber || 'Not provided'}</p>
-                </div>
-                
-                <div>
-                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Account Created</h4>
-                  <p className="mt-1 text-sm text-gray-900">{new Date(selectedUser.created_at).toLocaleString()}</p>
-                </div>
-              </div>
-            </div>
-            
-            <div className="p-4 lg:p-6 border-t border-gray-200 flex justify-end">
-              <button
-                onClick={() => setIsViewModalOpen(false)}
-                className="w-full sm:w-auto px-4 py-2 bg-[#2d7a63] text-white rounded-md hover:bg-[#245a4f] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#2d7a63] transition duration-150"
-              >
-                Close
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
       
       {/* Confirmation Modal */}
       {isConfirmModalOpen && userToDeactivate && (

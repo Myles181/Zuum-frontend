@@ -25,15 +25,15 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
     {
       title: 'Core Operations',
       items: [
-        {
-          id: 'users',
+    {
+      id: 'users',
           label: 'User Directory',
-          icon: Users,
+      icon: Users,
           description: 'Profiles, roles & access',
           badge: 'Live',
           badgeClass: 'bg-emerald-100 text-emerald-700'
-        },
-        {
+    },
+    {
           id: 'distribution',
           label: 'Distribution Desk',
           icon: Send,
@@ -54,14 +54,14 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
     {
       title: 'Monetization',
       items: [
-        {
-          id: 'beat',
+    {
+      id: 'beat',
           label: 'Beat Sales',
           icon: Music2,
           description: 'Orders, licenses & delivery'
-        },
-        {
-          id: 'withdrawalRequest',
+    },
+    {
+      id: 'withdrawalRequest',
           label: 'Payout Requests',
           icon: Wallet,
           description: 'Settlements & compliance'
@@ -117,56 +117,56 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
                   {section.title}
                 </p>
               )}
-              <div className="space-y-2">
+        <div className="space-y-2">
                 {section.items.map((item) => {
-                  const Icon = item.icon;
-                  const isActive = currentPage === item.id;
+            const Icon = item.icon;
+            const isActive = currentPage === item.id;
 
-                  return (
-                    <button
-                      key={item.id}
-                      onClick={() => handlePageChange(item.id)}
+            return (
+              <button
+                key={item.id}
+                onClick={() => handlePageChange(item.id)}
                       className={`relative w-full flex items-center gap-3 px-3 py-3 rounded-xl text-left transition-all duration-200 group ${
-                        isActive
+                  isActive
                           ? 'bg-gradient-to-r from-[#1f5f4a] to-[#2d7a63] text-white shadow-lg'
                           : 'bg-white/70 text-gray-700 border border-transparent hover:border-gray-200 hover:bg-white'
-                      }`}
-                    >
+                }`}
+              >
                       <span
                         className={`flex items-center justify-center w-10 h-10 rounded-lg ${
                           isActive ? 'bg-white/15 text-white' : 'bg-gray-100 text-gray-500 group-hover:text-[#2d7a63]'
-                        }`}
+                  }`} 
                       >
                         <Icon className="w-5 h-5" />
                       </span>
 
-                      {(!isCollapsed || isMobile) && (
+                {(!isCollapsed || isMobile) && (
                         <div className="flex-1 min-w-0">
                           <p className={`text-sm font-semibold truncate ${isActive ? 'text-white' : 'text-gray-900'}`}>
-                            {item.label}
-                          </p>
-                          <p className={`text-xs ${
+                      {item.label}
+                    </p>
+                    <p className={`text-xs ${
                             isActive ? 'text-emerald-100' : 'text-gray-500'
-                          }`}>
-                            {item.description}
-                          </p>
-                        </div>
-                      )}
+                    }`}>
+                      {item.description}
+                    </p>
+                  </div>
+                )}
 
                       {item.badge && !isCollapsed && (
                         <span className={`text-xs font-semibold px-2 py-1 rounded-full ${item.badgeClass || 'bg-gray-100 text-gray-600'}`}>
                           {item.badge}
                         </span>
                       )}
-
-                      {isCollapsed && !isMobile && (
-                        <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
-                          {item.label}
-                        </div>
-                      )}
-                    </button>
-                  );
-                })}
+                
+                {isCollapsed && !isMobile && (
+                  <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
+                    {item.label}
+                  </div>
+                )}
+              </button>
+            );
+          })}
               </div>
             </div>
           ))}
@@ -190,7 +190,7 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-500">New creators</span>
                 <span className="font-semibold text-gray-900">+124</span>
-              </div>
+            </div>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-gray-500">Payout volume</span>
                 <span className="font-semibold text-gray-900">$32.4k</span>
@@ -262,7 +262,7 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
       {isMobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 z-40 flex">
           <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setIsMobileMenuOpen(false)} />
-          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white shadow-xl">
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white shadow-xl overflow-y-auto">
             <SidebarContent isMobile={true} />
           </div>
         </div>
@@ -272,7 +272,7 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
       <div className={`hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 bg-white border-r border-gray-200 transition-all duration-300 ${
         isCollapsed ? 'lg:w-20' : 'lg:w-72'
       }`}>
-        <div className="flex-1 flex flex-col min-h-0 py-6 px-4">
+        <div className="flex-1 flex flex-col min-h-0 py-6 px-4 overflow-y-auto">
           <SidebarContent />
         </div>
       </div>

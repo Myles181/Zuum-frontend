@@ -57,6 +57,7 @@ import { UserPromotions } from './pages/UserPromotions';
 import DistributionRequestsPage from './admin/pages/Distribution';
 import AdminBeatPurchasesPage from './admin/pages/Beats';
 import AdminPromotionsPage from './admin/pages/promotion';
+import AdminUserAnalyticsPage from './admin/pages/UserAnalytics';
 import { DarkModeProvider } from './contexts/DarkModeContext';
 import ZuumOnboarding from './pages/Onboarding';
 import DepositPage from './components/dashboard/DepositPage';
@@ -261,6 +262,7 @@ const App = () => (
                 <Route path="/addistributions" element={<DistributionRequestsPage />} />
                 <Route path="/adbeat" element={<AdminBeatPurchasesPage />} />
                 <Route path="/adpromotion" element={<AdminPromotionsPage />} />
+              <Route path="/admin-analytics/:userId" element={<AdminUserAnalyticsPage />} />
               </Route>
           </Routes>
         </Router>
