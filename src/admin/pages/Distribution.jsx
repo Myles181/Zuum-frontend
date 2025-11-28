@@ -177,8 +177,9 @@ const DistributionRequestsPage = () => {
     users: '/users',
     distribution: '/addistributions',
     beat: '/adbeat',
-    withdrawalRequest: '/withdrawalRequest',
     promotion: '/adpromotion',
+    wallet: '/admin-wallet',
+    subscriptions: '/admin-subscriptions',
   };
 
   const handlePageChange = (pageId) => {

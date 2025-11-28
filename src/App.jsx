@@ -58,6 +58,8 @@ import DistributionRequestsPage from './admin/pages/Distribution';
 import AdminBeatPurchasesPage from './admin/pages/Beats';
 import AdminPromotionsPage from './admin/pages/promotion';
 import AdminUserAnalyticsPage from './admin/pages/UserAnalytics';
+import AdminWalletPage from './admin/pages/Wallet';
+import AdminSubscriptionsPage from './admin/pages/Subscriptions';
 import { DarkModeProvider } from './contexts/DarkModeContext';
 import ZuumOnboarding from './pages/Onboarding';
 import DepositPage from './components/dashboard/DepositPage';
@@ -248,7 +250,8 @@ const App = () => (
             <Route path="/adlog" element={<AdminLogin />} />
               <Route path="/adsin" element={<AdminSignup />} />
                <Route path="/adver" element={<VerifyEmailForm />} />
-               <Route path="/withdrawalRequest" element={<AdminWithdrawalRequest />} />
+               {/* Legacy standalone withdrawal page */}
+               {/* <Route path="/withdrawalRequest" element={<AdminWithdrawalRequest />} /> */}
                
             {/* Protected Routes */}
             <Route element={<ProtectedRoute />}>
@@ -262,6 +265,8 @@ const App = () => (
                 <Route path="/addistributions" element={<DistributionRequestsPage />} />
                 <Route path="/adbeat" element={<AdminBeatPurchasesPage />} />
                 <Route path="/adpromotion" element={<AdminPromotionsPage />} />
+              <Route path="/admin-wallet" element={<AdminWalletPage />} />
+              <Route path="/admin-subscriptions" element={<AdminSubscriptionsPage />} />
               <Route path="/admin-analytics/:userId" element={<AdminUserAnalyticsPage />} />
               </Route>
           </Routes>

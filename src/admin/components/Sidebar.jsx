@@ -1,18 +1,19 @@
 import { useState } from 'react';
-import { 
-  Users, 
-  Megaphone, 
+import {
+  Users,
+  Megaphone,
   Send,
   Music2,
   Wallet,
-  ChevronLeft, 
+  ChevronLeft,
   ChevronRight,
   Menu,
   X,
   Shield,
   BarChart3,
   TrendingUp,
-  LogOut
+  LogOut,
+  CreditCard,
 } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
 
@@ -54,20 +55,36 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
     {
       title: 'Monetization',
       items: [
-    {
-      id: 'beat',
+        {
+          id: 'beat',
           label: 'Beat Sales',
           icon: Music2,
-          description: 'Orders, licenses & delivery'
+          description: 'Orders, licenses & delivery',
+        },
+      ],
     },
     {
-      id: 'withdrawalRequest',
-          label: 'Payout Requests',
+      title: 'Wallet',
+      items: [
+        {
+          id: 'wallet',
+          label: 'Wallet Overview',
           icon: Wallet,
-          description: 'Settlements & compliance'
-        }
-      ]
-    }
+          description: 'Balances, withdrawals & transfers',
+        },
+      ],
+    },
+    {
+      title: 'Subscriptions',
+      items: [
+        {
+          id: 'subscriptions',
+          label: 'Subscription Manager',
+          icon: CreditCard,
+          description: 'Plans & user subscriptions',
+        },
+      ],
+    },
   ];
 
   const handlePageChange = (pageId) => {
