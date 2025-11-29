@@ -589,6 +589,7 @@ export const useSubscriptionPayment = () => {
 
       if (response.status === 200 && response.data?.status) {
         setPaymentDetails(response.data);
+        console.log(response.data, 'response.data from useSubscriptionPayment');  
         return response.data;
       } else {
         throw new Error(response.data?.message || 'Invalid response from server');

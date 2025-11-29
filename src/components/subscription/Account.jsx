@@ -1,42 +1,33 @@
 import { useState, useEffect } from 'react';
-import { CheckCircle, AlertCircle, Copy, RefreshCw, ArrowRight, Clock } from 'lucide-react';
-import {useSubscriptionPayment} from '../../../Hooks/subscription/useCreateAccount';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
 
 const SubscriptionPage = ({ onSuccess, onError, profile, details }) => {
+  const navigate = useNavigate();
   const [isFadingIn, setIsFadingIn] = useState(false);
-  const [copiedField, setCopiedField] = useState(null);
-  const [countdownTime, setCountdownTime] = useState('');
-  const [expiryTime, setExpiryTime] = useState(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [error, setError] = useState(null);
 
-  const {
-    loading,
-    error,
-    paymentDetails,
-    initiateSubscriptionPayment,
-    redirectToPayment
-  } = useSubscriptionPayment();
-
-  // Initialize payment on component mount
+  // Initialize component
   useEffect(() => {
-    initiateSubscriptionPayment();
     setIsFadingIn(true);
   }, []);
 
   // Get price data based on user identity
   const getPriceData = () => {
-    if (!profile) return { amount: '₦--,---', description: '/month' }; // Default
+    if (!profile) return { amount: '₦--,---', amountValue: 0, description: '/month' }; // Default
     
-    switch(profile.identity) {
+    switch(profile?.identity) {
       case 'artist':
-        return { amount: '₦15,000', description: '/month' };
+        return { amount: '₦15,000', amountValue: 15000, description: '/month' };
       case 'producer':
-        return { amount: '₦20,000', description: '/month' };
+        return { amount: '₦20,000', amountValue: 20000, description: '/month' };
       case 'label owner':
-        return { amount: '₦30,000', description: '/month' };
-        case 'dev':
-          return { amount: '₦200', description: '/month' };
+        return { amount: '₦30,000', amountValue: 30000, description: '/month' };
+      case 'dev':
+        return { amount: '₦200', amountValue: 200, description: '/month' };
       default:
-        return { amount: '₦--,---', description: '/month' };
+        return { amount: '₦--,---', amountValue: 0, description: '/month' };
     }
   };
 
@@ -77,37 +68,26 @@ const SubscriptionPage = ({ onSuccess, onError, profile, details }) => {
 
   const features = getFeatureList();
 
-  // Set expiration time when payment details are received
-  useEffect(() => {
-    if (paymentDetails) {
-      // Either use expiresAt from the response or set to 30 minutes from now
-      const expiry = new Date();
-      expiry.setMinutes(expiry.getMinutes() + 30);
-      setExpiryTime(expiry);
+  const handleConfirmPayment = () => {
+    if (!profile) {
+      setError('User profile not found');
+      return;
     }
-  }, [paymentDetails]);
 
-  // Update countdown timer
-  
+    setIsProcessing(true);
+    setError(null);
 
-  const copyToClipboard = (text, fieldName) => {
-    navigator.clipboard.writeText(text);
-    setCopiedField(fieldName);
-    setTimeout(() => setCopiedField(null), 2000);
-  };
+    // Get user balance (default to 0 if not available)
+    const userBalance = profile.balance || 0;
+    const subscriptionAmount = priceData.amountValue;
 
-  const handleRefresh = () => {
-    initiateSubscriptionPayment();
-  };
-
-  const handleSubscribe = async () => {
-    if (paymentDetails?.paymentLink) {
-      redirectToPayment();
+    // Check if user has sufficient balance
+    if (userBalance >= subscriptionAmount) {
+      // Navigate to success page
+      navigate('/subscription-success');
     } else {
-      const result = await initiateSubscriptionPayment();
-      if (result?.paymentLink) {
-        redirectToPayment();
-      }
+      // Navigate to dashboard page
+      navigate('/dashboard');
     }
   };
 
@@ -180,12 +160,6 @@ const SubscriptionPage = ({ onSuccess, onError, profile, details }) => {
             <AlertCircle size={18} className="text-red-500 mt-0.5 mr-2 flex-shrink-0" />
             <div>
               <p className="text-sm text-red-700">{error}</p>
-              <button 
-                onClick={handleRefresh}
-                className="mt-1 text-xs text-red-700 font-medium hover:underline flex items-center"
-              >
-                <RefreshCw size={12} className="mr-1" /> Try again
-              </button>
             </div>
           </div>
         </div>
@@ -219,11 +193,19 @@ const SubscriptionPage = ({ onSuccess, onError, profile, details }) => {
               <span className="font-medium text-gray-800 capitalize">{profile.identity || "Standard"}</span>
             </div>
           )}
+          {profile && (
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-sm text-gray-600">Current Balance:</span>
+              <span className="font-medium text-gray-800">
+                ₦{(profile.balance || 0).toLocaleString()}
+              </span>
+            </div>
+          )}
           <div className="flex justify-between items-center pt-3 border-t border-gray-200">
             <span className="text-sm font-medium text-gray-700">Total:</span>
             <span className="font-bold text-[#2D8C72]">
-              {details?.paymentDetails?.amount}
-              <span className="text-sm font-normal text-gray-500 ml-1">/Year</span>
+              {priceData.amount}
+              <span className="text-sm font-normal text-gray-500 ml-1">{priceData.description}</span>
             </span>
           </div>
         </div>
@@ -244,11 +226,11 @@ const SubscriptionPage = ({ onSuccess, onError, profile, details }) => {
         {/* Payment Button */}
         <div className="mt-6">
           <button
-            onClick={handleSubscribe}
-            disabled={loading || !paymentDetails}
+            onClick={handleConfirmPayment}
+            disabled={isProcessing || !profile}
             className="w-full py-3 px-4 bg-[#2D8C72] hover:bg-[#236a56] text-white rounded-md font-medium flex items-center justify-center transition-colors disabled:opacity-70 disabled:cursor-not-allowed"
           >
-            {loading ? (
+            {isProcessing ? (
               <div className="flex items-center">
                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -258,7 +240,7 @@ const SubscriptionPage = ({ onSuccess, onError, profile, details }) => {
               </div>
             ) : (
               <div className="flex items-center">
-                Proceed to Payment 
+                Confirm Payment 
                 <ArrowRight size={18} className="ml-2" />
               </div>
             )}
