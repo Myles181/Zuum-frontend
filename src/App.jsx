@@ -28,6 +28,7 @@ import { initializeSocket } from './socket';
 import FollowersListPage from './components/homepage/FollowingList ';
 import SubscriptionPage from './components/subscription/Account';
 import SubscriptionDetails from './components/subscription/SubDetails';
+import SubscriptionSuccess from './pages/SubscriptionSuccess';
 import ZuumNews from './pages/ZuumNews';
 
 import LockedMusicPlayer from './components/homepage/sale/Locked';
@@ -61,6 +62,7 @@ import AdminUserAnalyticsPage from './admin/pages/UserAnalytics';
 import AdminWalletPage from './admin/pages/Wallet';
 import AdminSubscriptionsPage from './admin/pages/Subscriptions';
 import { DarkModeProvider } from './contexts/DarkModeContext';
+import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import ZuumOnboarding from './pages/Onboarding';
 import DepositPage from './components/dashboard/DepositPage';
 import WithdrawalPage from './components/dashboard/WithdrawalPage';
@@ -183,7 +185,8 @@ const AppRoutes = () => {
     <>
       <Routes>
         {/* Subscription page should not trigger the popup */}
-        <Route path="/subscribe" element={<SubscriptionPage profile={profile} details={paymentDetails} />} />
+        <Route path="/subscribe" element={<SubscriptionPage details={paymentDetails} profile={profile} />} />
+        <Route path="/subscription-success" element={<SubscriptionSuccess />} />
         <Route path="/home" element={<Homepage details={paymentDetails} profile={profile} />} />
         {/* Rest of protected routes */}
        
@@ -238,6 +241,7 @@ const App = () => (
         {/* <SocketContextProvider> */}
         <AdminProvider>
         <Router>
+          <SubscriptionProvider>
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<ZuumOnboarding />} />
@@ -270,6 +274,7 @@ const App = () => (
               <Route path="/admin-analytics/:userId" element={<AdminUserAnalyticsPage />} />
               </Route>
           </Routes>
+          </SubscriptionProvider>
         </Router>
         </AdminProvider>
         {/* </SocketContextProvider> */}

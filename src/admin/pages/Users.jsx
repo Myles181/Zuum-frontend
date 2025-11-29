@@ -10,10 +10,23 @@ import {
   Search,
   AlertCircle,
   Menu,
-  Filter
+  Filter,
+  Mail,
+  Phone,
+  Calendar,
+  CreditCard,
+  TrendingUp,
+  TrendingDown,
+  Wallet,
+  Shield,
+  CheckCircle2,
+  XCircle,
+  UserCircle,
+  Building2
 } from 'lucide-react';
 import AdminSidebar from '../components/Sidebar';
 import { useAdmins } from '../hooks/useUsers';
+import { useUserById } from '../hooks/useUserById';
 
 const DEFAULT_PAGE_SIZE = 25;
 const PAGE_SIZE_OPTIONS = [10, 25, 50, 100, 200];
@@ -44,6 +57,17 @@ const AdminUsersPage = () => {
     deactivateUser,
     resetError 
   } = useAdmins();
+
+  // Use hook to fetch detailed user data by ID
+  const { 
+    user: detailedUser, 
+    isLoading: isLoadingUserDetails, 
+    error: userDetailsError,
+    fetchUserById,
+    resetError: resetUserDetailsError
+  } = useUserById();
+
+  console.log(detailedUser);
 
   const filteredUsers = useMemo(() => {
     const searchLower = searchTerm.toLowerCase();
@@ -80,9 +104,16 @@ const AdminUsersPage = () => {
   }, [currentPage, totalPages]);
 
   // Handle view user details
-  const handleViewUser = (user) => {
+  const handleViewUser = async (user) => {
     setSelectedUser(user);
+    // Fetch detailed user data from API
+    if (user?.id) {
+      await fetchUserById(user.id);
+    }
   };
+
+  // Use detailed user data if available, otherwise fall back to selectedUser from list
+  const displayUser = detailedUser || selectedUser;
 
   
   
@@ -187,7 +218,7 @@ const AdminUsersPage = () => {
                 </div>
                 <input
                   type="text"
-                  className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl text-base bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] transition-all duration-200"
+                  className="block w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl text-base bg-white placeholder-gray-500  text-black focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] transition-all duration-200"
                   placeholder="Search users..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -238,56 +269,58 @@ const AdminUsersPage = () => {
               </div>
             </div>
 
-            {/* Stats Cards */}
-            <div className="px-4 lg:px-6 mb-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                        <User className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" />
+            {/* Stats Cards - Only show when no user is selected */}
+            {!selectedUser && (
+              <div className="px-4 lg:px-6 mb-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                          <User className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" />
+                        </div>
                       </div>
-                    </div>
-                    <div className="ml-3 lg:ml-4">
-                      <p className="text-sm font-medium text-gray-600">Active Users</p>
-                      <p className="text-xl lg:text-2xl font-bold text-gray-900">
-                        {users.filter(u => !u.deactivated).length}
-                      </p>
+                      <div className="ml-3 lg:ml-4">
+                        <p className="text-sm font-medium text-gray-600">Active Users</p>
+                        <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                          {users.filter(u => !u.deactivated).length}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                        <AlertCircle className="w-5 h-5 lg:w-6 lg:h-6 text-red-600" />
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                          <AlertCircle className="w-5 h-5 lg:w-6 lg:h-6 text-red-600" />
+                        </div>
                       </div>
-                    </div>
-                    <div className="ml-3 lg:ml-4">
-                      <p className="text-sm font-medium text-gray-600">Deactivated</p>
-                      <p className="text-xl lg:text-2xl font-bold text-gray-900">
-                        {users.filter(u => u.deactivated).length}
-                      </p>
+                      <div className="ml-3 lg:ml-4">
+                        <p className="text-sm font-medium text-gray-600">Deactivated</p>
+                        <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                          {users.filter(u => u.deactivated).length}
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6 sm:col-span-2 lg:col-span-1">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-[#2d7a63] bg-opacity-10 rounded-lg flex items-center justify-center">
-                        <User className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
+                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6 sm:col-span-2 lg:col-span-1">
+                    <div className="flex items-center">
+                      <div className="flex-shrink-0">
+                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-[#2d7a63] bg-opacity-10 rounded-lg flex items-center justify-center">
+                          <User className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
+                        </div>
                       </div>
-                    </div>
-                    <div className="ml-3 lg:ml-4">
-                      <p className="text-sm font-medium text-gray-600">Total Users</p>
-                      <p className="text-xl lg:text-2xl font-bold text-gray-900">{users.length}</p>
+                      <div className="ml-3 lg:ml-4">
+                        <p className="text-sm font-medium text-gray-600">Total Users</p>
+                        <p className="text-xl lg:text-2xl font-bold text-gray-900">{users.length}</p>
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
             
             {/* Error notification */}
             {error && (
@@ -432,125 +465,331 @@ const AdminUsersPage = () => {
                   </div>
                 ) : (
                   <div className="hidden lg:flex h-full flex-col overflow-auto">
-                    <div className="p-6 border-b border-gray-200 flex items-center justify-between">
-                      <div>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedUser(null)}
-                          className="text-xs text-[#2d7a63] hover:text-[#245a4f] mb-1"
-                        >
-                          &larr; Back to user list
-                        </button>
-                        <h2 className="text-2xl font-bold text-gray-900">
-                          {selectedUser.username}
-                        </h2>
-                        <p
-                          className={`mt-1 text-sm ${
-                            selectedUser.deactivated
-                              ? 'text-red-600'
-                              : 'text-green-600'
-                          }`}
-                        >
-                          {selectedUser.deactivated ? 'Deactivated' : 'Active'}
-                        </p>
+                    {isLoadingUserDetails ? (
+                      <div className="flex items-center justify-center h-full">
+                        <div className="text-center">
+                          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2d7a63] mx-auto mb-4"></div>
+                          <p className="text-sm text-gray-600">Loading user details...</p>
+                        </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => navigate(`/admin-analytics/${selectedUser.id}`)}
-                        className="inline-flex items-center px-3 py-2 rounded-md text-xs font-semibold text-white bg-[#2d7a63] hover:bg-[#245a4f] shadow-sm"
-                      >
-                        Analytics
-                      </button>
-                    </div>
+                    ) : userDetailsError ? (
+                      <div className="p-6">
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                          <p className="text-sm text-red-700 mb-2">{userDetailsError}</p>
+                          <button
+                            onClick={() => {
+                              resetUserDetailsError();
+                              if (selectedUser?.id) {
+                                fetchUserById(selectedUser.id);
+                              }
+                            }}
+                            className="text-xs text-red-700 hover:underline"
+                          >
+                            Try again
+                          </button>
+                        </div>
+                      </div>
+                    ) : displayUser ? (
+                      <>
+                        {/* Modern Header Section */}
+                        <div className="bg-gradient-to-r from-[#2D8C72] to-[#34A085] p-6 text-white">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedUser(null);
+                              resetUserDetailsError();
+                            }}
+                            className="mb-4 inline-flex items-center text-sm text-white/90 hover:text-white transition-colors"
+                          >
+                            <ChevronLeft className="w-4 h-4 mr-1" />
+                            Back to user list
+                          </button>
+                          
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start gap-4">
+                              <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-full flex items-center justify-center border-2 border-white/30">
+                                {displayUser.image ? (
+                                  <img 
+                                    src={displayUser.image} 
+                                    alt={displayUser.username}
+                                    className="w-full h-full rounded-full object-cover"
+                                  />
+                                ) : (
+                                  <UserCircle className="w-10 h-10 text-white" />
+                                )}
+                              </div>
+                              <div>
+                                <h2 className="text-2xl font-bold mb-1">
+                                  {displayUser.username || displayUser.email || 'User'}
+                                </h2>
+                                <p className="text-white/80 text-sm mb-3">
+                                  {displayUser.firstname} {displayUser.lastname}
+                                </p>
+                                <div className="flex flex-wrap items-center gap-3">
+                                  <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                                    displayUser.deactivated
+                                      ? 'bg-red-500/20 text-red-100'
+                                      : 'bg-green-500/20 text-green-100'
+                                  }`}>
+                                    {displayUser.deactivated ? (
+                                      <XCircle className="w-3 h-3" />
+                                    ) : (
+                                      <CheckCircle2 className="w-3 h-3" />
+                                    )}
+                                    {displayUser.deactivated ? 'Deactivated' : 'Active'}
+                                  </span>
+                                  {displayUser.email_verified && (
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-500/20 text-blue-100">
+                                      <Shield className="w-3 h-3" />
+                                      Verified
+                                    </span>
+                                  )}
+                                  {displayUser.subscription_status && (
+                                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-500/20 text-purple-100">
+                                      <CreditCard className="w-3 h-3" />
+                                      {displayUser.subscription_status === 'active' || displayUser.subscription_status === '5' ? 'Subscribed' : 'Subscription'}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => navigate(`/admin-analytics/${displayUser.id}`)}
+                              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-[#2D8C72] bg-white hover:bg-gray-50 transition-colors shadow-lg"
+                            >
+                              <TrendingUp className="w-4 h-4" />
+                              Analytics
+                            </button>
+                          </div>
+                        </div>
 
-                    <div className="p-6 space-y-6">
-                      {/* User financial stats */}
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
-                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            User balance
-                          </p>
-                          <p className="mt-2 text-xl font-bold text-gray-900">
-                            ₦
-                            {(selectedUser.balance ?? 0).toLocaleString()}
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
-                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Withdrawals
-                          </p>
-                          <p className="mt-2 text-xl font-bold text-gray-900">
-                            ₦
-                            {(selectedUser.total_withdrawals ?? 0).toLocaleString()}
-                          </p>
-                        </div>
-                        <div className="bg-gray-50 rounded-lg border border-gray-200 p-4">
-                          <p className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Deposits
-                          </p>
-                          <p className="mt-2 text-xl font-bold text-gray-900">
-                            ₦
-                            {(selectedUser.total_deposits ?? 0).toLocaleString()}
-                          </p>
-                        </div>
-                      </div>
+                        <div className="p-6 space-y-6 bg-gray-50">
+                          {/* Financial Overview Cards */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="w-10 h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                  <Wallet className="w-5 h-5 text-green-600" />
+                                </div>
+                                <TrendingUp className="w-4 h-4 text-green-500" />
+                              </div>
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                                Balance
+                              </p>
+                              <p className="text-2xl font-bold text-gray-900">
+                                ₦{(displayUser.balance ?? 0).toLocaleString()}
+                              </p>
+                            </div>
+                            
+                            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                  <TrendingDown className="w-5 h-5 text-blue-600" />
+                                </div>
+                                <TrendingDown className="w-4 h-4 text-red-500" />
+                              </div>
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                                Withdrawals
+                              </p>
+                              <p className="text-2xl font-bold text-gray-900">
+                                ₦{(displayUser.total_withdrawals ?? 0).toLocaleString()}
+                              </p>
+                            </div>
+                            
+                            <div className="bg-white rounded-xl p-5 shadow-sm border border-gray-200 hover:shadow-md transition-shadow">
+                              <div className="flex items-center justify-between mb-3">
+                                <div className="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
+                                  <TrendingUp className="w-5 h-5 text-purple-600" />
+                                </div>
+                                <TrendingUp className="w-4 h-4 text-green-500" />
+                              </div>
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                                Deposits
+                              </p>
+                              <p className="text-2xl font-bold text-gray-900">
+                                ₦{(displayUser.total_deposits ?? 0).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
 
-                      {/* Core user details */}
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Email
-                          </h3>
-                          <p className="mt-1 text-sm text-gray-900 break-all">
-                            {selectedUser.email}
-                          </p>
+                          {/* User Information Section */}
+                          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+                              <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                                <UserCircle className="w-4 h-4" />
+                                User Information
+                              </h3>
+                            </div>
+                            <div className="p-6">
+                              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="flex items-start gap-3">
+                                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <Mail className="w-5 h-5 text-gray-600" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                                      Email Address
+                                    </p>
+                                    <p className="text-sm text-gray-900 break-all font-medium">
+                                      {displayUser.email}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-start gap-3">
+                                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <User className="w-5 h-5 text-gray-600" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                                      User ID
+                                    </p>
+                                    <p className="text-sm text-gray-900 font-medium">
+                                      {displayUser.id}
+                                      {displayUser.user_id && displayUser.user_id !== displayUser.id && (
+                                        <span className="text-gray-500 ml-2 text-xs">(Profile: {displayUser.user_id})</span>
+                                      )}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-start gap-3">
+                                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <UserCircle className="w-5 h-5 text-gray-600" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                                      Full Name
+                                    </p>
+                                    <p className="text-sm text-gray-900 font-medium">
+                                      {displayUser.firstname}{' '}
+                                      {displayUser.middlename || ''}{' '}
+                                      {displayUser.lastname}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-start gap-3">
+                                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <Building2 className="w-5 h-5 text-gray-600" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                                      Identity
+                                    </p>
+                                    <p className="text-sm text-gray-900 font-medium capitalize">
+                                      {displayUser.identity || 'Not specified'}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                <div className="flex items-start gap-3">
+                                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <Phone className="w-5 h-5 text-gray-600" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                                      Phone Number
+                                    </p>
+                                    <p className="text-sm text-gray-900 font-medium">
+                                      {displayUser.phonenumber || 'Not provided'}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {displayUser.label_name && displayUser.label_name !== 'NULL' && (
+                                  <div className="flex items-start gap-3">
+                                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                      <Building2 className="w-5 h-5 text-gray-600" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                                        Label Name
+                                      </p>
+                                      <p className="text-sm text-gray-900 font-medium">
+                                        {displayUser.label_name}
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+
+                                <div className="flex items-start gap-3">
+                                  <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <Calendar className="w-5 h-5 text-gray-600" />
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                                      Account Created
+                                    </p>
+                                    <p className="text-sm text-gray-900 font-medium">
+                                      {displayUser.created_at
+                                        ? new Date(displayUser.created_at).toLocaleDateString('en-US', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                          })
+                                        : 'Unknown'}
+                                    </p>
+                                  </div>
+                                </div>
+
+                                {displayUser.usdt_balance !== undefined && (
+                                  <div className="flex items-start gap-3">
+                                    <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                                      <CreditCard className="w-5 h-5 text-gray-600" />
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
+                                        USDT Balance
+                                      </p>
+                                      <p className="text-sm text-gray-900 font-medium">
+                                        {displayUser.usdt_balance?.toLocaleString() || '0'} USDT
+                                      </p>
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+
+                              {/* Bio Section */}
+                              {displayUser.bio && (
+                                <div className="mt-6 pt-6 border-t border-gray-200">
+                                  <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2">
+                                    Bio
+                                  </p>
+                                  <p className="text-sm text-gray-700 leading-relaxed">
+                                    {displayUser.bio}
+                                  </p>
+                                </div>
+                              )}
+
+                              {/* Social Stats */}
+                              <div className="mt-6 pt-6 border-t border-gray-200">
+                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-4">
+                                  Social Statistics
+                                </p>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div className="bg-gray-50 rounded-lg p-4">
+                                    <p className="text-xs text-gray-500 mb-1">Followers</p>
+                                    <p className="text-lg font-bold text-gray-900">
+                                      {displayUser.followers ?? 0}
+                                    </p>
+                                  </div>
+                                  <div className="bg-gray-50 rounded-lg p-4">
+                                    <p className="text-xs text-gray-500 mb-1">Following</p>
+                                    <p className="text-lg font-bold text-gray-900">
+                                      {displayUser.following ?? 0}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
-                        <div>
-                          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            User ID
-                          </h3>
-                          <p className="mt-1 text-sm text-gray-900">
-                            {selectedUser.id}
-                          </p>
-                        </div>
-                        <div>
-                          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Full name
-                          </h3>
-                          <p className="mt-1 text-sm text-gray-900">
-                            {selectedUser.firstname}{' '}
-                            {selectedUser.middlename || ''}{' '}
-                            {selectedUser.lastname}
-                          </p>
-                        </div>
-                        <div>
-                          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Identity
-                          </h3>
-                          <p className="mt-1 text-sm text-gray-900">
-                            {selectedUser.identity || 'Not specified'}
-                          </p>
-                        </div>
-                        <div>
-                          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Phone number
-                          </h3>
-                          <p className="mt-1 text-sm text-gray-900">
-                            {selectedUser.phonenumber || 'Not provided'}
-                          </p>
-                        </div>
-                        <div>
-                          <h3 className="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Account created
-                          </h3>
-                          <p className="mt-1 text-sm text-gray-900">
-                            {selectedUser.created_at
-                              ? new Date(selectedUser.created_at).toLocaleString()
-                              : 'Unknown'}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
+                      </>
+                    ) : null}
                   </div>
                 )}
 
