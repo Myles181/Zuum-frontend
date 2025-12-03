@@ -132,8 +132,11 @@ const AdminWalletPage = () => {
     users: '/users',
     distribution: '/addistributions',
     beat: '/adbeat',
+    'beat-posts': '/admin-beat-posts',
+    'audio-posts': '/admin-audio-posts',
     promotion: '/adpromotion',
     wallet: '/admin-wallet',
+    subscriptions: '/admin-subscriptions',
   };
 
   const handlePageChange = (pageId) => {
@@ -261,9 +264,10 @@ const AdminWalletPage = () => {
               </div>
             </div>
 
-            {/* Transactions list */}
+            {/* Transactions list - professional table-style layout */}
             <div className="flex-1 overflow-auto px-4 lg:px-6 pb-6">
               <div className="bg-white rounded-xl shadow-sm border border-gray-200">
+                {/* Header + filters */}
                 <div className="px-4 py-3 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                   <div>
                     <h2 className="text-sm font-semibold text-gray-900">
@@ -321,6 +325,16 @@ const AdminWalletPage = () => {
                   </div>
                 </div>
 
+                {/* Table header (desktop) */}
+                <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-100 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+                  <div className="col-span-4">Account / User</div>
+                  <div className="col-span-3">Details</div>
+                  <div className="col-span-2">Type & Status</div>
+                  <div className="col-span-2 text-right">Amount</div>
+                  <div className="col-span-1 text-right">ID</div>
+                </div>
+
+                {/* Table body */}
                 <div className="divide-y divide-gray-100">
                   {isLoading && (
                     <div className="px-4 py-6 text-sm text-gray-500">
@@ -329,31 +343,82 @@ const AdminWalletPage = () => {
                   )}
 
                   {!isLoading &&
-                    filteredTransactions.map((tx) => (
-                      <button
-                        key={`${tx.type}-${tx.id}`}
-                        type="button"
-                        onClick={() => openModal(tx)}
-                        className="w-full text-left px-4 py-3 hover:bg-gray-50 flex items-center justify-between"
-                      >
-                        <div>
-                          <p className="text-sm font-medium text-gray-900">
-                            {tx.primary}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {tx.secondary} · #{tx.id}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-sm font-semibold text-gray-900">
-                            ₦{tx.amount.toLocaleString()}
-                          </p>
-                          <p className="text-xs font-medium text-gray-500 capitalize">
-                            {tx.type}
-                          </p>
-                        </div>
-                      </button>
-                    ))}
+                    filteredTransactions.map((tx) => {
+                      const dateLabel = tx.created_at
+                        ? new Date(tx.created_at).toLocaleDateString('en-NG', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          })
+                        : 'N/A';
+
+                      const typeLabel =
+                        tx.type === 'withdrawal'
+                          ? 'Withdrawal'
+                          : tx.type === 'transfer'
+                          ? 'Transfer'
+                          : 'Deposit';
+
+                      const statusBadgeClasses =
+                        tx.status === 'pending'
+                          ? 'bg-amber-100 text-amber-700'
+                          : tx.status === 'approved' || tx.status === 'completed'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : 'bg-gray-100 text-gray-700';
+
+                      return (
+                        <button
+                          key={`${tx.type}-${tx.id}`}
+                          type="button"
+                          onClick={() => openModal(tx)}
+                          className="w-full text-left px-4 md:px-6 py-3 hover:bg-gray-50 transition-colors"
+                        >
+                          <div className="md:grid md:grid-cols-12 md:items-center gap-4">
+                            {/* Account / User */}
+                            <div className="md:col-span-4">
+                              <p className="text-sm font-medium text-gray-900">
+                                {tx.primary}
+                              </p>
+                              <p className="mt-0.5 text-xs text-gray-500 md:hidden">
+                                ₦{tx.amount.toLocaleString()} • {typeLabel}
+                              </p>
+                            </div>
+
+                            {/* Details */}
+                            <div className="md:col-span-3 mt-1 md:mt-0">
+                              <p className="text-xs text-gray-500">
+                                {tx.secondary}
+                              </p>
+                              <p className="mt-0.5 text-[11px] text-gray-400">
+                                {dateLabel}
+                              </p>
+                            </div>
+
+                            {/* Type & status */}
+                            <div className="md:col-span-2 mt-2 md:mt-0 flex items-center gap-2 text-xs text-gray-600">
+                              <span className="capitalize">{typeLabel}</span>
+                              <span
+                                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${statusBadgeClasses}`}
+                              >
+                                {tx.status || 'pending'}
+                              </span>
+                            </div>
+
+                            {/* Amount */}
+                            <div className="md:col-span-2 mt-2 md:mt-0 text-right">
+                              <p className="text-sm font-semibold text-gray-900">
+                                ₦{tx.amount.toLocaleString()}
+                              </p>
+                            </div>
+
+                            {/* ID */}
+                            <div className="md:col-span-1 mt-2 md:mt-0 text-right text-xs text-gray-500">
+                              #{tx.id}
+                            </div>
+                          </div>
+                        </button>
+                      );
+                    })}
 
                   {!isLoading && filteredTransactions.length === 0 && (
                     <div className="px-4 py-6 text-sm text-gray-500">

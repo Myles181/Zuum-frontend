@@ -113,6 +113,31 @@ export const useUserDistributionRequest = () => {
       // Add files
       submitData.append('audio_upload', formData.audio_upload);
       submitData.append('cover_photo', formData.cover_photo);
+      
+      // Create details object with all form data (excluding files which are sent separately)
+      const details = {
+        ...formData,
+        // Remove file objects from details as they're sent separately
+        audio_upload: undefined,
+        cover_photo: undefined,
+        audioFile: undefined,
+        coverArt: undefined,
+        // Remove tracks audio files but keep track metadata
+        tracks: formData.tracks ? formData.tracks.map(track => ({
+          ...track,
+          audioFile: undefined
+        })) : undefined
+      };
+      
+      // Remove undefined values from details
+      Object.keys(details).forEach(key => {
+        if (details[key] === undefined) {
+          delete details[key];
+        }
+      });
+      
+      // Add all form data in details object
+      submitData.append('details', JSON.stringify(details));
 
       const response = await axios.post('/user/distribution-request', submitData, {
         headers: {

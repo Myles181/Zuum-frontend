@@ -135,6 +135,8 @@ const AdminBeatPurchasesPage = () => {
     users: '/users',
     distribution: '/addistributions',
     beat: '/adbeat',
+    'beat-posts': '/admin-beat-posts',
+    'audio-posts': '/admin-audio-posts',
     promotion: '/adpromotion',
     wallet: '/admin-wallet',
     subscriptions: '/admin-subscriptions',
@@ -145,7 +147,7 @@ const AdminBeatPurchasesPage = () => {
     if (targetRoute) {
       navigate(targetRoute);
     } else {
-      console.log('Unknown page:', pageId);
+        console.log('Unknown page:', pageId);
     }
   };
 
@@ -363,8 +365,14 @@ const AdminBeatPurchasesPage = () => {
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
                           Customer
                         </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
+                          Amount
+                        </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
+                          License
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden xl:table-cell">
+                          Purchase Status
                         </th>
                         <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                           Actions
@@ -404,7 +412,13 @@ const AdminBeatPurchasesPage = () => {
                               {purchase.artist_name}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">
-                              {purchase.customer_name}
+                              <div className="flex flex-col">
+                                <span className="font-medium text-gray-700">{purchase.customer_name}</span>
+                                <span className="text-xs text-gray-500">{purchase.customer_email}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 hidden xl:table-cell">
+                              ₦{purchase.purchase_amount?.toLocaleString()}
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
                               <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
@@ -413,6 +427,17 @@ const AdminBeatPurchasesPage = () => {
                                   : 'bg-yellow-100 text-yellow-800'}`}
                               >
                                 {purchase.license_status || (purchase.license_uploaded ? 'Licensed' : 'Pending')}
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap hidden xl:table-cell">
+                              <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full
+                                ${purchase.status === 'Processing' 
+                                  ? 'bg-blue-100 text-blue-800' 
+                                  : purchase.delivered 
+                                    ? 'bg-green-100 text-green-800' 
+                                    : 'bg-gray-100 text-gray-700'}`}
+                              >
+                                {purchase.status}
                               </span>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -492,10 +517,13 @@ const AdminBeatPurchasesPage = () => {
                               <span className="font-medium">Email:</span> {purchase.customer_email}
                             </div>
                             <div className="text-sm text-gray-600">
-                              <span className="font-medium">Amount:</span> ${purchase.purchase_amount}
+                              <span className="font-medium">Amount:</span> ₦{purchase.purchase_amount?.toLocaleString()}
                             </div>
                             <div className="text-sm text-gray-600">
-                              <span className="font-medium">Status:</span> {purchase.status}
+                              <span className="font-medium">Purchase Status:</span> {purchase.status}
+                            </div>
+                            <div className="text-sm text-gray-600">
+                              <span className="font-medium">Delivered:</span> {purchase.delivered ? 'Yes' : 'No'}
                             </div>
                           </div>
                           
@@ -626,7 +654,9 @@ const AdminBeatPurchasesPage = () => {
                 
                 <div>
                   <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Purchase Amount</h4>
-                  <p className="mt-1 text-sm text-gray-900">${selectedPurchase.purchase_amount}</p>
+                  <p className="mt-1 text-sm text-gray-900">
+                    ₦{selectedPurchase.purchase_amount?.toLocaleString()}
+                  </p>
                 </div>
                 
                 <div>
@@ -637,19 +667,28 @@ const AdminBeatPurchasesPage = () => {
                 <div>
                   <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">License Status</h4>
                   <p className="mt-1 text-sm text-gray-900">
-                    {selectedPurchase.license_uploaded ? 'Uploaded' : 'Not Uploaded'}
+                    {selectedPurchase.license_status || (selectedPurchase.license_uploaded ? 'Uploaded' : 'Not Uploaded')}
                   </p>
                 </div>
                 
                 <div>
-                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Status</h4>
+                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Purchase Status</h4>
                   <span className={`mt-1 px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                    ${selectedPurchase.status === 'completed' 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-yellow-100 text-yellow-800'}`}
+                    ${selectedPurchase.status === 'Processing' 
+                      ? 'bg-blue-100 text-blue-800' 
+                      : selectedPurchase.delivered 
+                        ? 'bg-green-100 text-green-800' 
+                        : 'bg-gray-100 text-gray-700'}`}
                   >
-                    {selectedPurchase.status === 'completed' ? 'Completed' : 'Pending'}
+                    {selectedPurchase.status}
                   </span>
+                </div>
+
+                <div>
+                  <h4 className="text-xs font-medium text-gray-500 uppercase tracking-wider">Delivered</h4>
+                  <p className="mt-1 text-sm text-gray-900">
+                    {selectedPurchase.delivered ? 'Yes' : 'No'}
+                  </p>
                 </div>
               </div>
             </div>

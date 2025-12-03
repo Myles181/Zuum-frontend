@@ -143,6 +143,8 @@ const AdminUserAnalyticsPage = () => {
     users: '/users',
     distribution: '/addistributions',
     beat: '/adbeat',
+    'beat-posts': '/admin-beat-posts',
+    'audio-posts': '/admin-audio-posts',
     promotion: '/adpromotion',
     wallet: '/admin-wallet',
     subscriptions: '/admin-subscriptions',

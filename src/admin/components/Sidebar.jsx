@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import {
-  Users,
-  Megaphone,
+import { 
+  Users, 
+  Megaphone, 
   Send,
   Music2,
   Wallet,
-  ChevronLeft,
+  ChevronLeft, 
   ChevronRight,
   Menu,
   X,
@@ -14,6 +14,8 @@ import {
   TrendingUp,
   LogOut,
   CreditCard,
+  Disc,
+  Music,
 } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
 
@@ -55,11 +57,23 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
     {
       title: 'Monetization',
       items: [
-        {
-          id: 'beat',
+    {
+      id: 'beat',
           label: 'Beat Sales',
           icon: Music2,
           description: 'Orders, licenses & delivery',
+        },
+        {
+          id: 'beat-posts',
+          label: 'Beat Posts',
+          icon: Disc,
+          description: 'Manage beat posts & status',
+        },
+        {
+          id: 'audio-posts',
+          label: 'Audio Posts',
+          icon: Music,
+          description: 'Manage audio posts & status',
         },
       ],
     },
@@ -174,7 +188,7 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
                         <span className={`text-xs font-semibold px-2 py-1 rounded-full ${item.badgeClass || 'bg-gray-100 text-gray-600'}`}>
                           {item.badge}
                         </span>
-                      )}
+                )}
                 
                 {isCollapsed && !isMobile && (
                   <div className="absolute left-full ml-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50">
