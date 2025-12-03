@@ -160,6 +160,8 @@ const handleStatusChange = async (newStatus) => {
     users: '/users',
     distribution: '/addistributions',
     beat: '/adbeat',
+    'beat-posts': '/admin-beat-posts',
+    'audio-posts': '/admin-audio-posts',
     promotion: '/adpromotion',
     wallet: '/admin-wallet',
     subscriptions: '/admin-subscriptions',
@@ -170,7 +172,7 @@ const handleStatusChange = async (newStatus) => {
     if (targetRoute) {
       navigate(targetRoute);
     } else {
-      console.log('Unknown page:', pageId);
+        console.log('Unknown page:', pageId);
     }
   };
 

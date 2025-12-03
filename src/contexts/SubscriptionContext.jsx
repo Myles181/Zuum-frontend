@@ -79,7 +79,7 @@ export const SubscriptionProvider = ({ children }) => {
     }
   }, [profile, checkSubscriptionStatus]);
 
-  // List of paths where popup should not show
+  // List of paths where popup should not show at all
   const excludedPaths = [
     '/subscribe',
     '/login',
@@ -94,6 +94,12 @@ export const SubscriptionProvider = ({ children }) => {
     '/adver',
   ];
 
+  // Only show subscription popup logic on the Jet page
+  const isJetPage = location.pathname === '/jet';
+
+  // Check if current path is an admin route
+  const isAdminRoute = location.pathname.startsWith('/admin');
+
   // Show popup if user is not subscribed and tries to access a page
   useEffect(() => {
     console.log('[SubscriptionContext] Location changed:', {
@@ -101,11 +107,21 @@ export const SubscriptionProvider = ({ children }) => {
       isSubscribed,
       lastPathname,
       showPopup,
+      isAdminRoute,
+      isJetPage,
     });
 
-    // Don't show popup on excluded paths or if already subscribed
-    if (excludedPaths.includes(location.pathname) || isSubscribed === true) {
-      console.log('[SubscriptionContext] Hiding popup - excluded path or subscribed');
+    // Only consider showing popup on the Jet page
+    // Also never show on excluded paths, admin routes, or if already subscribed
+    if (
+      !isJetPage ||
+      excludedPaths.includes(location.pathname) ||
+      isAdminRoute ||
+      isSubscribed === true
+    ) {
+      console.log(
+        '[SubscriptionContext] Hiding popup - not Jet page, excluded path, admin route, or subscribed'
+      );
       setShowPopup(false);
       setLastPathname(location.pathname);
       return;
@@ -119,14 +135,14 @@ export const SubscriptionProvider = ({ children }) => {
 
     // Show popup if not subscribed (either on initial load or pathname change)
     if (isSubscribed === false) {
-      // Show on initial load (lastPathname is empty) or when pathname changes
+      // Show on initial load (lastPathname is empty) or when pathname changes on Jet page
       if (lastPathname === '' || location.pathname !== lastPathname) {
-        console.log('[SubscriptionContext] Showing popup - not subscribed');
+        console.log('[SubscriptionContext] Showing popup on Jet page - not subscribed');
         setShowPopup(true);
         setLastPathname(location.pathname);
       }
     }
-  }, [location.pathname, isSubscribed, lastPathname, showPopup]);
+  }, [location.pathname, isSubscribed, lastPathname, showPopup, isAdminRoute, isJetPage]);
 
 
   // Handle popup close

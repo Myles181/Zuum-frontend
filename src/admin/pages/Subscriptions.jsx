@@ -67,6 +67,8 @@ const AdminSubscriptionsPage = () => {
     users: '/users',
     distribution: '/addistributions',
     beat: '/adbeat',
+    'beat-posts': '/admin-beat-posts',
+    'audio-posts': '/admin-audio-posts',
     promotion: '/adpromotion',
     wallet: '/admin-wallet',
     subscriptions: '/admin-subscriptions',
@@ -286,7 +288,7 @@ const AdminSubscriptionsPage = () => {
               </div>
             </div>
 
-            {/* Plans List */}
+            {/* Plans List - Professional table-style layout */}
             <div className="flex-1 overflow-auto px-4 lg:px-6 pb-6">
               {isLoading && (
                 <div className="flex items-center justify-center h-64">
@@ -316,129 +318,131 @@ const AdminSubscriptionsPage = () => {
               )}
 
               {!isLoading && filteredPlans.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {filteredPlans.map((plan) => {
-                    const formattedAmount = plan.amount
-                      ? new Intl.NumberFormat('en-NG', {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
-                        }).format(plan.amount)
-                      : '0';
-                    const monthlyEquivalent = plan.frequency === 'annual' && plan.amount
-                      ? new Intl.NumberFormat('en-NG', {
-                          minimumFractionDigits: 0,
-                          maximumFractionDigits: 0,
-                        }).format(Math.round(plan.amount / 12))
-                      : null;
+                <div className="bg-white border border-gray-200 rounded-xl shadow-sm overflow-hidden">
+                  {/* Table header */}
+                  <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                    <div className="col-span-3 flex items-center gap-2">
+                      <CreditCard className="w-4 h-4 text-gray-400" />
+                      Plan
+                    </div>
+                    <div className="col-span-2">Billing</div>
+                    <div className="col-span-4">Description</div>
+                    <div className="col-span-2 text-right">Plan ID</div>
+                    <div className="col-span-1 text-right">Actions</div>
+                  </div>
 
-                    return (
-                      <div
-                        key={plan.id}
-                        className="group relative bg-gradient-to-br from-[#2D8C72]/10 via-[#34A085]/5 to-[#2D8C72]/15 rounded-2xl shadow-sm border border-[#2D8C72]/20 overflow-hidden hover:shadow-xl hover:border-[#2D8C72]/40 transition-all duration-300"
-                      >
-                        {/* Gradient Header */}
-                        <div className="relative bg-gradient-to-br from-[#2D8C72] to-[#34A085] px-6 py-5">
-                          <div className="flex items-start justify-between">
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                                  <CreditCard className="w-5 h-5 text-white" />
-                                </div>
-                                <div>
-                                  <h3 className="text-xl font-bold text-white">
-                                    {plan.name}
-                                  </h3>
-                                  <span className="inline-block mt-1 px-2.5 py-0.5 bg-white/20 backdrop-blur-sm rounded-full text-xs font-semibold text-white uppercase tracking-wide">
-                                    {plan.frequency}
-                                  </span>
-                                </div>
-                              </div>
+                  {/* Table body */}
+                  <div className="divide-y divide-gray-200">
+                    {filteredPlans.map((plan) => {
+                      const formattedAmount = plan.amount
+                        ? new Intl.NumberFormat('en-NG', {
+                            minimumFractionDigits: 0,
+                            maximumFractionDigits: 0,
+                          }).format(plan.amount)
+                        : '0';
+                      const monthlyEquivalent =
+                        plan.frequency === 'annual' && plan.amount
+                          ? new Intl.NumberFormat('en-NG', {
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            }).format(Math.round(plan.amount / 12))
+                          : null;
+
+                      return (
+                        <div
+                          key={plan.id}
+                          className="group px-4 md:px-6 py-4 md:grid md:grid-cols-12 md:items-center gap-4 hover:bg-gray-50 transition-colors"
+                        >
+                          {/* Plan name + frequency (mobile stacks) */}
+                          <div className="md:col-span-3 flex items-start gap-3">
+                            <div className="mt-1 hidden md:flex h-9 w-9 items-center justify-center rounded-lg bg-[#2D8C72]/10 text-[#2D8C72]">
+                              <CreditCard className="w-4 h-4" />
                             </div>
-                            <div className="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button
-                                onClick={() => openEditModal(plan)}
-                                className="p-2 bg-white/20 backdrop-blur-sm text-white hover:bg-white/30 rounded-lg transition-colors"
-                                title="Edit plan"
-                              >
-                                <Edit className="w-4 h-4" />
-                              </button>
-                              <button
-                                onClick={() => openDeleteModal(plan)}
-                                className="p-2 bg-white/20 backdrop-blur-sm text-white hover:bg-red-500/80 rounded-lg transition-colors"
-                                title="Delete plan"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </button>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2">
+                                <p className="text-sm font-semibold text-gray-900 truncate">
+                                  {plan.name || 'Unnamed plan'}
+                                </p>
+                                <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium uppercase text-gray-700">
+                                  {plan.frequency || 'monthly'}
+                                </span>
+                              </div>
+                              <p className="mt-0.5 text-xs text-gray-500 md:hidden">
+                                ₦{formattedAmount}{' '}
+                                <span className="text-[11px] text-gray-400">
+                                  /{plan.frequency === 'annual' ? 'year' : 'month'}
+                                </span>
+                              </p>
                             </div>
                           </div>
-                        </div>
 
-                        {/* Card Body */}
-                        <div className="p-6 bg-white/90">
-                          {/* Price Section */}
-                          <div className="mb-6 pb-6 border-b border-gray-200/50">
-                            <div className="flex items-baseline gap-2">
-                              <span className="text-3xl font-bold text-gray-900 !text-gray-900">
-                                ₦{formattedAmount}
-                              </span>
-                              <span className="text-sm font-medium text-gray-600 !text-gray-600">
+                          {/* Billing info */}
+                          <div className="md:col-span-2 hidden md:flex flex-col">
+                            <span className="text-sm font-semibold text-gray-900">
+                              ₦{formattedAmount}
+                              <span className="text-xs font-normal text-gray-500">
                                 /{plan.frequency === 'annual' ? 'year' : 'month'}
                               </span>
-                            </div>
+                            </span>
                             {monthlyEquivalent && (
-                              <p className="mt-1 text-xs text-gray-600 !text-gray-600">
-                                ~₦{monthlyEquivalent} per month
+                              <span className="text-xs text-gray-500">
+                                ~₦{monthlyEquivalent} / month
+                              </span>
+                            )}
+                          </div>
+
+                          {/* Description */}
+                          <div className="md:col-span-4 mt-2 md:mt-0">
+                            {plan.description ? (
+                              <p className="text-sm text-gray-600 line-clamp-2">
+                                {plan.description}
+                              </p>
+                            ) : (
+                              <p className="text-sm text-gray-400 italic">
+                                No description provided
                               </p>
                             )}
                           </div>
 
-                        {/* Description */}
-                        {plan.description ? (
-                          <div className="mb-4">
-                            <div className="flex items-start gap-2">
-                              <FileText className="w-4 h-4 text-[#2D8C72] mt-0.5 flex-shrink-0" />
-                              <p className="text-sm text-gray-700 !text-gray-700 leading-relaxed line-clamp-3">
-                                {plan.description}
-                              </p>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="mb-4">
-                            <p className="text-sm text-gray-500 !text-gray-500 italic">No description provided</p>
-                          </div>
-                        )}
-
-                        {/* Plan ID Badge */}
-                        <div className="mt-4 pt-4 border-t border-gray-200/50">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-gray-600 !text-gray-600">Plan ID</span>
-                            <span className="text-xs font-semibold text-gray-800 !text-gray-800 bg-white/80 backdrop-blur-sm px-2.5 py-1 rounded-md border border-gray-200/50">
-                              #{plan.id}
+                          {/* Plan ID */}
+                          <div className="md:col-span-2 mt-2 md:mt-0 flex md:justify-end">
+                            <span className="inline-flex items-center rounded-md border border-gray-200 bg-gray-50 px-2.5 py-1 text-xs font-medium text-gray-700">
+                              ID #{plan.id}
                             </span>
                           </div>
-                        </div>
-                      </div>
 
-                      {/* Hover Actions Bar */}
-                      <div className="px-6 py-3 bg-gradient-to-r from-gray-50/80 to-white/80 backdrop-blur-sm border-t border-gray-200/50 flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => openEditModal(plan)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-[#2D8C72] hover:bg-[#2D8C72]/10 rounded-lg transition-colors"
-                        >
-                          <Edit className="w-3.5 h-3.5" />
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => openDeleteModal(plan)}
-                          className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                    );
-                  })}
+                          {/* Actions */}
+                          <div className="md:col-span-1 mt-3 md:mt-0 flex justify-end gap-2">
+                            <button
+                              onClick={() => openEditModal(plan)}
+                              className="inline-flex items-center rounded-md border border-gray-200 bg-white px-2.5 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100"
+                            >
+                              <Edit className="w-3.5 h-3.5 mr-1" />
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => openDeleteModal(plan)}
+                              className="inline-flex items-center rounded-md border border-red-200 bg-white px-2.5 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="w-3.5 h-3.5 mr-1" />
+                              Delete
+                            </button>
+                          </div>
+
+                          {/* Mobile billing row */}
+                          <div className="mt-3 flex md:hidden justify-between text-xs text-gray-500">
+                            <span>
+                              Billing: ₦{formattedAmount}/
+                              {plan.frequency === 'annual' ? 'year' : 'month'}
+                            </span>
+                            {monthlyEquivalent && (
+                              <span>~₦{monthlyEquivalent}/mo</span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>
@@ -865,4 +869,5 @@ const AdminSubscriptionsPage = () => {
 };
 
 export default AdminSubscriptionsPage;
+
 

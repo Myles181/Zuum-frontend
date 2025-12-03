@@ -56,11 +56,14 @@ import VideoViewerPage from './components/homepage/sale/ViewVideo';
 import PromotionRequirementsForm from './components/upload/Globalreq';
 import { UserPromotions } from './pages/UserPromotions';
 import DistributionRequestsPage from './admin/pages/Distribution';
+import DistributionDetailsPage from './admin/pages/DistributionDetails';
 import AdminBeatPurchasesPage from './admin/pages/Beats';
 import AdminPromotionsPage from './admin/pages/promotion';
 import AdminUserAnalyticsPage from './admin/pages/UserAnalytics';
 import AdminWalletPage from './admin/pages/Wallet';
 import AdminSubscriptionsPage from './admin/pages/Subscriptions';
+import BeatPostsPage from './admin/pages/BeatPosts';
+import AdminAudioPostsPage from './admin/pages/AudioPosts';
 import { DarkModeProvider } from './contexts/DarkModeContext';
 import { SubscriptionProvider } from './contexts/SubscriptionContext';
 import ZuumOnboarding from './pages/Onboarding';
@@ -267,7 +270,10 @@ const App = () => (
                 <Route path="/admin/*" element={<AdminDashboard />} />
                 <Route path="/users" element={<AdminDashboard />} />
                 <Route path="/addistributions" element={<DistributionRequestsPage />} />
+                <Route path="/admin/distribution/:id" element={<DistributionDetailsPage />} />
                 <Route path="/adbeat" element={<AdminBeatPurchasesPage />} />
+                <Route path="/admin-beat-posts" element={<BeatPostsPage />} />
+                <Route path="/admin-audio-posts" element={<AdminAudioPostsPage />} />
                 <Route path="/adpromotion" element={<AdminPromotionsPage />} />
               <Route path="/admin-wallet" element={<AdminWalletPage />} />
               <Route path="/admin-subscriptions" element={<AdminSubscriptionsPage />} />

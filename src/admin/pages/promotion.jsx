@@ -144,6 +144,8 @@ const AdminPromotionsPage = () => {
     users: '/users',
     distribution: '/addistributions',
     beat: '/adbeat',
+    'beat-posts': '/admin-beat-posts',
+    'audio-posts': '/admin-audio-posts',
     promotion: '/adpromotion',
     wallet: '/admin-wallet',
     subscriptions: '/admin-subscriptions',
@@ -154,7 +156,7 @@ const AdminPromotionsPage = () => {
     if (targetRoute) {
       navigate(targetRoute);
     } else {
-      console.log('Unknown page:', pageId);
+        console.log('Unknown page:', pageId);
     }
   };
 
@@ -377,122 +379,168 @@ const AdminPromotionsPage = () => {
             {/* Main content */}
             <div className="flex-1 overflow-hidden">
               <div className="h-full bg-gray-50 shadow-sm rounded-lg overflow-hidden border border-gray-200 mx-4 lg:mx-6">
-                {/* Desktop Table */}
+                {/* Desktop List */}
                 <div className="hidden lg:block h-full overflow-auto">
-                  <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-200 sticky top-0">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider" style={{color: 'black !important'}}>
-                          Promotion ID
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider" style={{color: 'black !important'}}>
-                          Title
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider hidden md:table-cell" style={{color: 'black !important'}}>
-                          Customer
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider hidden lg:table-cell" style={{color: 'black !important'}}>
-                          Category
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider" style={{color: 'black !important'}}>
-                          Status
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider" style={{color: 'black !important'}}>
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-gray-50 divide-y divide-gray-200">
-                      {isLoading ? (
-                        <tr>
-                          <td colSpan="6" className="px-6 py-10 text-center">
-                            <div className="flex justify-center items-center">
-                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2d7a63]"></div>
-                              <span className="ml-3 text-gray-600">Loading promotions...</span>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : filteredPromotions.length > 0 ? (
-                        <>
-                          <tr className="bg-red-100">
-                            <td colSpan="6" className="px-6 py-4 text-center text-black font-bold">
-                              DEBUG: Table is rendering with {filteredPromotions.length} promotions
-                            </td>
-                          </tr>
-                          {filteredPromotions.map((promotion, index) => {
-                          console.log('Rendering promotion:', promotion);
-                          console.log('Available fields:', Object.keys(promotion));
-                          console.log('promotion.id:', promotion.id);
-                          console.log('promotion.title:', promotion.title);
-                          console.log('promotion.customer_name:', promotion.customer_name);
-                          console.log('promotion.category:', promotion.category);
-                          console.log('promotion.status:', promotion.status);
+                  {isLoading ? (
+                    <div className="p-8 text-center">
+                      <div className="flex justify-center items-center space-x-3">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2d7a63]" />
+                        <span className="text-sm text-gray-600">
+                          Loading promotions...
+                        </span>
+                      </div>
+                    </div>
+                  ) : filteredPromotions.length > 0 ? (
+                    <>
+                      {/* Header row */}
+                      <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-100 border-b border-gray-200 text-[11px] font-semibold text-gray-600 uppercase tracking-wider">
+                        <div className="col-span-3">Campaign</div>
+                        <div className="col-span-3">Customer</div>
+                        <div className="col-span-3">Category & Dates</div>
+                        <div className="col-span-2">Status</div>
+                        <div className="col-span-1 text-right">Actions</div>
+                      </div>
+
+                      {/* Rows */}
+                      <div className="divide-y divide-gray-200 bg-white">
+                        {filteredPromotions.map((promotion, index) => {
+                          const status = promotion.status || 'pending';
+                          const statusClasses =
+                            status === 'active'
+                              ? 'bg-green-100 text-green-700'
+                              : status === 'pending'
+                              ? 'bg-amber-100 text-amber-700'
+                              : 'bg-gray-100 text-gray-700';
+
+                          const categoryLabel =
+                            promotion.category_type ||
+                            promotion.category ||
+                            'Uncategorized';
+
+                          const startDate = promotion.start_date || promotion.startDate;
+                          const endDate = promotion.end_date || promotion.endDate;
+
+                          const formatPromotionDate = (value) =>
+                            value
+                              ? new Date(value).toLocaleDateString('en-NG', {
+                                  year: 'numeric',
+                                  month: 'short',
+                                  day: 'numeric',
+                                })
+                              : null;
+
+                          const startLabel = formatPromotionDate(startDate);
+                          const endLabel = formatPromotionDate(endDate);
+
                           return (
-                          <tr 
-                            key={`${promotion.id}-${index}`} 
-                            className="hover:bg-gray-50 transition duration-150"
-                          >
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-black font-medium" style={{color: 'black !important'}}>
-                                {promotion.id || 'NO ID'}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="flex-shrink-0 h-8 w-8 bg-[#2d7a63] bg-opacity-10 rounded-full flex items-center justify-center">
-                                  <User size={16} className="text-[#2d7a63]" />
+                            <div
+                              key={`${promotion.id}-${index}`}
+                              className="px-6 py-4 hover:bg-gray-50 transition-colors"
+                            >
+                              <div className="grid grid-cols-12 gap-4 items-center">
+                                {/* Campaign */}
+                                <div className="col-span-3 flex items-start gap-3">
+                                  <div className="h-9 w-9 rounded-full bg-[#2d7a63]/10 flex items-center justify-center">
+                                    <User size={16} className="text-[#2d7a63]" />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <p className="text-sm font-semibold text-gray-900 truncate">
+                                      {promotion.title ||
+                                        promotion.name ||
+                                        'Untitled campaign'}
+                                    </p>
+                                    <p className="mt-0.5 text-xs text-gray-500 truncate">
+                                      ID #{promotion.id || 'N/A'}
+                                    </p>
+                                  </div>
                                 </div>
-                                <div className="ml-3">
-                                    <div className="text-sm font-medium text-black" style={{color: 'black !important'}}>{promotion.title || promotion.name || 'NO TITLE'}</div>
+
+                                {/* Customer */}
+                                <div className="col-span-3 text-xs text-gray-600 space-y-1">
+                                  <p className="truncate">
+                                    <span className="text-gray-500">Name: </span>
+                                    <span className="font-medium text-gray-800">
+                                      {promotion.customer_name ||
+                                        promotion.user_name ||
+                                        promotion.user?.name ||
+                                        'Unknown customer'}
+                                    </span>
+                                  </p>
+                                  {promotion.customer_email && (
+                                    <p className="truncate">
+                                      <span className="text-gray-500">Email: </span>
+                                      <span className="font-medium text-gray-800">
+                                        {promotion.customer_email}
+                                      </span>
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* Category & dates */}
+                                <div className="col-span-3 text-xs text-gray-600 space-y-1.5">
+                                  <div>
+                                    <span className="text-gray-500">Category: </span>
+                                    <span className="inline-flex items-center rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-gray-800">
+                                      {categoryLabel}
+                                    </span>
+                                  </div>
+                                  {(startLabel || endLabel) && (
+                                    <p className="text-[11px] text-gray-500">
+                                      {startLabel && `From ${startLabel}`}
+                                      {startLabel && endLabel && ' · '}
+                                      {endLabel && `To ${endLabel}`}
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* Status */}
+                                <div className="col-span-2 text-xs text-gray-600 space-y-1">
+                                  <span
+                                    className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${statusClasses}`}
+                                  >
+                                    {status.replace(/_/g, ' ')}
+                                  </span>
+                                  {promotion.budget && (
+                                    <p className="text-[11px] text-gray-500">
+                                      Budget:{' '}
+                                      <span className="font-medium text-gray-800">
+                                        ₦
+                                        {Number(promotion.budget).toLocaleString()}
+                                      </span>
+                                    </p>
+                                  )}
+                                </div>
+
+                                {/* Actions */}
+                                <div className="col-span-1 flex justify-end gap-2">
+                                  <button
+                                    onClick={() => handleViewPromotion(promotion)}
+                                    className="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100"
+                                  >
+                                    <Eye size={14} className="mr-1" />
+                                    View
+                                  </button>
+                                  <button
+                                    onClick={() => handleUpdateClick(promotion)}
+                                    className="inline-flex items-center rounded-md border border-blue-200 bg-white px-3 py-1.5 text-xs font-medium text-blue-600 hover:bg-blue-50"
+                                  >
+                                    <Edit size={14} className="mr-1" />
+                                    Edit
+                                  </button>
                                 </div>
                               </div>
-                            </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-black font-medium hidden md:table-cell" style={{color: 'black !important'}}>
-                                {promotion.customer_name || promotion.user_name || promotion.user?.name || 'NO CUSTOMER'}
-                            </td>
-                              <td className="px-6 py-4 whitespace-nowrap text-sm text-black font-medium hidden lg:table-cell">
-                              <span className="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-gray-100 text-gray-800">
-                                  {promotion.category_type || promotion.category || 'NO CATEGORY'}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                ${promotion.status === 'active' 
-                                  ? 'bg-green-100 text-green-800' 
-                                  : promotion.status === 'pending'
-                                  ? 'bg-yellow-100 text-yellow-800'
-                                  : 'bg-red-100 text-red-800'}`}
-                              >
-                                {promotion.status}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button
-                                onClick={() => handleViewPromotion(promotion)}
-                                className="inline-flex items-center text-[#2d7a63] hover:text-[#245a4f] mr-4 transition duration-150"
-                              >
-                                <Eye size={16} className="mr-1" /> 
-                                <span className="hidden sm:inline">View</span>
-                              </button>
-                              <button
-                                onClick={() => handleUpdateClick(promotion)}
-                                className="inline-flex items-center text-blue-600 hover:text-blue-900 transition duration-150"
-                              >
-                                <Edit size={16} className="mr-1" /> 
-                                <span className="hidden sm:inline">Update</span>
-                              </button>
-                            </td>
-                          </tr>
+                            </div>
                           );
                         })}
-                        </>
-                      ) : (
-                        <tr>
-                          <td colSpan="6" className="px-6 py-8 text-center text-sm text-gray-500">
-                            {searchTerm ? 'No promotions found matching your search' : 'No promotions found'}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="p-8 text-center text-sm text-gray-500">
+                      {searchTerm
+                        ? 'No promotions found matching your search'
+                        : 'No promotions found'}
+                    </div>
+                  )}
                 </div>
 
                 {/* Mobile Cards */}

@@ -158,6 +158,8 @@ const AdminUsersPage = () => {
     users: '/users',
     distribution: '/addistributions',
     beat: '/adbeat',
+    'beat-posts': '/admin-beat-posts',
+    'audio-posts': '/admin-audio-posts',
     promotion: '/adpromotion',
     wallet: '/admin-wallet',
     subscriptions: '/admin-subscriptions',
@@ -366,102 +368,150 @@ const AdminUsersPage = () => {
                 {/* Desktop: list OR details */}
                 {!selectedUser ? (
                   <div className="hidden lg:block h-full overflow-auto">
-                    <table className="min-w-full divide-y divide-gray-200">
-                    <thead className="bg-gray-50 sticky top-0">
-                      <tr>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          User ID
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Username
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden md:table-cell">
-                          Email
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider hidden lg:table-cell">
-                          Name
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Status
-                        </th>
-                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="bg-white divide-y divide-gray-200">
-                      {isLoading ? (
-                        <tr>
-                          <td colSpan="6" className="px-6 py-10 text-center">
-                            <div className="flex justify-center items-center">
-                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2d7a63]"></div>
-                              <span className="ml-3 text-gray-600">Loading users...</span>
-                            </div>
-                          </td>
-                        </tr>
-                      ) : filteredUsers.length > 0 ? (
-                        paginatedUsers.map((user) => (
-                          <tr 
-                            key={user.id} 
-                            className={`hover:bg-gray-50 transition duration-150 ${user.deactivated ? "bg-red-50" : ""}`}
-                          >
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {user.id}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center">
-                                <div className="flex-shrink-0 h-8 w-8 bg-[#2d7a63] bg-opacity-10 rounded-full flex items-center justify-center">
-                                  <User className="h-4 w-4 text-white" />
-                                </div>
-                                <div className="ml-3">
-                                  <div className="text-sm font-medium text-gray-900">{user.username}</div>
+                    {isLoading ? (
+                      <div className="p-8 text-center">
+                        <div className="flex justify-center items-center space-x-3">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2d7a63]"></div>
+                          <span className="text-sm text-gray-600">Loading users...</span>
+                        </div>
+                      </div>
+                    ) : filteredUsers.length > 0 ? (
+                      <>
+                        {/* Table header */}
+                        <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-100 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
+                          <div className="col-span-4">User</div>
+                          <div className="col-span-3">Contact</div>
+                          <div className="col-span-3">Status & Meta</div>
+                          <div className="col-span-2 text-right">Actions</div>
+                        </div>
+
+                        {/* Table body */}
+                        <div className="divide-y divide-gray-100">
+                          {paginatedUsers.map((user) => {
+                            const isDeactivated = user.deactivated;
+                            const statusClasses = isDeactivated
+                              ? 'bg-red-100 text-red-800'
+                              : 'bg-green-100 text-green-800';
+
+                            const subscriptionActive =
+                              user.subscription_status === 'active' ||
+                              user.subscription_status === '5' ||
+                              user.subscription_plan_id;
+
+                            return (
+                              <div
+                                key={user.id}
+                                className={`px-6 py-4 hover:bg-gray-50 transition-colors ${
+                                  isDeactivated ? 'bg-red-50/40' : ''
+                                }`}
+                              >
+                                <div className="grid grid-cols-12 gap-4 items-center">
+                                  {/* User column */}
+                                  <div className="col-span-4 flex items-start gap-3">
+                                    <div className="h-9 w-9 rounded-full bg-[#2d7a63]/10 flex items-center justify-center overflow-hidden">
+                                      {user.image ? (
+                                        <img
+                                          src={user.image}
+                                          alt={user.username || user.email}
+                                          className="h-full w-full object-cover"
+                                        />
+                                      ) : (
+                                        <User className="h-4 w-4 text-[#2d7a63]" />
+                                      )}
+                                    </div>
+                                    <div className="min-w-0">
+                                      <p className="text-sm font-semibold text-gray-900 truncate">
+                                        {user.username || user.email || `User #${user.id}`}
+                                      </p>
+                                      <p className="mt-0.5 text-xs text-gray-500 truncate">
+                                        ID #{user.id}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  {/* Contact column */}
+                                  <div className="col-span-3 text-xs text-gray-600 space-y-1">
+                                    <p className="truncate">
+                                      <span className="text-gray-500">Email: </span>
+                                      <span className="font-medium text-gray-800">
+                                        {user.email || 'Not set'}
+                                      </span>
+                                    </p>
+                                    <p className="truncate">
+                                      <span className="text-gray-500">Name: </span>
+                                      <span className="font-medium text-gray-800">
+                                        {user.firstname || user.lastname
+                                          ? `${user.firstname || ''} ${user.lastname || ''}`.trim()
+                                          : 'Not provided'}
+                                      </span>
+                                    </p>
+                                  </div>
+
+                                  {/* Status & meta */}
+                                  <div className="col-span-3 text-xs text-gray-600 space-y-1">
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <span
+                                        className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${statusClasses}`}
+                                      >
+                                        {isDeactivated ? 'Deactivated' : 'Active'}
+                                      </span>
+                                      {user.email_verified && (
+                                        <span className="inline-flex items-center rounded-full bg-blue-100 text-blue-700 px-2.5 py-0.5 text-[11px] font-medium">
+                                          <Shield className="w-3 h-3 mr-1" />
+                                          Verified
+                                        </span>
+                                      )}
+                                      {subscriptionActive && (
+                                        <span className="inline-flex items-center rounded-full bg-purple-100 text-purple-700 px-2.5 py-0.5 text-[11px] font-medium">
+                                          <CreditCard className="w-3 h-3 mr-1" />
+                                          Subscribed
+                                        </span>
+                                      )}
+                                    </div>
+                                    {user.created_at && (
+                                      <p className="text-[11px] text-gray-500">
+                                        Joined{' '}
+                                        {new Date(user.created_at).toLocaleDateString('en-NG', {
+                                          year: 'numeric',
+                                          month: 'short',
+                                          day: 'numeric',
+                                        })}
+                                      </p>
+                                    )}
+                                  </div>
+
+                                  {/* Actions */}
+                                  <div className="col-span-2 flex justify-end gap-2">
+                                    <button
+                                      onClick={() => handleViewUser(user)}
+                                      className="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100"
+                                    >
+                                      <Eye size={14} className="mr-1" />
+                                      View
+                                    </button>
+                                    {!isDeactivated && (
+                                      <button
+                                        onClick={() => handleDeactivateClick(user)}
+                                        className="inline-flex items-center rounded-md border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
+                                      >
+                                        <X size={14} className="mr-1" />
+                                        Deactivate
+                                      </button>
+                                    )}
+                                  </div>
                                 </div>
                               </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden md:table-cell">
-                              {user.email}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 hidden lg:table-cell">
-                              {user.firstname} {user.lastname}
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className={`px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-                                ${user.deactivated 
-                                  ? 'bg-red-100 text-red-800' 
-                                  : 'bg-green-100 text-green-800'}`}
-                              >
-                                {user.deactivated ? 'Deactivated' : 'Active'}
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                              <button
-                                onClick={() => handleViewUser(user)}
-                                className="inline-flex items-center text-[#2d7a63] hover:text-[#245a4f] mr-4 transition duration-150"
-                              >
-                                <Eye size={16} className="mr-1" /> 
-                                <span className="hidden sm:inline">View</span>
-                              </button>
-                              {!user.deactivated && (
-                                <button
-                                  onClick={() => handleDeactivateClick(user)}
-                                  className="inline-flex items-center text-red-600 hover:text-red-900 transition duration-150"
-                                >
-                                  <X size={16} className="mr-1" /> 
-                                  <span className="hidden sm:inline">Deactivate</span>
-                                </button>
-                              )}
-                            </td>
-                          </tr>
-                        ))
-                      ) : (
-                        <tr>
-                          <td colSpan="6" className="px-6 py-8 text-center text-sm text-gray-500">
-                            {searchTerm ? 'No users found matching your search' : 'No users found'}
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
+                            );
+                          })}
+                        </div>
+                      </>
+                    ) : (
+                      <div className="p-8 text-center text-sm text-gray-500">
+                        {searchTerm
+                          ? 'No users found matching your search'
+                          : 'No users found'}
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="hidden lg:flex h-full flex-col overflow-auto">

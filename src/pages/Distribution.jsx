@@ -250,6 +250,11 @@ const Distribution = () => {
         social_links: socialLinks,
         audio_upload: primaryAudioFile,
         cover_photo: formData.coverArt,
+        // Pass all form data so it can be included in details object
+        ...formData,
+        // Override with the processed values
+        audio_upload: primaryAudioFile,
+        cover_photo: formData.coverArt,
       })
 
       setSuccess(true)

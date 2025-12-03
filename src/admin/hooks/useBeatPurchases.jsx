@@ -72,8 +72,9 @@ export const useBeatPurchases = () => {
           artist_name: `${purchase.firstname} ${purchase.lastname}`,
           customer_name: purchase.customer_name,
           customer_email: purchase.customer_email,
-          license_type: purchase.license_type || 'Standard',
-          purchase_amount: purchase.amount_paid / 100, // Convert from cents to dollars
+          license_type: purchase.license_type || 'N/A',
+          // Use raw amount from API (e.g. ₦10000), format in the UI
+          purchase_amount: purchase.amount_paid,
           purchase_date: purchase.purchase_date,
           send_email: purchase.send_email,
           license_uploaded: purchase.license !== null,
