@@ -162,7 +162,10 @@ const AdminUsersPage = () => {
     'audio-posts': '/admin-audio-posts',
     promotion: '/adpromotion',
     wallet: '/admin-wallet',
+    cryptoWallet: '/admin-wallet-crypto',
     subscriptions: '/admin-subscriptions',
+    settings: '/admin-settings',
+    'zuum-news': '/admin-zuum-news',
   };
 
   const handlePageChange = (pageId) => {
@@ -933,7 +936,7 @@ const AdminUsersPage = () => {
                   <select
                     value={pageSize}
                     onChange={handlePageSizeChange}
-                    className="w-full sm:w-auto rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2d7a63]"
+                    className="w-full sm:w-auto rounded-lg text-black border border-gray-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#2d7a63]"
                   >
                     {PAGE_SIZE_OPTIONS.map((size) => (
                       <option key={size} value={size}>

@@ -89,7 +89,10 @@ const DistributionDetailsPage = () => {
     'audio-posts': '/admin-audio-posts',
     promotion: '/adpromotion',
     wallet: '/admin-wallet',
+    cryptoWallet: '/admin-wallet-crypto',
     subscriptions: '/admin-subscriptions',
+    settings: '/admin-settings',
+    'zuum-news': '/admin-zuum-news',
   };
 
   const handlePageChange = (pageId) => {

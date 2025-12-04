@@ -61,7 +61,10 @@ import AdminBeatPurchasesPage from './admin/pages/Beats';
 import AdminPromotionsPage from './admin/pages/promotion';
 import AdminUserAnalyticsPage from './admin/pages/UserAnalytics';
 import AdminWalletPage from './admin/pages/Wallet';
+import AdminCryptoWalletPage from './admin/pages/CryptoWallet';
 import AdminSubscriptionsPage from './admin/pages/Subscriptions';
+import AdminSettingsPage from './admin/pages/Settings';
+import AdminZuumNewsPage from './admin/pages/ZuumNews';
 import BeatPostsPage from './admin/pages/BeatPosts';
 import AdminAudioPostsPage from './admin/pages/AudioPosts';
 import { DarkModeProvider } from './contexts/DarkModeContext';
@@ -276,7 +279,10 @@ const App = () => (
                 <Route path="/admin-audio-posts" element={<AdminAudioPostsPage />} />
                 <Route path="/adpromotion" element={<AdminPromotionsPage />} />
               <Route path="/admin-wallet" element={<AdminWalletPage />} />
+              <Route path="/admin-wallet-crypto" element={<AdminCryptoWalletPage />} />
               <Route path="/admin-subscriptions" element={<AdminSubscriptionsPage />} />
+              <Route path="/admin-settings" element={<AdminSettingsPage />} />
+              <Route path="/admin-zuum-news" element={<AdminZuumNewsPage />} />
               <Route path="/admin-analytics/:userId" element={<AdminUserAnalyticsPage />} />
               </Route>
           </Routes>
