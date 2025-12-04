@@ -16,6 +16,8 @@ import {
   CreditCard,
   Disc,
   Music,
+  Settings,
+  Newspaper,
 } from 'lucide-react';
 import { Navigate, useNavigate } from 'react-router-dom';
 
@@ -86,6 +88,12 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
           icon: Wallet,
           description: 'Balances, withdrawals & transfers',
         },
+        {
+          id: 'cryptoWallet',
+          label: 'Crypto Wallet',
+          icon: Wallet,
+          description: 'USDT deposits & addresses',
+        },
       ],
     },
     {
@@ -96,6 +104,17 @@ const AdminSidebar = ({ currentPage = 'users', onPageChange, isCollapsed, onTogg
           label: 'Subscription Manager',
           icon: CreditCard,
           description: 'Plans & user subscriptions',
+        },
+      ],
+    },
+    {
+      title: 'System',
+      items: [
+        {
+          id: 'settings',
+          label: 'Settings',
+          icon: Settings,
+          description: 'Platform settings & policies',
         },
       ],
     },
