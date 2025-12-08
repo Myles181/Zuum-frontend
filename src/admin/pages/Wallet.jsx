@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Wallet,
@@ -7,21 +7,50 @@ import {
   ArrowLeftRight,
   Search,
   X,
-  Check,
+  Loader2,
+  History,
+  Filter,
+  RefreshCw,
+  ChevronLeft,
+  ChevronRight,
+  TrendingUp,
+  AlertCircle,
 } from 'lucide-react';
 import AdminSidebar from '../components/Sidebar';
 import { useWithdrawals } from '../hooks/useWithdrawals';
+import { useDeposits } from '../hooks/useDeposits';
+import { useTransactionHistory } from '../hooks/useTransactionHistory';
 
 const AdminWalletPage = () => {
   const navigate = useNavigate();
-  const { withdrawals, isLoading, error } = useWithdrawals();
+  const { withdrawals } = useWithdrawals();
+  
+  // Deposits hook integration (for pending count)
+  const {
+    deposits: cryptoDeposits,
+    fetchDeposits,
+  } = useDeposits();
+
+  // Transaction history hook integration
+  const {
+    transactions: transactionHistory,
+    summary: transactionSummary,
+    isLoading: historyLoading,
+    error: historyError,
+    pagination: historyPagination,
+    fetchTransactionHistory,
+    resetError: resetHistoryError,
+  } = useTransactionHistory();
 
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('all'); // all | deposit | withdrawal | transfer
-  const [activeDepositTab, setActiveDepositTab] = useState('naira'); // naira | crypto
-  const [cryptoStatusFilter, setCryptoStatusFilter] = useState('all'); // all | pending | successful | failed
-  const [selectedTransaction, setSelectedTransaction] = useState(null);
+
+  // Transaction history filters
+  const [historyTypeFilter, setHistoryTypeFilter] = useState('');
+  const [historyStatusFilter, setHistoryStatusFilter] = useState('');
+  const [historyCurrencyFilter, setHistoryCurrencyFilter] = useState('');
+  const [historyOffset, setHistoryOffset] = useState(0);
+  const [showHistoryFilters, setShowHistoryFilters] = useState(false);
 
   // Placeholder transfers – replace with real hook/API when available
   const transfers = [
@@ -58,164 +87,41 @@ const AdminWalletPage = () => {
     [transfers],
   );
 
+  const totalPendingDeposits = useMemo(
+    () =>
+      Array.isArray(cryptoDeposits)
+        ? cryptoDeposits.filter((d) => d.status === 'PENDING' || d.status === 'pending').length
+        : 0,
+    [cryptoDeposits],
+  );
+
   const totalBalance = 0; // UI-only placeholder for now
 
-  // Placeholder Naira & Crypto deposits – replace with real hook/API when available
-  const nairaDeposits = [
-    {
-      id: 101,
-      user: 'User 1',
-      amount: 50000,
-      status: 'successful',
-      created_at: new Date().toISOString(),
-      reference: 'BANK-REF-001',
-      channel: 'Bank transfer',
-    },
-  ];
-
-  const [cryptoDeposits, setCryptoDeposits] = useState([
-    {
-      id: 201,
-      user: 'User 2',
-      amount: 100,
-      status: 'pending', // pending | successful | failed
-      created_at: new Date().toISOString(),
-      txHash: '0x1234...abcd',
-      network: 'TRON (USDT)',
-    },
-    {
-      id: 202,
-      user: 'User 3',
-      amount: 50,
-      status: 'successful',
-      created_at: new Date().toISOString(),
-      txHash: '0x5678...efgh',
-      network: 'TRON (USDT)',
-    },
-  ]);
-
-  // Flatten all movements into a single transaction list (withdrawals, transfers, deposits summary)
-  const allTransactions = useMemo(() => {
-    const withdrawalTx = Array.isArray(withdrawals)
-      ? withdrawals.map((w) => ({
-          id: w.id,
-          type: 'withdrawal',
-          amount: w.amount || 0,
-          status: w.status || 'pending',
-          created_at: w.created_at,
-          primary: w.account_name || 'Withdrawal',
-          secondary: `${w.bank_name || 'Bank'} · ${w.account_number || ''}`,
-          raw: w,
-        }))
-      : [];
-
-    const transferTx = transfers.map((t) => ({
-      id: t.id,
-      type: 'transfer',
-      amount: t.amount || 0,
-      status: t.status || 'pending',
-      created_at: t.created_at,
-      primary: t.user || 'Transfer',
-      secondary: `To: ${t.to}`,
-      raw: t,
-    }));
-
-    // Aggregate deposits for the generic transactions list if needed
-    const depositTx = [
-      ...nairaDeposits.map((d) => ({
-        id: d.id,
-        type: 'deposit',
-        amount: d.amount || 0,
-        status: d.status || 'pending',
-        created_at: d.created_at,
-        primary: d.user || 'Naira deposit',
-        secondary: `${d.channel || 'Naira'} · ${d.reference || ''}`,
-        raw: d,
-      })),
-      ...cryptoDeposits.map((d) => ({
-        id: d.id,
-        type: 'deposit',
-        amount: d.amount || 0,
-        status: d.status || 'pending',
-        created_at: d.created_at,
-        primary: d.user || 'Crypto deposit',
-        secondary: `${d.network || 'USDT'} · ${d.txHash || ''}`,
-        raw: d,
-      })),
-    ];
-
-    return [...withdrawalTx, ...transferTx, ...depositTx];
-  }, [withdrawals, transfers, nairaDeposits, cryptoDeposits]);
-
-  const filteredTransactions = useMemo(() => {
-    const term = searchTerm.toLowerCase();
-    return allTransactions.filter((tx) => {
-      const matchesType =
-        filterType === 'all' ? true : tx.type === filterType;
-
-      const s = term;
-      const matchesSearch =
-        !s ||
-        tx.primary.toLowerCase().includes(s) ||
-        tx.secondary.toLowerCase().includes(s) ||
-        String(tx.id).includes(s) ||
-        String(tx.amount).includes(s);
-
-      return matchesType && matchesSearch;
-    });
-  }, [allTransactions, filterType, searchTerm]);
-
-  const openModal = (tx) => {
-    setSelectedTransaction(tx);
+  // Handler for clicking on stat cards to filter transaction history
+  const handleStatCardClick = (type, status) => {
+    setHistoryTypeFilter(type);
+    setHistoryStatusFilter(status);
+    setHistoryOffset(0);
+    setShowHistoryFilters(true);
   };
 
-  const closeModal = () => {
-    setSelectedTransaction(null);
-  };
+  // Fetch deposits on component mount for pending count
+  useEffect(() => {
+    fetchDeposits({});
+  }, []);
 
-  const handleApprove = () => {
-    if (!selectedTransaction) return;
-
-    // For crypto deposits, allow changing status from pending to successful
-    if (
-      selectedTransaction.type === 'deposit' &&
-      selectedTransaction.raw?.network &&
-      selectedTransaction.status === 'pending'
-    ) {
-      // TODO: Replace with real API call to update crypto deposit status
-      setCryptoDeposits((prev) =>
-        prev.map((d) =>
-          d.id === selectedTransaction.raw.id
-            ? { ...d, status: 'successful' }
-            : d,
-        ),
-      );
-    }
-
-    console.log('Approve', selectedTransaction.type, selectedTransaction.raw);
-    closeModal();
-  };
-
-  const handleDecline = () => {
-    if (!selectedTransaction) return;
-
-    // For crypto deposits, allow changing status from pending to failed
-    if (
-      selectedTransaction.type === 'deposit' &&
-      selectedTransaction.raw?.network &&
-      selectedTransaction.status === 'pending'
-    ) {
-      // TODO: Replace with real API call to update crypto deposit status
-      setCryptoDeposits((prev) =>
-        prev.map((d) =>
-          d.id === selectedTransaction.raw.id ? { ...d, status: 'failed' } : d,
-        ),
-      );
-    }
-
-    console.log('Decline', selectedTransaction.type, selectedTransaction.raw);
-    closeModal();
-  };
+  // Fetch transaction history on mount and when filters change
+  useEffect(() => {
+    const filters = {
+      limit: 50,
+      offset: historyOffset,
+    };
+    if (historyTypeFilter) filters.type = historyTypeFilter;
+    if (historyStatusFilter) filters.status = historyStatusFilter;
+    if (historyCurrencyFilter) filters.currency = historyCurrencyFilter;
+    
+    fetchTransactionHistory(filters);
+  }, [historyTypeFilter, historyStatusFilter, historyCurrencyFilter, historyOffset]);
 
   const adminRoutes = {
     users: '/users',
@@ -273,8 +179,8 @@ const AdminWalletPage = () => {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden">
-          <div className="h-full flex flex-col">
+        <div className="flex-1 overflow-auto">
+          <div className="pb-8">
             {/* Desktop header */}
             <div className="hidden lg:block mb-6 px-8 pt-8">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -307,29 +213,71 @@ const AdminWalletPage = () => {
 
             {/* Stats row */}
             <div className="px-4 lg:px-8 mb-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Total balance */}
+              <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                {/* Total transactions */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
                   <div className="flex items-center">
                     <div className="w-10 h-10 rounded-xl bg-emerald-50 flex items-center justify-center">
-                      <Wallet className="w-5 h-5 text-emerald-600" />
+                      <History className="w-5 h-5 text-emerald-600" />
                     </div>
                     <div className="ml-3">
                       <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wide">
-                        Total balance (all users)
+                        Total transactions
                       </p>
                       <p className="mt-1 text-2xl font-semibold text-slate-900">
-                        ₦{totalBalance.toLocaleString()}
+                        {transactionSummary?.total_transactions || '0'}
                       </p>
                     </div>
                   </div>
                 </div>
 
-                {/* Pending withdrawals */}
+                {/* Successful amount */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 rounded-xl bg-green-50 flex items-center justify-center">
+                      <TrendingUp className="w-5 h-5 text-green-600" />
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wide">
+                        Successful amount
+                      </p>
+                      <p className="mt-1 text-xl font-semibold text-slate-900">
+                        {transactionSummary?.total_successful_amount?.toLocaleString() || '0'}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Pending deposits */}
+                <button
+                  type="button"
+                  onClick={() => handleStatCardClick('deposit', 'pending')}
+                  className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 text-left hover:border-amber-300 hover:shadow-md transition-all cursor-pointer"
+                >
                   <div className="flex items-center">
                     <div className="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center">
                       <ArrowDownRight className="w-5 h-5 text-amber-500" />
+                    </div>
+                    <div className="ml-3">
+                      <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wide">
+                        Pending deposits
+                      </p>
+                      <p className="mt-1 text-2xl font-semibold text-slate-900">
+                        {totalPendingDeposits}
+                      </p>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Pending withdrawals */}
+                <button
+                  type="button"
+                  onClick={() => handleStatCardClick('withdrawal', 'pending')}
+                  className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 text-left hover:border-orange-300 hover:shadow-md transition-all cursor-pointer"
+                >
+                  <div className="flex items-center">
+                    <div className="w-10 h-10 rounded-xl bg-orange-50 flex items-center justify-center">
+                      <ArrowUpRight className="w-5 h-5 text-orange-500" />
                     </div>
                     <div className="ml-3">
                       <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wide">
@@ -340,10 +288,14 @@ const AdminWalletPage = () => {
                       </p>
                     </div>
                   </div>
-                </div>
+                </button>
 
                 {/* Pending transfers */}
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4">
+                <button
+                  type="button"
+                  onClick={() => handleStatCardClick('transfer', 'pending')}
+                  className="bg-white rounded-2xl shadow-sm border border-slate-200 p-4 text-left hover:border-sky-300 hover:shadow-md transition-all cursor-pointer"
+                >
                   <div className="flex items-center">
                     <div className="w-10 h-10 rounded-xl bg-sky-50 flex items-center justify-center">
                       <ArrowLeftRight className="w-5 h-5 text-sky-500" />
@@ -357,546 +309,265 @@ const AdminWalletPage = () => {
                       </p>
                     </div>
                   </div>
-                </div>
+                </button>
               </div>
             </div>
 
-            {/* Deposits section */}
+            {/* Transaction History Section */}
             <div className="px-4 lg:px-8 mb-6">
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                {/* Header + tabs */}
-                <div className="px-4 py-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                {/* Header */}
+                <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+                      <History className="w-5 h-5 text-indigo-600" />
+                    </div>
                   <div>
-                    <h2 className="text-sm font-semibold text-slate-900">
-                      Deposits
+                      <h2 className="text-base font-bold text-slate-900">
+                        Transaction History
                     </h2>
                     <p className="text-xs text-slate-500">
-                      Naira and Crypto/USDT top-ups across all users.
+                        Complete history of all user transactions ({historyPagination.total} total)
                     </p>
+                    </div>
                   </div>
-                  <div className="inline-flex rounded-full bg-slate-100 p-1 text-[11px] font-medium text-slate-600">
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => setActiveDepositTab('naira')}
-                      className={`px-3 py-1 rounded-full ${
-                        activeDepositTab === 'naira'
-                          ? 'bg-white text-slate-900 shadow-sm'
-                          : 'text-slate-600'
+                      onClick={() => setShowHistoryFilters(!showHistoryFilters)}
+                      className={`px-3 py-2 rounded-lg border text-sm font-medium inline-flex items-center gap-2 transition-colors ${
+                        showHistoryFilters
+                          ? 'bg-indigo-50 border-indigo-200 text-indigo-700'
+                          : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
                       }`}
                     >
-                      Naira
+                      <Filter className="w-4 h-4" />
+                      Filters
                     </button>
                     <button
                       type="button"
-                      onClick={() => setActiveDepositTab('crypto')}
-                      className={`px-3 py-1 rounded-full ${
-                        activeDepositTab === 'crypto'
-                          ? 'bg-white text-slate-900 shadow-sm'
-                          : 'text-slate-600'
-                      }`}
+                      onClick={() => fetchTransactionHistory({ limit: 50, offset: historyOffset })}
+                      disabled={historyLoading}
+                      className="p-2 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50"
                     >
-                      Crypto / USDT
+                      <RefreshCw className={`w-4 h-4 ${historyLoading ? 'animate-spin' : ''}`} />
                     </button>
                   </div>
                 </div>
 
-                {/* Crypto status filter */}
-                {activeDepositTab === 'crypto' && (
-                  <div className="px-4 py-2 border-b border-slate-100 flex flex-wrap gap-2 text-[11px]">
-                    <span className="text-slate-500 font-medium mr-1">
-                      Status:
-                    </span>
-                    {['all', 'pending', 'successful', 'failed'].map((s) => (
-                      <button
-                        key={s}
-                        type="button"
-                        onClick={() => setCryptoStatusFilter(s)}
-                        className={`px-2.5 py-1 rounded-full border text-xs ${
-                          cryptoStatusFilter === s
-                            ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
-                            : 'bg-white border-slate-200 text-slate-600'
-                        }`}
+                {/* Filters */}
+                {showHistoryFilters && (
+                  <div className="px-6 py-4 bg-slate-50 border-b border-slate-100 flex flex-wrap items-end gap-4">
+                    <div className="min-w-[140px]">
+                      <label className="text-xs font-medium text-slate-600 block mb-1.5">Type</label>
+                      <select
+                        value={historyTypeFilter}
+                        onChange={(e) => { setHistoryTypeFilter(e.target.value); setHistoryOffset(0); }}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm text-black bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500"
                       >
-                        {s === 'all'
-                          ? 'All'
-                          : s.charAt(0).toUpperCase() + s.slice(1)}
-                      </button>
-                    ))}
+                        <option value="">All Types</option>
+                        <option value="bank_deposit">Bank Deposit</option>
+                        <option value="usdt_deposit">USDT Deposit</option>
+                        <option value="deposit">Deposit</option>
+                        <option value="withdrawal">Withdrawal</option>
+                        <option value="subscription">Subscription</option>
+                        <option value="transfer">Transfer</option>
+                      </select>
+                  </div>
+                    <div className="min-w-[140px]">
+                      <label className="text-xs font-medium text-slate-600 block mb-1.5">Status</label>
+                      <select
+                        value={historyStatusFilter}
+                        onChange={(e) => { setHistoryStatusFilter(e.target.value); setHistoryOffset(0); }}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm text-black bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500"
+                      >
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="successful">Successful</option>
+                        <option value="success">Success</option>
+                        <option value="failed">Failed</option>
+                      </select>
+                              </div>
+                    <div className="min-w-[140px]">
+                      <label className="text-xs font-medium text-slate-600 block mb-1.5">Currency</label>
+                      <select
+                        value={historyCurrencyFilter}
+                        onChange={(e) => { setHistoryCurrencyFilter(e.target.value); setHistoryOffset(0); }}
+                        className="w-full px-3 py-2 rounded-lg border border-slate-200 text-sm text-black bg-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500"
+                      >
+                        <option value="">All Currencies</option>
+                        <option value="NGN">NGN</option>
+                        <option value="USDT">USDT</option>
+                      </select>
+                  </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setHistoryTypeFilter('');
+                        setHistoryStatusFilter('');
+                        setHistoryCurrencyFilter('');
+                        setHistoryOffset(0);
+                      }}
+                      className="px-4 py-2 rounded-lg border border-slate-300 text-sm font-medium text-slate-700 hover:bg-white transition-colors"
+                    >
+                      Clear filters
+                    </button>
                   </div>
                 )}
 
-                {/* Deposits table header (desktop) */}
+                {/* Error message */}
+                {historyError && (
+                  <div className="px-4 py-3 bg-red-50 border-b border-red-100 flex items-center gap-2 text-sm text-red-700">
+                    <AlertCircle className="w-4 h-4" />
+                    {historyError}
+                    <button onClick={resetHistoryError} className="ml-auto text-red-600 hover:text-red-800">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Table header */}
                 <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-slate-50 border-b border-slate-100 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                  <div className="col-span-4">User</div>
-                  <div className="col-span-3">Details</div>
-                  <div className="col-span-2">
-                    {activeDepositTab === 'naira' ? 'Channel' : 'Network'}
-                  </div>
-                  <div className="col-span-2 text-right">
-                    {activeDepositTab === 'naira' ? 'Amount (₦)' : 'Amount (USDT)'}
-                  </div>
-                  <div className="col-span-1 text-right">Status</div>
-                </div>
-
-                {/* Deposits table body */}
-                <div className="divide-y divide-slate-100">
-                  {activeDepositTab === 'naira' &&
-                    (nairaDeposits.length > 0 ? (
-                      nairaDeposits.map((d) => {
-                        const dateLabel = d.created_at
-                          ? new Date(d.created_at).toLocaleString('en-NG', {
-                              year: 'numeric',
-                              month: 'short',
-                              day: 'numeric',
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })
-                          : 'N/A';
-
-                        return (
-                          <div
-                            key={d.id}
-                            className="px-4 md:px-6 py-3 hover:bg-slate-50/80 transition-colors"
-                          >
-                            <div className="md:grid md:grid-cols-12 md:items-center gap-4">
-                              {/* User */}
-                              <div className="md:col-span-4">
-                                <p className="text-sm font-medium text-slate-900">
-                                  {d.user}
-                                </p>
-                                <p className="mt-0.5 text-xs text-slate-500 md:hidden">
-                                  ₦{(d.amount || 0).toLocaleString()} •{' '}
-                                  {d.channel || 'Naira'}
-                                </p>
-                              </div>
-
-                              {/* Details */}
-                              <div className="md:col-span-3 mt-1 md:mt-0">
-                                <p className="text-xs text-slate-500">
-                                  Ref: {d.reference || 'N/A'}
-                                </p>
-                                <p className="mt-0.5 text-[11px] text-slate-400">
-                                  {dateLabel}
-                                </p>
-                              </div>
-
-                              {/* Channel */}
-                              <div className="md:col-span-2 mt-2 md:mt-0 text-xs text-slate-600">
-                                {d.channel || 'Bank transfer'}
-                              </div>
-
-                              {/* Amount */}
-                              <div className="md:col-span-2 mt-2 md:mt-0 text-right">
-                                <p className="text-sm font-semibold text-slate-900">
-                                  ₦{(d.amount || 0).toLocaleString()}
-                                </p>
-                              </div>
-
-                              {/* Status */}
-                              <div className="md:col-span-1 mt-2 md:mt-0 text-right">
-                                <span
-                                  className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                                    d.status === 'successful'
-                                      ? 'bg-emerald-100 text-emerald-700'
-                                      : d.status === 'failed'
-                                      ? 'bg-red-100 text-red-700'
-                                      : 'bg-amber-100 text-amber-700'
-                                  }`}
-                                >
-                                  {d.status || 'pending'}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })
-                    ) : (
-                      <div className="px-4 py-6 text-sm text-slate-500">
-                        No Naira deposits found.
-                      </div>
-                    ))}
-
-                  {activeDepositTab === 'crypto' &&
-                    (cryptoDeposits.filter((d) =>
-                      cryptoStatusFilter === 'all'
-                        ? true
-                        : d.status === cryptoStatusFilter,
-                    ).length > 0 ? (
-                      cryptoDeposits
-                        .filter((d) =>
-                          cryptoStatusFilter === 'all'
-                            ? true
-                            : d.status === cryptoStatusFilter,
-                        )
-                        .map((d) => {
-                          const dateLabel = d.created_at
-                            ? new Date(d.created_at).toLocaleString('en-NG', {
-                                year: 'numeric',
-                                month: 'short',
-                                day: 'numeric',
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })
-                            : 'N/A';
-
-                          return (
-                            <button
-                              key={d.id}
-                              type="button"
-                              onClick={() =>
-                                openModal({
-                                  id: d.id,
-                                  type: 'deposit',
-                                  amount: d.amount,
-                                  status: d.status,
-                                  created_at: d.created_at,
-                                  primary: d.user,
-                                  secondary: `${d.network || 'USDT'} · ${
-                                    d.txHash || ''
-                                  }`,
-                                  raw: d,
-                                })
-                              }
-                            className="w-full text-left px-4 md:px-6 py-3 hover:bg-slate-50/80 transition-colors"
-                            >
-                              <div className="md:grid md:grid-cols-12 md:items-center gap-4">
-                                {/* User */}
-                                <div className="md:col-span-4">
-                                  <p className="text-sm font-medium text-slate-900">
-                                    {d.user}
-                                  </p>
-                                  <p className="mt-0.5 text-xs text-slate-500 md:hidden">
-                                    {d.amount || 0} USDT •{' '}
-                                    {d.network || 'USDT'}
-                                  </p>
-                                </div>
-
-                                {/* Details */}
-                                <div className="md:col-span-3 mt-1 md:mt-0">
-                                  <p className="text-xs text-slate-500 truncate">
-                                    Tx: {d.txHash || 'N/A'}
-                                  </p>
-                                  <p className="mt-0.5 text-[11px] text-slate-400">
-                                    {dateLabel}
-                                  </p>
-                                </div>
-
-                                {/* Network */}
-                                <div className="md:col-span-2 mt-2 md:mt-0 text-xs text-slate-600">
-                                  {d.network || 'TRON (USDT)'}
-                                </div>
-
-                                {/* Amount */}
-                                <div className="md:col-span-2 mt-2 md:mt-0 text-right">
-                                  <p className="text-sm font-semibold text-slate-900">
-                                    {d.amount || 0} USDT
-                                  </p>
-                                </div>
-
-                                {/* Status */}
-                                <div className="md:col-span-1 mt-2 md:mt-0 text-right">
-                                  <span
-                                    className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                                      d.status === 'successful'
-                                        ? 'bg-emerald-100 text-emerald-700'
-                                        : d.status === 'failed'
-                                        ? 'bg-red-100 text-red-700'
-                                        : 'bg-amber-100 text-amber-700'
-                                    }`}
-                                  >
-                                    {d.status || 'pending'}
-                                  </span>
-                                </div>
-                              </div>
-                            </button>
-                          );
-                        })
-                    ) : (
-                      <div className="px-4 py-6 text-sm text-slate-500">
-                        No crypto deposits found for this status.
-                      </div>
-                    ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Transactions list - professional table-style layout */}
-            <div className="flex-1 overflow-auto px-4 lg:px-8 pb-8">
-              <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                {/* Header + filters */}
-                <div className="px-4 py-3 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div>
-                    <h2 className="text-sm font-semibold text-slate-900">
-                      Transactions
-                    </h2>
-                    <p className="text-xs text-slate-500">
-                      All wallet movements – deposits, withdrawals and transfers.
-                    </p>
-                  </div>
-                  <div className="inline-flex rounded-full bg-slate-100 p-1 text-[11px] font-medium text-slate-600">
-                    <button
-                      type="button"
-                      onClick={() => setFilterType('all')}
-                      className={`px-3 py-1 rounded-full ${
-                        filterType === 'all'
-                          ? 'bg-white text-slate-900 shadow-sm'
-                          : 'text-slate-600'
-                      }`}
-                    >
-                      All
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFilterType('deposit')}
-                      className={`px-3 py-1 rounded-full ${
-                        filterType === 'deposit'
-                          ? 'bg-white text-slate-900 shadow-sm'
-                          : 'text-slate-600'
-                      }`}
-                    >
-                      Deposits
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFilterType('withdrawal')}
-                      className={`px-3 py-1 rounded-full ${
-                        filterType === 'withdrawal'
-                          ? 'bg-white text-slate-900 shadow-sm'
-                          : 'text-slate-600'
-                      }`}
-                    >
-                      Withdrawals
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setFilterType('transfer')}
-                      className={`px-3 py-1 rounded-full ${
-                        filterType === 'transfer'
-                          ? 'bg-white text-slate-900 shadow-sm'
-                          : 'text-slate-600'
-                      }`}
-                    >
-                      Transfers
-                    </button>
-                  </div>
-                </div>
-
-                {/* Table header (desktop) */}
-                <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-3 bg-slate-50 border-b border-slate-100 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">
-                  <div className="col-span-4">Account / User</div>
-                  <div className="col-span-3">Details</div>
-                  <div className="col-span-2">Type & Status</div>
-                  <div className="col-span-2 text-right">Amount</div>
+                  <div className="col-span-3">User</div>
+                  <div className="col-span-2">Type</div>
+                  <div className="col-span-2">Amount</div>
+                  <div className="col-span-2">Status</div>
+                  <div className="col-span-2">Date</div>
                   <div className="col-span-1 text-right">ID</div>
                 </div>
 
                 {/* Table body */}
-                <div className="divide-y divide-slate-100">
-                  {isLoading && (
-                    <div className="px-4 py-6 text-sm text-slate-500">
-                      Loading transactions...
+                <div className="divide-y divide-slate-100 max-h-[400px] overflow-y-auto">
+                  {historyLoading ? (
+                    <div className="px-4 py-8 flex items-center justify-center gap-2 text-sm text-slate-500">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      Loading transaction history...
                     </div>
-                  )}
-
-                  {!isLoading &&
-                    filteredTransactions.map((tx) => {
+                  ) : transactionHistory.length > 0 ? (
+                    transactionHistory.map((tx) => {
                       const dateLabel = tx.created_at
-                        ? new Date(tx.created_at).toLocaleDateString('en-NG', {
+                        ? new Date(tx.created_at).toLocaleString('en-NG', {
                             year: 'numeric',
                             month: 'short',
                             day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
                           })
                         : 'N/A';
 
-                      const typeLabel =
-                        tx.type === 'withdrawal'
-                          ? 'Withdrawal'
-                          : tx.type === 'transfer'
-                          ? 'Transfer'
-                          : 'Deposit';
+                      const statusClass =
+                        tx.status === 'successful' || tx.status === 'success'
+                          ? 'bg-emerald-100 text-emerald-700'
+                          : tx.status === 'failed'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-amber-100 text-amber-700';
 
-                      const statusBadgeClasses =
-                        tx.status === 'pending'
-                              ? 'bg-amber-50 text-amber-700'
-                          : tx.status === 'approved' || tx.status === 'completed'
-                          ? 'bg-emerald-50 text-emerald-700'
-                          : 'bg-slate-100 text-slate-700';
+                      const typeLabel = tx.type?.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) || 'Unknown';
 
                       return (
-                        <button
-                          key={`${tx.type}-${tx.id}`}
-                          type="button"
-                          onClick={() => openModal(tx)}
-                          className="w-full text-left px-4 md:px-6 py-3 hover:bg-slate-50/80 transition-colors"
+                        <div
+                          key={tx.id}
+                          className="px-4 md:px-6 py-3 hover:bg-slate-50/80 transition-colors"
                         >
                           <div className="md:grid md:grid-cols-12 md:items-center gap-4">
-                            {/* Account / User */}
-                            <div className="md:col-span-4">
+                            {/* User */}
+                            <div className="md:col-span-3">
                               <p className="text-sm font-medium text-slate-900">
-                                {tx.primary}
+                                {tx.user?.name || `User #${tx.user_id}`}
                               </p>
                               <p className="mt-0.5 text-xs text-slate-500 md:hidden">
-                                ₦{tx.amount.toLocaleString()} • {typeLabel}
+                                {tx.amount} {tx.currency} • {typeLabel}
+                              </p>
+                              <p className="text-xs text-slate-400 truncate">
+                                {tx.user?.email || ''}
                               </p>
                             </div>
 
-                            {/* Details */}
-                            <div className="md:col-span-3 mt-1 md:mt-0">
-                              <p className="text-xs text-slate-500">
-                                {tx.secondary}
-                              </p>
-                              <p className="mt-0.5 text-[11px] text-slate-400">
-                                {dateLabel}
-                              </p>
-                            </div>
-
-                            {/* Type & status */}
-                            <div className="md:col-span-2 mt-2 md:mt-0 flex items-center gap-2 text-xs text-slate-600">
-                              <span className="capitalize">{typeLabel}</span>
-                              <span
-                                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${statusBadgeClasses}`}
-                              >
-                                {tx.status || 'pending'}
+                            {/* Type */}
+                            <div className="md:col-span-2 mt-1 md:mt-0">
+                              <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium bg-slate-100 text-slate-700">
+                                {typeLabel}
                               </span>
                             </div>
 
                             {/* Amount */}
-                            <div className="md:col-span-2 mt-2 md:mt-0 text-right">
+                            <div className="md:col-span-2 mt-2 md:mt-0">
                               <p className="text-sm font-semibold text-slate-900">
-                                ₦{tx.amount.toLocaleString()}
+                                {tx.currency === 'NGN' ? '₦' : '$'}{Number(tx.amount).toLocaleString()}
                               </p>
+                              <p className="text-xs text-slate-400">{tx.currency}</p>
                             </div>
 
-                            {/* ID */}
+                            {/* Status */}
+                            <div className="md:col-span-2 mt-2 md:mt-0">
+                              <span
+                                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${statusClass}`}
+                              >
+                                {tx.status}
+                              </span>
+                            </div>
+
+                            {/* Date */}
+                            <div className="md:col-span-2 mt-2 md:mt-0 text-xs text-slate-500">
+                              {dateLabel}
+                            </div>
+
+                            {/* Reference */}
                             <div className="md:col-span-1 mt-2 md:mt-0 text-right text-xs text-slate-500">
                               #{tx.id}
                             </div>
                           </div>
-                        </button>
+                          {tx.notes && (
+                            <p className="mt-1 text-xs text-slate-400 italic truncate">
+                              {tx.notes}
+                            </p>
+                          )}
+                        </div>
                       );
-                    })}
-
-                  {!isLoading && filteredTransactions.length === 0 && (
-                    <div className="px-4 py-6 text-sm text-slate-500">
+                    })
+                  ) : (
+                    <div className="px-4 py-8 text-center text-sm text-slate-500">
                       No transactions found.
                     </div>
                   )}
+      </div>
 
-                  {error && (
-                    <div className="px-4 py-3 text-xs text-red-600 bg-red-50 border-t border-red-100">
-                      {error}
+                {/* Pagination */}
+                {historyPagination.total > 0 && (
+                  <div className="px-4 py-3 border-t border-slate-100 flex items-center justify-between text-sm">
+                    <p className="text-slate-500">
+                      Showing {historyOffset + 1} - {Math.min(historyOffset + historyPagination.limit, historyPagination.total)} of {historyPagination.total}
+                </p>
+                    <div className="flex items-center gap-2">
+              <button
+                type="button"
+                        onClick={() => setHistoryOffset(Math.max(0, historyOffset - historyPagination.limit))}
+                        disabled={historyOffset === 0 || historyLoading}
+                        className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                        <ChevronLeft className="w-4 h-4" />
+              </button>
+                      <span className="text-slate-600 text-xs">
+                        Page {Math.floor(historyOffset / historyPagination.limit) + 1} of {historyPagination.pages}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setHistoryOffset(historyOffset + historyPagination.limit)}
+                        disabled={historyOffset + historyPagination.limit >= historyPagination.total || historyLoading}
+                        className="p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <ChevronRight className="w-4 h-4" />
+                      </button>
                     </div>
-                  )}
-                </div>
-              </div>
+                  </div>
+              )}
+            </div>
             </div>
           </div>
         </div>
       </div>
-
-      {/* Detail modal */}
-      {selectedTransaction && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
-          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
-            <div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
-              <div>
-                <p className="text-[11px] font-medium text-slate-500 uppercase tracking-wide">
-                  {selectedTransaction.type === 'transfer'
-                    ? 'Transfer request'
-                    : selectedTransaction.type === 'withdrawal'
-                    ? 'Withdrawal request'
-                    : 'Deposit'}
-                </p>
-                <h3 className="text-lg font-semibold text-slate-900">
-                  ID #{selectedTransaction.id}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={closeModal}
-                className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="px-4 py-4 space-y-3 text-sm">
-              {selectedTransaction.type === 'transfer' ? (
-                <>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">User</span>
-                    <span className="font-medium text-slate-900">
-                      {selectedTransaction.raw.user}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">To</span>
-                    <span className="font-medium text-slate-900">
-                      {selectedTransaction.raw.to}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Amount</span>
-                    <span className="font-semibold text-slate-900">
-                      ₦{selectedTransaction.amount.toLocaleString()}
-                    </span>
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Account name</span>
-                    <span className="font-medium text-slate-900">
-                      {selectedTransaction.raw.account_name}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Bank</span>
-                    <span className="font-medium text-slate-900">
-                      {selectedTransaction.raw.bank_name}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Account number</span>
-                    <span className="font-medium text-slate-900">
-                      {selectedTransaction.raw.account_number}
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Amount</span>
-                    <span className="font-semibold text-slate-900">
-                      ₦{(selectedTransaction.amount || 0).toLocaleString()}
-                    </span>
-                  </div>
-                </>
-              )}
-            </div>
-
-            <div className="px-4 py-3 border-t border-slate-200 flex justify-end gap-2 bg-slate-50/60">
-              <button
-                type="button"
-                onClick={handleDecline}
-                className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-white"
-              >
-                Decline
-              </button>
-              <button
-                type="button"
-                onClick={handleApprove}
-                className="px-4 py-2 rounded-lg bg-emerald-600 text-sm font-semibold text-white hover:bg-emerald-700 inline-flex items-center gap-1 shadow-sm"
-              >
-                <Check className="w-4 h-4" />
-                Credit
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
 export default AdminWalletPage;
-
-
-

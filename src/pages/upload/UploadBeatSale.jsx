@@ -172,19 +172,41 @@ const UploadBeats = () => {
     
     try {
       const submitData = new FormData();
-      // keep existing API fields
-      submitData.append('caption', formData.caption);
-      submitData.append('description', formData.description);
-      submitData.append('amount', formData.amount);
-      submitData.append('cover_photo', coverPhoto);
-      submitData.append('audio_upload', audioFile);
-      // new metadata fields
-      submitData.append('title', formData.caption);
-      submitData.append('artist', formData.artist);
-      submitData.append('genre', formData.genre);
-      if (formData.bpm) submitData.append('bpm', formData.bpm);
-      if (formData.musicalKey) submitData.append('key', formData.musicalKey);
-      submitData.append('beat_type', formData.beatType);
+      
+      // Core required fields
+      submitData.append('caption', formData.caption || '');
+      submitData.append('description', formData.description || '');
+      submitData.append('amount', formData.amount || 0);
+      
+      // File uploads
+      if (coverPhoto) {
+        submitData.append('cover_photo', coverPhoto);
+      }
+      if (audioFile) {
+        submitData.append('audio_upload', audioFile);
+      }
+      
+      // Metadata fields - send all form inputs
+      submitData.append('title', formData.caption || '');
+      submitData.append('artist', formData.artist || '');
+      submitData.append('genre', formData.genre || '');
+      submitData.append('bpm', formData.bpm || '');
+      submitData.append('key', formData.musicalKey || '');
+      submitData.append('beat_type', formData.beatType || '');
+      
+      // Log the data being sent (for debugging)
+      console.log('Submitting beat data:', {
+        caption: formData.caption,
+        description: formData.description,
+        amount: formData.amount,
+        artist: formData.artist,
+        genre: formData.genre,
+        bpm: formData.bpm,
+        musicalKey: formData.musicalKey,
+        beatType: formData.beatType,
+        hasCoverPhoto: !!coverPhoto,
+        hasAudioFile: !!audioFile
+      });
       
       await createBeatPost(submitData);
     } catch (err) {

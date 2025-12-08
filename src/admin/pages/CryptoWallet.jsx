@@ -1,56 +1,104 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Wallet, Search, Plus, X, Check } from 'lucide-react';
+import { Wallet, Search, Plus, X, Check, Loader2, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react';
 import AdminSidebar from '../components/Sidebar';
+import { useWallet } from '../hooks/useWallet';
+import { useDeposits } from '../hooks/useDeposits';
 
-// NOTE: Replace placeholder data with real hooks/API when backend is ready
-const initialCryptoDeposits = [
-  {
-    id: 201,
-    user: 'User 2',
-    amount: 100,
-    status: 'pending', // pending | successful | failed
-    created_at: new Date().toISOString(),
-    txHash: '0x1234...abcd',
-    network: 'TRON (USDT)',
-  },
-  {
-    id: 202,
-    user: 'User 3',
-    amount: 50,
-    status: 'successful',
-    created_at: new Date().toISOString(),
-    txHash: '0x5678...efgh',
-    network: 'TRON (USDT)',
-  },
+// Chain options for the dropdown
+const CHAIN_OPTIONS = [
+  { value: 'TRON', label: 'TRON (USDT)' },
+  { value: 'ETH', label: 'Ethereum (USDT)' },
+  { value: 'BSC', label: 'BSC (USDT)' },
 ];
 
-const initialWalletAddresses = [
-  {
-    id: 1,
-    label: 'Primary USDT TRC20',
-    address: 'TAbc1234...xyz',
-    network: 'TRON (USDT)',
-    active: true,
-    created_at: new Date().toISOString(),
-  },
-];
+// Helper to get display label from chain
+const getChainLabel = (chain) => {
+  const option = CHAIN_OPTIONS.find((opt) => opt.value === chain);
+  return option ? option.label : chain;
+};
 
 const AdminCryptoWalletPage = () => {
   const navigate = useNavigate();
 
+  // Wallet hook integration
+  const {
+    wallets,
+    isLoading: walletsLoading,
+    error: walletsError,
+    success: walletsSuccess,
+    addWallet,
+    updateWallet,
+    deleteWallet,
+    resetError,
+    resetSuccess,
+  } = useWallet();
+
+  // Deposits hook integration
+  const {
+    deposits,
+    pagination,
+    isLoading: depositsLoading,
+    error: depositsError,
+    success: depositsSuccess,
+    fetchDeposits,
+    approveDeposit,
+    rejectDeposit,
+    resetError: resetDepositsError,
+    resetSuccess: resetDepositsSuccess,
+  } = useDeposits();
+
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [cryptoStatusFilter, setCryptoStatusFilter] = useState('all'); // all | pending | successful | failed
-  const [cryptoDeposits, setCryptoDeposits] = useState(initialCryptoDeposits);
-  const [walletAddresses, setWalletAddresses] = useState(initialWalletAddresses);
+  const [cryptoStatusFilter, setCryptoStatusFilter] = useState('all'); // all | PENDING | APPROVED | REJECTED | COMPLETED | FAILED
   const [showAddressModal, setShowAddressModal] = useState(false);
   const [newAddress, setNewAddress] = useState({
-    label: '',
     address: '',
-    network: 'TRON (USDT)',
+    chain: 'TRON',
   });
   const [selectedDeposit, setSelectedDeposit] = useState(null);
+  const [actionLoading, setActionLoading] = useState(null); // Track which wallet action is loading
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(null); // Track which wallet to delete
+  const [approvalTxId, setApprovalTxId] = useState(''); // Transaction ID for approval
+
+  // Fetch deposits on component mount and when filter changes
+  useEffect(() => {
+    const filters = {};
+    if (cryptoStatusFilter !== 'all') {
+      filters.status = cryptoStatusFilter;
+    }
+    fetchDeposits(filters);
+  }, [cryptoStatusFilter]);
+
+  // Auto-clear success/error messages for wallets
+  useEffect(() => {
+    if (walletsSuccess) {
+      const timer = setTimeout(() => resetSuccess(), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [walletsSuccess, resetSuccess]);
+
+  useEffect(() => {
+    if (walletsError) {
+      const timer = setTimeout(() => resetError(), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [walletsError, resetError]);
+
+  // Auto-clear success/error messages for deposits
+  useEffect(() => {
+    if (depositsSuccess) {
+      const timer = setTimeout(() => resetDepositsSuccess(), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [depositsSuccess, resetDepositsSuccess]);
+
+  useEffect(() => {
+    if (depositsError) {
+      const timer = setTimeout(() => resetDepositsError(), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [depositsError, resetDepositsError]);
 
   const adminRoutes = {
     users: '/users',
@@ -73,16 +121,17 @@ const AdminCryptoWalletPage = () => {
     }
   };
 
-  const filteredDeposits = cryptoDeposits.filter((d) => {
-    const statusMatch =
-      cryptoStatusFilter === 'all' ? true : d.status === cryptoStatusFilter;
+  const filteredDeposits = deposits.filter((d) => {
     const term = searchTerm.toLowerCase();
+    const userName = d.user?.name || d.user?.email || '';
     const searchMatch =
       !term ||
-      d.user.toLowerCase().includes(term) ||
-      (d.txHash || '').toLowerCase().includes(term) ||
+      userName.toLowerCase().includes(term) ||
+      (d.tx_id || '').toLowerCase().includes(term) ||
+      (d.source_wallet_address || '').toLowerCase().includes(term) ||
+      (d.dest_wallet_address || '').toLowerCase().includes(term) ||
       String(d.id).includes(term);
-    return statusMatch && searchMatch;
+    return searchMatch;
   });
 
   const openDepositModal = (deposit) => {
@@ -93,33 +142,41 @@ const AdminCryptoWalletPage = () => {
     setSelectedDeposit(null);
   };
 
-  const handleApproveDeposit = () => {
-    if (!selectedDeposit || selectedDeposit.status !== 'pending') return;
-    // TODO: Replace with real API call to mark crypto deposit as successful
-    setCryptoDeposits((prev) =>
-      prev.map((d) =>
-        d.id === selectedDeposit.id ? { ...d, status: 'successful' } : d,
-      ),
-    );
+  const handleApproveDeposit = async () => {
+    if (!selectedDeposit || selectedDeposit.status !== 'PENDING') return;
+    if (!approvalTxId.trim()) {
+      alert('Please enter a transaction ID to approve this deposit.');
+      return;
+    }
+    
+    setActionLoading('approve');
+    const success = await approveDeposit(selectedDeposit.id, approvalTxId.trim());
+    setActionLoading(null);
+    
+    if (success) {
+      setApprovalTxId('');
     closeDepositModal();
+    }
   };
 
-  const handleDeclineDeposit = () => {
-    if (!selectedDeposit || selectedDeposit.status !== 'pending') return;
-    // TODO: Replace with real API call to mark crypto deposit as failed
-    setCryptoDeposits((prev) =>
-      prev.map((d) =>
-        d.id === selectedDeposit.id ? { ...d, status: 'failed' } : d,
-      ),
-    );
+  const handleDeclineDeposit = async () => {
+    if (!selectedDeposit || selectedDeposit.status !== 'PENDING') return;
+    
+    const reason = prompt('Enter rejection reason (optional):') || '';
+    
+    setActionLoading('reject');
+    const success = await rejectDeposit(selectedDeposit.id, reason);
+    setActionLoading(null);
+    
+    if (success) {
     closeDepositModal();
+    }
   };
 
   const openAddressModal = () => {
     setNewAddress({
-      label: '',
       address: '',
-      network: 'TRON (USDT)',
+      chain: 'TRON',
     });
     setShowAddressModal(true);
   };
@@ -128,31 +185,30 @@ const AdminCryptoWalletPage = () => {
     setShowAddressModal(false);
   };
 
-  const handleSaveAddress = (e) => {
+  const handleSaveAddress = async (e) => {
     e.preventDefault();
-    if (!newAddress.label || !newAddress.address) return;
+    if (!newAddress.address || !newAddress.chain) return;
 
-    // TODO: Replace with real API call to save wallet address
-    setWalletAddresses((prev) => [
-      {
-        id: prev.length + 1,
-        ...newAddress,
-        active: true,
-        created_at: new Date().toISOString(),
-      },
-      ...prev,
-    ]);
+    setActionLoading('add');
+    const success = await addWallet(newAddress.address, newAddress.chain, true);
+    setActionLoading(null);
 
-    setShowAddressModal(false);
+    if (success) {
+      setShowAddressModal(false);
+    }
   };
 
-  const toggleAddressActive = (id) => {
-    // TODO: Replace with real API call to toggle active flag
-    setWalletAddresses((prev) =>
-      prev.map((addr) =>
-        addr.id === id ? { ...addr, active: !addr.active } : addr,
-      ),
-    );
+  const toggleAddressActive = async (wallet) => {
+    setActionLoading(wallet.id);
+    await updateWallet(wallet.id, { active: !wallet.active });
+    setActionLoading(null);
+  };
+
+  const handleDeleteWallet = async (walletId) => {
+    setActionLoading(walletId);
+    await deleteWallet(walletId);
+    setActionLoading(null);
+    setShowDeleteConfirm(null);
   };
 
   return (
@@ -225,6 +281,24 @@ const AdminCryptoWalletPage = () => {
               </div>
             </div>
 
+            {/* Success/Error notifications */}
+            {(walletsSuccess || walletsError || depositsSuccess || depositsError) && (
+              <div className="px-4 lg:px-8 mb-4 space-y-2">
+                {(walletsSuccess || depositsSuccess) && (
+                  <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 text-sm">
+                    <CheckCircle2 className="w-4 h-4 flex-shrink-0" />
+                    {walletsSuccess || depositsSuccess}
+                  </div>
+                )}
+                {(walletsError || depositsError) && (
+                  <div className="flex items-center gap-2 px-4 py-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                    <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                    {walletsError || depositsError}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Top row: wallet address management */}
             <div className="px-4 lg:px-8 mb-6">
               <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
@@ -240,7 +314,8 @@ const AdminCryptoWalletPage = () => {
                   <button
                     type="button"
                     onClick={openAddressModal}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold px-3 py-1.5 hover:bg-emerald-700 shadow-sm"
+                    disabled={walletsLoading}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold px-3 py-1.5 hover:bg-emerald-700 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Plus className="w-3.5 h-3.5" />
                     Add address
@@ -248,51 +323,74 @@ const AdminCryptoWalletPage = () => {
                 </div>
 
                 <div className="divide-y divide-slate-100">
-                  {walletAddresses.length === 0 && (
+                  {walletsLoading && wallets.length === 0 && (
+                    <div className="px-4 py-6 flex items-center justify-center gap-2 text-sm text-slate-500">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Loading wallets...
+                    </div>
+                  )}
+
+                  {!walletsLoading && wallets.length === 0 && (
                     <div className="px-4 py-6 text-sm text-slate-500">
                       No wallet addresses configured yet.
                     </div>
                   )}
 
-                  {walletAddresses.map((addr) => (
+                  {wallets.map((wallet) => (
                     <div
-                      key={addr.id}
+                      key={wallet.id}
                       className="px-4 md:px-6 py-3 flex flex-col md:flex-row md:items-center md:justify-between gap-3"
                     >
                       <div className="space-y-1">
                         <p className="text-sm font-semibold text-slate-900">
-                          {addr.label}
+                          {getChainLabel(wallet.chain)}
                         </p>
                         <p className="text-xs font-mono text-slate-600 break-all">
-                          {addr.address}
+                          {wallet.address}
                         </p>
                         <p className="text-[11px] text-slate-400">
-                          {addr.network} •{' '}
-                          {new Date(
-                            addr.created_at,
-                          ).toLocaleDateString('en-NG', {
-                            year: 'numeric',
-                            month: 'short',
-                            day: 'numeric',
-                          })}
+                          {wallet.chain}
+                          {wallet.created_at && (
+                            <>
+                              {' '}•{' '}
+                              {new Date(wallet.created_at).toLocaleDateString('en-NG', {
+                                year: 'numeric',
+                                month: 'short',
+                                day: 'numeric',
+                              })}
+                            </>
+                          )}
                         </p>
                       </div>
                       <div className="flex items-center gap-2 md:gap-3">
                         <span
                           className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium ${
-                            addr.active
+                            wallet.active
                               ? 'bg-emerald-50 text-emerald-700'
                               : 'bg-slate-100 text-slate-600'
                           }`}
                         >
-                          {addr.active ? 'Active' : 'Inactive'}
+                          {wallet.active ? 'Active' : 'Inactive'}
                         </span>
                         <button
                           type="button"
-                          onClick={() => toggleAddressActive(addr.id)}
-                          className="text-xs font-medium text-slate-700 border border-slate-200 rounded-lg px-2.5 py-1 hover:bg-slate-50"
+                          onClick={() => toggleAddressActive(wallet)}
+                          disabled={actionLoading === wallet.id}
+                          className="text-xs font-medium text-slate-700 border border-slate-200 rounded-lg px-2.5 py-1 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1"
                         >
-                          {addr.active ? 'Disable' : 'Enable'}
+                          {actionLoading === wallet.id ? (
+                            <Loader2 className="w-3 h-3 animate-spin" />
+                          ) : null}
+                          {wallet.active ? 'Disable' : 'Enable'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setShowDeleteConfirm(wallet.id)}
+                          disabled={actionLoading === wallet.id}
+                          className="text-xs font-medium text-red-600 border border-red-200 rounded-lg px-2.5 py-1 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                          Delete
                         </button>
                       </div>
                     </div>
@@ -315,21 +413,26 @@ const AdminCryptoWalletPage = () => {
                       your gateway.
                     </p>
                   </div>
-                  <div className="inline-flex rounded-full bg-slate-100 p-1 text-[11px] font-medium text-slate-600">
-                    {['all', 'pending', 'successful', 'failed'].map((s) => (
+                  <div className="inline-flex rounded-full bg-slate-100 p-1 text-[11px] font-medium text-slate-600 flex-wrap">
+                    {[
+                      { value: 'all', label: 'All' },
+                      { value: 'PENDING', label: 'Pending' },
+                      { value: 'APPROVED', label: 'Approved' },
+                      { value: 'REJECTED', label: 'Rejected' },
+                      { value: 'COMPLETED', label: 'Completed' },
+                      { value: 'FAILED', label: 'Failed' },
+                    ].map((s) => (
                       <button
-                        key={s}
+                        key={s.value}
                         type="button"
-                        onClick={() => setCryptoStatusFilter(s)}
+                        onClick={() => setCryptoStatusFilter(s.value)}
                         className={`px-3 py-1 rounded-full ${
-                          cryptoStatusFilter === s
+                          cryptoStatusFilter === s.value
                             ? 'bg-white text-slate-900 shadow-sm'
                             : 'text-slate-600'
                         }`}
                       >
-                        {s === 'all'
-                          ? 'All'
-                          : s.charAt(0).toUpperCase() + s.slice(1)}
+                        {s.label}
                       </button>
                     ))}
                   </div>
@@ -346,13 +449,20 @@ const AdminCryptoWalletPage = () => {
 
                 {/* Table body */}
                 <div className="divide-y divide-slate-100">
-                  {filteredDeposits.length === 0 && (
+                  {depositsLoading && (
+                    <div className="px-4 py-6 flex items-center justify-center gap-2 text-sm text-slate-500">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Loading deposits...
+                    </div>
+                  )}
+
+                  {!depositsLoading && filteredDeposits.length === 0 && (
                     <div className="px-4 py-6 text-sm text-slate-500">
                       No crypto deposits found for this filter.
                     </div>
                   )}
 
-                  {filteredDeposits.map((d) => {
+                  {!depositsLoading && filteredDeposits.map((d) => {
                     const dateLabel = d.created_at
                       ? new Date(d.created_at).toLocaleString('en-NG', {
                           year: 'numeric',
@@ -364,11 +474,14 @@ const AdminCryptoWalletPage = () => {
                       : 'N/A';
 
                     const statusClasses =
-                      d.status === 'successful'
+                      d.status === 'APPROVED' || d.status === 'COMPLETED'
                         ? 'bg-emerald-50 text-emerald-700'
-                        : d.status === 'failed'
+                        : d.status === 'REJECTED' || d.status === 'FAILED'
                         ? 'bg-red-50 text-red-700'
                         : 'bg-amber-50 text-amber-700';
+
+                    const userName = d.user?.name || d.user?.email || `User #${d.user_id}`;
+                    const chainLabel = getChainLabel(d.chain) || d.chain || 'Unknown';
 
                     return (
                       <button
@@ -381,18 +494,17 @@ const AdminCryptoWalletPage = () => {
                           {/* User */}
                           <div className="md:col-span-3">
                             <p className="text-sm font-medium text-slate-900">
-                              {d.user}
+                              {userName}
                             </p>
                             <p className="mt-0.5 text-xs text-slate-500 md:hidden">
-                              {d.amount || 0} USDT •{' '}
-                              {d.network || 'TRON (USDT)'}
+                              {d.amount || 0} USDT • {chainLabel}
                             </p>
                           </div>
 
                           {/* Transaction */}
                           <div className="md:col-span-3 mt-1 md:mt-0">
                             <p className="text-xs text-slate-500 truncate">
-                              Tx: {d.txHash || 'N/A'}
+                              Tx: {d.tx_id || 'Pending'}
                             </p>
                             <p className="mt-0.5 text-[11px] text-slate-400">
                               {dateLabel}
@@ -401,7 +513,7 @@ const AdminCryptoWalletPage = () => {
 
                           {/* Network */}
                           <div className="md:col-span-2 mt-2 md:mt-0 text-xs text-slate-600">
-                            {d.network || 'TRON (USDT)'}
+                            {chainLabel}
                           </div>
 
                           {/* Amount */}
@@ -416,7 +528,7 @@ const AdminCryptoWalletPage = () => {
                             <span
                               className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-medium ${statusClasses}`}
                             >
-                              {d.status || 'pending'}
+                              {d.status || 'PENDING'}
                             </span>
                           </div>
                         </div>
@@ -445,8 +557,12 @@ const AdminCryptoWalletPage = () => {
               </div>
               <button
                 type="button"
-                onClick={closeDepositModal}
-                className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"
+                onClick={() => {
+                  setApprovalTxId('');
+                  closeDepositModal();
+                }}
+                disabled={actionLoading}
+                className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500 disabled:opacity-50"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -456,7 +572,7 @@ const AdminCryptoWalletPage = () => {
               <div className="flex justify-between">
                 <span className="text-slate-500">User</span>
                 <span className="font-medium text-slate-900">
-                  {selectedDeposit.user}
+                  {selectedDeposit.user?.name || selectedDeposit.user?.email || `User #${selectedDeposit.user_id}`}
                 </span>
               </div>
               <div className="flex justify-between">
@@ -468,40 +584,85 @@ const AdminCryptoWalletPage = () => {
               <div className="flex justify-between">
                 <span className="text-slate-500">Network</span>
                 <span className="font-medium text-slate-900">
-                  {selectedDeposit.network || 'TRON (USDT)'}
+                  {getChainLabel(selectedDeposit.chain) || selectedDeposit.chain}
+                </span>
+              </div>
+              <div className="flex justify-between items-start">
+                <span className="text-slate-500">Source wallet</span>
+                <span className="font-mono text-[11px] text-slate-800 truncate max-w-[200px] text-right">
+                  {selectedDeposit.source_wallet_address || 'N/A'}
+                </span>
+              </div>
+              <div className="flex justify-between items-start">
+                <span className="text-slate-500">Dest wallet</span>
+                <span className="font-mono text-[11px] text-slate-800 truncate max-w-[200px] text-right">
+                  {selectedDeposit.dest_wallet_address || 'N/A'}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-slate-500">Transaction hash</span>
+                <span className="text-slate-500">Transaction ID</span>
                 <span className="font-mono text-[11px] text-slate-800 truncate max-w-[200px]">
-                  {selectedDeposit.txHash || 'N/A'}
+                  {selectedDeposit.tx_id || 'Pending'}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-slate-500">Status</span>
-                <span className="font-medium text-slate-900">
+                <span className={`font-medium ${
+                  selectedDeposit.status === 'APPROVED' || selectedDeposit.status === 'COMPLETED'
+                    ? 'text-emerald-600'
+                    : selectedDeposit.status === 'REJECTED' || selectedDeposit.status === 'FAILED'
+                    ? 'text-red-600'
+                    : 'text-amber-600'
+                }`}>
                   {selectedDeposit.status}
                 </span>
               </div>
+              {selectedDeposit.reason && (
+                <div className="flex justify-between items-start">
+                  <span className="text-slate-500">Reason</span>
+                  <span className="font-medium text-slate-900 text-right max-w-[200px]">
+                    {selectedDeposit.reason}
+                  </span>
+                </div>
+              )}
+
+              {/* Transaction ID input for approval */}
+              {selectedDeposit.status === 'PENDING' && (
+                <div className="pt-2 border-t border-slate-100">
+                  <label className="text-xs font-medium text-slate-700 block mb-1">
+                    Transaction ID (required for approval)
+                  </label>
+                  <input
+                    type="text"
+                    value={approvalTxId}
+                    onChange={(e) => setApprovalTxId(e.target.value)}
+                    placeholder="0x1234567890abcdef..."
+                    disabled={actionLoading}
+                    className="w-full rounded-lg border text-black border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/70 focus:border-emerald-500/70 disabled:opacity-50"
+                  />
+                </div>
+              )}
             </div>
 
             <div className="px-4 py-3 border-t border-slate-200 flex justify-end gap-2 bg-slate-50/60">
               <button
                 type="button"
                 onClick={handleDeclineDeposit}
-                disabled={selectedDeposit.status !== 'pending'}
-                className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={selectedDeposit.status !== 'PENDING' || actionLoading}
+                className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1"
               >
-                Mark as failed
+                {actionLoading === 'reject' && <Loader2 className="w-4 h-4 animate-spin" />}
+                Reject
               </button>
               <button
                 type="button"
                 onClick={handleApproveDeposit}
-                disabled={selectedDeposit.status !== 'pending'}
+                disabled={selectedDeposit.status !== 'PENDING' || !approvalTxId.trim() || actionLoading}
                 className="px-4 py-2 rounded-lg bg-emerald-600 text-sm font-semibold text-white hover:bg-emerald-700 inline-flex items-center gap-1 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
               >
+                {actionLoading === 'approve' && <Loader2 className="w-4 h-4 animate-spin" />}
                 <Check className="w-4 h-4" />
-                Mark as successful
+                Approve
               </button>
             </div>
           </div>
@@ -519,7 +680,8 @@ const AdminCryptoWalletPage = () => {
               <button
                 type="button"
                 onClick={closeAddressModal}
-                className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500"
+                disabled={actionLoading === 'add'}
+                className="p-1.5 rounded-full hover:bg-slate-100 text-slate-500 disabled:opacity-50"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -528,20 +690,25 @@ const AdminCryptoWalletPage = () => {
             <form onSubmit={handleSaveAddress} className="px-4 py-4 space-y-4">
               <div className="space-y-1">
                 <label className="text-xs font-medium text-slate-700">
-                  Label
+                  Blockchain Network
                 </label>
-                <input
-                  type="text"
-                  value={newAddress.label}
+                <select
+                  value={newAddress.chain}
                   onChange={(e) =>
                     setNewAddress((prev) => ({
                       ...prev,
-                      label: e.target.value,
+                      chain: e.target.value,
                     }))
                   }
-                  placeholder="e.g. Primary USDT TRC20"
-                  className="w-full rounded-lg border text-black border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/70 focus:border-emerald-500/70"
-                />
+                  disabled={actionLoading === 'add'}
+                  className="w-full rounded-lg border text-black border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/70 focus:border-emerald-500/70 bg-white disabled:opacity-50"
+                >
+                  {CHAIN_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="space-y-1">
@@ -557,47 +724,80 @@ const AdminCryptoWalletPage = () => {
                       address: e.target.value,
                     }))
                   }
-                  placeholder="Paste your USDT TRC20 address here"
-                  className="w-full rounded-lg border  text-black border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/70 focus:border-emerald-500/70 resize-none"
+                  placeholder="Paste your wallet address here"
+                  disabled={actionLoading === 'add'}
+                  className="w-full rounded-lg border text-black border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/70 focus:border-emerald-500/70 resize-none disabled:opacity-50"
                 />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-xs font-medium text-slate-700">
-                  Network
-                </label>
-                <select
-                  value={newAddress.network}
-                  onChange={(e) =>
-                    setNewAddress((prev) => ({
-                      ...prev,
-                      network: e.target.value,
-                    }))
-                  }
-                  className="w-full rounded-lg border text-black border-slate-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500/70 focus:border-emerald-500/70 bg-white"
-                >
-                  <option value="TRON (USDT)">TRON (USDT)</option>
-                  <option value="Ethereum (USDT)">Ethereum (USDT)</option>
-                  <option value="BSC (USDT)">BSC (USDT)</option>
-                </select>
               </div>
 
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   type="button"
                   onClick={closeAddressModal}
-                  className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50"
+                  disabled={actionLoading === 'add'}
+                  className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-emerald-600 text-sm font-semibold text-white hover:bg-emerald-700 shadow-sm"
+                  disabled={actionLoading === 'add' || !newAddress.address}
+                  className="px-4 py-2 rounded-lg bg-emerald-600 text-sm font-semibold text-white hover:bg-emerald-700 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-2"
                 >
+                  {actionLoading === 'add' && (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  )}
                   Save address
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Delete confirmation modal */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
+            <div className="px-4 py-4">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex-shrink-0 w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                  <AlertCircle className="w-5 h-5 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-base font-semibold text-slate-900">
+                    Delete wallet
+                  </h3>
+                  <p className="text-sm text-slate-500">
+                    This action cannot be undone.
+                  </p>
+                </div>
+              </div>
+              <p className="text-sm text-slate-600">
+                Are you sure you want to delete this wallet address? Users will no longer be able to send funds to this address.
+              </p>
+            </div>
+            <div className="px-4 py-3 border-t border-slate-200 flex justify-end gap-2 bg-slate-50/60">
+              <button
+                type="button"
+                onClick={() => setShowDeleteConfirm(null)}
+                disabled={actionLoading === showDeleteConfirm}
+                className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-700 hover:bg-white disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleDeleteWallet(showDeleteConfirm)}
+                disabled={actionLoading === showDeleteConfirm}
+                className="px-4 py-2 rounded-lg bg-red-600 text-sm font-semibold text-white hover:bg-red-700 inline-flex items-center gap-2 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {actionLoading === showDeleteConfirm && (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                )}
+                Delete
+              </button>
+            </div>
           </div>
         </div>
       )}

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowDownToLine, CheckCircle, AlertCircle, Loader2, Copy, QrCode, Shield, CreditCard, Wallet, Clock, Info, Check, TrendingUp, Zap } from 'lucide-react';
+import { ArrowDownToLine, CheckCircle, AlertCircle, Loader2, Copy, QrCode, Shield, CreditCard, Wallet, Clock, Info, Check, TrendingUp, Zap, ChevronDown } from 'lucide-react';
 import { useCreateTronWallet, useCreateVirtualAccount } from '../../../Hooks/subscription/useCreateAccount';
+import { useWalletDeposit } from '../../hooks/useWalletDeposit';
 import Navbar from '../profile/NavBar';
 import BottomNav from '../homepage/BottomNav';
 
@@ -10,14 +11,35 @@ const DepositPage = () => {
   const [activeTab, setActiveTab] = useState('virtual');
   const [copiedInfo, setCopiedInfo] = useState(null);
   const [countdown, setCountdown] = useState(30);
+  
+  // Crypto deposit states
+  const [cryptoAmount, setCryptoAmount] = useState('');
+  const [selectedWallet, setSelectedWallet] = useState(null);
+  const [sourceWalletAddress, setSourceWalletAddress] = useState('');
+  const [showWalletDropdown, setShowWalletDropdown] = useState(false);
 
   const navigate = useNavigate();
   const { createVirtualAccount, account, loading, error, reset } = useCreateVirtualAccount();
   const { createTronWallet, walletData, loading: walletLoading, error: walletError, reset: resetTronWallet } = useCreateTronWallet();
+  
+  // Wallet deposit hook for crypto
+  const {
+    depositAddresses,
+    currentDeposit,
+    isLoading: cryptoLoading,
+    error: cryptoError,
+    success: cryptoSuccess,
+    fetchDepositAddresses,
+    createDepositRequest,
+    getActiveAddresses,
+    resetError: resetCryptoError,
+    resetSuccess: resetCryptoSuccess,
+    clearCurrentDeposit
+  } = useWalletDeposit();
 
   const isCountdownActive = useMemo(() => 
-    countdown > 0 && ((account && activeTab === 'virtual') || (walletData?.walletAddress && activeTab === 'crypto')),
-    [countdown, account, walletData, activeTab]
+    countdown > 0 && ((account && activeTab === 'virtual') || (currentDeposit && activeTab === 'crypto')),
+    [countdown, account, currentDeposit, activeTab]
   );
 
   // Countdown timer
@@ -27,12 +49,42 @@ const DepositPage = () => {
     return () => clearTimeout(timer);
   }, [isCountdownActive, countdown]);
 
-  // Reset countdown on account/wallet creation
+  // Reset countdown on account/deposit creation
   useEffect(() => {
-    if ((account && activeTab === 'virtual') || (walletData?.walletAddress && activeTab === 'crypto')) {
+    if ((account && activeTab === 'virtual') || (currentDeposit && activeTab === 'crypto')) {
       setCountdown(30);
     }
-  }, [account, walletData, activeTab]);
+  }, [account, currentDeposit, activeTab]);
+
+  // Fetch deposit addresses when switching to crypto tab
+  useEffect(() => {
+    if (activeTab === 'crypto') {
+      fetchDepositAddresses();
+    }
+  }, [activeTab]);
+
+  // Auto-select first active wallet
+  useEffect(() => {
+    const activeAddresses = getActiveAddresses();
+    if (activeAddresses.length > 0 && !selectedWallet) {
+      setSelectedWallet(activeAddresses[0]);
+    }
+  }, [depositAddresses, getActiveAddresses, selectedWallet]);
+
+  // Auto-clear crypto success/error messages
+  useEffect(() => {
+    if (cryptoSuccess) {
+      const timer = setTimeout(() => resetCryptoSuccess(), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [cryptoSuccess, resetCryptoSuccess]);
+
+  useEffect(() => {
+    if (cryptoError) {
+      const timer = setTimeout(() => resetCryptoError(), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [cryptoError, resetCryptoError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,8 +116,6 @@ const DepositPage = () => {
 
   const handleTabChange = (tabId) => {
     setActiveTab(tabId);
-    // No automatic wallet generation when switching to crypto tab
-    // Wallet will be generated only when user clicks the button
   };
 
   const handleCreateTronWallet = async () => {
@@ -75,6 +125,41 @@ const DepositPage = () => {
       // Error is handled in the hook
       console.error('Failed to create TRON wallet:', err);
     }
+  };
+
+  // Handle crypto deposit request submission
+  const handleCryptoDeposit = async (e) => {
+    e.preventDefault();
+    if (!cryptoAmount || parseFloat(cryptoAmount) <= 0) return;
+    if (!selectedWallet) return;
+    if (!sourceWalletAddress.trim()) return;
+
+    await createDepositRequest(
+      parseFloat(cryptoAmount),
+      selectedWallet.id,
+      sourceWalletAddress.trim()
+    );
+  };
+
+  // Reset crypto deposit form
+  const handleCryptoReset = () => {
+    setCryptoAmount('');
+    setSourceWalletAddress('');
+    clearCurrentDeposit();
+    resetCryptoError();
+    resetCryptoSuccess();
+    setCountdown(30);
+  };
+
+  // Get chain label for display
+  const getChainLabel = (chain) => {
+    const labels = {
+      'TRON': 'TRON (TRC20)',
+      'ETH': 'Ethereum (ERC20)',
+      'BSC': 'BSC (BEP20)',
+      'BTC': 'Bitcoin'
+    };
+    return labels[chain] || chain;
   };
 
   const quickAmounts = [1000, 5000, 10000, 50000];
@@ -291,37 +376,47 @@ const DepositPage = () => {
           <div className="rounded-xl p-5 space-y-4" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)' }}>
             <div className="text-center">
               <h3 className="text-xl font-bold text-white mb-1">Deposit USDT</h3>
-              <p className="text-xs text-gray-400">Send via TRC20 Network</p>
+              <p className="text-xs text-gray-400">Send crypto to our wallet address</p>
             </div>
 
-            {walletLoading && (
-              <div className="p-8 flex flex-col items-center">
-                <Loader2 size={40} className="animate-spin mb-3" color="#2D8C72" />
-                <p className="text-white font-semibold">Creating TRON Wallet...</p>
+            {/* Success Message */}
+            {cryptoSuccess && (
+              <div className="p-4 rounded-lg" style={{ background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)' }}>
+                <div className="flex items-center gap-2">
+                  <CheckCircle size={20} color="#22c55e" />
+                  <p className="text-sm text-green-400">{cryptoSuccess}</p>
+                </div>
               </div>
             )}
 
-            {walletError && (
-              <div className="p-4 rounded-lg" style={{ background: 'rgba(239,68,68,0.1)' }}>
+            {/* Error Message */}
+            {cryptoError && (
+              <div className="p-4 rounded-lg" style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)' }}>
                 <div className="flex items-start gap-3">
                   <AlertCircle size={20} color="#ef4444" />
                   <div>
-                    <p className="text-red-400 font-bold mb-2">Error</p>
-                    <p className="text-sm text-red-400 mb-3">{walletError}</p>
-                    <button onClick={handleCreateTronWallet} className="px-4 py-2 rounded-lg font-semibold text-white" style={{ background: '#2D8C72' }}>
-                      Retry
-                    </button>
+                    <p className="text-red-400 font-bold mb-1">Error</p>
+                    <p className="text-sm text-red-400">{cryptoError}</p>
                   </div>
                 </div>
               </div>
             )}
 
-            {hasWallet && (
+            {/* Loading State */}
+            {cryptoLoading && (
+              <div className="p-8 flex flex-col items-center">
+                <Loader2 size={40} className="animate-spin mb-3" color="#2D8C72" />
+                <p className="text-white font-semibold">Processing...</p>
+              </div>
+            )}
+
+            {/* Deposit Request Created Successfully */}
+            {currentDeposit && !cryptoLoading && (
               <>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
                     <CheckCircle size={20} color="#22c55e" />
-                    <span className="font-bold text-white">Wallet Ready</span>
+                    <span className="font-bold text-white">Deposit Request Created</span>
                   </div>
                   {isCountdownActive && (
                     <div className="flex items-center gap-1 px-2 py-1 rounded text-xs font-semibold" style={{ background: 'rgba(245,158,11,0.2)', color: '#f59e0b' }}>
@@ -331,9 +426,14 @@ const DepositPage = () => {
                   )}
                 </div>
 
+                {/* QR Code for destination wallet */}
                 <div className="flex justify-center">
                   <div className="p-4 rounded-xl relative" style={{ background: '#fff' }}>
-                    <img src={qrCode} alt="QR" className="w-40 h-40" />
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(currentDeposit.dest_wallet_address)}`} 
+                      alt="QR" 
+                      className="w-40 h-40" 
+                    />
                     <div className="absolute -top-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1" style={{ background: '#2D8C72', color: '#fff' }}>
                       <QrCode size={10} />
                       SCAN
@@ -342,51 +442,49 @@ const DepositPage = () => {
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-400 mb-1 block">TRON Wallet Address</label>
+                  <label className="text-xs text-gray-400 mb-1 block">Send USDT to this address</label>
                   <div className="relative">
                     <input 
-                      value={walletData.walletAddress} 
+                      value={currentDeposit.dest_wallet_address} 
                       readOnly 
                       className="w-full p-3 rounded-lg font-mono text-xs pr-20 text-white" 
                       style={{ background: '#1a1a1a', border: '2px solid #22c55e' }} 
                     />
                     <button 
-                      onClick={() => copyText(walletData.walletAddress, 'usdt')} 
+                      onClick={() => copyText(currentDeposit.dest_wallet_address, 'dest')} 
                       className="absolute right-2 top-1/2 -translate-y-1/2 px-3 py-1.5 rounded text-xs font-semibold text-white flex items-center gap-1" 
-                      style={{ background: copiedInfo === 'usdt' ? '#22c55e' : '#2D8C72' }}
+                      style={{ background: copiedInfo === 'dest' ? '#22c55e' : '#2D8C72' }}
                     >
-                      {copiedInfo === 'usdt' ? <Check size={12} /> : <Copy size={12} />}
-                      {copiedInfo === 'usdt' ? 'Copied' : 'Copy'}
+                      {copiedInfo === 'dest' ? <Check size={12} /> : <Copy size={12} />}
+                      {copiedInfo === 'dest' ? 'Copied' : 'Copy'}
                     </button>
                   </div>
                 </div>
 
-                {walletData.message && (
-                  <div className="p-3 rounded-lg" style={{ background: 'rgba(45,140,114,0.1)' }}>
-                    <p className="text-xs text-center" style={{ color: '#2D8C72' }}>
-                      {walletData.message}
-                    </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="p-3 rounded-lg" style={{ background: '#1a1a1a' }}>
+                    <p className="text-xs text-gray-400 mb-1">Amount</p>
+                    <p className="text-xl font-bold" style={{ color: '#2D8C72' }}>{currentDeposit.amount} USDT</p>
                   </div>
-                )}
+                  <div className="p-3 rounded-lg" style={{ background: '#1a1a1a' }}>
+                    <p className="text-xs text-gray-400 mb-1">Network</p>
+                    <p className="text-sm font-semibold text-white">{currentDeposit.chain}</p>
+                  </div>
+                  </div>
 
-                <div className="grid grid-cols-3 gap-2">
-                  {[
-                    { label: 'Network', value: 'TRC20' },
-                    { label: 'Coin', value: 'USDT' },
-                    { label: 'Time', value: '5-15m' }
-                  ].map(item => (
-                    <div key={item.label} className="p-3 rounded-lg" style={{ background: '#1a1a1a' }}>
-                      <p className="text-xs text-gray-400">{item.label}</p>
-                      <p className="text-xs font-semibold text-white">{item.value}</p>
+                <div className="p-3 rounded-lg" style={{ background: '#1a1a1a' }}>
+                  <p className="text-xs text-gray-400 mb-1">Status</p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></div>
+                    <p className="text-sm font-semibold text-amber-400">{currentDeposit.status}</p>
                     </div>
-                  ))}
                 </div>
 
-                <div className="p-3 rounded-lg" style={{ background: 'rgba(245,158,11,0.1)' }}>
+                <div className="p-3 rounded-lg" style={{ background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.3)' }}>
                   <div className="flex gap-2">
-                    <AlertCircle size={14} color="#f59e0b" className="flex-shrink-0 mt-0.5" />
+                    <Info size={14} color="#f59e0b" className="flex-shrink-0 mt-0.5" />
                     <p className="text-xs" style={{ color: '#f59e0b' }}>
-                      Only send USDT (TRC20) to this address. Other tokens will be lost.
+                      Send exactly {currentDeposit.amount} USDT from your wallet ({currentDeposit.source_wallet_address?.slice(0, 10)}...) to the address above. Your deposit will be processed after admin verification.
                     </p>
                   </div>
                 </div>
@@ -398,40 +496,149 @@ const DepositPage = () => {
                   style={{ background: isCountdownActive ? '#1a1a1a' : 'linear-gradient(135deg, #2D8C72 0%, #34A085 100%)' }}
                 >
                   <CheckCircle size={20} />
-                  {isCountdownActive ? `Wait ${countdown}s` : 'Payment Complete'}
+                  {isCountdownActive ? `Wait ${countdown}s` : 'I\'ve Sent Payment'}
                 </button>
 
                 <button 
-                  onClick={handleTronReset}
+                  onClick={handleCryptoReset}
                   className="w-full py-3 rounded-lg font-semibold text-white" 
                   style={{ background: 'transparent', border: '2px solid #2D8C72' }}
                 >
-                  Generate New Wallet
+                  New Deposit Request
                 </button>
               </>
             )}
 
-            {!hasWallet && !walletLoading && !walletError && (
-              <div className="space-y-4">
-                <div className="p-4 rounded-lg" style={{ background: 'rgba(45,140,114,0.1)' }}>
+            {/* Deposit Form */}
+            {!currentDeposit && !cryptoLoading && (
+              <form onSubmit={handleCryptoDeposit} className="space-y-4">
+                {/* Wallet Selection */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-semibold text-white mb-2">
+                    <Wallet size={14} />
+                    Select Network & Wallet
+                  </label>
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowWalletDropdown(!showWalletDropdown)}
+                      className="w-full p-3 rounded-lg text-left flex items-center justify-between"
+                      style={{ 
+                        background: '#1a1a1a',
+                        border: `2px solid ${selectedWallet ? 'rgba(45,140,114,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                      }}
+                    >
+                      {selectedWallet ? (
+                        <div>
+                          <p className="text-sm font-semibold text-white">{getChainLabel(selectedWallet.chain)}</p>
+                          <p className="text-xs text-gray-400 font-mono truncate">{selectedWallet.address}</p>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-400">Select a wallet...</p>
+                      )}
+                      <ChevronDown size={20} className={`text-gray-400 transition-transform ${showWalletDropdown ? 'rotate-180' : ''}`} />
+                    </button>
+
+                    {showWalletDropdown && (
+                      <div 
+                        className="absolute z-10 w-full mt-2 rounded-lg overflow-hidden"
+                        style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)' }}
+                      >
+                        {getActiveAddresses().length === 0 ? (
+                          <div className="p-4 text-center text-gray-400 text-sm">
+                            No wallets available
+                          </div>
+                        ) : (
+                          getActiveAddresses().map((wallet) => (
+                            <button
+                              key={wallet.id}
+                              type="button"
+                              onClick={() => {
+                                setSelectedWallet(wallet);
+                                setShowWalletDropdown(false);
+                              }}
+                              className="w-full p-3 text-left hover:bg-white/5 transition-colors border-b border-white/5 last:border-0"
+                            >
+                              <p className="text-sm font-semibold text-white">{getChainLabel(wallet.chain)}</p>
+                              <p className="text-xs text-gray-400 font-mono truncate">{wallet.address}</p>
+                            </button>
+                          ))
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Amount Input */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-semibold text-white mb-2">
+                    <CreditCard size={14} />
+                    Amount (USDT)
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      value={cryptoAmount}
+                      onChange={(e) => setCryptoAmount(e.target.value)}
+                      placeholder="0.00"
+                      min="1"
+                      step="0.01"
+                      className="w-full p-3 rounded-lg text-xl font-bold pr-16 text-white"
+                      style={{ 
+                        background: '#1a1a1a',
+                        border: `2px solid ${cryptoAmount ? 'rgba(45,140,114,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                        outline: 'none'
+                      }}
+                    />
+                    <span className="absolute right-4 top-1/2 -translate-y-1/2 text-lg font-bold" style={{ color: '#2D8C72' }}>
+                      USDT
+                    </span>
+                  </div>
+                </div>
+
+                {/* Source Wallet Address */}
+                <div>
+                  <label className="flex items-center gap-2 text-sm font-semibold text-white mb-2">
+                    <ArrowDownToLine size={14} />
+                    Your Wallet Address
+                  </label>
+                  <input
+                    type="text"
+                    value={sourceWalletAddress}
+                    onChange={(e) => setSourceWalletAddress(e.target.value)}
+                    placeholder="Enter your wallet address (e.g., TYyy1234...)"
+                    className="w-full p-3 rounded-lg text-sm font-mono text-white"
+                    style={{ 
+                      background: '#1a1a1a',
+                      border: `2px solid ${sourceWalletAddress ? 'rgba(45,140,114,0.5)' : 'rgba(255,255,255,0.1)'}`,
+                      outline: 'none'
+                    }}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">The wallet address you'll be sending USDT from</p>
+                </div>
+
+                {/* Info Box */}
+                <div className="p-3 rounded-lg" style={{ background: 'rgba(45,140,114,0.1)' }}>
                   <div className="flex items-start gap-3">
                     <Info size={16} color="#2D8C72" className="flex-shrink-0 mt-0.5" />
                     <p className="text-xs" style={{ color: '#2D8C72' }}>
-                      Click below to generate a temporary TRON wallet address for USDT deposits. 
-                      Each new deposit requires a fresh wallet address for security.
+                      After submitting, you'll receive a wallet address to send your USDT. 
+                      Your deposit will be credited after admin verification.
                     </p>
                   </div>
                 </div>
 
+                {/* Submit Button */}
                 <button 
-                  onClick={handleCreateTronWallet}
-                  className="w-full py-3 rounded-lg font-bold text-white flex items-center justify-center gap-2"
+                  type="submit"
+                  disabled={!cryptoAmount || parseFloat(cryptoAmount) <= 0 || !selectedWallet || !sourceWalletAddress.trim() || cryptoLoading}
+                  className="w-full py-3 rounded-lg font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-50"
                   style={{ background: 'linear-gradient(135deg, #2D8C72 0%, #34A085 100%)' }}
                 >
-                  <Wallet size={20} />
-                  Generate TRON Wallet
+                  {cryptoLoading ? <Loader2 size={20} className="animate-spin" /> : <Shield size={20} />}
+                  {cryptoLoading ? 'Processing...' : 'Create Deposit Request'}
                 </button>
-              </div>
+              </form>
             )}
           </div>
         )}

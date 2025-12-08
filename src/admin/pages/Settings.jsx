@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Settings as SettingsIcon,
@@ -19,8 +19,15 @@ import {
   Save,
   Search,
   Newspaper,
+  Megaphone,
+  Send,
+  Loader2,
+  Trash2,
+  Calendar,
+  RefreshCw,
 } from 'lucide-react';
 import AdminSidebar from '../components/Sidebar';
+import { useAnnouncements } from '../hooks/useAnnouncements';
 
 const AdminSettingsPage = () => {
   const navigate = useNavigate();
@@ -40,6 +47,20 @@ const AdminSettingsPage = () => {
     sms: false,
     push: true,
   });
+  const [announcementContent, setAnnouncementContent] = useState('');
+
+  // Use the announcements hook
+  const {
+    announcements,
+    isLoading: isAnnouncementLoading,
+    error: announcementError,
+    success: announcementSuccess,
+    fetchAnnouncements,
+    createAnnouncement,
+    deleteAnnouncement,
+    resetError: resetAnnouncementError,
+    resetSuccess: resetAnnouncementSuccess,
+  } = useAnnouncements();
 
   const adminRoutes = {
     users: '/users',
@@ -68,6 +89,14 @@ const AdminSettingsPage = () => {
       navigate('/admin-zuum-news');
       return;
     }
+
+    // Fetch announcements when opening announcement modal
+    if (cardId === 'announcement') {
+      fetchAnnouncements({ limit: 10, offset: 0 });
+      setAnnouncementContent('');
+      resetAnnouncementError();
+      resetAnnouncementSuccess();
+    }
     
     setActiveCard(cardId);
     setModalContent(modalData);
@@ -80,11 +109,43 @@ const AdminSettingsPage = () => {
     setModalContent(null);
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    // Handle announcement separately
+    if (activeCard === 'announcement') {
+      if (!announcementContent.trim()) {
+        alert('Please enter announcement content');
+        return;
+      }
+
+      const result = await createAnnouncement(announcementContent);
+      if (result) {
+        setAnnouncementContent('');
+      }
+      return;
+    }
+
     // TODO: Implement API calls for each setting
     console.log('Saving settings:', { activeCard, modalContent });
     // Show success message
     closeModal();
+  };
+
+  const handleDeleteAnnouncement = async (id) => {
+    if (window.confirm('Are you sure you want to delete this announcement?')) {
+      await deleteAnnouncement(id);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   };
 
   const settingsCards = [
@@ -134,68 +195,77 @@ const AdminSettingsPage = () => {
       action: 'Update Account',
     },
     {
-      id: 'notifications',
-      title: 'Notification Settings',
-      description: 'Configure system notification preferences',
-      icon: Bell,
-      color: 'bg-indigo-50 text-indigo-600',
-      iconBg: 'bg-indigo-100',
-      action: 'Configure',
-    },
-    {
-      id: 'general',
-      title: 'General Settings',
-      description: 'Manage general platform settings',
-      icon: Globe,
-      color: 'bg-slate-50 text-slate-600',
-      iconBg: 'bg-slate-100',
-      action: 'Manage',
-    },
-    {
-      id: 'email',
-      title: 'Email Settings',
-      description: 'Configure email service and templates',
-      icon: Mail,
-      color: 'bg-cyan-50 text-cyan-600',
-      iconBg: 'bg-cyan-100',
-      action: 'Configure',
-    },
-    {
-      id: 'payment',
-      title: 'Payment Settings',
-      description: 'Manage payment gateway configurations',
-      icon: CreditCard,
-      color: 'bg-green-50 text-green-600',
-      iconBg: 'bg-green-100',
-      action: 'Manage',
-    },
-    {
-      id: 'database',
-      title: 'Database Settings',
-      description: 'View and manage database configurations',
-      icon: Database,
+      id: 'announcement',
+      title: 'Send Announcement',
+      description: 'Send announcements to all users',
+      icon: Megaphone,
       color: 'bg-orange-50 text-orange-600',
       iconBg: 'bg-orange-100',
-      action: 'View',
+      action: 'Send Now',
     },
-    {
-      id: 'api',
-      title: 'API Keys',
-      description: 'Manage API keys and integrations',
-      icon: Key,
-      color: 'bg-pink-50 text-pink-600',
-      iconBg: 'bg-pink-100',
-      action: 'Manage Keys',
-    },
-    {
-      id: 'security',
-      title: 'Security Settings',
-      description: 'Configure security policies and rules',
-      icon: AlertTriangle,
-      color: 'bg-rose-50 text-rose-600',
-      iconBg: 'bg-rose-100',
-      action: 'Configure',
-    },
+    // {
+    //   id: 'notifications',
+    //   title: 'Notification Settings',
+    //   description: 'Configure system notification preferences',
+    //   icon: Bell,
+    //   color: 'bg-indigo-50 text-indigo-600',
+    //   iconBg: 'bg-indigo-100',
+    //   action: 'Configure',
+    // },
+    // {
+    //   id: 'general',
+    //   title: 'General Settings',
+    //   description: 'Manage general platform settings',
+    //   icon: Globe,
+    //   color: 'bg-slate-50 text-slate-600',
+    //   iconBg: 'bg-slate-100',
+    //   action: 'Manage',
+    // },
+    // {
+    //   id: 'email',
+    //   title: 'Email Settings',
+    //   description: 'Configure email service and templates',
+    //   icon: Mail,
+    //   color: 'bg-cyan-50 text-cyan-600',
+    //   iconBg: 'bg-cyan-100',
+    //   action: 'Configure',
+    // },
+    // {
+    //   id: 'payment',
+    //   title: 'Payment Settings',
+    //   description: 'Manage payment gateway configurations',
+    //   icon: CreditCard,
+    //   color: 'bg-green-50 text-green-600',
+    //   iconBg: 'bg-green-100',
+    //   action: 'Manage',
+    // },
+    // {
+    //   id: 'database',
+    //   title: 'Database Settings',
+    //   description: 'View and manage database configurations',
+    //   icon: Database,
+    //   color: 'bg-orange-50 text-orange-600',
+    //   iconBg: 'bg-orange-100',
+    //   action: 'View',
+    // },
+    // {
+    //   id: 'api',
+    //   title: 'API Keys',
+    //   description: 'Manage API keys and integrations',
+    //   icon: Key,
+    //   color: 'bg-pink-50 text-pink-600',
+    //   iconBg: 'bg-pink-100',
+    //   action: 'Manage Keys',
+    // },
+    // {
+    //   id: 'security',
+    //   title: 'Security Settings',
+    //   description: 'Configure security policies and rules',
+    //   icon: AlertTriangle,
+    //   color: 'bg-rose-50 text-rose-600',
+    //   iconBg: 'bg-rose-100',
+    //   action: 'Configure',
+    // },
     {
       id: 'zuum-news',
       title: 'Zuum News',
@@ -222,7 +292,7 @@ const AdminSettingsPage = () => {
                 value={privacyPolicy}
                 onChange={(e) => setPrivacyPolicy(e.target.value)}
                 rows={12}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] text-sm text-black"
                 placeholder="Enter privacy policy content..."
               />
             </div>
@@ -240,7 +310,7 @@ const AdminSettingsPage = () => {
                 value={termsOfService}
                 onChange={(e) => setTermsOfService(e.target.value)}
                 rows={12}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] text-sm"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] text-sm text-black"
                 placeholder="Enter terms of service content..."
               />
             </div>
@@ -258,7 +328,7 @@ const AdminSettingsPage = () => {
                 type="text"
                 value={selectedUserId}
                 onChange={(e) => setSelectedUserId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] text-sm"
+                className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] text-sm"
                 placeholder="Enter user ID or email..."
               />
             </div>
@@ -282,7 +352,7 @@ const AdminSettingsPage = () => {
                 type="text"
                 value={selectedUserId}
                 onChange={(e) => setSelectedUserId(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] text-sm"
+                className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] text-sm"
                 placeholder="Enter admin user ID or email..."
               />
             </div>
@@ -306,7 +376,7 @@ const AdminSettingsPage = () => {
                 type="email"
                 value={adminEmail}
                 onChange={(e) => setAdminEmail(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] text-sm"
+                className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] text-sm"
                 placeholder="admin@example.com"
               />
             </div>
@@ -318,7 +388,7 @@ const AdminSettingsPage = () => {
                 type="password"
                 value={adminPassword}
                 onChange={(e) => setAdminPassword(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] text-sm"
+                className="w-full px-3 py-2 border text-black border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] text-sm"
                 placeholder="Enter new password..."
               />
             </div>
@@ -385,6 +455,112 @@ const AdminSettingsPage = () => {
                   />
                 </label>
               </div>
+            </div>
+          </div>
+        );
+
+      case 'announcement':
+        return (
+          <div className="space-y-4">
+            {/* Success Message */}
+            {announcementSuccess && (
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3 flex items-center gap-2">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+                <span className="text-sm text-green-800">{announcementSuccess}</span>
+                <button
+                  onClick={resetAnnouncementSuccess}
+                  className="ml-auto text-green-600 hover:text-green-800"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* Error Message */}
+            {announcementError && (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-red-600" />
+                <span className="text-sm text-red-800">{announcementError}</span>
+                <button
+                  onClick={resetAnnouncementError}
+                  className="ml-auto text-red-600 hover:text-red-800"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+
+            {/* New Announcement Form */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Announcement Content <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                value={announcementContent}
+                onChange={(e) => setAnnouncementContent(e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-300 text-black rounded-lg focus:outline-none focus:ring-2 focus:ring-[#2d7a63] focus:border-[#2d7a63] text-sm resize-none"
+                placeholder="Enter your announcement message..."
+                disabled={isAnnouncementLoading}
+              />
+            </div>
+
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+              <p className="text-xs text-blue-800">
+                <Bell className="w-4 h-4 inline mr-1" />
+                This announcement will be sent to all registered users via push notification.
+              </p>
+            </div>
+
+            {/* Previous Announcements */}
+            <div className="border-t border-gray-200 pt-4 mt-4">
+              <div className="flex items-center justify-between mb-3">
+                <h4 className="text-sm font-semibold text-gray-700">Previous Announcements</h4>
+                <button
+                  onClick={() => fetchAnnouncements({ limit: 10, offset: 0 })}
+                  disabled={isAnnouncementLoading}
+                  className="p-1 text-gray-500 hover:text-gray-700 transition-colors"
+                  title="Refresh"
+                >
+                  <RefreshCw className={`w-4 h-4 ${isAnnouncementLoading ? 'animate-spin' : ''}`} />
+                </button>
+              </div>
+
+              {isAnnouncementLoading && announcements.length === 0 ? (
+                <div className="text-center py-4">
+                  <Loader2 className="w-6 h-6 text-gray-400 animate-spin mx-auto" />
+                  <p className="text-xs text-gray-500 mt-2">Loading announcements...</p>
+                </div>
+              ) : announcements.length > 0 ? (
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {announcements.map((item) => (
+                    <div
+                      key={item.id}
+                      className="bg-gray-50 rounded-lg p-3 border border-gray-200 group"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <p className="text-sm text-gray-700 flex-1">{item.content}</p>
+                        <button
+                          onClick={() => handleDeleteAnnouncement(item.id)}
+                          className="p-1 text-gray-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-all"
+                          title="Delete"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="flex items-center gap-1 mt-2 text-xs text-gray-400">
+                        <Calendar className="w-3 h-3" />
+                        <span>{formatDate(item.createdAt || item.created_at)}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4 bg-gray-50 rounded-lg">
+                  <Megaphone className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                  <p className="text-xs text-gray-500">No announcements yet</p>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -522,17 +698,37 @@ const AdminSettingsPage = () => {
               <button
                 type="button"
                 onClick={closeModal}
-                className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-white transition-colors"
+                disabled={isAnnouncementLoading}
+                className="px-4 py-2 rounded-lg border border-gray-300 text-sm font-medium text-gray-700 hover:bg-white transition-colors disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 type="button"
                 onClick={handleSave}
-                className="px-4 py-2 rounded-lg bg-[#2d7a63] text-sm font-semibold text-white hover:bg-[#245a4f] inline-flex items-center gap-2 transition-colors shadow-sm"
+                disabled={isAnnouncementLoading}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold text-white inline-flex items-center gap-2 transition-colors shadow-sm disabled:opacity-50 ${
+                  activeCard === 'announcement'
+                    ? 'bg-orange-500 hover:bg-orange-600'
+                    : 'bg-[#2d7a63] hover:bg-[#245a4f]'
+                }`}
               >
-                <Save className="w-4 h-4" />
-                Save Changes
+                {isAnnouncementLoading && activeCard === 'announcement' ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : activeCard === 'announcement' ? (
+                  <>
+                    <Send className="w-4 h-4" />
+                    Send Announcement
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Save Changes
+                  </>
+                )}
               </button>
             </div>
           </div>
