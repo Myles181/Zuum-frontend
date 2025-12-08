@@ -3,7 +3,7 @@ import io from 'socket.io-client';
 
 // Allow a dedicated socket URL + path so we can match the backend config exactly.
 // Fallback to VITE_API_URL and default Socket.IO path if not provided.
-const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || import.meta.env.VITE_API_URL;
+const SOCKET_URL =  "https://zuum-backend-qs8x.onrender.com"
 const SOCKET_PATH = import.meta.env.VITE_SOCKET_PATH || '/socket.io';
 
 let socket;

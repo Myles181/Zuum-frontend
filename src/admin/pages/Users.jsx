@@ -145,7 +145,7 @@ const AdminUsersPage = () => {
       setCurrentPage(prev => prev - 1);
     }
   };
-
+  
   const handlePageSizeChange = (event) => {
     const newSize = Number(event.target.value);
     if (!Number.isNaN(newSize)) {
@@ -173,7 +173,7 @@ const AdminUsersPage = () => {
     if (targetRoute) {
       navigate(targetRoute);
     } else {
-      console.log('Unknown page:', pageId);
+        console.log('Unknown page:', pageId);
     }
   };
 
@@ -276,55 +276,55 @@ const AdminUsersPage = () => {
 
             {/* Stats Cards - Only show when no user is selected */}
             {!selectedUser && (
-              <div className="px-4 lg:px-6 mb-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-green-100 rounded-lg flex items-center justify-center">
-                          <User className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" />
-                        </div>
-                      </div>
-                      <div className="ml-3 lg:ml-4">
-                        <p className="text-sm font-medium text-gray-600">Active Users</p>
-                        <p className="text-xl lg:text-2xl font-bold text-gray-900">
-                          {users.filter(u => !u.deactivated).length}
-                        </p>
+            <div className="px-4 lg:px-6 mb-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-green-100 rounded-lg flex items-center justify-center">
+                        <User className="w-5 h-5 lg:w-6 lg:h-6 text-green-600" />
                       </div>
                     </div>
-                  </div>
-
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-red-100 rounded-lg flex items-center justify-center">
-                          <AlertCircle className="w-5 h-5 lg:w-6 lg:h-6 text-red-600" />
-                        </div>
-                      </div>
-                      <div className="ml-3 lg:ml-4">
-                        <p className="text-sm font-medium text-gray-600">Deactivated</p>
-                        <p className="text-xl lg:text-2xl font-bold text-gray-900">
-                          {users.filter(u => u.deactivated).length}
-                        </p>
-                      </div>
+                    <div className="ml-3 lg:ml-4">
+                      <p className="text-sm font-medium text-gray-600">Active Users</p>
+                      <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                        {users.filter(u => !u.deactivated).length}
+                      </p>
                     </div>
                   </div>
+                </div>
 
-                  <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6 sm:col-span-2 lg:col-span-1">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0">
-                        <div className="w-8 h-8 lg:w-10 lg:h-10 bg-[#2d7a63] bg-opacity-10 rounded-lg flex items-center justify-center">
-                          <User className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
-                        </div>
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                        <AlertCircle className="w-5 h-5 lg:w-6 lg:h-6 text-red-600" />
                       </div>
-                      <div className="ml-3 lg:ml-4">
-                        <p className="text-sm font-medium text-gray-600">Total Users</p>
-                        <p className="text-xl lg:text-2xl font-bold text-gray-900">{users.length}</p>
+                    </div>
+                    <div className="ml-3 lg:ml-4">
+                      <p className="text-sm font-medium text-gray-600">Deactivated</p>
+                      <p className="text-xl lg:text-2xl font-bold text-gray-900">
+                        {users.filter(u => u.deactivated).length}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 lg:p-6 sm:col-span-2 lg:col-span-1">
+                  <div className="flex items-center">
+                    <div className="flex-shrink-0">
+                      <div className="w-8 h-8 lg:w-10 lg:h-10 bg-[#2d7a63] bg-opacity-10 rounded-lg flex items-center justify-center">
+                        <User className="w-5 h-5 lg:w-6 lg:h-6 text-white" />
                       </div>
+                    </div>
+                    <div className="ml-3 lg:ml-4">
+                      <p className="text-sm font-medium text-gray-600">Total Users</p>
+                      <p className="text-xl lg:text-2xl font-bold text-gray-900">{users.length}</p>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
             )}
             
             {/* Error notification */}
@@ -370,15 +370,15 @@ const AdminUsersPage = () => {
               <div className="h-full bg-white shadow-sm rounded-lg overflow-hidden border border-gray-200 mx-4 lg:mx-6">
                 {/* Desktop: list OR details */}
                 {!selectedUser ? (
-                  <div className="hidden lg:block h-full overflow-auto">
-                    {isLoading ? (
+                <div className="hidden lg:block h-full overflow-auto">
+                      {isLoading ? (
                       <div className="p-8 text-center">
                         <div className="flex justify-center items-center space-x-3">
-                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2d7a63]"></div>
+                              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#2d7a63]"></div>
                           <span className="text-sm text-gray-600">Loading users...</span>
                         </div>
-                      </div>
-                    ) : filteredUsers.length > 0 ? (
+                            </div>
+                      ) : filteredUsers.length > 0 ? (
                       <>
                         {/* Table header */}
                         <div className="grid grid-cols-12 gap-4 px-6 py-3 bg-gray-50 border-b border-gray-100 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
@@ -403,7 +403,7 @@ const AdminUsersPage = () => {
 
                             return (
                               <div
-                                key={user.id}
+                            key={user.id} 
                                 className={`px-6 py-4 hover:bg-gray-50 transition-colors ${
                                   isDeactivated ? 'bg-red-50/40' : ''
                                 }`}
@@ -421,7 +421,7 @@ const AdminUsersPage = () => {
                                       ) : (
                                         <User className="h-4 w-4 text-[#2d7a63]" />
                                       )}
-                                    </div>
+                                </div>
                                     <div className="min-w-0">
                                       <p className="text-sm font-semibold text-gray-900 truncate">
                                         {user.username || user.email || `User #${user.id}`}
@@ -429,8 +429,8 @@ const AdminUsersPage = () => {
                                       <p className="mt-0.5 text-xs text-gray-500 truncate">
                                         ID #{user.id}
                                       </p>
-                                    </div>
-                                  </div>
+                                </div>
+                              </div>
 
                                   {/* Contact column */}
                                   <div className="col-span-3 text-xs text-gray-600 space-y-1">
@@ -468,7 +468,7 @@ const AdminUsersPage = () => {
                                         <span className="inline-flex items-center rounded-full bg-purple-100 text-purple-700 px-2.5 py-0.5 text-[11px] font-medium">
                                           <CreditCard className="w-3 h-3 mr-1" />
                                           Subscribed
-                                        </span>
+                              </span>
                                       )}
                                     </div>
                                     {user.created_at && (
@@ -485,22 +485,22 @@ const AdminUsersPage = () => {
 
                                   {/* Actions */}
                                   <div className="col-span-2 flex justify-end gap-2">
-                                    <button
-                                      onClick={() => handleViewUser(user)}
+                              <button
+                                onClick={() => handleViewUser(user)}
                                       className="inline-flex items-center rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-100"
-                                    >
+                              >
                                       <Eye size={14} className="mr-1" />
                                       View
-                                    </button>
+                              </button>
                                     {!isDeactivated && (
-                                      <button
-                                        onClick={() => handleDeactivateClick(user)}
+                                <button
+                                  onClick={() => handleDeactivateClick(user)}
                                         className="inline-flex items-center rounded-md border border-red-200 bg-white px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50"
-                                      >
+                                >
                                         <X size={14} className="mr-1" />
                                         Deactivate
-                                      </button>
-                                    )}
+                                </button>
+                              )}
                                   </div>
                                 </div>
                               </div>
@@ -804,7 +804,7 @@ const AdminUsersPage = () => {
                                     </div>
                                   </div>
                                 )}
-                              </div>
+                </div>
 
                               {/* Bio Section */}
                               {displayUser.bio && (
@@ -971,7 +971,7 @@ const AdminUsersPage = () => {
                 </div>
               </div>
             )}
-            </div>
+          </div>
         </div>
       </div>
       

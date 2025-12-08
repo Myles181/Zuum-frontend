@@ -33,8 +33,6 @@ const AudioFeed = ({ profile }) => {
     pagination: postsPagination,
   } = useAudioPosts(page, limit);
 
-  console.log(posts);
-
   const {
     loading: beatsLoading,
     error: beatsError,
@@ -42,30 +40,54 @@ const AudioFeed = ({ profile }) => {
     pagination: beatsPagination,
   } = useFetchBeats({ initialPage: beatsPage, initialLimit: beatsLimit });
 
-  const combinedContent = useMemo(
-    () => [...allPosts, ...allBeats].sort(
-      (a, b) => new Date(b.created_at) - new Date(a.created_at)
-    ),
-    [allPosts, allBeats]
-  );
+  console.log(posts);
 
+  // Merge and sort all posts by timestamp (newest first)
+  const sortedContent = useMemo(() => {
+    const merged = [
+      ...allPosts.map(post => ({
+        ...post,
+        type: "audio",
+        created_at: post.created_at || post.createdAt || post.date_created || new Date().toISOString()
+      })),
+      ...allBeats.map(beat => ({
+        ...beat,
+        type: "beat",
+        created_at: beat.created_at || beat.createdAt || beat.date_created || new Date().toISOString()
+      }))
+    ];
+
+    // Sort by created_at timestamp (newest first)
+    return merged.sort((a, b) => {
+      const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+      const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+      return dateB - dateA; // Descending order (newest first)
+    });
+  }, [allPosts, allBeats]);
+
+  // Update audio posts
   useEffect(() => {
-    if (posts.length) {
-      setAllPosts((prev) => [
-        ...prev,
-        ...posts
-          .filter((p) => !prev.some((q) => q.id === p.id))
-          .map((post) => ({ ...post, isLiked: post.isLiked || false, type: "audio" })),
-      ]);
+    if (posts?.length) {
+      setAllPosts((prev) => {
+        const newPosts = posts
+          .filter((p) => !prev.some((q) => q.id === p.id && q.type === "audio"))
+          .map((post) => ({ 
+            ...post, 
+            isLiked: post.isLiked || false, 
+            type: "audio",
+            created_at: post.created_at || post.createdAt || post.date_created || new Date().toISOString()
+          }));
+        return [...prev, ...newPosts];
+      });
     }
   }, [posts]);
 
+  // Update beat posts
   useEffect(() => {
     if (beats?.length) {
-      setAllBeats((prev) => [
-        ...prev,
-        ...beats
-          .filter((b) => !prev.some((q) => q.id === b.id))
+      setAllBeats((prev) => {
+        const newBeats = beats
+          .filter((b) => !prev.some((q) => q.id === b.id && q.type === "beat"))
           .map((beat) => ({
             ...beat,
             type: "beat",
@@ -74,8 +96,10 @@ const AudioFeed = ({ profile }) => {
             username: beat.username || beat.artist,
             caption: beat.caption || beat.title,
             price: beat.amount ? beat.amount / 100 : 0,
-          })),
-      ]);
+            created_at: beat.created_at || beat.createdAt || beat.date_created || new Date().toISOString()
+          }));
+        return [...prev, ...newBeats];
+      });
     }
   }, [beats]);
 
@@ -101,7 +125,7 @@ const AudioFeed = ({ profile }) => {
 
   // Improved intersection observer for scroll detection
   useEffect(() => {
-    if (!containerRef.current || !combinedContent.length) return;
+    if (!containerRef.current || !sortedContent.length) return;
 
     // Disconnect previous observer
     if (scrollObserver.current) {
@@ -137,11 +161,11 @@ const AudioFeed = ({ profile }) => {
         scrollObserver.current.disconnect();
       }
     };
-  }, [combinedContent]);
+  }, [sortedContent]);
 
   // Improved audio playback control
   useEffect(() => {
-    console.log(`Audio playback control: currentIndex = ${currentIndex}, total posts = ${combinedContent.length}`);
+    console.log(`Audio playback control: currentIndex = ${currentIndex}, total posts = ${sortedContent.length}`);
     
     // ALWAYS stop all audio first when currentIndex changes
     audioRefs.current.forEach((audioEl, idx) => {
@@ -170,12 +194,12 @@ const AudioFeed = ({ profile }) => {
       console.log(`No audio element found for index ${currentIndex}`);
       currentAudioRef.current = null;
     }
-  }, [currentIndex, combinedContent.length]);
+  }, [currentIndex, sortedContent.length]);
 
   // Debug logging
   useEffect(() => {
-    console.log(`Current audio index: ${currentIndex}, Total posts: ${combinedContent.length}`);
-  }, [currentIndex, combinedContent.length]);
+    console.log(`Current audio index: ${currentIndex}, Total posts: ${sortedContent.length}`);
+  }, [currentIndex, sortedContent.length]);
 
   const handleTap = useCallback((idx) => {
     const audio = audioRefs.current.get(idx);
@@ -262,13 +286,13 @@ const AudioFeed = ({ profile }) => {
           }
         `}</style>
 
-        {combinedContent.length > 0 ? (
-          combinedContent.map((content, idx) => (
+        {sortedContent.length > 0 ? (
+          sortedContent.map((content, idx) => (
             <div 
               key={`${content.type}-${content.id}`} 
               className="snap-slide w-full h-full" 
               data-index={idx}
-              ref={idx === combinedContent.length - 1 ? lastPostRef : null}
+              ref={idx === sortedContent.length - 1 ? lastPostRef : null}
             >
               <AudioPost
                 profile={profile}

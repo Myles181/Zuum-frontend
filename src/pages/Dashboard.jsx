@@ -13,13 +13,15 @@ import {
   XCircle,
   AlertCircle,
   Eye,
-  EyeOff
+  EyeOff,
+  Star,
+  Wallet,
+  Loader2
 } from 'lucide-react';
 import Navbar from '../components/profile/NavBar';
 import BottomNav from '../components/homepage/BottomNav';
 import { Link } from 'react-router-dom';
 import { useUserTransactions } from "../../Hooks/Dashbored/userTransactions";
-import { useGetUserWithdrawalRequests } from "../../Hooks/Dashbored/useGetUserWithdrawalRequests";
 
 const MobileDashboard = ({ 
   balance = 50000.00, 
@@ -31,8 +33,6 @@ const MobileDashboard = ({
 }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentBalanceIndex, setCurrentBalanceIndex] = useState(0);
-  const [NoOfData, setNoOfData] = useState(5);
-  const [withdrawalsNoOfData, setWithdrawalsNoOfData] = useState(5);
   const [balanceVisible, setBalanceVisible] = useState(true);
   const scrollContainerRef = useRef(null);
 
@@ -40,14 +40,6 @@ const MobileDashboard = ({
 
   // Use the actual hooks
   const { data, loading, error, refetch } = useUserTransactions();
-  const { withdrawals, withdrawalAPIloading, withdrawalAPIerror, fetchWithdrawals } = useGetUserWithdrawalRequests();
-
-  // Log data for debugging
-  if (withdrawalAPIloading) {
-    console.log("Withdrawal data loading...");
-  } else {
-    console.log("Withdrawals:", withdrawals);
-  }
 
   // Dark mode styles
   const darkModeStyles = {
@@ -112,12 +104,37 @@ const MobileDashboard = ({
 
   const getTransactionIcon = (type) => {
     switch(type?.toLowerCase()) {
-      case 'deposit': return <ArrowDownLeft className="w-5 h-5" />;
-      case 'withdrawal': return <ArrowUpRight className="w-5 h-5" />;
-      case 'transfer': return <Repeat className="w-5 h-5" />;
-      case 'purchase': return <ShoppingCart className="w-5 h-5" />;
-      default: return <Repeat className="w-5 h-5" />;
+      case 'deposit':
+      case 'bank_deposit':
+        return <ArrowDownLeft className="w-5 h-5" />;
+      case 'withdrawal':
+        return <ArrowUpRight className="w-5 h-5" />;
+      case 'transfer':
+        return <Repeat className="w-5 h-5" />;
+      case 'purchase':
+        return <ShoppingCart className="w-5 h-5" />;
+      case 'subscription':
+        return <Star className="w-5 h-5" />;
+      case 'promotion_audio':
+      case 'promotion':
+        return <TrendingUp className="w-5 h-5" />;
+      default:
+        return <CreditCard className="w-5 h-5" />;
     }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleDateString('en-NG', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const isIncomingTransaction = (type) => {
+    return ['deposit', 'bank_deposit'].includes(type?.toLowerCase());
   };
 
   const getStatusIcon = (status) => {
@@ -379,21 +396,25 @@ const MobileDashboard = ({
             >
               Recent Activity
             </h3>
-            {data && data.length > 5 && (
-              <button
-                onClick={() => setNoOfData(prev => prev === 5 ? data.length : 5)}
+            {data && data.length > 0 && (
+              <Link
+                to="/transactions"
                 className="text-sm font-medium transition-all duration-300 hover:scale-105 active:scale-95"
                 style={{ color: 'var(--color-accent-primary)' }}
               >
-                {NoOfData === 5 ? "View All" : "Show Less"}
-              </button>
+                View All
+              </Link>
             )}
           </div>
 
           <div className="space-y-2">
             {loading ? (
-              <div className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
-                Loading transactions...
+              <div 
+                className="flex flex-col items-center justify-center py-12 rounded-2xl"
+                style={{ backgroundColor: 'var(--color-card-bg)', border: '1px solid var(--color-border)' }}
+              >
+                <Loader2 className="w-8 h-8 animate-spin mb-3" style={{ color: 'var(--color-accent-primary)' }} />
+                <p style={{ color: 'var(--color-text-secondary)' }}>Loading transactions...</p>
               </div>
             ) : error ? (
               <div 
@@ -404,30 +425,37 @@ const MobileDashboard = ({
                   color: '#ef4444'
                 }}
               >
-                Error loading transactions. Please try again.
+                <AlertCircle className="w-8 h-8 mx-auto mb-3" />
+                <p>Error loading transactions</p>
+                <button
+                  onClick={refetch}
+                  className="mt-3 px-4 py-2 rounded-lg text-sm"
+                  style={{ backgroundColor: 'var(--color-accent-primary)', color: '#fff' }}
+                >
+                  Try Again
+                </button>
               </div>
             ) : Array.isArray(data) && data.length > 0 ? (
-              data.slice(0, NoOfData).map((transaction) => {
+              data.slice(0, 5).map((transaction) => {
                 const statusColors = getStatusColor(transaction.status);
+                const isIncoming = isIncomingTransaction(transaction.type);
                 return (
                   <div
                     key={transaction.id}
-                    className="flex items-center justify-between p-4 rounded-2xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
+                    className="flex items-center justify-between p-4 rounded-2xl transition-all duration-300"
                     style={{ 
                       backgroundColor: 'var(--color-card-bg)',
                       border: '1px solid var(--color-border)'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-card-hover)'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-card-bg)'}
                   >
                     <div className="flex items-center space-x-3 flex-1">
                       <div 
-                        className="w-11 h-11 rounded-xl flex items-center justify-center transition-all duration-300"
+                        className="w-11 h-11 rounded-xl flex items-center justify-center"
                         style={{ 
-                          backgroundColor: transaction.type?.toLowerCase() === 'deposit' 
+                          backgroundColor: isIncoming 
                             ? 'rgba(34, 197, 94, 0.1)' 
                             : 'rgba(239, 68, 68, 0.1)',
-                          color: transaction.type?.toLowerCase() === 'deposit' 
+                          color: isIncoming 
                             ? '#22c55e' 
                             : '#ef4444'
                         }}
@@ -435,168 +463,43 @@ const MobileDashboard = ({
                         {getTransactionIcon(transaction.type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-1">
-                          <div 
-                            className="font-medium truncate"
+                        <div className="flex items-center gap-2 mb-1">
+                          <span 
+                            className="font-medium capitalize truncate"
                             style={{ color: 'var(--color-text-primary)' }}
                           >
-                            {transaction.to || transaction.from || 'Unknown'}
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span 
-                            className="text-xs capitalize"
-                            style={{ color: 'var(--color-text-secondary)' }}
-                          >
-                            {transaction.type || 'transaction'}
-                          </span>
-                          <span style={{ color: 'var(--color-text-secondary)' }}>•</span>
-                          <span 
-                            className="text-xs"
-                            style={{ color: 'var(--color-text-secondary)' }}
-                          >
-                            {transaction.date}
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right ml-3">
-                      <div 
-                        className="font-semibold mb-1"
-                        style={{ 
-                          color: transaction.type?.toLowerCase() === 'deposit' ? '#22c55e' : '#ef4444'
-                        }}
-                      >
-                        {transaction.type?.toLowerCase() === 'deposit' ? '+' : '-'}₦{transaction.amount?.toLocaleString() || '0'}
-                      </div>
-                      <div className="flex items-center justify-end space-x-1">
-                        {getStatusIcon(transaction.status)}
-                        <span 
-                          className="text-xs capitalize"
-                          style={{ color: statusColors.color }}
-                        >
-                          {transaction.status || 'pending'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                );
-              })
-            ) : (
-              <div 
-                className="text-center py-12 rounded-2xl"
-                style={{ 
-                  backgroundColor: 'var(--color-card-bg)',
-                  border: '1px solid var(--color-border)',
-                  color: 'var(--color-text-secondary)'
-                }}
-              >
-                No transactions found
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Withdrawal Requests */}
-        <div className="mb-8">
-          <div className="flex justify-between items-center mb-4">
-            <h3 
-              className="text-base font-semibold"
-              style={{ color: 'var(--color-text-primary)' }}
-            >
-              Withdrawal Requests
-            </h3>
-            {withdrawals && withdrawals.length > 5 && (
-              <button
-                onClick={() => setWithdrawalsNoOfData(prev => prev === 5 ? withdrawals.length : 5)}
-                className="text-sm font-medium transition-all duration-300 hover:scale-105 active:scale-95"
-                style={{ color: 'var(--color-accent-primary)' }}
-              >
-                {withdrawalsNoOfData === 5 ? "View All" : "Show Less"}
-              </button>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            {withdrawalAPIloading ? (
-              <div className="text-center py-8" style={{ color: 'var(--color-text-secondary)' }}>
-                Loading withdrawals...
-              </div>
-            ) : withdrawalAPIerror ? (
-              <div 
-                className="text-center py-12 rounded-2xl"
-                style={{ 
-                  backgroundColor: 'var(--color-card-bg)',
-                  border: '1px solid var(--color-border)',
-                  color: '#ef4444'
-                }}
-              >
-                Error loading withdrawals. Please try again.
-              </div>
-            ) : Array.isArray(withdrawals) && withdrawals.length > 0 ? (
-              withdrawals.slice(0, withdrawalsNoOfData).map((withdrawal) => {
-                const statusColors = getStatusColor(withdrawal.status);
-                return (
-                  <div
-                    key={withdrawal.id}
-                    className="p-4 rounded-2xl transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] cursor-pointer"
-                    style={{ 
-                      backgroundColor: 'var(--color-card-bg)',
-                      border: '1px solid var(--color-border)'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-card-hover)'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-card-bg)'}
-                  >
-                    <div className="flex items-start justify-between mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span 
-                            className="font-medium"
-                            style={{ color: 'var(--color-text-primary)' }}
-                          >
-                            {withdrawal.account_name}
+                            {transaction.type?.replace('_', ' ') || 'Transaction'}
                           </span>
                           <div
-                            className="flex items-center space-x-1 px-2 py-1 rounded-full text-xs"
+                            className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px]"
                             style={{
                               backgroundColor: statusColors.bg,
                               color: statusColors.color,
                               border: `1px solid ${statusColors.border}`
                             }}
                           >
-                            {getStatusIcon(withdrawal.status)}
-                            <span className="capitalize">{withdrawal.status}</span>
+                            {getStatusIcon(transaction.status)}
+                            <span className="capitalize">{transaction.status}</span>
                           </div>
                         </div>
-                        <div 
-                          className="text-sm mb-1"
-                          style={{ color: 'var(--color-text-secondary)' }}
-                        >
-                          {withdrawal.bank_name} • {withdrawal.account_number}
-                        </div>
-                        {withdrawal.reason && (
-                          <div 
-                            className="text-xs"
-                            style={{ color: 'var(--color-text-secondary)' }}
-                          >
-                            {withdrawal.reason}
-                          </div>
-                        )}
-                      </div>
-                      <div className="text-right ml-3">
-                        <div 
-                          className="font-semibold text-lg mb-1"
-                          style={{ color: 'var(--color-text-primary)' }}
-                        >
-                          ₦{withdrawal.amount}
-                        </div>
-                        <div 
+                        <p 
                           className="text-xs"
                           style={{ color: 'var(--color-text-secondary)' }}
                         >
-                          {new Date(withdrawal.updated_at).toLocaleDateString()}
-                        </div>
+                          {formatDate(transaction.created_at)}
+                        </p>
                       </div>
+                    </div>
+                    <div className="text-right ml-3">
+                      <p 
+                        className="font-semibold"
+                        style={{ color: isIncoming ? '#22c55e' : '#ef4444' }}
+                      >
+                        {isIncoming ? '+' : '-'}₦{formatAmount(transaction.amount)}
+                      </p>
+                      <p className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
+                        ID: {transaction.id}
+                      </p>
                     </div>
                   </div>
                 );
@@ -610,7 +513,8 @@ const MobileDashboard = ({
                   color: 'var(--color-text-secondary)'
                 }}
               >
-                No withdrawal requests found
+                <Wallet className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                <p>No transactions found</p>
               </div>
             )}
           </div>

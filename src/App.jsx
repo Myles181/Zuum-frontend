@@ -74,6 +74,7 @@ import DepositPage from './components/dashboard/DepositPage';
 import WithdrawalPage from './components/dashboard/WithdrawalPage';
 import P2PTransferPage from './components/dashboard/TransferPage';
 import Analytics from './pages/analytics';
+import TransactionHistory from './pages/TransactionHistory';
 
 // Dark mode styles for consistent theming
 const darkModeStyles = {
@@ -204,7 +205,7 @@ const AppRoutes = () => {
         <Route path="/activity" element={<ActivityPage />} />
         <Route path="/messages" element={<Chat />} />
         <Route path="/message" element={<ChatListPage />} />
-        <Route path="/chat/:roomId" element={<MessagePage />} />
+        <Route path="/chat/:roomId" element={<MessagePage profile={profile} />} />
         <Route path="/music/:postId" element={<MusicDetailsPage />} />
         <Route path="/distribution-requests" element={<UserDistributionRequests />} />
         <Route path="/add" element={<UploadPage profile={profile} />} />
@@ -232,6 +233,7 @@ const AppRoutes = () => {
          <Route path="/dashboard/withdraw" element={<WithdrawalPage profile={profile} />} />
           <Route path="/dashboard/transfer" element={<P2PTransferPage profile={profile} />} />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/transactions" element={<TransactionHistory />} />
 
 
 
