@@ -1,11 +1,27 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaHeart, FaRegHeart, FaThumbsDown, FaRegThumbsDown } from 'react-icons/fa';
+import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import Navbar from '../components/profile/NavBar';
 import BottomNav from '../components/homepage/BottomNav';
+import { useNews } from '../admin/hooks/useNews';
 
 const ZuumNews = () => {
-  const [activeCategory, setActiveCategory] = useState('all');
   const [reactions, setReactions] = useState({});
+  
+  // Use the news hook
+  const {
+    news,
+    isLoading,
+    error,
+    success,
+    fetchNews,
+    resetError,
+  } = useNews();
+
+  // Fetch news on component mount
+  useEffect(() => {
+    fetchNews({ limit: 50, offset: 0 });
+  }, [fetchNews]);
 
   // Dark mode styles matching UploadPage
   const darkModeStyles = {
@@ -16,99 +32,43 @@ const ZuumNews = () => {
     '--color-primary': '#2D8C72',
     '--color-primary-light': '#34A085',
     '--color-text-on-primary': '#ffffff',
-    '--color-border': '#374151'
+    '--color-border': '#374151',
+    '--color-success': '#10b981',
+    '--color-error': '#ef4444'
   };
-
-  // Mock data for news articles
-  const newsArticles = [
-    {
-      id: 1,
-      title: "Zuum Launches New AI-Powered Music Discovery Feature",
-      excerpt: "Revolutionary AI technology helps artists and listeners discover new music like never before.",
-      category: "feature",
-      date: "2024-01-15",
-      readTime: "3 min",
-      image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=250&fit=crop",
-      likes: 124,
-      dislikes: 5,
-      featured: true
-    },
-    {
-      id: 2,
-      title: "Top 10 Emerging Artists to Watch in 2024",
-      excerpt: "Discover the most promising new talents that are making waves in the music industry.",
-      category: "artists",
-      date: "2024-01-14",
-      readTime: "5 min",
-      image: "https://images.unsplash.com/photo-1516280440614-37939bbacd81?w=400&h=250&fit=crop",
-      likes: 89,
-      dislikes: 2
-    },
-    {
-      id: 3,
-      title: "How to Optimize Your Music for Streaming Platforms",
-      excerpt: "Expert tips and strategies to help your music stand out on streaming platforms.",
-      category: "tips",
-      date: "2024-01-13",
-      readTime: "7 min",
-      image: "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&h=250&fit=crop",
-      likes: 156,
-      dislikes: 8
-    },
-    {
-      id: 4,
-      title: "Zuum Platform Update: Enhanced User Experience",
-      excerpt: "Major platform improvements including faster loading times and better mobile experience.",
-      category: "update",
-      date: "2024-01-12",
-      readTime: "4 min",
-      image: "https://images.unsplash.com/photo-1551650975-87deedd944c3?w=400&h=250&fit=crop",
-      likes: 203,
-      dislikes: 12
-    },
-    {
-      id: 5,
-      title: "The Future of Music Distribution: Trends to Watch",
-      excerpt: "Explore the latest trends in music distribution and how they're shaping the industry.",
-      category: "trends",
-      date: "2024-01-11",
-      readTime: "6 min",
-      image: "https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=400&h=250&fit=crop",
-      likes: 167,
-      dislikes: 9
-    },
-    {
-      id: 6,
-      title: "Success Story: How Artist X Gained 1M Followers",
-      excerpt: "An inspiring journey of how one artist used Zuum's platform to build a massive following.",
-      category: "success",
-      date: "2024-01-10",
-      readTime: "8 min",
-      image: "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=250&fit=crop",
-      likes: 234,
-      dislikes: 15
-    }
-  ];
-
-  const categories = [
-    { id: 'all', name: 'All News' },
-    { id: 'feature', name: 'Features' },
-    { id: 'artists', name: 'Artists' },
-    { id: 'tips', name: 'Tips' },
-    { id: 'update', name: 'Updates' },
-    { id: 'trends', name: 'Trends' },
-    { id: 'success', name: 'Success' }
-  ];
-
-  const filteredArticles = newsArticles.filter(article => 
-    activeCategory === 'all' || article.category === activeCategory
-  );
 
   const handleReaction = (id, type) => {
     setReactions(prev => ({
       ...prev,
       [id]: prev[id] === type ? null : type
     }));
+    
+    // TODO: Implement API call to update reactions
+    // This would require a new endpoint like:
+    // POST /api/news/{id}/reaction
+    // with body: { type: 'like' | 'dislike' }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const handleRefresh = () => {
+    fetchNews({ limit: 50, offset: 0 });
+  };
+
+  // Calculate read time based on content length
+  const calculateReadTime = (content) => {
+    if (!content) return '1 min';
+    const words = content.split(' ').length;
+    const minutes = Math.ceil(words / 200);
+    return `${minutes} min`;
   };
 
   return (
@@ -122,10 +82,55 @@ const ZuumNews = () => {
           background: 'linear-gradient(to right, #2D8C72, #1f6352)'
         }}
       >
-        <div className="max-w-6xl mx-auto">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2">Zuum News</h1>
-          <p className="text-green-100 text-lg">Stay updated with music industry insights and platform updates</p>
+        <div className="max-w-6xl mx-auto flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl md:text-4xl font-bold mb-2">Zuum News</h1>
+            <p className="text-green-100 text-lg">Stay updated with music industry insights and platform updates</p>
+          </div>
+          
+          {/* Refresh Button */}
+          <button
+            onClick={handleRefresh}
+            disabled={isLoading}
+            className="p-3 rounded-full border transition-colors disabled:opacity-50"
+            style={{ 
+              borderColor: 'rgba(255,255,255,0.2)',
+              color: 'white',
+              backgroundColor: 'rgba(255,255,255,0.1)'
+            }}
+            title="Refresh news"
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.2)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.1)';
+            }}
+          >
+            <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
         </div>
+
+        {/* Success Message */}
+        {success && (
+          <div className="max-w-6xl mx-auto mt-4 p-3 bg-green-900/50 border border-green-700 rounded-lg flex items-center gap-3">
+            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
+            <span className="text-sm text-green-100">{success}</span>
+          </div>
+        )}
+
+        {/* Error Message */}
+        {error && (
+          <div className="max-w-6xl mx-auto mt-4 p-3 bg-red-900/50 border border-red-700 rounded-lg flex items-center gap-3">
+            <AlertCircle className="w-4 h-4 text-red-300" />
+            <span className="text-sm text-red-100">{error}</span>
+            <button
+              onClick={resetError}
+              className="ml-auto text-red-300 hover:text-white"
+            >
+              ×
+            </button>
+          </div>
+        )}
       </div>
 
       <div 
@@ -140,169 +145,160 @@ const ZuumNews = () => {
           }}
         >
           <div className="p-8">
-            {/* Categories */}
-            <div className="mb-8 overflow-x-auto">
-              <div className="flex space-x-2 pb-2">
-                {categories.map(category => (
-                  <button
-                    key={category.id}
-                    onClick={() => setActiveCategory(category.id)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all duration-300 transform hover:scale-105`}
-                    style={
-                      activeCategory === category.id
-                        ? { 
-                            backgroundColor: '#2D8C72', 
-                            color: 'white' 
-                          }
-                        : { 
-                            backgroundColor: 'var(--color-bg-secondary)', 
-                            color: 'var(--color-text-secondary)',
-                            border: '1px solid var(--color-border)'
-                          }
-                    }
-                    onMouseEnter={(e) => {
-                      if (activeCategory !== category.id) {
-                        e.target.style.backgroundColor = '#374151';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (activeCategory !== category.id) {
-                        e.target.style.backgroundColor = 'var(--color-bg-secondary)';
-                      }
-                    }}
-                  >
-                    {category.name}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* News Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredArticles.map(article => (
-                <article
-                  key={article.id}
-                  className="rounded-lg shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden transform hover:scale-105 hover:-translate-y-2"
-                  style={{ 
-                    backgroundColor: 'var(--color-bg-secondary)',
-                    border: '1px solid var(--color-border)'
-                  }}
+            {/* Loading State */}
+            {isLoading && news.length === 0 ? (
+              <div className="py-20 text-center">
+                <div className="inline-flex items-center justify-center w-16 h-16 mb-4 rounded-full" 
+                     style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+                  <Loader2 className="w-8 h-8 animate-spin" style={{ color: '#2D8C72' }} />
+                </div>
+                <h3 
+                  className="text-xl font-semibold mb-2"
+                  style={{ color: 'var(--color-text-primary)' }}
                 >
-                  <div className="relative h-48">
-                    <img
-                      src={article.image}
-                      alt={article.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute bottom-3 left-3">
-                      <span 
-                        className="px-3 py-1 rounded-full text-xs font-medium text-white"
-                        style={{ backgroundColor: '#2D8C72' }}
-                      >
-                        {article.category}
-                      </span>
-                    </div>
-                  </div>
+                  Loading news...
+                </h3>
+                <p style={{ color: 'var(--color-text-secondary)' }}>
+                  Fetching the latest updates
+                </p>
+              </div>
+            ) : news.length > 0 ? (
+              /* News Grid */
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {news.map((newsItem) => {
+                  const readTime = calculateReadTime(newsItem.content);
+                  const likes = newsItem.likes || 0;
+                  const dislikes = newsItem.dislikes || 0;
+                  const userReaction = reactions[newsItem.id];
                   
-                  <div className="p-5">
-                    <div className="flex justify-between items-start mb-3">
-                      <h3 
-                        className="text-lg font-bold line-clamp-2"
-                        style={{ color: 'var(--color-text-primary)' }}
-                      >
-                        {article.title}
-                      </h3>
-                    </div>
-                    
-                    <p 
-                      className="text-sm mb-4 line-clamp-3"
-                      style={{ color: 'var(--color-text-secondary)' }}
+                  return (
+                    <article
+                      key={newsItem.id}
+                      className="rounded-lg shadow-sm hover:shadow-xl transition-all duration-500 overflow-hidden transform hover:scale-105 hover:-translate-y-2"
+                      style={{ 
+                        backgroundColor: 'var(--color-bg-secondary)',
+                        border: '1px solid var(--color-border)'
+                      }}
                     >
-                      {article.excerpt}
-                    </p>
-                    
-                    <div 
-                      className="flex items-center justify-between text-xs mb-4"
-                      style={{ color: 'var(--color-text-secondary)' }}
-                    >
-                      <span>{article.date}</span>
-                      <span>{article.readTime}</span>
-                    </div>
-                    
-                    {/* Reactions */}
-                    <div 
-                      className="flex items-center justify-between border-t pt-3"
-                      style={{ borderColor: 'var(--color-border)' }}
-                    >
-                      <div className="flex items-center space-x-4">
-                        <button 
-                          onClick={() => handleReaction(article.id, 'like')}
-                          className="flex items-center space-x-1 transition-colors duration-300"
-                          style={{ 
-                            color: reactions[article.id] === 'like' ? '#2D8C72' : 'var(--color-text-secondary)'
-                          }}
-                          onMouseEnter={(e) => {
-                            if (reactions[article.id] !== 'like') {
-                              e.currentTarget.style.color = '#2D8C72';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (reactions[article.id] !== 'like') {
-                              e.currentTarget.style.color = 'var(--color-text-secondary)';
-                            }
-                          }}
-                        >
-                          {reactions[article.id] === 'like' ? (
-                            <FaHeart />
-                          ) : (
-                            <FaRegHeart />
-                          )}
-                          <span>{article.likes + (reactions[article.id] === 'like' ? 1 : 0)}</span>
-                        </button>
-                        
-                        <button 
-                          onClick={() => handleReaction(article.id, 'dislike')}
-                          className="flex items-center space-x-1 transition-colors duration-300"
-                          style={{ 
-                            color: reactions[article.id] === 'dislike' ? '#ef4444' : 'var(--color-text-secondary)'
-                          }}
-                          onMouseEnter={(e) => {
-                            if (reactions[article.id] !== 'dislike') {
-                              e.currentTarget.style.color = '#ef4444';
-                            }
-                          }}
-                          onMouseLeave={(e) => {
-                            if (reactions[article.id] !== 'dislike') {
-                              e.currentTarget.style.color = 'var(--color-text-secondary)';
-                            }
-                          }}
-                        >
-                          {reactions[article.id] === 'dislike' ? (
-                            <FaThumbsDown />
-                          ) : (
-                            <FaRegThumbsDown />
-                          )}
-                          <span>{article.dislikes + (reactions[article.id] === 'dislike' ? 1 : 0)}</span>
-                        </button>
+                      <div className="relative h-48">
+                        {newsItem.image ? (
+                          <img
+                            src={newsItem.image}
+                            alt={newsItem.title}
+                            className="w-full h-full object-cover"
+                            onError={(e) => {
+                              e.target.src = 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&h=250&fit=crop';
+                            }}
+                          />
+                        ) : (
+                          <div 
+                            className="w-full h-full flex items-center justify-center"
+                            style={{ backgroundColor: '#374151' }}
+                          >
+                            <div className="text-4xl">📰</div>
+                          </div>
+                        )}
                       </div>
-                    </div>
-                  </div>
-                </article>
-              ))}
-            </div>
-
-            {/* No Results */}
-            {filteredArticles.length === 0 && (
+                      
+                      <div className="p-5">
+                        <div className="flex justify-between items-start mb-3">
+                          <h3 
+                            className="text-lg font-bold line-clamp-2"
+                            style={{ color: 'var(--color-text-primary)' }}
+                          >
+                            {newsItem.title}
+                          </h3>
+                        </div>
+                        
+                        <p 
+                          className="text-sm mb-4 line-clamp-3"
+                          style={{ color: 'var(--color-text-secondary)' }}
+                        >
+                          {newsItem.content?.substring(0, 150)}...
+                        </p>
+                        
+                        <div 
+                          className="flex items-center justify-between text-xs mb-4"
+                          style={{ color: 'var(--color-text-secondary)' }}
+                        >
+                          <span>{formatDate(newsItem.createdAt || newsItem.created_at)}</span>
+                          <span>{readTime} read</span>
+                        </div>
+                        
+                        {/* Reactions */}
+                        <div 
+                          className="flex items-center justify-between border-t pt-3"
+                          style={{ borderColor: 'var(--color-border)' }}
+                        >
+                          <div className="flex items-center space-x-4">
+                            <button 
+                              onClick={() => handleReaction(newsItem.id, 'like')}
+                              className="flex items-center space-x-1 transition-colors duration-300"
+                              style={{ 
+                                color: userReaction === 'like' ? '#2D8C72' : 'var(--color-text-secondary)'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (userReaction !== 'like') {
+                                  e.currentTarget.style.color = '#2D8C72';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (userReaction !== 'like') {
+                                  e.currentTarget.style.color = 'var(--color-text-secondary)';
+                                }
+                              }}
+                            >
+                              {userReaction === 'like' ? (
+                                <FaHeart />
+                              ) : (
+                                <FaRegHeart />
+                              )}
+                              <span>{likes + (userReaction === 'like' ? 1 : 0)}</span>
+                            </button>
+                            
+                            <button 
+                              onClick={() => handleReaction(newsItem.id, 'dislike')}
+                              className="flex items-center space-x-1 transition-colors duration-300"
+                              style={{ 
+                                color: userReaction === 'dislike' ? '#ef4444' : 'var(--color-text-secondary)'
+                              }}
+                              onMouseEnter={(e) => {
+                                if (userReaction !== 'dislike') {
+                                  e.currentTarget.style.color = '#ef4444';
+                                }
+                              }}
+                              onMouseLeave={(e) => {
+                                if (userReaction !== 'dislike') {
+                                  e.currentTarget.style.color = 'var(--color-text-secondary)';
+                                }
+                              }}
+                            >
+                              {userReaction === 'dislike' ? (
+                                <FaThumbsDown />
+                              ) : (
+                                <FaRegThumbsDown />
+                              )}
+                              <span>{dislikes + (userReaction === 'dislike' ? 1 : 0)}</span>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            ) : (
+              /* No Results */
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">📰</div>
                 <h3 
                   className="text-xl font-semibold mb-2"
                   style={{ color: 'var(--color-text-primary)' }}
                 >
-                  No articles found
+                  No news articles yet
                 </h3>
                 <p style={{ color: 'var(--color-text-secondary)' }}>
-                  Try selecting a different category
+                  Check back later for updates
                 </p>
               </div>
             )}
