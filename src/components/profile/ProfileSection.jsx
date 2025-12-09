@@ -6,7 +6,7 @@ import d from "../../assets/icons/Mask group1.svg";
 import { FiBarChart, FiMail, FiPhone, FiCalendar, FiCreditCard, FiEdit, FiShare2, FiGrid, FiPlay, FiUser } from "react-icons/fi";
 import MusicSection from "./MusicSection";
 import VideoSection from "./VideoSection";
-import { Headphones } from "lucide-react";
+import { Headphones, Megaphone } from "lucide-react";
 
 const ProfileSection = ({ profile }) => {
   const navigate = useNavigate();
@@ -80,22 +80,22 @@ const ProfileSection = ({ profile }) => {
   };
 
   return (
-    <div 
+    <div
       className="max-w-2xl mx-auto pb-16 font-sans"
-      style={{ 
+      style={{
         backgroundColor: 'var(--color-bg-secondary)',
         ...darkModeStyles
       }}
     >
       {/* Header Section */}
-      <div 
+      <div
         className="p-5 mt-13"
         style={{ backgroundColor: 'var(--color-bg-primary)' }}
       >
         {/* Profile Info Row */}
         <div className="flex items-center space-x-8 mb-6">
           <div className="relative">
-            <div 
+            <div
               className="w-28 h-28 rounded-full p-1"
               style={{ background: 'linear-gradient(to right, var(--color-primary), var(--color-primary-light))' }}
             >
@@ -107,9 +107,9 @@ const ProfileSection = ({ profile }) => {
               />
             </div>
             {mergedProfile.is_admin && (
-              <span 
+              <span
                 className="absolute bottom-0 right-0 text-xs px-2.5 py-1 rounded-full font-medium shadow-sm"
-                style={{ 
+                style={{
                   backgroundColor: 'var(--color-primary)',
                   color: 'var(--color-text-on-primary)'
                 }}
@@ -118,18 +118,18 @@ const ProfileSection = ({ profile }) => {
               </span>
             )}
           </div>
-          
+
           <div className="flex-1">
             <div className="flex items-center mb-3">
-              <h2 
+              <h2
                 className="text-2xl font-light mr-3"
                 style={{ color: 'var(--color-text-primary)' }}
               >
                 {mergedProfile.username}
               </h2>
-              <span 
+              <span
                 className="text-xs px-3 py-1.5 rounded-full capitalize font-medium"
-                style={{ 
+                style={{
                   backgroundColor: 'var(--color-bg-secondary)',
                   color: 'var(--color-text-secondary)'
                 }}
@@ -137,16 +137,16 @@ const ProfileSection = ({ profile }) => {
                 {mergedProfile.identity}
               </span>
             </div>
-            
+
             <div className="flex space-x-6 mb-4 text-center">
               <div>
-                <span 
+                <span
                   className="block font-semibold"
                   style={{ color: 'var(--color-text-primary)' }}
                 >
                   {mergedProfile.posts}
                 </span>
-                <span 
+                <span
                   className="text-xs"
                   style={{ color: 'var(--color-text-secondary)' }}
                 >
@@ -154,13 +154,13 @@ const ProfileSection = ({ profile }) => {
                 </span>
               </div>
               <div>
-                <span 
+                <span
                   className="block font-semibold"
                   style={{ color: 'var(--color-text-primary)' }}
                 >
                   {mergedProfile.followers_list.length || 0}
                 </span>
-                <span 
+                <span
                   className="text-xs"
                   style={{ color: 'var(--color-text-secondary)' }}
                 >
@@ -168,13 +168,13 @@ const ProfileSection = ({ profile }) => {
                 </span>
               </div>
               <div>
-                <span 
+                <span
                   className="block font-semibold"
                   style={{ color: 'var(--color-text-primary)' }}
                 >
                   {mergedProfile.following_list.length || 0}
                 </span>
-                <span 
+                <span
                   className="text-xs"
                   style={{ color: 'var(--color-text-secondary)' }}
                 >
@@ -182,13 +182,13 @@ const ProfileSection = ({ profile }) => {
                 </span>
               </div>
             </div>
-            
+
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-2 w-full">
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                 <Link to="/editprofile" className="w-full sm:w-auto">
-                  <button 
+                  <button
                     className="border px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm w-full hover:bg-gray-800"
-                    style={{ 
+                    style={{
                       backgroundColor: 'var(--color-bg-primary)',
                       borderColor: 'var(--color-primary)',
                       color: 'var(--color-primary)'
@@ -198,9 +198,9 @@ const ProfileSection = ({ profile }) => {
                   </button>
                 </Link>
                 <Link to="/purchasedbeats" className="w-full sm:w-auto">
-                  <button 
+                  <button
                     className="border px-4 py-2 rounded-lg text-sm font-medium transition-colors shadow-sm w-full hover:bg-[#248066]"
-                    style={{ 
+                    style={{
                       backgroundColor: 'var(--color-primary)',
                       borderColor: 'var(--color-primary)',
                       color: 'var(--color-text-on-primary)'
@@ -211,9 +211,9 @@ const ProfileSection = ({ profile }) => {
                 </Link>
               </div>
 
-              <button 
+              <button
                 className="border p-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm w-full sm:w-auto flex items-center justify-center hover:bg-gray-800"
-                style={{ 
+                style={{
                   backgroundColor: 'var(--color-bg-primary)',
                   borderColor: 'var(--color-primary)',
                   color: 'var(--color-primary)'
@@ -221,19 +221,33 @@ const ProfileSection = ({ profile }) => {
               >
                 <FiShare2 className="w-4 h-4" />
               </button>
+
+              <Link to="/announcements" className="w-full sm:w-auto">
+                <button
+                  className="border p-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm w-full sm:w-auto flex items-center justify-center hover:bg-gray-800"
+                  style={{
+                    backgroundColor: 'var(--color-bg-primary)',
+                    borderColor: 'var(--color-primary)',
+                    color: 'var(--color-primary)'
+                  }}
+                  title="Announcements"
+                >
+                  <Megaphone className="w-4 h-4" />
+                </button>
+              </Link>
             </div>
           </div>
         </div>
 
         {/* Bio Section */}
         <div className="mb-5">
-          <p 
+          <p
             className="text-sm font-medium"
             style={{ color: 'var(--color-text-primary)' }}
           >
             {mergedProfile.firstname} {mergedProfile.middlename} {mergedProfile.lastname}
           </p>
-          <p 
+          <p
             className="text-sm mt-2 leading-relaxed"
             style={{ color: 'var(--color-text-secondary)' }}
           >
@@ -250,25 +264,25 @@ const ProfileSection = ({ profile }) => {
           ].map((item, idx) => {
             const CardContent = (
               <div className="flex flex-col items-center space-y-2 flex-shrink-0">
-                <div 
+                <div
                   className="w-16 h-16 rounded-full flex items-center justify-center p-0.5"
                   style={{ background: 'linear-gradient(to right, var(--color-primary), var(--color-primary-light))' }}
                 >
-                  <div 
+                  <div
                     className="w-full h-full rounded-full flex items-center justify-center"
                     style={{ backgroundColor: 'var(--color-bg-primary)' }}
                   >
                     <span style={{ color: 'var(--color-primary)' }}>{item.icon}</span>
                   </div>
                 </div>
-                <span 
+                <span
                   className="text-xs font-medium"
                   style={{ color: 'var(--color-text-primary)' }}
                 >
                   {item.title}
                 </span>
                 {item.value && (
-                  <span 
+                  <span
                     className="text-xs text-center max-w-16 truncate"
                     style={{ color: 'var(--color-text-secondary)' }}
                   >
@@ -292,7 +306,7 @@ const ProfileSection = ({ profile }) => {
       </div>
 
       {/* Tab Navigation */}
-      <div 
+      <div
         className="border-t"
         style={{ borderColor: 'var(--color-border)' }}
       >
@@ -308,8 +322,8 @@ const ProfileSection = ({ profile }) => {
                   : ""
               )}
               style={{
-                color: activeTab === tab 
-                  ? 'var(--color-primary)' 
+                color: activeTab === tab
+                  ? 'var(--color-primary)'
                   : 'var(--color-text-secondary)',
                 backgroundColor: activeTab === tab
                   ? 'var(--color-bg-primary)'
@@ -327,7 +341,7 @@ const ProfileSection = ({ profile }) => {
               }}
             >
               {activeTab === tab && (
-                <div 
+                <div
                   className="after:absolute after:bottom-0 after:left-0 after:w-full after:h-0.5"
                   style={{ backgroundColor: 'var(--color-primary)' }}
                 ></div>
@@ -342,7 +356,7 @@ const ProfileSection = ({ profile }) => {
       </div>
 
       {/* Tab Content */}
-      <div 
+      <div
         className="p-5"
         style={{ backgroundColor: 'var(--color-bg-primary)' }}
       >

@@ -10,17 +10,16 @@ import FollowersList from './FollowersList';
 const Sidebar = ({ isOpen, toggleSidebar }) => {
   return (
     <div
-      className={`sidebar fixed top-0 left-0 w-4/5 sm:w-5/6 md:w-80 lg:w-96 h-full shadow-lg p-4 sm:p-5 overflow-y-auto transition-transform duration-300 z-50 ${
-        isOpen ? 'translate-x-0' : '-translate-x-full'
-      }`}
+      className={`sidebar fixed top-0 left-0 w-4/5 sm:w-5/6 md:w-80 lg:w-96 h-full shadow-lg p-4 sm:p-5 overflow-y-auto transition-transform duration-300 z-50 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
       style={{ backgroundColor: 'var(--color-bg-primary)' }}
     >
-  
+
       <img src="icons/Group 5.svg" alt="ZUUM Logo" className="logo w-24 sm:w-30 mb-4 sm:mb-5" />
-      <a 
-        href="#" 
+      <a
+        href="#"
         className="menu-item flex items-center gap-2 mb-3 text-sm sm:text-base p-2 rounded-lg transition-colors"
-        style={{ 
+        style={{
           color: 'var(--color-text-primary)',
           backgroundColor: 'var(--color-bg-primary)'
         }}
@@ -41,7 +40,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
       <button className="logout-btn w-full bg-green-700 text-white py-2 sm:py-3 rounded-lg mt-4 sm:mt-5 text-sm sm:text-base hover:bg-green-800 transition-colors">Log Out</button>
       <div className="section-title font-bold mt-4 sm:mt-5 text-sm sm:text-base text-gray-900 dark:text-gray-100">Followed Artists/ Producers</div>
       <FollowersList />
-      
+
       <div className="section-title font-bold mt-4 sm:mt-5 text-sm sm:text-base text-gray-900 dark:text-gray-100">Company</div>
       <a href="#" className="menu-item flex items-center gap-2 mb-3 text-sm sm:text-base hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-lg transition-colors text-gray-700 dark:text-gray-200">
         Instant Share

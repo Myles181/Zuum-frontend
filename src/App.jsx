@@ -40,7 +40,8 @@ import PromotionPage from './pages/Promotion';
 import SharedAudioPage from './components/homepage/SharePage';
 
 import { AlertProvider } from './contexts/AlertConntexts';
-import {Jet} from './pages/Jet';
+import { Jet } from './pages/Jet';
+import Announcements from './pages/Announcements';
 import { AuthProvider, useAuth } from './contexts/AuthContexts';
 import Distribution from './pages/Distribution';
 import UserDistributionRequests from './pages/UserDistributionRequests';
@@ -91,22 +92,22 @@ const darkModeStyles = {
 };
 
 const CustomLoader = () => (
-  <div 
+  <div
     className="fixed inset-0 flex items-center justify-center z-50"
-    style={{ 
+    style={{
       ...darkModeStyles,
       backgroundColor: 'var(--color-bg-primary)'
     }}
   >
     <div className="text-center">
-      <div 
+      <div
         className="w-16 h-16 border-4 rounded-full animate-spin mx-auto"
         style={{
           borderColor: 'var(--color-primary)',
           borderTopColor: 'transparent'
         }}
       ></div>
-      <p 
+      <p
         className="mt-4 text-lg font-medium"
         style={{ color: 'var(--color-text-primary)' }}
       >
@@ -117,42 +118,42 @@ const CustomLoader = () => (
 );
 
 const AuthErrorDisplay = ({ errorMessage }) => (
-  <div 
+  <div
     className="fixed inset-0 flex items-center justify-center z-50 p-4"
-    style={{ 
+    style={{
       ...darkModeStyles,
       backgroundColor: 'var(--color-bg-primary)'
     }}
   >
-    <div 
+    <div
       className="text-center max-w-md p-8 rounded-xl shadow-2xl"
-      style={{ 
+      style={{
         backgroundColor: 'var(--color-bg-secondary)',
         border: '1px solid var(--color-border)'
       }}
     >
-      <div 
+      <div
         className="text-5xl mb-4"
         style={{ color: 'var(--color-error)' }}
       >
         ⚠️
       </div>
-      <h2 
+      <h2
         className="text-2xl font-bold mb-2"
         style={{ color: 'var(--color-text-primary)' }}
       >
         Authentication Error
       </h2>
-      <p 
+      <p
         className="mb-6"
         style={{ color: 'var(--color-text-secondary)' }}
       >
         {errorMessage}
       </p>
-      <button 
-        onClick={() => window.location.reload()} 
+      <button
+        onClick={() => window.location.reload()}
         className="px-6 py-3 rounded-lg font-medium transition-colors"
-        style={{ 
+        style={{
           backgroundColor: 'var(--color-primary)',
           color: 'var(--color-text-on-primary)'
         }}
@@ -177,7 +178,7 @@ const AppRoutes = () => {
   useEffect(() => {
     if (!profile) return; // wait for profile
     console.log(profile);
-    
+
 
     // Initialize socket once
     if (profile.id) {
@@ -196,7 +197,7 @@ const AppRoutes = () => {
         <Route path="/subscription-success" element={<SubscriptionSuccess />} />
         <Route path="/home" element={<Homepage details={paymentDetails} profile={profile} />} />
         {/* Rest of protected routes */}
-       
+
         <Route path="/search" element={<Search />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={<ArtistPage profile={profile} />} />
@@ -217,23 +218,24 @@ const AppRoutes = () => {
         <Route path="/details" element={<SubscriptionDetails />} />
         <Route path="/lock" element={<LockedMusicPlayer />} />
         <Route path="/userbeats/:userId" element={<PurchaseFeed />} />
-        <Route path="/dashboard" element={<MusicDashboard  profile={profile}/>} />
+        <Route path="/dashboard" element={<MusicDashboard profile={profile} />} />
         <Route path="/beats/:id" element={<BeatDetails />} />
         <Route path="/purchasedbeats" element={<PurchasedBeats />} />
         <Route path="/promotion" element={<PromotionPage />} />
         <Route path="/distribution" element={<Distribution />} />
         <Route path="/jet" element={<Jet />} />
         <Route path="/global" element={<PromotionPlatforms />} />
-         <Route path="/req" element={<PromotionRequirementsForm />} />
+        <Route path="/req" element={<PromotionRequirementsForm />} />
         <Route path="/shared-audio/:shareId" element={<SharedAudioPage />} />
         <Route path="/videos/:id" element={<VideoViewerPage />} />
         <Route path="/user/promotions" element={<UserPromotions />} />
         <Route path="/zuum-news" element={<ZuumNews />} />
-         <Route path="/dashboard/deposit" element={<DepositPage />} />
-         <Route path="/dashboard/withdraw" element={<WithdrawalPage profile={profile} />} />
-          <Route path="/dashboard/transfer" element={<P2PTransferPage profile={profile} />} />
-          <Route path="/analytics" element={<Analytics />} />
-          <Route path="/transactions" element={<TransactionHistory />} />
+        <Route path="/dashboard/deposit" element={<DepositPage />} />
+        <Route path="/dashboard/withdraw" element={<WithdrawalPage profile={profile} />} />
+        <Route path="/dashboard/transfer" element={<P2PTransferPage profile={profile} />} />
+        <Route path="/analytics" element={<Analytics />} />
+        <Route path="/transactions" element={<TransactionHistory />} />
+        <Route path="/announcements" element={<Announcements />} />
 
 
 
@@ -248,48 +250,48 @@ const App = () => (
       <AuthProvider>
         {/* <SocketContextProvider> */}
         <AdminProvider>
-        <Router>
-          <SubscriptionProvider>
-          <Routes>
-            {/* Public Routes */}
-            <Route path="/" element={<ZuumOnboarding />} />
-            <Route path="/start" element={<GetStarted />} />
-            <Route path="/signup" element={<Signup />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/forgot" element={<ForgotPassword />} />
-            <Route path="/reset" element={<ResetPassword />} />
-            <Route path="/verify" element={<VerifyOTP />} />
-            <Route path="/adlog" element={<AdminLogin />} />
-              <Route path="/adsin" element={<AdminSignup />} />
-               <Route path="/adver" element={<VerifyEmailForm />} />
-               {/* Legacy standalone withdrawal page */}
-               {/* <Route path="/withdrawalRequest" element={<AdminWithdrawalRequest />} /> */}
-               
-            {/* Protected Routes */}
-            <Route element={<ProtectedRoute />}>
-              <Route path="/*" element={<AppRoutes />} />
-            </Route>
+          <Router>
+            <SubscriptionProvider>
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<ZuumOnboarding />} />
+                <Route path="/start" element={<GetStarted />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/forgot" element={<ForgotPassword />} />
+                <Route path="/reset" element={<ResetPassword />} />
+                <Route path="/verify" element={<VerifyOTP />} />
+                <Route path="/adlog" element={<AdminLogin />} />
+                <Route path="/adsin" element={<AdminSignup />} />
+                <Route path="/adver" element={<VerifyEmailForm />} />
+                {/* Legacy standalone withdrawal page */}
+                {/* <Route path="/withdrawalRequest" element={<AdminWithdrawalRequest />} /> */}
+
+                {/* Protected Routes */}
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/*" element={<AppRoutes />} />
+                </Route>
 
                 {/* Admin Protected Routes - Must come before the wildcard */}
-              <Route element={<AdminProtectedRoute />}>
-                <Route path="/admin/*" element={<AdminDashboard />} />
-                <Route path="/users" element={<AdminDashboard />} />
-                <Route path="/addistributions" element={<DistributionRequestsPage />} />
-                <Route path="/admin/distribution/:id" element={<DistributionDetailsPage />} />
-                <Route path="/adbeat" element={<AdminBeatPurchasesPage />} />
-                <Route path="/admin-beat-posts" element={<BeatPostsPage />} />
-                <Route path="/admin-audio-posts" element={<AdminAudioPostsPage />} />
-                <Route path="/adpromotion" element={<AdminPromotionsPage />} />
-              <Route path="/admin-wallet" element={<AdminWalletPage />} />
-              <Route path="/admin-wallet-crypto" element={<AdminCryptoWalletPage />} />
-              <Route path="/admin-subscriptions" element={<AdminSubscriptionsPage />} />
-              <Route path="/admin-settings" element={<AdminSettingsPage />} />
-              <Route path="/admin-zuum-news" element={<AdminZuumNewsPage />} />
-              <Route path="/admin-analytics/:userId" element={<AdminUserAnalyticsPage />} />
-              </Route>
-          </Routes>
-          </SubscriptionProvider>
-        </Router>
+                <Route element={<AdminProtectedRoute />}>
+                  <Route path="/admin/*" element={<AdminDashboard />} />
+                  <Route path="/users" element={<AdminDashboard />} />
+                  <Route path="/addistributions" element={<DistributionRequestsPage />} />
+                  <Route path="/admin/distribution/:id" element={<DistributionDetailsPage />} />
+                  <Route path="/adbeat" element={<AdminBeatPurchasesPage />} />
+                  <Route path="/admin-beat-posts" element={<BeatPostsPage />} />
+                  <Route path="/admin-audio-posts" element={<AdminAudioPostsPage />} />
+                  <Route path="/adpromotion" element={<AdminPromotionsPage />} />
+                  <Route path="/admin-wallet" element={<AdminWalletPage />} />
+                  <Route path="/admin-wallet-crypto" element={<AdminCryptoWalletPage />} />
+                  <Route path="/admin-subscriptions" element={<AdminSubscriptionsPage />} />
+                  <Route path="/admin-settings" element={<AdminSettingsPage />} />
+                  <Route path="/admin-zuum-news" element={<AdminZuumNewsPage />} />
+                  <Route path="/admin-analytics/:userId" element={<AdminUserAnalyticsPage />} />
+                </Route>
+              </Routes>
+            </SubscriptionProvider>
+          </Router>
         </AdminProvider>
         {/* </SocketContextProvider> */}
       </AuthProvider>

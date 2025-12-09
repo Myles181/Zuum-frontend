@@ -93,8 +93,8 @@ export const useAudio = () => {
           default:
             setError(
               err.response.data?.error ||
-                err.response.data?.message ||
-                'Failed to fetch audio posts',
+              err.response.data?.message ||
+              'Failed to fetch audio posts',
             );
         }
       } else {
@@ -171,7 +171,7 @@ export const useAudio = () => {
           default:
             setError(
               err.response.data?.message ||
-                'Failed to update audio post status',
+              'Failed to update audio post status',
             );
         }
       } else {
@@ -235,7 +235,7 @@ export const useAudio = () => {
           default:
             setError(
               err.response.data?.message ||
-                'Failed to delete audio post',
+              'Failed to delete audio post',
             );
         }
       } else {
@@ -271,6 +271,15 @@ export const useAudio = () => {
     error,
     pagination,
     fetchAudioPosts,
+    getAudioById: useCallback(async (id) => {
+      try {
+        const response = await axios.get(`/admin/audio/${id}`);
+        return response.data?.data || response.data;
+      } catch (error) {
+        console.error('Error fetching audio by id:', error);
+        return null;
+      }
+    }, []),
     updateAudioStatus,
     deleteAudioPost,
     resetError,
