@@ -1,13 +1,13 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { FiMenu, FiChevronLeft, FiSearch, FiSettings } from 'react-icons/fi';
+import { FiMenu, FiChevronLeft, FiSearch, FiSettings, FiBell } from 'react-icons/fi';
 import { MdRocketLaunch } from 'react-icons/md';
 
-const Navbar = ({ 
-  toggleSidebar, 
-  name, 
-  profilePicture, 
-  goBack, 
+const Navbar = ({
+  toggleSidebar,
+  name,
+  profilePicture,
+  goBack,
   isDashboardPage,
   isMessagePage,
   activeTab,
@@ -15,7 +15,7 @@ const Navbar = ({
 }) => {
   const location = useLocation();
   const isProfilePage = location.pathname === '/profile';
-  
+
   // Dark mode styles - consistent with ProfileSection
   const darkModeStyles = {
     '--color-bg-primary': '#1a1a1a',
@@ -32,11 +32,10 @@ const Navbar = ({
   const currentTab = activeTab || 'audio';
 
   return (
-    <div 
-      className={`navbar backdrop-blur-md shadow-md flex items-center justify-between px-4 py-3 fixed top-0 left-0 w-full z-50 transition-colors duration-200 ${
-        isProfilePage ? 'bg-transparent' : ''
-      }`}
-      style={{ 
+    <div
+      className={`navbar backdrop-blur-md shadow-md flex items-center justify-between px-4 py-3 fixed top-0 left-0 w-full z-50 transition-colors duration-200 ${isProfilePage ? 'bg-transparent' : ''
+        }`}
+      style={{
         ...darkModeStyles,
         backgroundColor: isProfilePage ? 'transparent' : 'var(--color-bg-primary)',
         borderBottom: isProfilePage ? 'none' : '1px solid var(--color-border)',
@@ -47,24 +46,22 @@ const Navbar = ({
       <div className="nav-left">
         {isMessagePage || isDashboardPage ? (
           <FiChevronLeft
-            className={`w-6 h-6 cursor-pointer transition-colors hover:opacity-80 ${
-              isProfilePage ? 'text-white' : 'text-[var(--color-text-primary)]'
-            }`}
+            className={`w-6 h-6 cursor-pointer transition-colors hover:opacity-80 ${isProfilePage ? 'text-white' : 'text-[var(--color-text-primary)]'
+              }`}
             onClick={goBack}
           />
         ) : (
           <Link to="/jet">
-            <MdRocketLaunch 
-              className={`w-6 h-6 transition-colors hover:opacity-80 ${
-                isProfilePage ? 'text-white' : 'text-[var(--color-text-primary)]'
-              }`}
+            <MdRocketLaunch
+              className={`w-6 h-6 transition-colors hover:opacity-80 ${isProfilePage ? 'text-white' : 'text-[var(--color-text-primary)]'
+                }`}
             />
           </Link>
         )}
       </div>
 
       {/* Middle Section - Audio/Video switch (only on Home) */}
-      <div 
+      <div
         className="flex items-center space-x-2 px-4 py-1 rounded-full transition-colors"
       >
         {isMessagePage && profilePicture && (
@@ -80,22 +77,20 @@ const Navbar = ({
             <button
               type="button"
               onClick={() => handleTabClick && handleTabClick('audio')}
-              className={`relative z-10 px-3 py-1.5 font-medium transition-all duration-200 ${
-                currentTab === 'audio'
-                  ? 'text-[var(--color-primary)]'
-                  : 'text-[var(--color-text-on-primary)]/75'
-              }`}
+              className={`relative z-10 px-3 py-1.5 font-medium transition-all duration-200 ${currentTab === 'audio'
+                ? 'text-[var(--color-primary)]'
+                : 'text-[var(--color-text-on-primary)]/75'
+                }`}
             >
               Audio
             </button>
             <button
               type="button"
               onClick={() => handleTabClick && handleTabClick('video')}
-              className={`relative z-10 px-3 py-1.5 font-medium transition-all duration-200 ${
-                currentTab === 'video'
-                  ? 'text-[var(--color-primary)]'
-                  : 'text-[var(--color-text-on-primary)]/75'
-              }`}
+              className={`relative z-10 px-3 py-1.5 font-medium transition-all duration-200 ${currentTab === 'video'
+                ? 'text-[var(--color-primary)]'
+                : 'text-[var(--color-text-on-primary)]/75'
+                }`}
             >
               Video
             </button>
@@ -114,35 +109,36 @@ const Navbar = ({
       <div className="nav-right flex space-x-4">
         {!(isDashboardPage || isMessagePage) && !isProfilePage && (
           <>
-            <Link 
+            <Link
+              to="/announcements"
+              className="p-1 rounded-lg transition-colors hover:bg-[var(--color-bg-secondary)] relative group"
+            >
+              <FiBell
+                className="w-5 h-5 transition-transform group-hover:rotate-12"
+                style={{ color: 'var(--color-text-primary)' }}
+              />
+              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border border-[var(--color-bg-primary)]"></span>
+            </Link>
+            <Link
               to="/search"
               className="p-1 rounded-lg transition-colors hover:bg-[var(--color-bg-secondary)]"
             >
-              <FiSearch 
-                className="w-5 h-5" 
-                style={{ color: 'var(--color-text-primary)' }}
-              />
-            </Link>
-            <Link 
-              to="/settings"
-              className="p-1 rounded-lg transition-colors hover:bg-[var(--color-bg-secondary)]"
-            >
-              <FiSettings 
-                className="w-5 h-5" 
+              <FiSearch
+                className="w-5 h-5"
                 style={{ color: 'var(--color-text-primary)' }}
               />
             </Link>
           </>
         )}
-        
+
         {/* On profile page, show a settings icon with appropriate color */}
         {isProfilePage && (
-          <Link 
+          <Link
             to="/settings"
             className="p-1 rounded-lg transition-colors hover:bg-white hover:bg-opacity-10"
           >
-            <FiSettings 
-              className="w-5 h-5 text-white" 
+            <FiSettings
+              className="w-5 h-5 text-white"
             />
           </Link>
         )}

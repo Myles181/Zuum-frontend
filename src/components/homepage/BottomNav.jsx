@@ -2,7 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FiHome, FiMessageCircle, FiPlusSquare, FiBell, FiUser } from 'react-icons/fi';
 
-const BottomNav = () => {
+const BottomNav = ({ onHomeClick }) => {
   const location = useLocation();
 
   // Dark mode styles - consistent with other components
@@ -18,23 +18,30 @@ const BottomNav = () => {
   };
 
   // Improved active path detection
-  const isActive = (path) => 
+  const isActive = (path) =>
     location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   return (
-    <div 
+    <div
       className="fixed bottom-0 left-0 w-full flex justify-around py-2 z-50"
-      style={{ 
+      style={{
         ...darkModeStyles,
         backgroundColor: 'var(--color-bg-primary)',
         borderTop: '1px solid var(--color-border)'
       }}
     >
       {/* Home */}
-      <Link 
-        to='/home' 
+      <Link
+        to='/home'
+        state={{ openAnnouncement: true }}
+        onClick={(e) => {
+          if (isActive('/home') && onHomeClick) {
+            e.preventDefault();
+            onHomeClick();
+          }
+        }}
         className="flex flex-col items-center p-2 transition-colors duration-200"
-        style={{ 
+        style={{
           color: isActive('/home') ? 'var(--color-primary)' : 'var(--color-text-secondary)'
         }}
         onMouseEnter={(e) => {
@@ -53,10 +60,10 @@ const BottomNav = () => {
       </Link>
 
       {/* Messages */}
-      <Link 
-        to='/message' 
+      <Link
+        to='/message'
         className="flex flex-col items-center p-2 transition-colors duration-200"
-        style={{ 
+        style={{
           color: isActive('/message') ? 'var(--color-primary)' : 'var(--color-text-secondary)'
         }}
         onMouseEnter={(e) => {
@@ -75,10 +82,10 @@ const BottomNav = () => {
       </Link>
 
       {/* Add */}
-      <Link 
-        to='/add' 
+      <Link
+        to='/add'
         className="flex flex-col items-center p-2 transition-colors duration-200"
-        style={{ 
+        style={{
           color: isActive('/add') ? 'var(--color-primary)' : 'var(--color-text-secondary)'
         }}
         onMouseEnter={(e) => {
@@ -97,10 +104,10 @@ const BottomNav = () => {
       </Link>
 
       {/* Activities */}
-      <Link 
-        to='/activity' 
+      <Link
+        to='/activity'
         className="flex flex-col items-center p-2 transition-colors duration-200"
-        style={{ 
+        style={{
           color: isActive('/activity') ? 'var(--color-primary)' : 'var(--color-text-secondary)'
         }}
         onMouseEnter={(e) => {
@@ -119,10 +126,10 @@ const BottomNav = () => {
       </Link>
 
       {/* Profile */}
-      <Link 
-        to='/profile' 
+      <Link
+        to='/profile'
         className="flex flex-col items-center p-2 transition-colors duration-200"
-        style={{ 
+        style={{
           color: isActive('/profile') ? 'var(--color-primary)' : 'var(--color-text-secondary)'
         }}
         onMouseEnter={(e) => {

@@ -610,13 +610,15 @@ const AdminUsersPage = () => {
                               type="button"
                               onClick={() =>
                                 navigate(`/admin-analytics/${displayUser.profile_id}`, {
-                                  state: { userId: displayUser.user_id },
+                                  state: { userId: displayUser.user_id,
+                                    username: displayUser.firstname + ' ' + displayUser.lastname,
+                                   },
                                 })
                               }
                                                             className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-[#2D8C72] bg-white hover:bg-gray-50 transition-colors shadow-lg"
                             >
                               <TrendingUp className="w-4 h-4" />
-                              {displayUser?.user_id} Analytics
+                            Analytics
                             </button>
                           </div>
                         </div>
